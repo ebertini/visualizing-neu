@@ -223,3 +223,13 @@ __marimo__/
 *.json
 *.xlsx
 *.xls
+
+# Processed data artifacts (parquet, pickled frames, etc.) — never commit
+data/processed/
+*.parquet
+*.feather
+*.pkl
+
+# OS / editor
+.DS_Store
+.vscode/
