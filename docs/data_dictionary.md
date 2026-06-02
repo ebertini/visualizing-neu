@@ -12,11 +12,13 @@ Legend:
 
 ## `faculty-list-2025.xlsx` — Faculty roster
 
+> Current Northeastern faculty directory. One row per faculty member. Primary source for college/department affiliation, academic rank, tenure status, and country. Join to grants tables via `Employee ID` = `clientfacultyid`.
+
 Shape: **2,232 rows × 9 cols**. Single sheet (`Sheet1`). One row per current faculty member.
 
 | Column | Type | Null % | Unique | Notes |
 |---|---|---|---|---|
-| `Employee ID` | int64 → *string* | 0% | 2,232 | Primary key in this file. Range 26,501 – 3,189,672 (non-sequential; treat as opaque ID). Use as canonical faculty identifier here; crosswalk to `PersonId` / `ClientFacultyId` / `AAUID` in other files is TBD (advisor question #1). |
+| `Employee ID` | int64 → *string* | 0% | 2,232 | Primary key in this file. Range 26,501 – 3,189,672 (non-sequential; treat as opaque ID). **= `ri_matches_grants_2026.clientfacultyid` and `grants-with-coPI.ClientFacultyId`** — confirmed cross-file join key to both structured grants tables. |
 | `Superior_Academic_Unit` | object → *category* | 0% | 12 | Top-level college. Top 5: College of Engineering (356), Science (332), Social Sciences & Humanities (304), Bouvé Health Sciences (269), D'Amore-McKim Business (215). Also includes NU London (126) and Mills College (40). |
 | `Superior_Academic_Unit_Code` | object → *category* | 0% | 12 | `CCxxx` code, 1:1 with `Superior_Academic_Unit`. Redundant — drop or use as join key. |
 | `Academic Unit` | object → *category* | 0% | 80 | Department / school within a college. Examples: Khoury College of Computer Sciences (210), Electrical and Computer Engineering (98), Mechanical and Industrial Engineering (81). |
@@ -29,6 +31,8 @@ Shape: **2,232 rows × 9 cols**. Single sheet (`Sheet1`). One row per current fa
 ---
 
 ## `grants-with-abstract.xlsx` — Grants with text content
+
+> Largest grant file by row count, but primarily useful for its `Title` and `Abstract` text fields. Structured financial/agency fields are mostly null — those live in the structured grant tables. Use as a text-enrichment join.
 
 Shape: **8,075 rows × 25 cols**. Sheet: `Grants with abstract (2).csv`. **Role:** text-content companion to the structured grant tables; differentiator is `Title` + `Abstract`. Many structured fields are 100% null on purpose (live in `grants-with-coPI` / `ri_matches`). Use as enrichment, not as fact table.
 
@@ -66,6 +70,8 @@ Shape: **8,075 rows × 25 cols**. Sheet: `Grants with abstract (2).csv`. **Role:
 
 ## `grants-with-coPI.xlsx` — Structured grants with PI/co-PI rows
 
+> Structured grant fact table with funding amounts, agency, and PI/co-PI designation. Likely an earlier export of the same underlying data as `ri_matches_grants_2026` — it has 10 fewer rows and 6 fewer distinct grants. Use for diff/verification only; prefer `ri_matches_grants_2026` for analysis.
+
 Shape: **3,136 rows × 22 cols**. Sheet: `Grants with co PI indicator (1)`. **Grain:** one row per (grant × faculty member) — only **2,670 distinct `GrantId`s** (avg ~1.17 faculty per grant). All institution = Northeastern.
 
 | Column | Type | Null % | Unique | Notes |
@@ -95,7 +101,9 @@ Shape: **3,136 rows × 22 cols**. Sheet: `Grants with co PI indicator (1)`. **Gr
 
 ---
 
-## `ri_matches_grants_2026.xlsx` — Research-interest matched grants
+## `ri_matches_grants_2026.xlsx` — Research-interest matched grants ⭐ PRIMARY TABLE
+
+> Most likely a newer export of the same underlying system as `grants-with-coPI`, with 10 additional rows and ~6 more grants. Snake_case column names and `AAUID` in place of `PersonId` are the only structural differences. **Using this as the canonical structured grants table.** Use this file as the source of truth for all grant analyses maybe. `grants-with-coPI` should only be used for diffing/verification.
 
 Shape: **3,146 rows × 22 cols**. Sheet: `ri_matches_grants_2026-2-1_3-50`. **Schema is essentially identical to `grants-with-coPI`** but with snake_case columns and 10 additional rows. Same grain (one row per grant × faculty), 2,676 distinct grants.
 
@@ -111,7 +119,7 @@ Shape: **3,146 rows × 22 cols**. Sheet: `ri_matches_grants_2026-2-1_3-50`. **Sc
 | `startdate` | datetime64 | 0% | 769 | 1995-06-01 → 2026-01-01. |
 | `enddate` | datetime64 | 0% | 451 | 1998-05-31 → 2030-09-30. |
 | `AAUID` | int64 → *string* | 0% | 570 | **Renamed from `PersonId`** in this file. Same value range. |
-| `clientfacultyid` | int64 → *string* | 0% | 570 | Same as `grants-with-coPI.ClientFacultyId`. |
+| `clientfacultyid` | int64 → *string* | 0% | 570 | **= `faculty-list-2025.Employee ID`.** Confirmed cross-file join key to the faculty roster. Same as `grants-with-coPI.ClientFacultyId`. |
 | `orcid` | object | 10% | 476 | Same as `grants-with-coPI.OrcidId`. |
 | `personname` | object | 0% | 570 | Same as `grants-with-coPI.PersonName`. |
 | `institutionname` | object | 0% | 1 | Always "Northeastern University". **Drop.** |
@@ -124,7 +132,7 @@ Shape: **3,146 rows × 22 cols**. Sheet: `ri_matches_grants_2026-2-1_3-50`. **Sc
 | `iscopi` | int64 → *bool* | 0% | 2 | 0/1. |
 | `startdateyear` | int64 | 0% | 30 | 1995 – 2026. |
 
-**Working assumption (pending advisor question #2):** `ri_matches_grants_2026` is the newer/superset version. Plan: keep `ri_matches` as the canonical structured grants table; use `grants-with-coPI` only to diff/verify.
+**Confirmed:** `ri_matches_grants_2026` is the newer/superset version and is the canonical structured grants table. Use `grants-with-coPI` only to diff/verify.
 
 ---
 
@@ -133,7 +141,7 @@ Shape: **3,146 rows × 22 cols**. Sheet: `ri_matches_grants_2026-2-1_3-50`. **Sc
 | Join | Candidate key(s) | Confidence | Notes |
 |---|---|---|---|
 | `grants-with-coPI` ↔ `ri_matches_grants_2026` | `GrantId` = `grantid`; `PersonId` = `AAUID` | High | Schemas mirror each other; row counts and value ranges align. |
-| structured grants ↔ `faculty-list-2025` | `ClientFacultyId` ↔ `Employee ID` (most likely); fallback: normalized `PersonName` ↔ derived faculty name | **Low** | ID ranges only weakly overlap; ORCID would be ideal but the faculty file doesn't carry it. Needs validation in Week 2 + advisor question #1. |
+| structured grants ↔ `faculty-list-2025` | `clientfacultyid` (`ri_matches`) / `ClientFacultyId` (`grants-with-coPI`) **= `Employee ID`** (confirmed) | **High** | Confirmed join key. `faculty-list-2025.Employee ID` is equivalent to `clientfacultyid` / `ClientFacultyId` in both structured grant files. |
 | `grants-with-abstract` ↔ structured grant files | `Id` ↔ `GrantId`/`grantid`: **does NOT match** (different ID space). `SourceActivityId` ↔ `AgencyGrantId`: plausible — both look like external IDs. `PersonId` ↔ `PersonId`/`AAUID`: ranges overlap but cardinalities differ (1,042 vs 567–570). | **Low** | Primary advisor question #3. Worst-case fallback: fuzzy match on (`Title` ≈ `GrantName`) + (`Start Date` ≈ `startdate`). |
 | External agency databases (NSF, NIH) | `AgencyGrantId` + `AgencyCode` | High | For enrichment in later phases if needed. |
 
