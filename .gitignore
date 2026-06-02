@@ -217,12 +217,8 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# DataSet files
-*.csv
-*.tsv
-*.json
-*.xlsx
-*.xls
+# output
+outputs/
 
 # Processed data artifacts (parquet, pickled frames, etc.) — never commit
 data/processed/
