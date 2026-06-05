@@ -2,9 +2,9 @@
 
 **Date:** June 4, 2026  
 **Author:** Utkarsh  
-**Scope:** Week 2 audit of 4 raw .xlsx files in `DataSet/`
+**Scope:** Comprehensive audit of 4 raw .xlsx files in `DataSet/`
 
-This report documents data quality issues discovered during Week 1-2 exploration, cleaning decisions, and normalization plans for Week 3 pipeline implementation.
+This report documents data quality issues discovered during initial exploration, cleaning decisions, and normalization plans for pipeline implementation.
 
 ---
 
@@ -14,12 +14,13 @@ This report documents data quality issues discovered during Week 1-2 exploration
 |---|---|---|---|
 | 100% null columns (drop) | 17 | Low | Drop in pipeline |
 | Near-empty columns (98% null) | 1 | Medium | Drop `awarddate` |
-| Categorical normalization | 5 fields | High | Standardize in Week 3 |
+| Categorical normalization | 5 fields | High | Standardize |
 | Missing join keys | 567 faculty | High | Fuzzy match + manual |
 | Duplicate grants | TBD | Medium | Validate in pipeline |
 | Outliers (dollars) | TBD | Low | Document, keep |
 | Date range issues | 31 years (1995-2026) | Low | Expected |
 | Trailing spaces in categories | 1 value | Low | Strip in pipeline |
+| Pre-employment grants attributed to NU | Unknown | High | Document caveat; filter if hire dates available |
 
 **Overall Assessment:** Data is analysis-ready after cleaning. No blocking issues; most problems are cosmetic (null columns) or addressable via normalization.
 
@@ -80,7 +81,7 @@ This report documents data quality issues discovered during Week 1-2 exploration
 3. External collaborators mis-coded as NU faculty
 
 **Decision:** 
-- Week 3: Implement fuzzy name-matching with `rapidfuzz` (threshold 0.85) as first pass
+- Implement fuzzy name-matching with `rapidfuzz` (threshold 0.85) as first pass
 - Flag remaining unmatched as `(External/Former)` category for college-level analyses
 - Document caveat: ~10% of grant-faculty rows lack college mapping
 
@@ -101,7 +102,7 @@ This report documents data quality issues discovered during Week 1-2 exploration
 2. **`grants-with-coPI` vs `ri_matches_grants_2026`:**
    - 2,670 grants vs 2,676 grants → **6-grant delta**
    - ID ranges overlap (38K–1.79M)
-   - **To verify in Week 3:** Are these 6 grants truly new, or data entry corrections?
+   - **To verify:** Are these 6 grants truly new, or data entry corrections?
 
 3. **`grants-with-abstract` join mystery:**
    - 8,075 rows, `Id` range 91K–158K → **completely different ID space**
@@ -109,7 +110,7 @@ This report documents data quality issues discovered during Week 1-2 exploration
    - **Fallback strategy:** fuzzy-match on `(Title ≈ GrantName) + (Start Date ≈ startdate)`
 
 **Decision:**
-- Week 3 pipeline: validate no within-grant inconsistencies (same `grantid` → same `totaldollars`, `agencyname`)
+- Pipeline should validate no within-grant inconsistencies (same `grantid` → same `totaldollars`, `agencyname`)
 - Flag the 6-grant delta for manual review
 - Implement fuzzy join for abstracts using `(title, start_date)` tuple matching
 
@@ -127,7 +128,7 @@ This report documents data quality issues discovered during Week 1-2 exploration
 **From notebook:** The `PI` field in structured grant files is "inconsistent format" — likely represents the *lead* PI when the row is a co-PI, not always the person in that row.
 
 **Decision:**
-- Week 3: Normalize all name fields to `Title Case` + `Last, First` format
+- Normalize all name fields to `Title Case` + `Last, First` format
 - Use `rapidfuzz` to create a `faculty_id_lookup` table bridging all name variants
 - Add `name_normalized` column to processed tables
 
@@ -142,7 +143,7 @@ This report documents data quality issues discovered during Week 1-2 exploration
 - Median: $431,876
 - Top grant: $38.6M (likely a multi-year consortium or center grant)
 
-**Checks needed in Week 3:**
+**Validation checks needed:**
 1. Validate top 5 largest grants against public records (NSF Award Search)
 2. Check if any grants < $10K are data entry errors (should be $10,000 not $10?)
 3. Flag grants > $10M as "mega-grants" for separate trend analysis
@@ -162,7 +163,7 @@ This report documents data quality issues discovered during Week 1-2 exploration
 
 **Issues:**
 - 21-year grant seems long but plausible (NSF center with multiple renewals coded as one grant?)
-- Compare `durationinyears` vs `(enddate - startdate).days / 365` in Week 3 — do they agree?
+- Compare `durationinyears` vs `(enddate - startdate).days / 365` — do they agree?
 
 **Decision:** Validate in pipeline; if disagreement > 10%, compute duration from dates.
 
@@ -207,7 +208,7 @@ Other:
   - Visiting / Adjunct
 ```
 
-**Decision:** Implement `normalize_academic_rank()` in Week 3 pipeline with regex-based bucketing.
+**Decision:** Implement `normalize_academic_rank()` in pipeline with regex-based bucketing.
 
 ### 4.2 College Names (Trailing Spaces)
 
@@ -228,7 +229,7 @@ Top agencies by grant count:
 
 **Issue:** 80 unique `Academic Unit` values; some are redundant (e.g., "College of Engineering" as both college and unit).
 
-**Decision:** Week 3 pipeline should create a clean hierarchy:
+**Decision:** Pipeline should create a clean hierarchy:
 - `college` (12 values, from `Superior_Academic_Unit`)
 - `department` (derived from `Academic Unit`, with college name stripped)
 
@@ -259,10 +260,10 @@ Top agencies by grant count:
 - `Id` field (91K–158K range) does NOT match `GrantId` / `grantid` (38K–1.79M)
 - `PersonId` ranges overlap but cardinalities differ (1,042 vs 570)
 
-**Week 3 pipeline approach:**
+**Recommended approach:**
 1. Attempt fuzzy join: `(Title ≈ grantname) + (Start Date ≈ startdate)` with 90% threshold
 2. Create `grants_with_text` table with `abstract` and `title` joined on best match
-3. Document join success rate; if < 70%, consult advisor (Week 3 question)
+3. Document join success rate; if < 70%, consult advisor
 
 ---
 
@@ -282,11 +283,11 @@ Top agencies by grant count:
 
 **Current assumption:** All dollar amounts are nominal USD (not adjusted for inflation).
 
-**Week 3 decision needed:**
+**Decision needed:**
 - Add `totaldollars_real` column using CPI deflator (base year = 2025)?
-- Or defer to analysis phase (Week 5) and apply on-the-fly?
+- Or defer to analysis phase and apply on-the-fly?
 
-**Recommendation:** Defer. Inflation adjustment complicates initial exploration; apply in Week 5 for trend charts.
+**Recommendation:** Defer. Inflation adjustment complicates initial exploration; apply during trend analysis as needed.
 
 ---
 
@@ -302,18 +303,18 @@ Top agencies by grant count:
 
 - `faculty-list-2025.xlsx` is **current faculty only** — no historical roster.
 - Departed faculty with grants will be "unmatched" in college analyses.
-- **Recommendation for advisor:** Request historical faculty roster with hire/departure dates (see Question 7 in data dictionary).
+- **Recommendation:** Request historical faculty roster with hire/departure dates for complete temporal analysis.
 
 ### 7.3 Abstract Coverage
 
 - Only 36% of `grants-with-abstract` rows have `Abstract` populated.
 - Coverage likely improves post-2015 but needs empirical validation.
-- **Week 8 NLP scope:** Restrict topic modeling to grants with abstracts; report coverage by year/college.
+- **NLP analysis consideration:** Restrict topic modeling to grants with abstracts; report coverage by year/college.
 
 ### 7.4 Co-PI Relationship Semantics
 
 - `iscopi = 1` rows represent co-PIs, but the `PI` field sometimes contains the *lead* PI's name (not always the person in that row).
-- **Week 7 network analysis:** Use `(grantid, clientfacultyid)` tuples to build edges; ignore the `PI` string field.
+- **Network analysis consideration:** Use `(grantid, clientfacultyid)` tuples to build edges; ignore the `PI` string field.
 
 ### 7.5 Multi-Institution Grants
 
@@ -321,9 +322,24 @@ Top agencies by grant count:
 - If a grant has collaborators at other institutions, they don't appear here.
 - **Implication:** Collaboration network is NU-internal only; external partnerships invisible.
 
+### 7.6 Pre-Employment Grant Attribution
+
+- All faculty in `ri_matches_grants_2026` are marked with `InstitutionName = "Northeastern University"` regardless of when the grant was awarded.
+- Many grants from 1995–2005 were likely obtained by faculty at their *previous* institutions before joining NU.
+- Without hire dates, we cannot distinguish "pre-NU" vs "at-NU" grants in temporal analyses.
+- **Impact on analysis:** 
+  - Institutional productivity metrics (e.g., "NU grants by year") are inflated for early years.
+  - Faculty research trajectories cannot be accurately segmented by career stage at NU.
+  - Cross-institution comparisons will misattribute grant funding to NU.
+- **Mitigation:**
+  - Document this caveat prominently in all temporal trend visualizations.
+  - If hire dates become available, add `grant_era` flag: `pre_employment`, `at_nu`, or `unknown`.
+  - Consider restricting temporal analyses to post-2010 grants (when most current faculty were likely already at NU).
+  - Flag grants > 5 years before 2025 faculty roster as "potentially pre-employment" in dashboard tooltips.
+
 ---
 
-## 8. Week 3 Pipeline Requirements
+## 8. Data Pipeline Implementation Requirements
 
 Based on this audit, `src/build_dataset.py` must:
 
@@ -368,27 +384,3 @@ Based on this audit, `src/build_dataset.py` must:
    - List of unresolved faculty (for manual review)
 
 ---
-
-## 9. Open Questions for Advisor (Week 3 Review)
-
-1. **Historical faculty roster:** Can we obtain hire/departure dates to filter grants to "NU tenure"?
-2. **Abstract join failure:** If fuzzy matching achieves < 70%, should we request the join key from data provider?
-3. **Currency inflation:** Should we add CPI-adjusted dollars now, or apply in analysis phase?
-4. **Demographic data:** Is gender/race/ethnicity available for faculty (for equity analysis)? If so, how do we acquire it?
-
----
-
-## 10. Sign-Off Checklist
-
-- [x] Missingness documented for all files
-- [x] Duplicate strategies defined
-- [x] Outlier ranges validated
-- [x] Categorical normalization plan specified
-- [x] Join keys confirmed
-- [x] Dtype coercion rules set
-- [x] Week 3 pipeline requirements written
-- [x] Known limitations flagged
-
-**Status:** Ready to proceed to Week 3 pipeline implementation.
-
-**Next step:** Build `src/build_dataset.py` implementing all cleaning rules above, with comprehensive logging and validation checks.

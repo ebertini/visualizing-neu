@@ -45,6 +45,9 @@
 - Build canonical tables: `faculty`, `grants`, `grant_faculty` (PI/co-PI long form), `grant_topics`.
 - Normalize names (case, accents, "Last, First" vs "First Last"); fuzzy-match across files (`rapidfuzz`).
 - Persist as Parquet in `data/processed/`.
+- Which corpus is good for scraping all faculty publication - maybe their google scholar but it can be pretty averse to bots
+  - https://northeastern.discovery.academicanalytics.com/
+  - OPENALEX is what is populating the current dataset - check the API for this
 - **Deliverable:** `src/build_dataset.py` reproducible pipeline + ER diagram.
 
 ---
