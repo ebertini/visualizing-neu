@@ -25,10 +25,10 @@ This report separates **confirmed working aspects** of the dataset from **suspec
 
 | Issue | Severity | Impact on Analysis |
 |---|---|---|
-| **1. Funding source bias toward NSF/NIH** | High | Underrepresents internal, foundation, and industry grants |
+| **1. Possible funding source bias toward NSF/NIH** | High | Underrepresents internal, foundation, and industry grants |
 | **2. Pre-employment grants attributed to NU** | High | Inflates historical institutional productivity metrics |
 | **3. Faculty roster = 2025 snapshot only** | High | Cannot track departures, sabbaticals, or historical affiliations |
-| **4. Grant abstracts missing for 64% of abstract-linked grants** | Medium | 90.1% of `ri_matches` grants can be linked to an abstract, but only 35.6% of those have actual text |
+| **4. Grant abstracts missing for 28% of grants** | Medium | Only 72% (1,928 of 2,676) grants have non-empty abstract text available for NLP/topic analysis |
 
 **Overall Assessment:** Dataset is usable but has systematic gaps that need to be documented or corrected for accurate institutional-level analysis.
 
@@ -47,15 +47,15 @@ This report separates **confirmed working aspects** of the dataset from **suspec
    - Corporate/industry partnerships
    - Private foundations (Gates, Sloan, etc.)
    - State/local government
-   - International funding agencies
+   - Other Government entities (DAPRA, Navy, etc.)
 
-2. This skew suggests the data **only captures federal research grants** submitted through specific systems (likely NSF's Research.gov and NIH's eRA Commons).
+2. This skew suggests the data **only captures these two federal research grants** submitted through specific systems (likely NSF's Research.gov and NIH's eRA Commons).
 
 3. **Impact on analysis:**
    - Cannot measure true institutional research productivity
    - Cannot analyze funding diversity across colleges
    - Interdisciplinary grants from non-traditional sources are invisible
-   - Business school, law school, and social science grants drastically underrepresented
+   - Business school, law school, and social science grants possibly are drastically underrepresented
 
 **Questions for data team:**
 - Is this dataset intentionally limited to NSF/NIH grants only?
@@ -71,20 +71,21 @@ This report separates **confirmed working aspects** of the dataset from **suspec
 **Observation:**
 - All faculty in `ri_matches_grants_2026` are marked with `InstitutionName = "Northeastern University"` regardless of when the grant was awarded.
 - Dataset spans **1995–2026**, but many current faculty joined NU after 2000
-- Example: A 1998 NSF grant attributed to a faculty member who joined NU in 2005
-- Many grants from 1995–2005 were likely obtained by faculty at their *previous* institutions before joining NU.
+- Example: A 2017 NSF grant attributed to a faculty member (Prof. Enrico Bertini) who joined NU in 2022
 - Without hire dates, we cannot distinguish "pre-NU" vs "at-NU" grants in temporal analyses.
-- If a grant has collaborators at other institutions, they don't appear here.
-- Collaboration network is NU-internal only; external partnerships invisible.
+- If a grant has collaborators at other institutions, they possibly don't appear here and there is no way to confirm this since everyone is marked as a NU member. 
+  - Collaboration network is NU-internal only; external partnerships invisible.
 
 **Why this is a problem:**
-1. **Inflates historical metrics:** Grant funding from 1995–2005 includes grants obtained at other institutions
+1. **Inflates historical metrics:** Earlier grant fundings listed includes grants obtained at other institutions
 2. **Cannot segment career stages:** Unable to distinguish "hired with grant" vs "won grant at NU"
 3. **Misleads institutional comparisons:** NU's historical productivity appears higher than actual
 
 **Current workaround:**
-- We can document this caveat and restrict temporal analyses to post-2010 grants
-- However, this arbitrary cutoff loses 15+ years of data
+- We can document this caveat and restrict temporal analyses to grants listed in later years but this is also not a perfect solution. 
+  - However, this arbitrary cutoff loses 15+ years of data
+- We can cross reference names with their `linkedin` information, but this requires scrapping information which might yield imprecise informatino. 
+
 
 **Questions for data team:**
 - Does the university have faculty hire dates available?
@@ -119,29 +120,42 @@ This report separates **confirmed working aspects** of the dataset from **suspec
 
 | Status | Count | Percentage |
 |---|---|---|
+| **Total grants (`ri_matches`)** | **2,676** | 100% |
 | **With abstract record** | 2,410 | 90.1% |
 | **Without abstract record** | 266 | 9.9% |
-| **Total grants (`ri_matches`)** | **2,676** | 100% |
 
 - 2,676 grants were identified through `ri_matches`.
-- 90.1% of those grants can be linked to an entry in the `grants-with-abstract` table.
-- 266 grants (9.9%) have **no corresponding entry** in the abstract table at all.
+- 90.1% of those grants (2,410) can be linked to an entry in the `grants-with-abstract` table.
+- 9.9% of grants (266) have **no record** in the abstract table at all.
 
 ### 4.2 Abstract Text Availability (within `grants-with-abstract`)
 
 | Status | Count | Percentage |
 |---|---|---|
+| **Total rows in `grants-with-abstract`** | **8,075** | 100% |
 | **Has abstract text** | 2,873 | 35.6% |
 | **Empty / missing text** | 5,202 | 64.4% |
-| **Total rows in `grants-with-abstract`** | **8,075** | 100% |
 
 - Of all rows in the `grants-with-abstract` table, only **35.6% contain actual abstract text**.
 - 64.4% of rows exist but have an empty or null abstract field.
+- Note: The table has 8,075 rows but only 2,676 unique grants (multiple entries per grant exist).
+
+### 4.3 **KEY METRIC:** Grants with Usable Abstract Text
+
+| Status | Count | Percentage |
+|---|---|---|
+| **Total unique grants** | **2,676** | 100% |
+| **With ≥1 non-empty abstract** | 1,928 | 72.0% |
+| **No non-empty abstract** | 748 | 28.0% |
+
+This is the most relevant metric for analysis purposes:
+- **72% of grants (1,928)** have at least one non-empty abstract available for text analysis
+- **28% of grants (748)** either have no record (266) or have records with empty text (482)
 
 **Why this is a problem:**
-1. **NLP/topic modeling** is limited to the ~35.6% subset with text — results may not generalize to all grants.
+1. **NLP/topic modeling** is limited to the 72% subset with text — results may not generalize to all grants.
 2. **Keyword and theme analysis** will be biased toward grants that include text (potentially skewing toward certain agencies, years, or research areas).
-3. The two-layer gap (match rate + text availability) must both be reported when presenting text analysis results.
+3. The three-layer gap (record match + text availability + unique grants) must all be reported when presenting text analysis results.
 
 **Questions for data team:**
 - Why do 64.4% of `grants-with-abstract` rows exist without abstract text?
@@ -150,12 +164,12 @@ This report separates **confirmed working aspects** of the dataset from **suspec
 
 ---
 
-## 5. Summary: Questions for Northeastern Data Team
+## 5. Summary: Questions for Northeastern Data Team Meeting
 
-### Critical Questions (Impact Analysis Validity)
+### Critical Questions that Impact Analysis Validity
 
 1. **Funding source coverage:**
-   - Is this dataset intentionally limited to NSF/NIH federal grants?
+   - Is this dataset intentionally favoring NSF/NIH federal grants for a particular reason?
    - Can we access data on internal grants, corporate partnerships, and foundation funding?
    - What percentage of total institutional research funding does this dataset represent?
 
@@ -167,7 +181,7 @@ This report separates **confirmed working aspects** of the dataset from **suspec
    - Can you provide a faculty roster with hire/departure dates and department changes?
    - For departed faculty, can we append their last known college/department?
 
-### Moderate Questions (Expand Analysis Capability)
+### Moderate Questions to Expand Analysis Capability
 
 4. **Grant abstracts:**
    - Is abstract collection mandatory for current submissions?
@@ -195,8 +209,9 @@ These limitations will be **prominently disclosed** in all deliverables:
    > "Faculty roster is a 2025 snapshot. ~10% of grant records cannot be mapped to departments due to missing historical affiliation data for departed faculty."
 
 4. **Text analysis caveat:**
-   > "Of 2,676 ri_matches grants, 90.1% (2,410) can be linked to an entry in the abstracts table. Across the full abstracts table (8,075 rows), only 35.6% contain actual text. The effective share of grants with usable abstract text is unknown without a direct join, but is at most 90.1%."
-- Coverage likely improves post-2015 but needs empirical validation.
-- **NLP analysis consideration:** Restrict topic modeling to grants with non-empty abstracts; report coverage by year/college.
+   > "Only 72% (1,928 of 2,676) grants have usable abstract text for topic analysis or text mining purposes."
+   > "Abstract availability breakdown: 90.1% have records in the abstracts table, but many records are empty. Among all 8,075 rows in the abstracts table (multiple per grant), only 35.6% contain actual text."
+   - Coverage likely improves post-2015 but needs empirical validation.
+   - **NLP analysis consideration:** Restrict topic modeling to grants with non-empty abstracts; report coverage by year/college.
 
 ---

@@ -1,0 +1,379 @@
+<h1 id="data-quality-report-issues-for-northeastern-data-team">Data
+Quality Report — Issues for Northeastern Data Team</h1>
+<p><strong>Date:</strong> June 5, 2026<br />
+<strong>Author:</strong> Uttkarsh<br />
+<strong>Audience:</strong> Northeastern University Data Team<br />
+<strong>Purpose:</strong> Document validated data issues requiring
+institutional clarification</p>
+<p>This report separates <strong>confirmed working aspects</strong> of
+the dataset from <strong>suspected data collection issues</strong> that
+may require investigation or documentation by the data team.</p>
+<hr />
+<h2 id="executive-summary">Executive Summary</h2>
+<h3 id="what-works-no-action-needed">✅ What Works (No Action
+Needed)</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Faculty ID joins</td>
+<td>✓ Validated</td>
+<td><code>ClientFacultyId</code> ↔︎ <code>Employee ID</code> joins work
+with ~90% match rate</td>
+</tr>
+<tr>
+<td>Grant-faculty relationships</td>
+<td>✓ Validated</td>
+<td>PI/co-PI flags (<code>iscopi</code>) consistently identify
+roles</td>
+</tr>
+<tr>
+<td>Date formatting</td>
+<td>✓ Clean</td>
+<td>All date fields parse correctly;
+<code>startdate</code>/<code>enddate</code> are reliable</td>
+</tr>
+<tr>
+<td>Dollar amounts</td>
+<td>✓ Reasonable</td>
+<td>No obvious data entry errors; outliers align with public
+records</td>
+</tr>
+<tr>
+<td>Grant IDs</td>
+<td>✓ Unique</td>
+<td><code>GrantId</code> serves as reliable primary key</td>
+</tr>
+</tbody>
+</table>
+<h3 id="suspected-data-collection-issues-needs-clarification">⚠️
+Suspected Data Collection Issues (Needs Clarification)</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Issue</th>
+<th>Severity</th>
+<th>Impact on Analysis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1. Possible funding source bias toward NSF/NIH</strong></td>
+<td>High</td>
+<td>Underrepresents internal, foundation, and industry grants</td>
+</tr>
+<tr>
+<td><strong>2. Pre-employment grants attributed to NU</strong></td>
+<td>High</td>
+<td>Inflates historical institutional productivity metrics</td>
+</tr>
+<tr>
+<td><strong>3. Faculty roster = 2025 snapshot only</strong></td>
+<td>High</td>
+<td>Cannot track departures, sabbaticals, or historical
+affiliations</td>
+</tr>
+<tr>
+<td><strong>4. Grant abstracts missing for 28% of grants</strong></td>
+<td>Medium</td>
+<td>Only 72% (1,928 of 2,676) grants have non-empty abstract text
+available for NLP/topic analysis</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Overall Assessment:</strong> Dataset is usable but has
+systematic gaps that need to be documented or corrected for accurate
+institutional-level analysis.</p>
+<hr />
+<h2 id="critical-issue-funding-source-bias-nsfnih-dominance">1. ⚠️
+CRITICAL ISSUE: Funding Source Bias (NSF/NIH Dominance)</h2>
+<p><strong>Observation:</strong> - <strong>NSF:</strong> 2,123 grants
+(79%) - <strong>NIH:</strong> 568 grants (21%) - <strong>All other
+agencies combined:</strong> &lt;100 grants</p>
+<p><strong>Why this is a problem:</strong> 1. Northeastern faculty
+secure funding from diverse sources not represented here: - Internal
+university grants - Corporate/industry partnerships - Private
+foundations (Gates, Sloan, etc.) - State/local government - Other
+Government entities (DAPRA, Navy, etc.)</p>
+<ol start="2" type="1">
+<li><p>This skew suggests the data <strong>only captures these two
+federal research grants</strong> submitted through specific systems
+(likely NSF’s Research.gov and NIH’s eRA Commons).</p></li>
+<li><p><strong>Impact on analysis:</strong></p>
+<ul>
+<li>Cannot measure true institutional research productivity</li>
+<li>Cannot analyze funding diversity across colleges</li>
+<li>Interdisciplinary grants from non-traditional sources are
+invisible</li>
+<li>Business school, law school, and social science grants possibly are
+drastically underrepresented</li>
+</ul></li>
+</ol>
+<p><strong>Questions for data team:</strong> - Is this dataset
+intentionally limited to NSF/NIH grants only? - Are internal grants,
+foundation grants, or industry contracts tracked in a separate system? -
+Can data from other sources be integrated (e.g., university’s financial
+research accounting system)?</p>
+<hr />
+<h2 id="critical-issue-pre-employment-grant-attribution">2. ⚠️ CRITICAL
+ISSUE: Pre-Employment Grant Attribution</h2>
+<h3 id="multi-institution-grants">2.1 Multi-Institution Grants</h3>
+<p><strong>Observation:</strong> - All faculty in
+<code>ri_matches_grants_2026</code> are marked with
+<code>InstitutionName = "Northeastern University"</code> regardless of
+when the grant was awarded. - Dataset spans <strong>1995–2026</strong>,
+but many current faculty joined NU after 2000 - Example: A 2017 NSF
+grant attributed to a faculty member (Prof. Enrico Bertini) who joined
+NU in 2022 - Without hire dates, we cannot distinguish “pre-NU” vs
+“at-NU” grants in temporal analyses. - If a grant has collaborators at
+other institutions, they possibly don’t appear here and there is no way
+to confirm this since everyone is marked as a NU member. - Collaboration
+network is NU-internal only; external partnerships invisible.</p>
+<p><strong>Why this is a problem:</strong> 1. <strong>Inflates
+historical metrics:</strong> Earlier grant fundings listed includes
+grants obtained at other institutions 2. <strong>Cannot segment career
+stages:</strong> Unable to distinguish “hired with grant” vs “won grant
+at NU” 3. <strong>Misleads institutional comparisons:</strong> NU’s
+historical productivity appears higher than actual</p>
+<p><strong>Current workaround:</strong> - We can document this caveat
+and restrict temporal analyses to grants listed in later years but this
+is also not a perfect solution. - However, this arbitrary cutoff loses
+15+ years of data - We can cross reference names with their
+<code>linkedin</code> information, but this requires scrapping
+information which might yield imprecise informatino.</p>
+<p><strong>Questions for data team:</strong> - Does the university have
+faculty hire dates available? - Can we add a <code>hire_date</code>
+field to distinguish pre-employment vs at-NU grants? - Is there a flag
+in the source system indicating “external grant transferred to NU”?</p>
+<hr />
+<h2 id="moderate-issue-faculty-roster-2025-snapshot-only">3. ⚠️ MODERATE
+ISSUE: Faculty Roster = 2025 Snapshot Only</h2>
+<p><strong>Observation:</strong> - <code>faculty-list-2025.xlsx</code>
+contains <strong>only current faculty</strong> as of 2025 - Grants
+dataset includes <strong>570 unique faculty</strong>, but only ~90%
+match the roster - ~57 faculty with grants cannot be mapped to
+departments/colleges</p>
+<p><strong>Why this is a problem:</strong> 1. Departed, retired, or
+renamed faculty are invisible — grants cannot be attributed to a
+college/department. 2. Cannot distinguish active vs. inactive faculty in
+network analysis. 3. ~10% of grant funding cannot be broken down by
+college.</p>
+<p><strong>Questions for data team:</strong> - Can you provide a faculty
+roster with hire/departure dates and department changes? - For departed
+faculty, can we append their last known college/department?</p>
+<hr />
+<h2 id="moderate-issue-grant-abstract-coverage">4. ⚠️ MODERATE ISSUE:
+Grant Abstract Coverage</h2>
+<h3 id="abstract-match-rate-ri_matches-grants-with-abstract">4.1
+Abstract Match Rate (<code>ri_matches</code> →
+<code>grants-with-abstract</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Count</th>
+<th>Percentage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Total grants (<code>ri_matches</code>)</strong></td>
+<td><strong>2,676</strong></td>
+<td>100%</td>
+</tr>
+<tr>
+<td><strong>With abstract record</strong></td>
+<td>2,410</td>
+<td>90.1%</td>
+</tr>
+<tr>
+<td><strong>Without abstract record</strong></td>
+<td>266</td>
+<td>9.9%</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>2,676 grants were identified through <code>ri_matches</code>.</li>
+<li>90.1% of those grants (2,410) can be linked to an entry in the
+<code>grants-with-abstract</code> table.</li>
+<li>9.9% of grants (266) have <strong>no record</strong> in the abstract
+table at all.</li>
+</ul>
+<h3 id="abstract-text-availability-within-grants-with-abstract">4.2
+Abstract Text Availability (within
+<code>grants-with-abstract</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Count</th>
+<th>Percentage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Total rows in
+<code>grants-with-abstract</code></strong></td>
+<td><strong>8,075</strong></td>
+<td>100%</td>
+</tr>
+<tr>
+<td><strong>Has abstract text</strong></td>
+<td>2,873</td>
+<td>35.6%</td>
+</tr>
+<tr>
+<td><strong>Empty / missing text</strong></td>
+<td>5,202</td>
+<td>64.4%</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Of all rows in the <code>grants-with-abstract</code> table, only
+<strong>35.6% contain actual abstract text</strong>.</li>
+<li>64.4% of rows exist but have an empty or null abstract field.</li>
+<li>Note: The table has 8,075 rows but only 2,676 unique grants
+(multiple entries per grant exist).</li>
+</ul>
+<h3 id="key-metric-grants-with-usable-abstract-text">4.3 <strong>KEY
+METRIC:</strong> Grants with Usable Abstract Text</h3>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Count</th>
+<th>Percentage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Total unique grants</strong></td>
+<td><strong>2,676</strong></td>
+<td>100%</td>
+</tr>
+<tr>
+<td><strong>With ≥1 non-empty abstract</strong></td>
+<td>1,928</td>
+<td>72.0%</td>
+</tr>
+<tr>
+<td><strong>No non-empty abstract</strong></td>
+<td>748</td>
+<td>28.0%</td>
+</tr>
+</tbody>
+</table>
+<p>This is the most relevant metric for analysis purposes: - <strong>72%
+of grants (1,928)</strong> have at least one non-empty abstract
+available for text analysis - <strong>28% of grants (748)</strong>
+either have no record (266) or have records with empty text (482)</p>
+<p><strong>Why this is a problem:</strong> 1. <strong>NLP/topic
+modeling</strong> is limited to the 72% subset with text — results may
+not generalize to all grants. 2. <strong>Keyword and theme
+analysis</strong> will be biased toward grants that include text
+(potentially skewing toward certain agencies, years, or research areas).
+3. The three-layer gap (record match + text availability + unique
+grants) must all be reported when presenting text analysis results.</p>
+<p><strong>Questions for data team:</strong> - Why do 64.4% of
+<code>grants-with-abstract</code> rows exist without abstract text? -
+Can missing abstracts be backfilled from NSF Award Search or NIH
+RePORTER public APIs? - Is abstract collection mandatory for current
+grant submissions?</p>
+<hr />
+<h2 id="summary-questions-for-northeastern-data-team-meeting">5.
+Summary: Questions for Northeastern Data Team Meeting</h2>
+<h3 id="critical-questions-that-impact-analysis-validity">Critical
+Questions that Impact Analysis Validity</h3>
+<ol type="1">
+<li><strong>Funding source coverage:</strong>
+<ul>
+<li>Is this dataset intentionally favoring NSF/NIH federal grants for a
+particular reason?</li>
+<li>Can we access data on internal grants, corporate partnerships, and
+foundation funding?</li>
+<li>What percentage of total institutional research funding does this
+dataset represent?</li>
+</ul></li>
+<li><strong>Pre-employment grant attribution:</strong>
+<ul>
+<li>Can you provide faculty hire dates to segment “pre-NU” vs “at-NU”
+grants?</li>
+<li>Is there a flag indicating grants that were transferred from other
+institutions?</li>
+</ul></li>
+<li><strong>Historical faculty roster:</strong>
+<ul>
+<li>Can you provide a faculty roster with hire/departure dates and
+department changes?</li>
+<li>For departed faculty, can we append their last known
+college/department?</li>
+</ul></li>
+</ol>
+<h3 id="moderate-questions-to-expand-analysis-capability">Moderate
+Questions to Expand Analysis Capability</h3>
+<ol start="4" type="1">
+<li><strong>Grant abstracts:</strong>
+<ul>
+<li>Is abstract collection mandatory for current submissions?</li>
+<li>Can we backfill missing abstracts from NSF Award Search or NIH
+RePORTER?</li>
+</ul></li>
+<li><strong>Additional context:</strong>
+<ul>
+<li>Are there fields indicating grant subcategories (e.g., CAREER
+awards, center grants)?</li>
+<li>Can you clarify the <code>grants-with-abstract.xlsx</code> ID space
+mismatch (different numbering system)?</li>
+</ul></li>
+</ol>
+<hr />
+<h2 id="caveats-well-document">8. Caveats We’ll Document</h2>
+<p>These limitations will be <strong>prominently disclosed</strong> in
+all deliverables:</p>
+<ol type="1">
+<li><p><strong>Funding analysis caveat:</strong> &gt; “This dataset
+primarily captures federal NSF/NIH grants and may underrepresent
+internal, foundation, and industry funding. Institutional productivity
+metrics should not be interpreted as comprehensive research
+output.”</p></li>
+<li><p><strong>Temporal analysis caveat:</strong> &gt; “Grant start
+dates span 1995–2026, but many pre-2010 grants were obtained by faculty
+at previous institutions before joining Northeastern. Historical trends
+may not accurately reflect institutional growth.”</p></li>
+<li><p><strong>Faculty coverage caveat:</strong> &gt; “Faculty roster is
+a 2025 snapshot. ~10% of grant records cannot be mapped to departments
+due to missing historical affiliation data for departed
+faculty.”</p></li>
+<li><p><strong>Text analysis caveat:</strong> &gt; “Only 72% (1,928 of
+2,676) grants have usable abstract text for topic analysis or text
+mining purposes.” &gt; “Abstract availability breakdown: 90.1% have
+records in the abstracts table, but many records are empty. Among all
+8,075 rows in the abstracts table (multiple per grant), only 35.6%
+contain actual text.”</p>
+<ul>
+<li>Coverage likely improves post-2015 but needs empirical
+validation.</li>
+<li><strong>NLP analysis consideration:</strong> Restrict topic modeling
+to grants with non-empty abstracts; report coverage by
+year/college.</li>
+</ul></li>
+</ol>
+<hr />
