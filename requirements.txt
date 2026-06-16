@@ -17,6 +17,17 @@ ipykernel>=6.29
 rapidfuzz>=3.6
 python-dateutil>=2.9
 
+# Network analysis (Week 7)
+networkx>=3.3
+python-louvain>=0.16
+
+# NLP / topic modeling (Week 8)
+scikit-learn>=1.4
+gensim>=4.3
+pyLDAvis>=3.4
+nltk>=3.8
+wordcloud>=1.9
+
 # Code quality
 ruff>=0.4
 black>=24.3

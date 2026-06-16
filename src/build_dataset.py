@@ -71,6 +71,20 @@ class DataPipeline:
             xl = pd.ExcelFile(path)
             self.raw[key] = {name: xl.parse(name) for name in xl.sheet_names}
             logger.info(f"  {key}: {list(self.raw[key].keys())}")
+        
+        # Load supplemental unmatched faculty CSV
+        unmatched_path = self.input_dir / 'UnmatchedFaculty.csv'
+        if unmatched_path.exists():
+            self.raw['unmatched_faculty'] = pd.read_csv(
+                unmatched_path,
+                header=None,
+                names=['_idx', 'employee id', 'name', 'superior_academic_unit', '_dept_or_note'],
+                dtype=str
+            )
+            logger.info(f"  unmatched_faculty: {len(self.raw['unmatched_faculty'])} rows")
+        else:
+            self.raw['unmatched_faculty'] = None
+            logger.warning("  UnmatchedFaculty.csv not found – skipping supplement")
 
     def _lowercase_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         """Lowercase all column names, preserving original Excel identity."""
@@ -159,6 +173,51 @@ class DataPipeline:
         
         return 'Other'
     
+    # ── Cleaning: Unmatched Faculty Supplement ────────────────────────────────
+
+    def load_unmatched_faculty_supplement(self) -> pd.DataFrame:
+        """
+        Parse UnmatchedFaculty.csv and return rows shaped like the faculty table.
+        Column 4 is treated as academic_unit unless it starts with 'moved to',
+        in which case it is stored as a note and academic_unit is left blank.
+        """
+        raw = self.raw.get('unmatched_faculty')
+        if raw is None or len(raw) == 0:
+            return pd.DataFrame()
+
+        df = raw.copy()
+
+        # Separate academic unit from freeform notes
+        def _parse_dept(val: str) -> Tuple[str, str]:
+            if pd.isna(val) or str(val).strip() == '':
+                return ('', '')
+            v = str(val).strip()
+            if v.lower().startswith('moved to') or v.lower() == 'nan':
+                return ('', v)
+            return (v, '')
+
+        parsed = df['_dept_or_note'].apply(_parse_dept)
+        df['academic unit'] = parsed.apply(lambda x: x[0])
+        df['_note'] = parsed.apply(lambda x: x[1])
+
+        # Build rows compatible with faculty canonical schema
+        supplement = pd.DataFrame({
+            'employee id': df['employee id'].str.strip(),
+            'superior_academic_unit': df['superior_academic_unit'].str.strip(),
+            'academic unit': df['academic unit'],
+            'academic track type': 'Unknown',
+            'academic rank': 'Unknown',
+            'tenure status': 'Not on tenure path',
+            'location_address_country': 'Unknown',
+        })
+
+        # Cast to matching category dtypes after merge (done in clean_faculty merge step)
+        self.log_validation(
+            "UnmatchedFaculty supplement rows",
+            f"{len(supplement)} rows loaded from UnmatchedFaculty.csv"
+        )
+        return supplement
+
     # ── Cleaning: Grants (ri_matches as primary) ─────────────────────────────
     
     def clean_grants_primary(self) -> pd.DataFrame:
@@ -415,6 +474,27 @@ class DataPipeline:
             
             # Clean
             faculty_df = self.clean_faculty()
+            
+            # Merge unmatched faculty supplement
+            supplement_df = self.load_unmatched_faculty_supplement()
+            if len(supplement_df) > 0:
+                # Only add rows whose employee id is not already in the roster
+                existing_ids = set(faculty_df['employee id'].astype(str))
+                new_rows = supplement_df[
+                    ~supplement_df['employee id'].isin(existing_ids)
+                ].copy()
+                # Re-apply category dtypes to match faculty_df
+                for col in ['superior_academic_unit', 'academic unit', 'academic track type',
+                            'academic rank', 'tenure status', 'location_address_country']:
+                    new_rows[col] = new_rows[col].astype(
+                        faculty_df[col].dtype if col in faculty_df.columns else 'category'
+                    )
+                faculty_df = pd.concat([faculty_df, new_rows], ignore_index=True)
+                self.log_validation(
+                    "Faculty rows after supplement merge",
+                    f"{len(faculty_df)} total rows ({len(new_rows)} added from UnmatchedFaculty)"
+                )
+
             grants_df = self.clean_grants_primary()
             grants_abstract_df = self.clean_grants_abstract()
             
