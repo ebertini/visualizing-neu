@@ -41,6 +41,8 @@ python -m nbconvert --to html notebooks/01_schema_overview.ipynb --output-dir=do
 
 # Convert all notebooks
 python -m nbconvert --to html notebooks/*.ipynb --output-dir=docs
+
+python3 -m nbconvert --to html --execute --ExecutePreprocessor.timeout=120 notebooks/*.ipynb --output-dir=docs 2>&1
 ```
 
 ### Adding More Notebooks
