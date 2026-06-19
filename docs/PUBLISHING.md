@@ -39,10 +39,14 @@ To convert notebooks to HTML locally without pushing:
 # Convert single notebook
 python -m nbconvert --to html notebooks/01_schema_overview.ipynb --output-dir=docs
 
+python3 -m nbconvert --to html --execute --ExecutePreprocessor.timeout=120 notebooks/01_schema_overview.ipynb --output-dir=docs
+
 # Convert all notebooks
 python -m nbconvert --to html notebooks/*.ipynb --output-dir=docs
 
 python3 -m nbconvert --to html --execute --ExecutePreprocessor.timeout=120 notebooks/*.ipynb --output-dir=docs 2>&1
+
+
 ```
 
 ### Adding More Notebooks
