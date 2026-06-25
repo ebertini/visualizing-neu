@@ -10,6 +10,7 @@ Numbered EDA notebooks. Run in order; later notebooks may import from `src/`.
 | 06 | `06_bivariate_segmentation.ipynb` | 6 | Agency × dept matrix; rank × award size; top-25 faculty; Gini / Lorenz concentration; tenure × agency cross-tab |
 | 07 | `07_collaboration_network.ipynb` | 7 | networkx co-PI graph; degree / betweenness / PageRank; Louvain communities; cross-college collaboration matrix & trend |
 | 08 | `08_topic_analysis.ipynb` | 8 | Abstract corpus QC; TF-IDF top terms; LDA 20-topic model; topic prevalence over time; topics by college; topic ↔ agency affinity |
+| 09 | `09_faculty_lookup_helper.ipynb` | helper | Name-based faculty lookup for employee ID, departments, agencies, and grant IDs |
 
 **Rule:** never commit notebook outputs. Use `nbstripout` or "Restart kernel & clear outputs" before `git add`.
 
