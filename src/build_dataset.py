@@ -99,6 +99,7 @@ class DataPipeline:
         "grants_copi":   "grants-with-coPI.xlsx",
         "grants_abs":    "grants-with-abstract.xlsx",
         "aad_coverage":  "aad_2024_federal_grant_coverage_list.xlsx",
+        "unmatched":     "UnmatchedFaculty.csv",
     }
 
     def __init__(self, input_dir: Path, output_dir: Path):
@@ -123,25 +124,80 @@ class DataPipeline:
                 raise FileNotFoundError(f"Missing input file: {path}")
             if key == "aad_coverage":
                 df = pd.read_excel(path, sheet_name="AAD2024 Federal Grants")
+            elif key == "unmatched":
+                df = pd.read_csv(path)
             else:
                 df = pd.read_excel(path)
             self.raw[key] = df
             log.info(f"  {key}: {df.shape}  ({fname})")
 
-    # ── Build: faculty (HR Snowflake) ────────────────────────────────────────
+    # ── Build: faculty (HR Snowflake + UnmatchedFaculty supplement) ─────────
+
+    def _faculty_name_lookup(self) -> dict[str, str]:
+        """Build faculty_id -> most-common personname from the grant tables.
+
+        HR Snowflake does not carry a name column, so faculty names come from
+        the `personname` field in ri_matches / grants-with-coPI.
+        """
+        ri   = _lower_cols(self.raw["ri_matches"])[["clientfacultyid", "personname"]]
+        copi = _lower_cols(self.raw["grants_copi"])[["clientfacultyid", "personname"]]
+        combined = pd.concat([ri, copi], ignore_index=True)
+        combined["clientfacultyid"] = combined["clientfacultyid"].astype(str)
+        combined["personname"] = combined["personname"].fillna("").str.strip()
+        combined = combined[combined["personname"] != ""]
+        return (combined.groupby("clientfacultyid")["personname"]
+                .agg(lambda s: s.mode().iloc[0])
+                .to_dict())
 
     def build_faculty(self) -> pd.DataFrame:
-        log.info("Building faculty.parquet (HR Snowflake)...")
+        log.info("Building faculty.parquet (HR Snowflake + UnmatchedFaculty supplement)...")
         df = _lower_cols(self.raw["hr_faculty"])
 
         # Drop redundant code column (we keep the human-readable name)
         df = df.drop(columns=[c for c in ["superior_academic_unit_code"] if c in df.columns])
 
-        df["employee_id"] = df["employee_id"].astype(str)
+        # Standardize the primary key name across all outputs
+        df = df.rename(columns={"employee_id": "faculty_id"})
+        df["faculty_id"] = df["faculty_id"].astype(str)
         df["hire_date"] = pd.to_datetime(df["hire_date"], errors="coerce")
         df["termination_date"] = pd.to_datetime(df["termination_date"], errors="coerce")
-
         df["academic_rank"] = df["academic_rank"].apply(_normalize_rank)
+
+        # Attach faculty_name derived from grant tables
+        name_lookup = self._faculty_name_lookup()
+        df["faculty_name"] = df["faculty_id"].map(name_lookup).fillna("")
+
+        # UnmatchedFaculty supplement: faculty who appear in grant tables but
+        # are not in the HR snapshot (usually departed faculty with historical
+        # grants). Also fills academic_unit for any HR rows that were missing it.
+        supp = self.raw["unmatched"].copy()
+        supp.columns = [c.strip().lower() for c in supp.columns]
+        supp["faculty_id"] = supp["faculty_id"].astype(str)
+        for c in ["faculty_name", "superior_academic_unit", "academic_unit"]:
+            supp[c] = supp[c].fillna("").astype(str).str.strip()
+
+        # (1) Fill missing academic_unit on HR rows whose faculty_id is in supplement
+        unit_fill = supp.set_index("faculty_id")["academic_unit"].to_dict()
+        # cast out of category so we can assign, then re-cast below
+        df["academic_unit"] = df["academic_unit"].astype("object")
+        mask = df["academic_unit"].isna() & df["faculty_id"].isin(unit_fill)
+        df.loc[mask, "academic_unit"] = df.loc[mask, "faculty_id"].map(unit_fill)
+
+        # (2) Add supplement rows for faculty_ids not already present in HR
+        existing_ids = set(df["faculty_id"])
+        new_rows = supp[~supp["faculty_id"].isin(existing_ids)].copy()
+        n_added = len(new_rows)
+        for col in df.columns:
+            if col not in new_rows.columns:
+                new_rows[col] = pd.NA
+        new_rows = new_rows[df.columns.tolist()]
+        df = pd.concat([df, new_rows], ignore_index=True)
+
+        # Reorder: identity columns first
+        head = ["faculty_id", "faculty_name"]
+        df = df[head + [c for c in df.columns if c not in head]]
+
+        # Final type coercion (categories after all edits)
         for col in [
             "superior_academic_unit", "academic_unit", "academic_track_type",
             "academic_rank", "tenure_status", "location_address_country",
@@ -150,12 +206,13 @@ class DataPipeline:
             if col in df.columns:
                 df[col] = df[col].astype("category")
 
-        df = df.drop_duplicates(subset=["employee_id"]).reset_index(drop=True)
+        df = df.drop_duplicates(subset=["faculty_id"]).reset_index(drop=True)
 
+        n_named = (df["faculty_name"].fillna("") != "").sum()
         self._log_check(
-            f"faculty: {len(df)} rows | "
+            f"faculty: {len(df)} rows ({n_added} added from UnmatchedFaculty) | "
             f"hire_date populated: {df['hire_date'].notna().sum()} | "
-            f"terminated: {df['termination_date'].notna().sum()}"
+            f"faculty_name populated: {n_named}"
         )
         return df
 
@@ -208,6 +265,9 @@ class DataPipeline:
             suffixes=("", "_aad"),
         )
         grants = grants.drop(columns=["_agency_key", "_agency_match", "_agency_key_aad"], errors="ignore")
+
+        # Standardize primary key name
+        grants = grants.rename(columns={"grantid": "grant_id"})
 
         cov_rate = grants["db_coverage"].notna().mean() * 100 if "db_coverage" in grants.columns else 0
         self._log_check(

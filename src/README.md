@@ -18,6 +18,20 @@ python src/build_dataset.py --input-dir DataSet --output-dir data/processed
 | `grants-with-coPI.xlsx` | grant ↔ PI / co-PI relationships |
 | `grants-with-abstract.xlsx` | grant titles + abstract text |
 | `aad_2024_federal_grant_coverage_list.xlsx` | federal-agency coverage flags (PI / co-PI availability, DB coverage years) |
+| `UnmatchedFaculty.csv` | manual supplement — 15 faculty who appear in grant tables but not in the HR snapshot (usually departed faculty with historical grants) |
+
+---
+
+## Identifier conventions
+
+The pipeline standardizes on **`faculty_id`** and **`grant_id`** as the canonical
+join keys across all outputs.
+
+| Where you see... | It's the same as... | Notes |
+|---|---|---|
+| `faculty_id` (in `faculty.parquet`, `faculty_grants.parquet`) | `Employee ID` in HR Snowflake, `ClientFacultyId` / `clientfacultyid` in the grant tables | Canonical faculty key. |
+| `grant_id` (in `grants.parquet`, `faculty_grants.parquet`) | `GrantId` / `grantid` in the raw grant tables | Canonical grant key. |
+| `personid` (in `grant_abstracts.parquet` only) | **NOT the same as `faculty_id`.** It comes from a different source system (Faculty Activities DB) and does not overlap with HR `Employee ID` (verified: only 1 of 1,042 abstract `personid`s matches any HR ID). | Do NOT join abstracts to faculty on `personid`. Link abstracts to grants via `title` / `sponsor` / `start_date`, then to faculty via `faculty_grants`. |
 
 ---
 
@@ -25,25 +39,30 @@ python src/build_dataset.py --input-dir DataSet --output-dir data/processed
 
 ### 1. `faculty.parquet` — faculty roster
 
-One row per faculty member. Built from the HR Snowflake export, so every row
-has a hire date — use this when you need to filter grants relative to a
-faculty member's tenure at Northeastern.
+One row per faculty member. Built from the HR Snowflake export (2,232 rows),
+then supplemented with 15 rows from `UnmatchedFaculty.csv` for faculty who
+appear in grant records but are missing from the HR snapshot.
+
+Use this whenever you need faculty metadata (college, rank, hire date). Every
+HR row has a hire date — use it to filter grants relative to a faculty
+member's tenure at Northeastern.
 
 | Column | Type | Description |
 |---|---|---|
-| `employee_id` | str | Primary key. Joins to `faculty_grants.faculty_id`. |
+| `faculty_id` | str | Primary key. Joins to `faculty_grants.faculty_id`. Same as `Employee ID` / `ClientFacultyId` in raw files. |
+| `faculty_name` | str | Person name pulled from grant tables (`personname`). Populated only for faculty who appear in at least one grant (~557 of 2,247). |
 | `superior_academic_unit` | category | College (e.g. "College of Engineering"). |
 | `academic_unit` | category | Department within the college. |
 | `academic_track_type` | category | Tenure / Non-Tenure / etc. |
 | `academic_rank` | category | Normalized to ~8 buckets (Professor, Associate Professor, Assistant Professor, Teaching Professor, …). |
 | `tenure_status` | category | Tenured / On tenure path / Not on tenure path. |
 | `location_address_country` | category | Country of primary appointment. |
-| `hire_date` | datetime | Date of hire (fully populated). |
+| `hire_date` | datetime | Date of hire (populated for all 2,232 HR rows; null for the 15 supplement rows). |
 | `terminal_degrees` | str | PhD / EdD / MD / etc. |
 | `termination_date` | datetime | Null if still active. |
 | `termination_status` | category | Null if still active. |
 
-Rows: **2,232**
+Rows: **2,247** (2,232 from HR + 15 from UnmatchedFaculty supplement)
 
 ---
 
@@ -56,7 +75,7 @@ name (fuzzy-matched, threshold 85). Use this for grant-level analyses
 
 | Column | Type | Description |
 |---|---|---|
-| `grantid` | str | Primary key. Joins to `faculty_grants.grant_id`. |
+| `grant_id` | str | Primary key. Joins to `faculty_grants.grant_id`. |
 | `grantname` | str | Grant title. |
 | `agencycode` | str | Funding agency short code. |
 | `agencyname` | str | Funding agency name. |
@@ -89,7 +108,7 @@ and any text analysis. Note this table's primary key (`id`) is the
 | Column | Type | Description |
 |---|---|---|
 | `id` | str | Primary key (abstract record id). |
-| `personid` | str | Faculty Person ID from source system (not `employee_id`). |
+| `personid` | str | Faculty Person ID from source system — **NOT the same as `faculty_id`**. See "Identifier conventions" above. |
 | `sourcetype` | str | Source category. |
 | `sourceactivityid` | str | Source activity id. |
 | `desiredvisibility` | mixed | Visibility flag from source. |
@@ -121,9 +140,9 @@ member to their grants or vice versa.
 
 | Column | Type | Description |
 |---|---|---|
-| `faculty_id` | str | Joins to `faculty.employee_id`. |
+| `faculty_id` | str | Joins to `faculty.faculty_id`. |
 | `faculty_name` | str | Person name as it appears in the grant records. |
-| `grant_id` | str | Joins to `grants.grantid`. |
+| `grant_id` | str | Joins to `grants.grant_id`. |
 | `is_copi` | bool | `True` if this faculty member is a co-PI on the grant, `False` if lead PI. |
 | `source` | category | Which raw table the pair came from: `ri_matches`, `grants_with_copi`, or `both`. |
 
@@ -140,8 +159,7 @@ import pandas as pd
 fg = pd.read_parquet("data/processed/faculty_grants.parquet")
 g  = pd.read_parquet("data/processed/grants.parquet")
 
-joined = fg.merge(g[["grantid", "totaldollars"]],
-                  left_on="grant_id", right_on="grantid")
+joined = fg.merge(g[["grant_id", "totaldollars"]], on="grant_id")
 
 # (a) PI-only credit: full $ to lead PI, $0 to co-PIs
 pi_only = (joined[~joined["is_copi"]]

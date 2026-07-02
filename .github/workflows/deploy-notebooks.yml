@@ -30,12 +30,11 @@ jobs:
       - name: Convert notebooks to HTML
         run: |
           python -m nbconvert --to html notebooks/*.ipynb --output-dir=docs
-          # Copy index.html if it exists
-          if [ -f docs/index.html ]; then
-            echo "Index page already exists"
-          fi
           # Create .nojekyll to bypass Jekyll processing
           touch docs/.nojekyll
+
+      - name: Generate index.html
+        run: python scripts/generate_index.py
       
       - name: Setup Pages
         uses: actions/configure-pages@v4
