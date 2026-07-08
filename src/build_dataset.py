@@ -1,6 +1,6 @@
 """
-Data Pipeline: load raw .xlsx files, clean them, and export 4 canonical Parquet
-tables to `data/processed/`.
+Data Pipeline: load raw .xlsx files, clean them, and export the canonical
+Parquet tables to `data/processed/`.
 
 Outputs
 -------
@@ -10,19 +10,23 @@ Outputs
        termination info so downstream analyses can apply hire-date filters.
 
 2. grants.parquet
-       One row per grant from ri_matches_grants_2026, enriched with the
-       AAD federal-grant-coverage columns
-       (DB Coverage, PI Names Available, Co-PI Available) joined on agency.
+       One row per grant from ri_matches_grants_2026, enriched with:
+         - AAD federal-grant-coverage columns (DB Coverage, PI Names
+           Available, Co-PI Available) joined on agency name,
+         - the most-recently-updated abstract + title + funding metadata
+           from grants-with-abstract, merged on grant id.
 
-3. grant_abstracts.parquet
-       One row per grant abstract from grants-with-abstract
-       (titles + abstract text, plus sponsor / dollar / date metadata).
-
-4. faculty_grants.parquet
+3. faculty_grants.parquet
        Faculty -> grants lookup. Union of (faculty, grant) pairs from BOTH
-       ri_matches_grants_2026 and grants-with-coPI, deduplicated on
-       (clientfacultyid, grantid). Includes the is_copi flag so analyses
-       can choose PI-only vs. full-credit accounting.
+       ri_matches_grants_2026 and grants-with-coPI. Every `personname`
+       is preserved as a row; rows missing a client faculty id get
+       `faculty_id = "00000"` (unresolved-name bucket).
+
+4. grant_orphaned_abstracts.parquet
+       Abstract records from grants-with-abstract that do NOT match any
+       Northeastern grant_id in grants.parquet. Kept as a separate table
+       for anyone who wants the extended NSF/NIH corpus (used by the
+       topic model to enrich vocabulary).
 
 Run:
     python src/build_dataset.py --input-dir DataSet --output-dir data/processed
@@ -315,13 +319,24 @@ class DataPipeline:
             out[k] = best[0] if best and best[1] >= threshold else None
         return out
 
-    # ── Build: grant_abstracts ───────────────────────────────────────────────
+    # ── Build: grant_abstracts split (merged into grants + orphans separately) ─
 
-    def build_grant_abstracts(self) -> pd.DataFrame:
-        log.info("Building grant_abstracts.parquet...")
+    UNMATCHED_ID = "00000"
+
+    def _split_abstracts(self, grants_grant_ids: set[str]) -> tuple[pd.DataFrame, pd.DataFrame]:
+        """Split grants-with-abstract into (matched, orphaned).
+
+        Matched rows are collapsed to one row per grant_id by picking the row
+        with the most recent `updateddate` (fall back to `createddate`, then
+        row order). Only the following columns are carried forward for the
+        merge into grants.parquet:
+            grant_id, title_from_abstract, abstract, funding_status,
+            type_of_funding, funding_source.
+        Orphans keep all their original columns.
+        """
         df = _lower_cols(self.raw["grants_abs"])
 
-        # Drop columns that are essentially empty or not useful for analysis
+        # Drop columns that are essentially empty
         drop = ["aacsb_-_type_of_intellectual_contribution",
                 "aacsb_-_mission",
                 "aacsb_-_portfolio_of_intellectual_contribution"]
@@ -339,9 +354,37 @@ class DataPipeline:
             if c in df.columns:
                 df[c] = df[c].fillna("").astype(str)
 
-        coverage = (df["abstract"] != "").mean() * 100 if "abstract" in df.columns else 0
-        self._log_check(f"grant_abstracts: {len(df)} rows | abstract coverage: {coverage:.1f}%")
-        return df.reset_index(drop=True)
+        df["sourceactivityid"] = df["sourceactivityid"].astype(str)
+        matched_mask = df["sourceactivityid"].isin(grants_grant_ids) & (df["sourceactivityid"] != "")
+
+        matched_raw = df[matched_mask].copy()
+        orphaned    = df[~matched_mask].reset_index(drop=True)
+
+        # For each matched grant, pick the most-recently-updated abstract row.
+        # Sort by (updateddate, createddate) descending, then drop_duplicates.
+        sort_keys = [c for c in ["updateddate", "createddate"] if c in matched_raw.columns]
+        if sort_keys:
+            matched_raw = matched_raw.sort_values(sort_keys, ascending=False, na_position="last")
+        matched = matched_raw.drop_duplicates(subset=["sourceactivityid"], keep="first")
+
+        keep_cols = {
+            "sourceactivityid": "grant_id",
+            "title":            "title_from_abstract",
+            "abstract":         "abstract",
+            "funding_status":   "funding_status",
+            "type_of_funding":  "type_of_funding",
+            "funding_source":   "funding_source",
+        }
+        matched = (matched[[c for c in keep_cols if c in matched.columns]]
+                   .rename(columns=keep_cols)
+                   .reset_index(drop=True))
+
+        self._log_check(
+            f"grant_abstracts split: {len(matched)} matched (merged into grants), "
+            f"{len(orphaned)} orphaned (saved separately). "
+            f"Total abstract records: {len(df)}"
+        )
+        return matched, orphaned
 
     # ── Build: faculty_grants (union of ri_matches + grants-with-coPI) ───────
 
@@ -357,7 +400,13 @@ class DataPipeline:
 
         for d in (ri_sub, copi_sub):
             d["grantid"] = d["grantid"].astype(str)
-            d["clientfacultyid"] = d["clientfacultyid"].astype(str)
+            # Preserve rows with missing clientfacultyid — stamp UNMATCHED_ID
+            # ("00000") so we don't lose personnames that aren't in HR.
+            d["clientfacultyid"] = (
+                d["clientfacultyid"].astype(str)
+                 .replace({"nan": self.UNMATCHED_ID, "None": self.UNMATCHED_ID, "": self.UNMATCHED_ID})
+                 .fillna(self.UNMATCHED_ID)
+            )
             d["personname"] = d["personname"].fillna("").str.strip()
             d["iscopi"] = d["iscopi"].fillna(False).astype(bool)
 
@@ -365,43 +414,108 @@ class DataPipeline:
         copi_sub["source"] = "grants_with_copi"
 
         combined = pd.concat([ri_sub, copi_sub], ignore_index=True)
+        # Drop rows that have neither an id nor a name — those are truly empty.
+        combined = combined[(combined["clientfacultyid"] != self.UNMATCHED_ID) |
+                            (combined["personname"] != "")]
 
-        # If the same (faculty, grant) appears in both, keep one row but
-        # mark its source as "both" and OR the iscopi flag.
+        # For unmatched-id rows we key on personname so distinct un-IDed PIs
+        # remain separate; for matched-id rows we key on clientfacultyid.
+        combined["_dedup_person"] = combined.apply(
+            lambda r: r["personname"] if r["clientfacultyid"] == self.UNMATCHED_ID
+                       else r["clientfacultyid"],
+            axis=1,
+        )
+
         agg = (
-            combined.groupby(["clientfacultyid", "grantid"], as_index=False)
+            combined.groupby(["_dedup_person", "grantid"], as_index=False)
             .agg(
+                clientfacultyid=("clientfacultyid", "first"),
                 personname=("personname", lambda s: s.dropna().iloc[0] if s.dropna().size else ""),
                 iscopi=("iscopi", "max"),
                 source=("source", lambda s: "both" if s.nunique() > 1 else s.iloc[0]),
             )
+            .drop(columns=["_dedup_person"])
         )
         agg = agg.rename(columns={"clientfacultyid": "faculty_id", "grantid": "grant_id",
                                   "personname": "faculty_name", "iscopi": "is_copi"})
-        agg = agg[["faculty_id", "faculty_name", "grant_id", "is_copi", "source"]]
+        agg["is_pi"] = ~agg["is_copi"]
+        agg = agg[["faculty_id", "faculty_name", "grant_id", "is_pi", "is_copi", "source"]]
 
         # Quick stats
-        n_pairs = len(agg)
-        n_pi    = (~agg["is_copi"]).sum()
-        n_copi  = agg["is_copi"].sum()
-        n_only_copi = (agg["source"] == "grants_with_copi").sum()
-        n_only_ri   = (agg["source"] == "ri_matches").sum()
-        n_both      = (agg["source"] == "both").sum()
+        n_pairs      = len(agg)
+        n_pi         = int((~agg["is_copi"]).sum())
+        n_copi       = int(agg["is_copi"].sum())
+        n_only_copi  = int((agg["source"] == "grants_with_copi").sum())
+        n_only_ri    = int((agg["source"] == "ri_matches").sum())
+        n_both       = int((agg["source"] == "both").sum())
+        n_unmatched  = int((agg["faculty_id"] == self.UNMATCHED_ID).sum())
         self._log_check(
             f"faculty_grants: {n_pairs} unique (faculty, grant) pairs | "
             f"PI rows: {n_pi} | co-PI rows: {n_copi} | "
-            f"source: ri-only={n_only_ri}, copi-only={n_only_copi}, both={n_both}"
+            f"source: ri-only={n_only_ri}, copi-only={n_only_copi}, both={n_both} | "
+            f"faculty_id=00000 (unresolved): {n_unmatched}"
         )
         return agg
+
+    def _annotate_at_neu(
+        self,
+        faculty_grants: pd.DataFrame,
+        faculty: pd.DataFrame,
+        grants: pd.DataFrame,
+    ) -> pd.DataFrame:
+        """Add hire-date context to each faculty-grant row.
+
+        Adds three columns:
+          hire_date       - faculty hire date (NaT for supplement rows or when
+                             faculty_id == '00000')
+          grant_startdate - grant start date
+          neu_status      - categorical:
+                              'earned_at_neu'      grant started on/after hire
+                              'prior_institution'  grant started strictly before
+                                                    hire (does not count as
+                                                    NEU work)
+                              'unknown'            hire or start date missing
+        """
+        out = (
+            faculty_grants
+            .merge(faculty[["faculty_id", "hire_date"]], on="faculty_id", how="left")
+            .merge(grants[["grant_id", "startdate"]].rename(columns={"startdate": "grant_startdate"}),
+                   on="grant_id", how="left")
+        )
+
+        known = out["hire_date"].notna() & out["grant_startdate"].notna()
+        status = pd.Series("unknown", index=out.index, dtype="object")
+        status.loc[known & (out["grant_startdate"] >= out["hire_date"])] = "earned_at_neu"
+        status.loc[known & (out["grant_startdate"] <  out["hire_date"])] = "prior_institution"
+        out["neu_status"] = pd.Categorical(
+            status, categories=["earned_at_neu", "prior_institution", "unknown"]
+        )
+
+        counts    = status.value_counts()
+        n_earned  = int(counts.get("earned_at_neu", 0))
+        n_prior   = int(counts.get("prior_institution", 0))
+        n_unknown = int(counts.get("unknown", 0))
+        pct_prior = n_prior / max(n_earned + n_prior, 1) * 100
+        self._log_check(
+            f"faculty_grants.neu_status: earned_at_neu={n_earned} | "
+            f"prior_institution={n_prior} ({pct_prior:.1f}% of dated rows) | "
+            f"unknown={n_unknown}"
+        )
+        return out
 
     # ── Export ───────────────────────────────────────────────────────────────
 
     def export(self) -> None:
-        log.info("Writing Parquet files...")
+        log.info("Writing Parquet + CSV files...")
         for name, df in self.processed.items():
-            path = self.output_dir / f"{name}.parquet"
-            df.to_parquet(path, index=False, compression="snappy")
-            log.info(f"  {path.name}: {df.shape}")
+            pq_path  = self.output_dir / f"{name}.parquet"
+            csv_path = self.output_dir / f"{name}.csv"
+            df.to_parquet(pq_path, index=False, compression="snappy")
+            # CSVs are the PI-shareable copy. Keep NaT/NaN as empty; write UTF-8
+            # with a BOM so Excel opens non-ASCII names correctly.
+            df.to_csv(csv_path, index=False, encoding="utf-8-sig")
+            log.info(f"  {pq_path.name}: {df.shape}  ({pq_path.stat().st_size / 1e6:.1f} MB pq, "
+                     f"{csv_path.stat().st_size / 1e6:.1f} MB csv)")
 
         report_path = self.output_dir / "PIPELINE_VALIDATION.txt"
         with open(report_path, "w") as f:
@@ -419,10 +533,25 @@ class DataPipeline:
 
     def run(self) -> None:
         self.load_raw()
-        self.processed["faculty"]          = self.build_faculty()
-        self.processed["grants"]           = self.build_grants()
-        self.processed["grant_abstracts"]  = self.build_grant_abstracts()
-        self.processed["faculty_grants"]   = self.build_faculty_grants()
+        self.processed["faculty"]        = self.build_faculty()
+        grants                            = self.build_grants()
+        matched_abs, orphaned_abs         = self._split_abstracts(set(grants["grant_id"]))
+        # Merge matched abstracts into grants (one row per grant_id)
+        grants = grants.merge(matched_abs, on="grant_id", how="left")
+        for c in ["title_from_abstract", "abstract", "funding_status",
+                  "type_of_funding", "funding_source"]:
+            if c in grants.columns:
+                grants[c] = grants[c].fillna("")
+        n_with_abs = int((grants["abstract"].fillna("") != "").sum()) if "abstract" in grants.columns else 0
+        self._log_check(f"grants: {n_with_abs}/{len(grants)} rows have a non-empty abstract")
+        self.processed["grants"]                     = grants
+        self.processed["grant_orphaned_abstracts"]   = orphaned_abs
+        self.processed["faculty_grants"]             = self.build_faculty_grants()
+        self.processed["faculty_grants"]             = self._annotate_at_neu(
+            self.processed["faculty_grants"],
+            self.processed["faculty"],
+            self.processed["grants"],
+        )
         self.export()
         log.info("Pipeline complete.")
 

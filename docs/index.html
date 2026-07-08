@@ -22,6 +22,12 @@
             border-bottom: 3px solid #000000;
             padding-bottom: 10px;
         }
+        h2 {
+            color: #333;
+            margin-top: 2em;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 6px;
+        }
         .notebook-list {
             list-style: none;
             padding: 0;
@@ -32,6 +38,10 @@
             background: #f8f9fa;
             border-left: 10px solid #c50021;
         }
+        .notebook-list li.interactive {
+            border-left-color: #0b6bcb;
+            background: #eef6fb;
+        }
         .notebook-list a {
             color: #000;
             text-decoration: none;
@@ -39,13 +49,25 @@
             font-size: 1.1em;
         }
         .notebook-list a:hover {
-            color: #000000;
+            text-decoration: underline;
         }
         .description {
             color: #666;
             margin-top: 5px;
             font-size: 0.9em;
         }
+        .badge {
+            display: inline-block;
+            font-size: 0.72em;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 8px;
+            vertical-align: middle;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+        .badge-interactive { background: #0b6bcb; color: white; }
+        .badge-report      { background: #444;   color: white; }
         footer {
             margin-top: 40px;
             text-align: center;
@@ -58,37 +80,57 @@
     <div class="container">
         <h1>Northeastern University Grant Visualization</h1>
         <p>Analysis and visualization of faculty grants, collaborations, and research funding at Northeastern University.</p>
-        
+
+        <h2>Interactive dashboards</h2>
+        <ul class="notebook-list">
+            <li class="interactive">
+                <a href="07_grant_projection_specter2.html">Grant projection &mdash; SPECTER2 (recommended)<span class="badge badge-interactive">Plotly</span></a>
+                <div class="description">UMAP projection of every NEU grant abstract encoded by the SPECTER2 scientific-paper transformer (768-D &rarr; 2-D via cosine UMAP). Hover any point for title, PI, college, agency, $ amount, year, topic + confidence. Toggle colour between LDA topic / college / agency using the top buttons.</div>
+            </li>
+            <li class="interactive">
+                <a href="07_grant_projection.html">Grant projection &mdash; TF-IDF baseline<span class="badge badge-interactive">Plotly</span></a>
+                <div class="description">Same layout as above but positioned by TF-IDF term overlap rather than a neural embedding. Useful as a sanity-check contrast to the SPECTER2 version.</div>
+            </li>
+            <li class="interactive">
+                <a href="college_profiles.html">Per-college research profiles<span class="badge badge-interactive">cards</span></a>
+                <div class="description">One card per college: faculty on grants, grant count, total funding, top 3 topics, top 3 agencies, and top 5 PIs by full-credit funding.</div>
+            </li>
+        </ul>
+
         <h2>Notebooks</h2>
         <ul class="notebook-list">
             <li>
-                <a href="01_schema_overview.html">01 · Schema Overview</a>
-                <div class="description">**Week 1 Goal**: load every raw dataset, print shape / dtypes / null counts / sample rows, and capture findings into `docs/data_dictionary.md`.</div>
+                <a href="01_schema_overview.html">01 &middot; Schema Overview</a>
+                <div class="description">Load every processed table, print schemas / nulls / samples; sanity-check the faculty &harr; grants &harr; abstracts joins.</div>
             </li>
             <li>
-                <a href="02_funding_landscape.html">04 · Univariate Exploration</a>
-                <div class="description">**Goal:** Produce baseline charts covering the one-variable distributions that anchor all later analyses.</div>
+                <a href="02_funding_landscape.html">02 &middot; Funding Landscape</a>
+                <div class="description">Baseline distributions: grant size (linear + log), duration, yearly count, agency frequency, faculty rank &amp; tenure, co-PI rate.</div>
             </li>
             <li>
-                <a href="03_funding_over_time.html">05 · Temporal Trends</a>
-                <div class="description">**Goal:** Understand how Northeastern&#x27;s grant funding has evolved over time (2000–2025).</div>
+                <a href="03_funding_over_time.html">03 &middot; Funding Over Time</a>
+                <div class="description">Annual &amp; cumulative funding 2000&ndash;2025, rolling averages, college &times; year heatmap, agency mix over time, pre/post-COVID comparison.</div>
             </li>
             <li>
-                <a href="04_who_gets_funded.html">06 · Bivariate Analysis &amp; Segmentation</a>
-                <div class="description">**Goal:** Cross-variable analysis to surface headline findings and candidate stories.</div>
+                <a href="04_who_gets_funded.html">04 &middot; Who Gets Funded</a>
+                <div class="description">Concentration analysis: Lorenz curve / Gini, top-25 faculty, top-15 departments, agency &times; department matrix, plus the earned-at-NEU vs prior-institution attribution comparison.</div>
             </li>
             <li>
-                <a href="05_collaboration_network.html">07 · Collaboration Network (co-PI Analysis)</a>
-                <div class="description">**Goal:** Build and analyze the co-PI collaboration graph.</div>
+                <a href="05_collaboration_network.html">05 &middot; Collaboration Network</a>
+                <div class="description">Co-PI network: NetworkX graph, degree / betweenness / PageRank centrality, Louvain communities, cross-college collaboration matrix, trend over time.</div>
             </li>
             <li>
-                <a href="06_research_topics.html">06 · Research Topics</a>
-                <div class="description">**Goal.** Discover what Northeastern&#x27;s grant-funded research is *about* by fitting a topic</div>
+                <a href="06_research_topics.html">06 &middot; Research Topics</a>
+                <div class="description">LDA topic model (k=8) over grant abstracts: perplexity sweep, UMass coherence &amp; confidence validation, topic prevalence + trends over time, topics &times; college / agency / funding, top faculty per topic.</div>
+            </li>
+            <li>
+                <a href="07_topic_deep_dive.html">07 &middot; Topic Deep Dive</a>
+                <div class="description">Follow-up analyses: sub-topics inside each parent (LDA k=4), JS-distance topic dendrogram, per-college profile cards, and UMAP projections (TF-IDF baseline + SPECTER2 &mdash; produces the two interactive projections above).</div>
             </li>
         </ul>
-        
+
         <footer>
-            <p>Data analyzed from faculty lists and grant records (2025-2026)</p>
+            <p>Data analyzed from faculty lists and grant records (2025&ndash;2026)</p>
         </footer>
     </div>
 </body>
