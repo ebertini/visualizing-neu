@@ -39,7 +39,7 @@ Shape: **8,075 rows × 25 cols**. Sheet: `Grants with abstract (2).csv`. **Role:
 | Column | Type | Null % | Unique | Notes |
 |---|---|---|---|---|
 | `Id` | int64 | 0% | 8,075 | Primary key in this file. Range 91,518 – 158,405 — **distinct ID space** from `grants-with-coPI.GrantId` (38,584 – 1,795,307). Join path TBD (advisor question #3). |
-| `PersonId` | int64 → *string* | 0% | 1,042 | Faculty identifier (range 1,183 – 902,666). Range overlaps with `grants-with-coPI.PersonId` and faculty `Employee ID` — candidate for shared key, needs validation. |
+| `PersonId` | int64 → *string* | 0% | 1,042 | **⚠ Column-name collision.** This `PersonId` is a **different ID space** from `grants-with-coPI.PersonId`. Values are from an internal profile-upload system (probably Symplectic Elements / internal-CV database); range overlaps numerically with the coPI file's values but the two do NOT share meaning — confirmed 0% direct-value overlap with `faculty.faculty_id`, `faculty_id_lookup.faculty_id`, and `faculty_grants.faculty_id` in [`scripts/_orphan_faculty_overlap.py`](../scripts/_orphan_faculty_overlap.py). Cannot be joined directly. Reachable to `faculty_id` only through the observational bridge in [`personid_to_faculty.parquet`](../data/processed/personid_to_faculty.parquet). See [`ID_RECONCILIATION.md`](ID_RECONCILIATION.md). |
 | `Sourcetype` | object → *category* | 0% | 2 | `Institution` (4,492) vs `AA` (3,583). Likely "Institution-reported" vs "Academic Analytics" feed; investigate impact on duplication. |
 | `SourceActivityId` | object | <1% | 7,475 | Upstream source-system ID. Possible bridge to `grants-with-coPI.GrantId` / `AgencyGrantId` — check in Week 2. |
 | `DesiredVisibility` | int64 → *category* | 0% | 2 | Values: 0, 2. Display-permission flag from the source system. Ignore for analysis. |
@@ -85,8 +85,8 @@ Shape: **3,136 rows × 22 cols**. Sheet: `Grants with co PI indicator (1)`. **Gr
 | `DollarsPerYear` | int64 | 0% | 2,322 | USD/year. Range 527 – 3,625,548; median 126,357. |
 | `StartDate` | datetime64 | 0% | 767 | Grant start (1995-06-01 → 2026-01-01). **Primary time-series axis.** |
 | `EndDate` | datetime64 | 0% | 440 | Grant end (1998-05-31 → 2030-09-30). |
-| `PersonId` | int64 → *string* | 0% | 567 | Faculty identifier (range 855 – 2,139,205). **Different ID space than `faculty-list-2025.Employee ID`** — crosswalk required. |
-| `ClientFacultyId` | int64 → *string* | 0% | 567 | Parallel faculty ID, 1:1 with `PersonId` here. Possible bridge to faculty roster. |
+| `PersonId` | int64 → *string* | 0% | 567 | **⚠ Column-name collision** with `grants-with-abstract.PersonId` — that column holds a **different** internal ID space. Here `PersonId` = **`AAUID`** (Academic Analytics User ID; renamed in [`ri_matches_grants_2026.xlsx`](../DataSet/ri_matches_grants_2026.xlsx)). 1:1 with `ClientFacultyId` at all 570 observed pairs. |
+| `ClientFacultyId` | int64 → *string* | 0% | 567 | Same values as HR `Employee ID` (= canonical `faculty_id` in processed data). This is the join key to the faculty roster. |
 | `PersonName` | object | 0% | 567 | `LAST, FIRST [MIDDLE]` form (e.g., `MELODIA, TOMMASO`). Use for human-readable display and as fallback fuzzy-join key. |
 | `OrcidId` | object | 10% | 473 | ORCID identifier — globally unique researcher ID. **Best cross-institution join key**, where present. |
 | `InstitutionName` | object | 0% | 1 | Always "Northeastern University". **Drop** (constant). |
@@ -142,10 +142,39 @@ Shape: **3,146 rows × 22 cols**. Sheet: `ri_matches_grants_2026-2-1_3-50`. **Sc
 |---|---|---|---|
 | `grants-with-coPI` ↔ `ri_matches_grants_2026` | `GrantId` = `grantid`; `PersonId` = `AAUID` | High | Schemas mirror each other; row counts and value ranges align. |
 | structured grants ↔ `faculty-list-2025` | `clientfacultyid` (`ri_matches`) / `ClientFacultyId` (`grants-with-coPI`) **= `Employee ID`** (confirmed) | **High** | Confirmed join key. `faculty-list-2025.Employee ID` is equivalent to `clientfacultyid` / `ClientFacultyId` in both structured grant files. |
-| `grants-with-abstract` ↔ structured grant files | `Id` ↔ `GrantId`/`grantid`: **does NOT match** (different ID space). `SourceActivityId` ↔ `AgencyGrantId`: plausible — both look like external IDs. `PersonId` ↔ `PersonId`/`AAUID`: ranges overlap but cardinalities differ (1,042 vs 567–570). | **Low** | Primary advisor question #3. Worst-case fallback: fuzzy match on (`Title` ≈ `GrantName`) + (`Start Date` ≈ `startdate`). |
+| `grants-with-abstract` ↔ structured grant files | `SourceActivityId` = `grantid` (`ri_matches`) / `GrantId` (`coPI`). Split into matched / orphaned in [`build_dataset.py`](../src/build_dataset.py); ~37% match rate. | **High** | `SourceActivityId` **is** the grant id in the structured tables when it matches. `Id` is a distinct file-local key; do not join on it. |
+| `grants-with-abstract.PersonId` ↔ any faculty ID | **Zero direct overlap** (verified in [`scripts/_orphan_faculty_overlap.py`](../scripts/_orphan_faculty_overlap.py)). | **N/A** | `abstract.PersonId` is a **different ID space** from every other faculty identifier in the corpus. Reach `faculty_id` via the observational bridge in [`personid_to_faculty.parquet`](../data/processed/personid_to_faculty.parquet), not by direct join. Same column name as `grants-with-coPI.PersonId`, different meaning. |
 | External agency databases (NSF, NIH) | `AgencyGrantId` + `AgencyCode` | High | For enrichment in later phases if needed. |
 
-## Empirical questions to answer in Week 2 (no advisor input needed)
+---
+
+## ID crosswalk — the four identifiers for one person
+
+> **Read [`ID_RECONCILIATION.md`](ID_RECONCILIATION.md) before using any of these fields.**
+
+One person (e.g. Chris Martens) appears in the raw data under **four distinct
+identifiers** originating from three source systems:
+
+| ID space | Raw column(s) | Example (Martens) | Owner / origin |
+|---|---|---:|---|
+| HR `Employee ID` / `ClientFacultyId` — the **canonical `faculty_id`** used in every processed parquet | `faculty-list-2025.Employee ID`, `ri_matches.clientfacultyid`, `grants-with-coPI.ClientFacultyId` | **2963712** | Northeastern HR |
+| `AAUID` — external vendor ID (unused in analysis; preserved on `faculty_id_lookup.parquet` for future enrichment) | `ri_matches.AAUID`, `grants-with-coPI.PersonId` | 799620 | Academic Analytics (external vendor) |
+| `abstract.PersonId` — internal upload-system ID; **not directly joinable to anything else** | `grants-with-abstract.PersonId` | 110082 | Internal abstract-upload system |
+
+**The `PersonId` collision:** `grants-with-coPI.xlsx` and
+`grants-with-abstract.xlsx` both have a column named `PersonId`, but they
+hold **different ID spaces** (`AAUID` vs the internal upload-system ID).
+They cannot be joined on `PersonId`. Same name, different meaning.
+
+**Reaching from `abstract.PersonId` to canonical `faculty_id`** requires the
+observational bridge captured in
+[`data/processed/personid_to_faculty.parquet`](../data/processed/personid_to_faculty.parquet)
+— walks through `SourceActivityId → grant_id → faculty_grants.faculty_id`,
+resolves via strict 100% co-occurrence majority vote, and marks each row
+with a `resolution_method` audit column. Build details in
+[`ID_RECONCILIATION.md`](ID_RECONCILIATION.md#4--why-the-orphan-bridge-in-personid_to_facultycsv-still-works).
+
+---## Empirical questions to answer in Week 2 (no advisor input needed)
 
 - Confirm currency is USD throughout (sample a few NSF awards against public records).
 - Calendar year vs fiscal year for `StartDate` (compare distribution of `Start Date.month`).

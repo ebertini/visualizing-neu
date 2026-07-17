@@ -17,6 +17,9 @@ topic model** in favor of SPECTER2 → UMAP → HDBSCAN → c-TF-IDF (via
 BERTopic), retires the TF-IDF/t-SNE preview in EnricoVis, and picks up
 the prioritized follow-ups from
 [Compendium §9](TOPIC_ANALYSIS_COMPENDIUM.md#9-suggested-follow-ups).
+It also inserts a new **orphan-abstract reconciliation** step (M2
+below) using the ID crosswalk built in
+[`ID_RECONCILIATION.md`](ID_RECONCILIATION.md).
 
 > **Why the switch away from LDA.** LDA is bag-of-words; it treats
 > "neural network" (ML) and "neural network" (neuroscience) as the
@@ -28,6 +31,21 @@ the prioritized follow-ups from
 > deterministic given a seed, and emits an honest "noise" cluster
 > instead of forcing low-confidence grants into whichever topic wins
 > the argmax coin flip.
+
+> **Why orphan reconciliation moved into the plan.** The compendium
+> described [`grant_orphaned_abstracts.parquet`](../data/processed/grant_orphaned_abstracts.parquet)
+> as "~5,000 external abstracts from an NSF/NIH crawl of collaborators
+> + non-NU awards." Investigation ([`ID_RECONCILIATION.md`](ID_RECONCILIATION.md))
+> shows that description is wrong: **only 403 of 5,095 rows actually
+> carry an abstract** (7.9%); the rest are title-only. And those 403
+> are **not external work** — they're NEU faculty's own grant records
+> that failed the `SourceActivityId → grant_id` join. The new
+> [`personid_to_faculty.parquet`](../data/processed/personid_to_faculty.parquet)
+> bridge resolves 235 of the 403 to a specific NEU faculty. Some are
+> likely updates/duplicates of grants already in the corpus (see the
+> Martens example in [ID_RECONCILIATION.md §5.1](ID_RECONCILIATION.md#51-clean-case--abstractpersonid-110082--martens));
+> the rest are genuinely new NEU abstracts. Both need to be handled
+> before BERTopic tuning, since they change what the model sees.
 
 ---
 
@@ -41,6 +59,8 @@ the prioritized follow-ups from
 | Hierarchy | 8 parents × 4 leaves = 32 (nb07 §2, LDA-of-LDA) | 8 parents → 25 leaves proportional (LDA-of-LDA) | Use BERTopic's native `hierarchical_topics()` (condensed HDBSCAN tree). Cut at 2 levels; no LDA-of-LDA hack. |
 | Label stability | Hand-curated `TOPIC_LABELS`, drifts across reruns | Auto-named from anchor terms in `topics.py` (does not exist yet) | c-TF-IDF top terms are derived from the cluster and stable given the seed; a single `outputs/topic_labels.json` still overrides them with human-curated names when we care. |
 | Noise handling | 22% of grants argmax-assigned below 0.5 confidence, pollute topics | same | HDBSCAN emits a native `-1` noise cluster; low-confidence grants are labeled "unassigned" honestly and greyed out in the viz. |
+| Orphan abstracts | Compendium describes them as "5,095 external abstracts" but they're actually NEU records that failed a join; only 403 have real abstract text | Not used | New M2 milestone runs `src/reconcile_orphans.py` to (a) fuzzy-match orphan abstracts to abstract-less NEU grants (title + faculty via bridge + date) and backfill, (b) attach the remainder to their resolved `faculty_id` as extra NEU documents flagged `has_grant_record=False`. |
+| Faculty attribution for extra docs | n/a (LDA only saw matched grants) | n/a | Use [`personid_to_faculty.parquet`](../data/processed/personid_to_faculty.parquet) (strict 100% majority vote), filter to `resolution_method == 'strict_100pct'`. Everything else is silently dropped. |
 | Pipeline scripts | live in notebooks | referenced in work breakdown but **not present in repo** | Materialize as `src/` modules that both notebooks and EnricoVis import. |
 | Data location | `data/processed/grants.parquet` (~2,676 rows; ~1,928 with abstract) | expects `grants.csv` in same folder as HTMLs | EnricoVis reads from `data/processed/` directly (build step writes JSON to `docs/EnricoVis/data/`). |
 
@@ -78,25 +98,33 @@ the prioritized follow-ups from
 ```
 src/
   clean_text.py               # unified cleaner (merge of nb06 rules + EnricoVis/clean_text.py)
-  build_dataset.py            # already exists
+  build_dataset.py            # already exists; already emits personid_to_faculty + faculty_id_lookup + faculty_missing_metadata
+  reconcile_orphans.py        # NEW (M2): fuzzy-match orphan abstracts to abstract-less NEU grants and backfill
   build_specter2_embeddings.py# already exists; call src/clean_text.py before encoding
   topics_bertopic.py          # CANONICAL: BERTopic on precomputed SPECTER2 → UMAP → HDBSCAN → c-TF-IDF
   topics_lda.py               # LEGACY: LDA kept only for report-notebook continuity
   build_viz_data.py           # writes docs/EnricoVis/data/*.json from cached artifacts
 
 data/processed/
-  grants.parquet              # existing
-  specter2_embeddings.npy     # existing (regenerated after clean_text unification)
+  grants.parquet              # existing; M2 enriches abstract-less rows with recovered orphan abstracts
+  grant_orphaned_abstracts.parquet  # existing (5,095 rows, 403 with abstract); untouched by M2 (audit source of truth)
+  personid_to_faculty.parquet # existing (from build_dataset); strict-100% bridge
+  faculty_id_lookup.parquet   # existing (from build_dataset); college + aauid
+  faculty_missing_metadata.parquet  # existing; 13 faculty with grants but no HR record
+  grant_orphan_recovery.parquet     # NEW (M2): audit trail — which orphans matched which NEU grants, plus scores
+  extra_neu_abstracts.parquet       # NEW (M2): orphan abstracts NOT matched to a NEU grant but with resolvable faculty
+  specter2_embeddings.npy     # existing (regenerated after clean_text + M2 recovery)
   specter2_umap_2d.npy        # NEW: 2-D UMAP for viz (n_components=2, cached, seeded)
   specter2_umap_5d.npy        # NEW: 5-D UMAP for HDBSCAN clustering (cached, seeded)
   bertopic_model/             # NEW: BERTopic .save() artifact (topics, c-TF-IDF, tree)
-  topic_assignments.parquet   # NEW: grant_id → topic_id, topic_prob, is_noise, parent_id
+  topic_assignments.parquet   # NEW: doc_id → topic_id, topic_prob, is_noise, parent_id
 
 outputs/
   topic_labels.json           # single source of truth: {id: {label, palette, top_terms, parent}}
   topic_assignments.csv       # regenerated from BERTopic; superset of the old nb06 export
   subtopics.csv               # regenerated from BERTopic hierarchical_topics()
   bertopic_diagnostics.json   # cluster sizes, %-noise, mean intra-cluster distance, seed
+  orphan_recovery_report.md   # NEW (M2): human-readable summary of what was recovered vs left as extras
 
 docs/EnricoVis/data/          # NEW folder — the HTMLs stop inlining data
   grants_umap.json
@@ -157,7 +185,95 @@ the cached SPECTER2 embeddings and writes
 `data/processed/bertopic_model/` + `outputs/bertopic_diagnostics.json`.
 Rerunning nb07 imports the fitted model instead of refitting inline.
 
-### M2 — Tune BERTopic on the unified corpus
+### M2 — Reconcile orphan abstracts back into the NEU corpus
+
+**Prerequisite for M3.** The corpus BERTopic tunes against must be
+finalized before we sweep `min_cluster_size`. This milestone recovers
+the 403 usable orphan abstracts using the ID crosswalk built in
+[`ID_RECONCILIATION.md`](ID_RECONCILIATION.md).
+
+**Inputs**
+
+- [`data/processed/grant_orphaned_abstracts.parquet`](../data/processed/grant_orphaned_abstracts.parquet)
+  — filter to rows with `len(abstract) >= 200` → 403 candidates.
+- [`data/processed/personid_to_faculty.parquet`](../data/processed/personid_to_faculty.parquet)
+  — filter to `resolution_method == 'strict_100pct'` → 235 of the 403
+  orphans acquire a `faculty_id`. The remaining 168 (personid ambiguous
+  or orphan-only) are silently dropped for now — no attribution, no
+  entry.
+- [`data/processed/grants.parquet`](../data/processed/grants.parquet)
+  — the 748 abstract-less NEU grants are the fuzzy-match target pool.
+- [`data/processed/faculty_grants.parquet`](../data/processed/faculty_grants.parquet)
+  — to restrict candidate NEU grants to those the resolved faculty
+  actually has on record.
+
+**Method** (implemented in new `src/reconcile_orphans.py`):
+
+1. For each of the 235 attributable orphan-with-abstract rows, look up
+   the resolved `faculty_id` and pull the abstract-less NEU grants
+   attributed to that faculty via `faculty_grants`.
+2. Score every (orphan, candidate NEU grant) pair on:
+   - **Title similarity** — `rapidfuzz.fuzz.token_set_ratio` (already a
+     dependency of `build_dataset.py`). Threshold: **>= 85**.
+   - **Date proximity** — `abs(orphan.start_date - neu.startdate).days`.
+     Threshold: **<= 365 days** (grants get re-uploaded up to a year
+     out from award date).
+   - **Amount overlap** — if orphan.dollar_amount is non-zero,
+     `abs(o - n) / max(o, n) <= 0.15`. Note: `Dollar Amount` in the
+     abstract file is unreliable (median 0 per
+     [data_dictionary.md](data_dictionary.md#grants-with-abstractxlsx--grants-with-text-content));
+     if zero, this check contributes nothing (not a veto).
+3. **Match rule:** best candidate above title threshold with date OK
+   and (if dollar available) amount OK is treated as a match.
+4. **Outcome buckets:**
+   - **`update`** — orphan matches an existing abstract-less NEU grant.
+     Backfill the abstract onto that NEU grant. Set
+     `abstract_source = 'orphan_recovered'` (existing rows keep
+     `abstract_source = 'internal'`).
+   - **`extra`** — orphan has resolved faculty but no NEU grant match.
+     Write to `extra_neu_abstracts.parquet` as a pseudo-doc with
+     `doc_id = f'orphan-{id}'`, carrying `faculty_id`, `title`,
+     `abstract`, `start_date` (no `grant_id`, no dollars, no agency).
+     BERTopic sees these; downstream $/agency crosstabs skip them.
+   - **`unattributed`** — no resolved faculty. Not touched; audit-only.
+5. Full trace of every orphan (input signals, chosen bucket, matched
+   NEU grant if any, all scores) written to
+   `grant_orphan_recovery.parquet` and summarized in
+   `outputs/orphan_recovery_report.md`.
+
+**Expected outcome**
+
+Based on the Martens example in
+[ID_RECONCILIATION.md §5.1](ID_RECONCILIATION.md#51-clean-case--abstractpersonid-110082--martens),
+we expect a meaningful chunk to fall into `update` (grants that got
+re-uploaded with a different `SourceActivityId`). Ballpark going in
+(before running):
+
+- **update:** ~100–180 abstracts backfilled onto existing NEU grants.
+  These raise NEU's native abstract coverage from **1,928 → ~2,050–2,100 of 2,676** (72% → ~77–79%).
+- **extra:** ~50–130 new pseudo-docs (attributable but unmatched).
+  Corpus BERTopic sees grows to **~2,150–2,250 documents**.
+- **unattributed:** ~168 orphans with no resolved faculty — dropped
+  from the topic model, kept in `grant_orphaned_abstracts.parquet`.
+
+Actual numbers land at M2 execution; the report notebook (M5f) cites
+whichever ones we get.
+
+**Not covered by M2 (still deferred):**
+
+- The 4,692 title-only orphans. No abstract text → nothing for the
+  topic model to eat. They stay in `grant_orphaned_abstracts.parquet`
+  as reference data.
+- NIH 2020+ abstract cliff. Orphans can't fix this because the 2020+
+  orphans are ~99% title-only. **M5a (RePORTER backfill) is now the
+  only path** to close that gap.
+
+**Deliverable:** updated `grants.parquet` with recovered abstracts,
+`extra_neu_abstracts.parquet` for topic model consumption,
+`grant_orphan_recovery.parquet` for audit, and
+`outputs/orphan_recovery_report.md` for the humans.
+
+### M3 — Tune BERTopic on the unified corpus
 
 - Two knobs matter: `min_cluster_size` (HDBSCAN) and `min_topic_size`
   (BERTopic's post-hoc merge). Sweep
@@ -189,7 +305,7 @@ Rerunning nb07 imports the fitted model instead of refitting inline.
 **Deliverable:** committed `bertopic_model/`, committed
 `outputs/topic_labels.json`, committed diagnostics JSON.
 
-### M3 — Retire the TF-IDF/t-SNE preview in EnricoVis
+### M4 — Retire the TF-IDF/t-SNE preview in EnricoVis
 
 - Add `src/build_viz_data.py` that reads:
   - `data/processed/specter2_umap_2d.npy` + `specter2_ids.txt`
@@ -226,28 +342,33 @@ Rerunning nb07 imports the fitted model instead of refitting inline.
 **Deliverable:** the three HTMLs render real SPECTER2 semantics with
 the same UI. Preview scripts (`build_preview.py`) are not resurrected.
 
-### M4 — Pick up the highest-leverage Compendium follow-ups
+### M5 — Pick up the highest-leverage Compendium follow-ups
 
 Ordered by expected impact per hour (matching
 [Compendium §9](TOPIC_ANALYSIS_COMPENDIUM.md#9-suggested-follow-ups)).
 
-#### M4a — NIH RePORTER abstract backfill *(changes headline numbers)*
+#### M5a — NIH RePORTER abstract backfill *(now the only path to fix the 2020+ NIH cliff)*
 
+- Orphan reconciliation (M2) does not help here — 2,987 of the 5,095
+  orphans are 2020+ but only ~80 of those carry abstract text. The
+  RePORTER API is the only way to recover the missing NIH 2020+
+  abstracts.
 - Write `src/backfill_nih_abstracts.py` that:
   - reads `grants.parquet`, selects NIH rows with empty abstract and
     year ≥ 2020 (~150 rows);
   - hits the [NIH RePORTER v2 API](https://api.reporter.nih.gov/) by
-    project number (`awardnumber` field);
-  - merges recovered abstracts back into `grants.parquet` with a
-    `abstract_source = 'reporter'` flag (existing rows keep
+    project number (`agencygrantid`);
+  - merges recovered abstracts back into `grants.parquet` with
+    `abstract_source = 'reporter'` (M2-recovered rows keep
+    `abstract_source = 'orphan_recovered'`; native rows stay
     `abstract_source = 'internal'`);
   - re-invokes SPECTER2 encoding only for the touched rows.
-- Re-run M2 K-scan and confirm the biomedical late-window signal
+- Re-run M3 tuning and confirm the biomedical late-window signal
   returns.
 - Add the recovered count to the coverage table in
   [`01_schema_overview.ipynb`](../notebooks/01_schema_overview.ipynb).
 
-#### M4b — LDA-vs-BERTopic agreement report *(compendium continuity)*
+#### M5b — LDA-vs-BERTopic agreement report *(compendium continuity)*
 
 - Add a nb07 section that loads both the fitted BERTopic model and
   the legacy LDA k=8 fit, computes the topic-agreement crosstab
@@ -257,7 +378,7 @@ Ordered by expected impact per hour (matching
   numbers and the new ones. Not a live pipeline component; runs once
   per major topic-model revision.
 
-#### M4c — Sub-topic label curation
+#### M5c — Sub-topic label curation
 
 - The old "per-subtopic coherence gate" is no longer needed —
   HDBSCAN's condensed tree already surfaces coherent sub-clusters and
@@ -267,45 +388,62 @@ Ordered by expected impact per hour (matching
   `outputs/topic_labels.json` under a `subtopics` key so future
   reruns keep them.
 
-#### M4d — Faculty-embedding UMAP *(natural extension for the PI)*
+#### M5d — Faculty-embedding UMAP *(natural extension for the PI)*
 
 - New notebook `notebooks/08_faculty_embedding.ipynb`:
-  - group SPECTER2 vectors by PI (mean-pooled, weighted by dollars);
+  - group SPECTER2 vectors by `faculty_id` (mean-pooled, weighted by
+    dollars where available; extra pseudo-docs from M2 contribute
+    unweighted since they have no dollar figure);
+  - resolve faculty attribution via `faculty_grants.parquet` for real
+    grants and directly via `extra_neu_abstracts.faculty_id` for
+    pseudo-docs;
   - UMAP to 2-D; render interactive Plotly with hover (name,
-    college, top topic, total \$);
+    college via `faculty_id_lookup.parquet`, top topic, total \$);
   - answers the standing PI question *"who could Prof. X
     collaborate with?"*.
 - Also emit `docs/EnricoVis/data/faculty_umap.json` and build a
   fourth EnricoVis app `docs/EnricoVis/faculty_atlas.html` on the
   same D3 canvas template as `grant_atlas.html`.
 
-#### M4e — Topic × dollar-per-year trends
+#### M5e — Topic × dollar-per-year trends
 
 - Add a nb06 section computing per-topic *dollars* by year (not just
   grant count) using BERTopic assignments. This is a one-groupby
   edit; commit a plot alongside the existing count trend.
 - BERTopic's `topics_over_time(docs, timestamps)` gives this for
   grant counts natively; the dollar version is a weighted variant.
+- **Extras pseudo-docs are excluded** from this crosstab (no dollar
+  figure).
 
-#### M4f — Report-mode notebook (also: LDA legacy view)
+#### M5f — Report-mode notebook (also: LDA legacy view)
 
 - `notebooks/09_report_figures.ipynb` reads only the committed CSVs +
   JSON (`topic_assignments.csv`, `subtopics.csv`,
-  `topic_labels.json`, `college_profiles.csv`, `bertopic_diagnostics.json`)
+  `topic_labels.json`, `college_profiles.csv`,
+  `bertopic_diagnostics.json`, `orphan_recovery_report.md`)
   and produces publication-ready figures. Zero model fitting; runs
   in seconds.
 - Includes a **"legacy LDA view"** section that regenerates the
   compendium's k=8 numbers via `src/topics_lda.py`, so any figure
   previously cited under the old model is reproducible on demand.
-- Every figure caption includes the coverage caveat one-liner.
+- Every figure caption includes the coverage caveat one-liner —
+  updated post-M2 to cite the new native-vs-recovered-vs-extra split.
 
 ---
 
 ## 4 · What "done" looks like
 
-- `python -m src.build_dataset && python -m src.build_specter2_embeddings
+- `python -m src.build_dataset && python -m src.reconcile_orphans
+  && python -m src.build_specter2_embeddings
   && python -m src.topics_bertopic && python -m src.build_viz_data`
   rebuilds everything from raw `.xlsx` in one shell script.
+- `grants.parquet` carries an `abstract_source` column with values
+  `internal | orphan_recovered | reporter`, so any downstream analysis
+  can filter or footnote by provenance.
+- `extra_neu_abstracts.parquet` exists as the sink for orphan
+  abstracts that couldn't be matched to an existing NEU grant but do
+  have a resolved `faculty_id`; BERTopic sees them, dollar/agency
+  crosstabs skip them.
 - All three EnricoVis HTMLs render **real SPECTER2 + BERTopic** without
   any code edits after a rebuild, and expose the noise/unassigned
   bucket honestly instead of hiding it in a real topic.
@@ -313,54 +451,74 @@ Ordered by expected impact per hour (matching
   `data/processed/bertopic_model/` and shares `topic_labels.json`
   with EnricoVis. Renaming a topic there updates every downstream
   artifact.
+- `outputs/orphan_recovery_report.md` documents the M2 outcome
+  (how many `update` / `extra` / `unattributed`).
 - NIH 2020+ biomedical grants are visible in the topic model
-  (M4a done).
+  (M5a done).
 - Notebook 07 has an LDA-vs-BERTopic agreement crosstab documenting
-  which old topics were split/merged (M4b done).
+  which old topics were split/merged (M5b done).
 - A one-page report notebook (`09_report_figures.ipynb`) exists that
   the PI can rerun without touching any modeling code, with a
-  legacy-LDA section for continuity with the compendium (M4f done).
+  legacy-LDA section for continuity with the compendium (M5f done).
 
 ---
 
 ## 5 · Risks / open decisions to close before starting
 
-1. **`min_cluster_size` for HDBSCAN.** The single biggest knob. Too
-   low → 60+ tiny clusters, unusable in a legend; too high → one
-   giant "CS" cluster and everything else noise. M2 sweeps this;
-   expected landing zone is 20–30 for ~2k documents.
-2. **What to do with the noise cluster.** HDBSCAN will put ~15–25% of
+1. **Orphan match thresholds** (M2). Title `token_set_ratio >= 85` +
+   date within ±365d is the recommended starting point. Too strict →
+   too few `update` matches, over-attributed pseudo-docs bloat the
+   `extra` bucket. Too loose → false-positive matches attach wrong
+   abstracts to NEU grants. Recommendation: run once at 85/365, spot-
+   check 10 random matches in the resulting `grant_orphan_recovery.parquet`,
+   adjust if needed. **Decision needed at M2 execution.**
+2. **What to do with `extra_neu_abstracts` pseudo-docs in the viz.**
+   Options: (a) render them alongside real grants but with a distinct
+   "no grant record" hover badge (recommended — honest); (b) hide them
+   from the viz entirely, still use them in BERTopic training only
+   (loses signal in faculty-per-topic profiles). **Decision needed
+   before M4.**
+3. **`min_cluster_size` for HDBSCAN.** The single biggest knob for
+   BERTopic. Too low → 60+ tiny clusters, unusable in a legend; too
+   high → one giant "CS" cluster and everything else noise. M3 sweeps
+   this; expected landing zone is 20–30 for ~2.1k documents.
+4. **What to do with the noise cluster.** HDBSCAN will put ~15–25% of
    grants in `-1`. Options: (a) leave as "unassigned" (recommended,
    honest), (b) `.transform()` them to the nearest real cluster with
    a low confidence flag, (c) drop from the viz. **Decision needed
-   before M3.**
-3. **Title-only grants.** 748 of 2,676 (28%) have no abstract.
-   Options: (a) fit BERTopic on abstract+title-only together and let
-   HDBSCAN sort them (many will land in noise); (b) fit on the 1,928
-   with abstracts, then `.transform()` title-only via SPECTER2
-   nearest-cluster. **Decision needed before M2.** Recommend (b).
-4. **Embedding choice.** SPECTER2 vs SciNCL — M2 runs the ablation.
-   Decide before M3 which cache the viz build reads from.
-5. **Hierarchy depth.** BERTopic's `hierarchical_topics()` returns a
+   before M4.**
+5. **Title-only grants.** 748 of 2,676 (28%) have no abstract and
+   M2 doesn't fix that (title-only NEU grants aren't part of the
+   orphan pool). Recommendation: fit BERTopic on documents with real
+   abstracts (post-M2: ~2,050–2,150 real + ~50–130 extras), then
+   `.transform()` the 748 title-only grants via SPECTER2 nearest-
+   cluster with a low-confidence flag. **Decision needed before M3.**
+6. **Embedding choice.** SPECTER2 vs SciNCL — M3 runs the ablation.
+   Decide before M4 which cache the viz build reads from.
+7. **Hierarchy depth.** BERTopic's `hierarchical_topics()` returns a
    full tree; EnricoVis currently renders two levels (parent → leaf).
    Confirm two levels reads well with 25–35 leaves; if not, cut at
    three levels (super-group → parent → leaf).
-6. **NIH SubAward keeps its own funder bucket** (per EnricoVis
+8. **NIH SubAward keeps its own funder bucket** (per EnricoVis
    decision #2). Confirm this survives into the report figures — some
    published NEU comms fold NIH-SUB into NIH.
-7. **`NAMED_MIN = 30` cutoff** hides NEH (19 grants) in "Other."
+9. **`NAMED_MIN = 30` cutoff** hides NEH (19 grants) in "Other."
    Lower to `19` for humanities visibility, or accept the hide.
-   **Decision needed before M3 palette is frozen.**
-8. **File-size budget for the HTMLs.** After M3, JSON is fetched
-   rather than inlined. Committed JSON should stay under ~2 MB
-   uncompressed each; if it doesn't, gzip and serve via a tiny
-   `docs/EnricoVis/index.html` shim.
-9. **Container limitation persists.** SPECTER2 + UMAP + HDBSCAN will
-   not run in Copilot Workspace / any sandbox without HF network
-   access; every rerun is a local-machine step. All CI must consume
-   the cached `.npy` / `bertopic_model/` / `.json` artifacts, never
-   regenerate them.
-
+   **Decision needed before M4 palette is frozen.**
+10. **File-size budget for the HTMLs.** After M4, JSON is fetched
+    rather than inlined. Committed JSON should stay under ~2 MB
+    uncompressed each; if it doesn't, gzip and serve via a tiny
+    `docs/EnricoVis/index.html` shim.
+11. **Container limitation persists.** SPECTER2 + UMAP + HDBSCAN will
+    not run in Copilot Workspace / any sandbox without HF network
+    access; every rerun is a local-machine step. All CI must consume
+    the cached `.npy` / `bertopic_model/` / `.json` artifacts, never
+    regenerate them.
+12. **Compendium correction.** [`TOPIC_ANALYSIS_COMPENDIUM.md`](TOPIC_ANALYSIS_COMPENDIUM.md#2-the-data-that-feeds-the-topic-model)
+    still describes orphans as "5,095 external abstracts." That's
+    wrong — 5,095 records, only 403 with abstracts, all NEU-internal.
+    Fix as part of M5f (report-mode notebook) so the corrected
+    numbers land in one place.
 ---
 
 ## 6 · Suggested execution order (short version)
@@ -368,13 +526,17 @@ Ordered by expected impact per hour (matching
 1. Land **M1** (unify plumbing + wire up BERTopic module). No
    user-visible change yet, but the embedding cache is regenerated
    with clean text.
-2. Land **M2** (tune BERTopic, commit labels + fitted model).
+2. Land **M2** (orphan reconciliation). Small user-visible change:
+   NEU abstract coverage bumps ~72% → ~78%; `grants.parquet` gets an
+   `abstract_source` column. **Review
+   `outputs/orphan_recovery_report.md` before proceeding to M3.**
+3. Land **M3** (tune BERTopic, commit labels + fitted model).
    Internal-only change.
-3. Land **M3** (retire preview + wire HTMLs to BERTopic JSON). **Big
+4. Land **M4** (retire preview + wire HTMLs to BERTopic JSON). **Big
    user-visible viz upgrade** — first PI demo moment.
-4. Land **M4a** (RePORTER backfill). Second demo moment — biomedical
-   late-window signal returns and headline numbers change.
-5. Land **M4b** (LDA-vs-BERTopic agreement report) so the compendium
+5. Land **M5a** (RePORTER backfill). Second demo moment — NIH 2020+
+   signal returns (orphans can't do this) and headline numbers change.
+6. Land **M5b** (LDA-vs-BERTopic agreement report) so the compendium
    reader can trace old-to-new. Do this before showing the report
    notebook to any external stakeholder.
-6. Land **M4c–f** in parallel.
+7. Land **M5c–f** in parallel.

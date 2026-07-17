@@ -1,11 +1,11 @@
 # Faculty ID Reconciliation
 
-**Status:** under review — do not act on the recommendations at the bottom yet.
+**Status:** decisions recorded (see §6); pipeline updated accordingly.
 **Trigger:** while building the orphan-abstract bridge we discovered the raw
 datasets carry three distinct identifiers for the same person, plus a column
 name (`PersonId`) that means different things in different files.
 **Concrete example throughout:** Chris Martens (Robin), Khoury College of
-Computer Sciences.
+Computer Sciences → College of Arts, Media and Design (per HR).
 
 ---
 
@@ -99,10 +99,11 @@ part of `grants.parquet`; the unmatched half becomes
 
 ---
 
-## 4 · Why the orphan bridge in `personid_to_faculty.csv` still works
+## 4 · Why the orphan bridge works — and how it's persisted
 
-The bridge we built in [scripts/_orphan_faculty_overlap.py](../scripts/_orphan_faculty_overlap.py)
-does not try to translate `abstract.PersonId → AAUID` or
+The bridge in the pipeline
+([`build_dataset.build_personid_to_faculty`](../src/build_dataset.py)) does
+not try to translate `abstract.PersonId → AAUID` or
 `abstract.PersonId → ClientFacultyId` directly (there is no such lookup).
 Instead it walks the graph through the grants themselves, using the
 **matched** subset of `grants-with-abstract.xlsx` as an observational bridge:
@@ -127,8 +128,9 @@ so `personid 110082 → faculty_id 2963712` is unambiguous.
 For 315 of 639 personids (49%) the bridge collapses to one candidate; for
 the remaining 324 (51%) it produces 2–4 candidates because a single
 personid uploaded grants that involve multiple NEU faculty (co-PIs). This
-is a downstream artefact, not an ID-space problem — majority-vote across
-shared grants resolves it cleanly (verified on the Amato example below).
+is a downstream artefact, not an ID-space problem — the strict 100%
+majority-vote rule adopted in §6 resolves it safely (verified on the Amato
+example below).
 
 ---
 
@@ -171,58 +173,107 @@ The bridge stores 4 faculty candidates, but co-occurrence tells the story:
 | PLATT, ROBERT J | 1 / 11 | 9% |
 
 Amato uploaded 11 abstracts: 8 solo grants + 3 collaborations where a
-co-PI got attributed alongside him. Majority-vote picks Amato correctly.
-The current `personid_to_faculty.csv` stores all 4 candidates and the
-downstream code takes the first (alphabetically-smallest `faculty_id`),
-which happens to pick Amato here by luck — but for other personids the
-first-in-list heuristic could easily pick a co-PI.
+co-PI got attributed alongside him. The **strict 100% rule** in
+[`build_personid_to_faculty`](../src/build_dataset.py) requires exactly
+one candidate at 100% co-occurrence; Amato is the only faculty on all 11
+grants, so he alone survives the vote. Persisted in
+`personid_to_faculty.parquet` as:
+
+```
+personid=15082  faculty_id=1234224  resolution_method=strict_100pct
+n_shared_grants=11  n_candidate_faculty_ids=4  winner_share=1.0
+```
 
 ---
 
-## 6 · Implications & open questions to review
+## 6 · Decisions & what changed in the pipeline
 
 **Confirmed / not broken:**
 
 - The `faculty_id = 2963712` we've been using for Martens throughout is
   correct. `faculty.parquet`, `faculty_grants.parquet`, and every
   downstream analysis use the right canonical ID.
-- The orphan → faculty bridge is valid; it just needs the majority-vote
-  disambiguation to be trustworthy for the ambiguous 51%.
+- The orphan → faculty bridge is valid; the strict 100% majority-vote
+  variant is now the pipeline default.
 
-**Worth deciding before we go further:**
+**Decisions (all five resolved):**
 
-1. **Document `PersonId` collision in [`docs/data_dictionary.md`](data_dictionary.md).**
-   Anyone unfamiliar with the source systems will trip on this. Small
-   write-up saves future confusion. *(Recommend: yes.)*
-2. **Decide whether `AAUID` is worth preserving anywhere in processed
-   data.** It's Academic Analytics' external ID and we currently drop it.
-   If we ever want to enrich topic modeling with AA-derived research
-   interests, we'd need it back. *(Recommend: keep in
-   `faculty_id_lookup.parquet` as an optional column; costs almost
-   nothing.)*
-3. **Handle the abstract-file duplicate risk before "recovery."** The
-   Martens finding (orphan 1382460 ≈ matched grant 1471424) suggests some
-   fraction of the 403 orphan-with-abstract rows are duplicates of grants
-   already in the corpus. Recovery counts must be net-of-duplicates, or
-   we'll double-count grants in the topic model. *(Requires: a title +
-   PI + date check before folding in.)*
-4. **Formalize the majority-vote disambiguation** and republish
-   `personid_to_faculty.csv` so it stores the winning single faculty
-   plus a confidence score, instead of a semicolon-separated candidate
-   list. Downstream code becomes simpler and more correct.
-5. **Consider capturing `abstract.PersonId → faculty_id` as a permanent
-   lookup** alongside `faculty_id_lookup.parquet`. It's derived data
-   (from the observational bridge above) but useful anywhere we want to
-   attribute abstract-file records to faculty without re-running the
-   crosswalk. *(Recommend: yes, once majority-vote is applied.)*
+1. ✅ **Document `PersonId` collision** in
+   [`docs/data_dictionary.md`](data_dictionary.md). Done — the `PersonId`
+   entries in both `grants-with-abstract` and `grants-with-coPI` sections
+   now carry an explicit "column-name collision" warning, the cross-file
+   join-keys table calls out that `abstract.PersonId` has **zero direct
+   overlap** with any faculty ID, and a new *"ID crosswalk — the four
+   identifiers for one person"* section maps everything in one place.
+2. ✅ **Preserve `AAUID`.** New [`faculty_id_lookup.parquet`](../data/processed/faculty_id_lookup.parquet)
+   (built by [`src/build_dataset.py`](../src/build_dataset.py) via
+   `build_faculty_id_lookup`) is a proper crosswalk: one row per canonical
+   `faculty_id`, with `college`, `academic_unit`, and the optional
+   `aauid` populated for the 557 faculty (24.8%) who appear in
+   `ri_matches`. AAUID is not used as a join key anywhere; it exists as an
+   optional handle for future enrichment with Academic Analytics data.
+3. ⏸ **Duplicate-vs-update check deferred.** The Martens example in §5.1
+   suggests some orphan-with-abstract rows may be updates to older
+   grants rather than fresh records. Before any "fold into the topic
+   corpus" step, we still need a title + PI + date match against
+   existing NEU grants. Not implemented yet; called out here so it isn't
+   forgotten.
+4. ✅ **Strict 100% majority-vote disambiguation.** New
+   [`personid_to_faculty.parquet`](../data/processed/personid_to_faculty.parquet)
+   (built by `build_personid_to_faculty`) uses the safe rule: a personid
+   resolves to a `faculty_id` **only when exactly one candidate faculty
+   co-occurs on every one of that personid's shared grants**. Anything
+   less is flagged, not guessed. Results on the full 1,042 personids:
 
-**Deliberately out of scope (do not tackle yet):**
+   | `resolution_method` | Count | Share |
+   |---|---:|---:|
+   | `strict_100pct` (resolved) | 538 | 51.6% |
+   | `ambiguous_no_winner` (had shared grants, no candidate at 100%) | 101 | 9.7% |
+   | `no_shared_grants` (personid appears only in orphan half) | 403 | 38.7% |
 
-- Whether to fuzzy-match orphan records to existing NEU grants at the
-  grant level (Path 2 in prior discussion). Wait until decisions 1–4
-  above are settled.
-- Whether to fold recoverable orphan abstracts into the topic corpus
-  (Path 1). Same — depends on 3 and 4.
+   Verified spot-checks:
+   - Martens (personid `110082`) → `faculty_id = 2963712`, 5 shared
+     grants, 1 candidate, share = 1.0 (clean case).
+   - Amato (personid `15082`) → `faculty_id = 1234224`, 11 shared
+     grants, **4 candidates**, share = 1.0. The strict rule correctly
+     picks Amato and rejects the three co-PIs (Trypakis, Marsella,
+     Platt) whose shares were 18%, 9%, 9% respectively.
+5. ✅ **Persist the bridge with an audit column.** The new parquet has
+   `resolution_method` (categorical), `n_shared_grants`, `n_candidate_faculty_ids`,
+   and `winner_share` alongside `personid` and `faculty_id`. Downstream
+   code can filter on `resolution_method == 'strict_100pct'` for high-
+   confidence use, or examine the audit columns to make its own call
+   (e.g. accept `n_shared_grants >= 2` even if only one candidate exists).
+
+**Note on faculty_id_lookup coverage — and the missing-metadata report.**
+The lookup has 557 AAUID entries but `ri_matches` contains 570 unique
+`clientfacultyid` values. The 13-row gap is faculty who appear in
+`ri_matches` (and `grants-with-coPI`) with valid IDs but are **not** in HR
+Snowflake or `UnmatchedFaculty.csv`.
+
+**Their grants are NOT dropped.** Grants are keyed by `grant_id`, and
+`faculty_grants.parquet` preserves the attribution because those faculty
+have valid `clientfacultyid` values. What's missing is only the
+faculty-level metadata (`college`, `academic_unit`, `hire_date`,
+`academic_rank`) — any downstream join to `faculty.parquet` returns NULL
+for these fields on those 13 faculty.
+
+The gap is now surfaced as a first-class pipeline output:
+[`faculty_missing_metadata.parquet`](../data/processed/faculty_missing_metadata.parquet)
+(built by `build_faculty_missing_metadata` in
+[`src/build_dataset.py`](../src/build_dataset.py); also written as CSV).
+Current run: **13 faculty, 68 (faculty, grant) rows affected, $61.1M in
+grants**. All 13 appear in both raw grant files (`source_files=both`), so
+this is a stable HR-side gap rather than data freshness. To backfill,
+add entries for anyone on the list to `DataSet/UnmatchedFaculty.csv` and
+re-run the pipeline.
+
+**Still deferred (do not tackle yet):**
+
+- Fuzzy-match orphan records to existing NEU grants at the grant level.
+  Depends on decision 3.
+- Fold recoverable orphan abstracts into the topic corpus. Depends on
+  decisions 3 and 4.
 
 ---
 
@@ -234,21 +285,22 @@ Raw:
 - [DataSet/grants-with-coPI.xlsx](../DataSet/grants-with-coPI.xlsx) — `PersonId` (= AAUID) + `ClientFacultyId`
 - [DataSet/grants-with-abstract.xlsx](../DataSet/grants-with-abstract.xlsx) — `PersonId` (different ID space) + `SourceActivityId`
 
-Processed:
+Processed (canonical outputs of [`src/build_dataset.py`](../src/build_dataset.py)):
 - [data/processed/faculty.parquet](../data/processed/faculty.parquet)
 - [data/processed/faculty_grants.parquet](../data/processed/faculty_grants.parquet)
 - [data/processed/grants.parquet](../data/processed/grants.parquet)
 - [data/processed/grant_orphaned_abstracts.parquet](../data/processed/grant_orphaned_abstracts.parquet)
-- [data/processed/faculty_id_lookup.parquet](../data/processed/faculty_id_lookup.parquet)
+- [data/processed/faculty_id_lookup.parquet](../data/processed/faculty_id_lookup.parquet) — **new**: `faculty_id` → `college` / `academic_unit` / `aauid`
+- [data/processed/personid_to_faculty.parquet](../data/processed/personid_to_faculty.parquet) — **new**: `abstract.PersonId` → `faculty_id` with strict 100% majority vote + audit columns
+- [data/processed/faculty_missing_metadata.parquet](../data/processed/faculty_missing_metadata.parquet) — **new**: faculty who have grants but no HR record (backfill via `DataSet/UnmatchedFaculty.csv`)
 
-Derived (from this investigation):
-- [data/processed/personid_to_faculty.csv](../data/processed/personid_to_faculty.csv) — the observational bridge (639 personids)
+Exploratory (from the review — kept for reference, not part of the pipeline):
 - [data/processed/faculty_orphan_overlap.csv](../data/processed/faculty_orphan_overlap.csv) — all 2,247 NEU faculty with orphan counts
 - [data/processed/faculty_orphan_overlap_both.csv](../data/processed/faculty_orphan_overlap_both.csv) — 359 faculty in both tables
 - [data/processed/orphans_with_abstract_review.csv](../data/processed/orphans_with_abstract_review.csv) — 403 usable orphan abstracts
 
-Scripts:
+Scripts (diagnostic; not part of the canonical build):
 - [scripts/_diagnose_orphans.py](../scripts/_diagnose_orphans.py) — usability + date/agency mix
-- [scripts/_orphan_faculty_overlap.py](../scripts/_orphan_faculty_overlap.py) — builds the bridge and the overlap tables
+- [scripts/_orphan_faculty_overlap.py](../scripts/_orphan_faculty_overlap.py) — initial (loose) bridge exploration; superseded by `build_dataset.build_personid_to_faculty`
 - [scripts/_bridge_examples.py](../scripts/_bridge_examples.py) — clean vs ambiguous personid trace
 - [scripts/_id_reconciliation.py](../scripts/_id_reconciliation.py) — finds Martens across all four raw files

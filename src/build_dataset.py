@@ -28,6 +28,30 @@ Outputs
        for anyone who wants the extended NSF/NIH corpus (used by the
        topic model to enrich vocabulary).
 
+5. faculty_id_lookup.parquet
+       Roster-level ID crosswalk. One row per canonical `faculty_id`
+       (HR Employee ID). Carries `college`, `academic_unit`, and the
+       optional `aauid` (Academic Analytics User ID) for the ~570
+       faculty who appear in ri_matches. AAUID is preserved for possible
+       future enrichment with Academic Analytics research-interest data;
+       it is NOT used as a join key in the current pipeline.
+
+6. personid_to_faculty.parquet
+       Observational bridge from `grants-with-abstract.PersonId` (an
+       internal upload-system ID) to canonical `faculty_id`. Uses strict
+       100% co-occurrence majority vote over shared grants; anything less
+       is flagged as `ambiguous_no_winner` in the `resolution_method`
+       column. See docs/ID_RECONCILIATION.md for the rationale.
+
+7. faculty_missing_metadata.parquet
+       Faculty who appear in `faculty_grants` (with a valid
+       `clientfacultyid`) but have no matching record in HR Snowflake or
+       `UnmatchedFaculty.csv`. Their grants are NOT dropped from
+       `grants.parquet` — only the faculty-level metadata (college,
+       hire_date, rank) is unavailable for downstream joins. Rewrite
+       `DataSet/UnmatchedFaculty.csv` with entries for anyone in this
+       list to backfill.
+
 Run:
     python src/build_dataset.py --input-dir DataSet --output-dir data/processed
 """
@@ -503,6 +527,271 @@ class DataPipeline:
         )
         return out
 
+    # ── Build: ID crosswalks (faculty_id_lookup + personid_to_faculty) ───
+
+    def build_faculty_missing_metadata(
+        self, faculty_grants_df: pd.DataFrame, faculty_df: pd.DataFrame
+    ) -> pd.DataFrame:
+        """Faculty who have grants but no HR / UnmatchedFaculty record.
+
+        These faculty appear in `ri_matches` / `grants-with-coPI` with a valid
+        `clientfacultyid`, are correctly attributed to their grants in
+        `faculty_grants.parquet`, but do NOT appear in HR Snowflake or
+        `UnmatchedFaculty.csv`. Any downstream join to `faculty.parquet` for
+        college / academic_unit / hire_date / rank will return NULL for them.
+
+        Their grants are NOT dropped. This report exists so someone can
+        backfill the missing metadata by adding entries to
+        `DataSet/UnmatchedFaculty.csv` and re-running the pipeline.
+
+        Columns:
+          faculty_id    : canonical NEU faculty_id (= ri_matches.clientfacultyid)
+          faculty_name  : LAST, FIRST from ri_matches / coPI (best available)
+          aauid         : Academic Analytics User ID (may be empty)
+          n_grants      : distinct grants this faculty is attributed to
+          n_as_pi       : grants where they are the PI
+          n_as_copi     : grants where they are a co-PI
+          total_dollars : sum of ri_matches.totaldollars for their grants
+          source_files  : which raw file(s) they came from (`ri_matches`,
+                          `grants_with_copi`, `both`)
+        """
+        log.info("Building faculty_missing_metadata.parquet...")
+
+        known_ids = set(faculty_df["faculty_id"].astype(str))
+
+        fg = faculty_grants_df.copy()
+        fg["faculty_id"] = fg["faculty_id"].astype(str)
+        missing = fg[
+            ~fg["faculty_id"].isin(known_ids)
+            & (fg["faculty_id"] != self.UNMATCHED_ID)
+        ].copy()
+
+        cols = [
+            "faculty_id", "faculty_name", "aauid",
+            "n_grants", "n_as_pi", "n_as_copi", "total_dollars", "source_files",
+        ]
+        if len(missing) == 0:
+            empty = pd.DataFrame(columns=cols)
+            empty["n_grants"] = empty["n_grants"].astype("int32")
+            empty["n_as_pi"] = empty["n_as_pi"].astype("int32")
+            empty["n_as_copi"] = empty["n_as_copi"].astype("int32")
+            empty["total_dollars"] = empty["total_dollars"].astype("int64")
+            self._log_check(
+                "faculty_missing_metadata: 0 faculty (every grant-bearing faculty "
+                "has an HR or UnmatchedFaculty record)"
+            )
+            return empty
+
+        agg = missing.groupby("faculty_id").agg(
+            faculty_name=("faculty_name", lambda s: next(
+                (x for x in s if isinstance(x, str) and x.strip()), "")),
+            n_grants=("grant_id", "nunique"),
+            n_as_pi=("is_pi", "sum"),
+            n_as_copi=("is_copi", "sum"),
+            source_files=("source",
+                lambda s: "both" if s.nunique() > 1 else s.iloc[0]),
+        ).reset_index()
+
+        # AAUID + total dollars from ri_matches (1:1 with clientfacultyid)
+        ri = _lower_cols(self.raw["ri_matches"])
+        ri["clientfacultyid"] = ri["clientfacultyid"].astype(str)
+        ri["aauid"] = (
+            ri["aauid"].astype(str)
+              .replace({"nan": "", "None": ""}).fillna("")
+        )
+        ri["totaldollars"] = pd.to_numeric(
+            ri["totaldollars"], errors="coerce").fillna(0)
+        aauid_map = (
+            ri.drop_duplicates("clientfacultyid")
+              .set_index("clientfacultyid")["aauid"].to_dict()
+        )
+        dollars_map = ri.groupby("clientfacultyid")["totaldollars"].sum().to_dict()
+
+        agg["aauid"] = agg["faculty_id"].map(aauid_map).fillna("")
+        agg["total_dollars"] = (
+            agg["faculty_id"].map(dollars_map).fillna(0).astype("int64")
+        )
+
+        agg["n_grants"] = agg["n_grants"].astype("int32")
+        agg["n_as_pi"] = agg["n_as_pi"].astype("int32")
+        agg["n_as_copi"] = agg["n_as_copi"].astype("int32")
+        out = (
+            agg[cols]
+            .sort_values(["n_grants", "total_dollars"], ascending=[False, False])
+            .reset_index(drop=True)
+        )
+
+        self._log_check(
+            f"faculty_missing_metadata: {len(out)} faculty with grants but no HR "
+            f"record | {int(out['n_grants'].sum())} distinct (faculty, grant) rows "
+            f"affected | " f"total ${int(out['total_dollars'].sum())/1e6:.1f}M in grants"
+        )
+        return out
+
+    def build_faculty_id_lookup(self, faculty_df: pd.DataFrame) -> pd.DataFrame:
+        """Roster-level ID crosswalk (faculty_id, college, academic_unit, aauid).
+
+        `aauid` is the Academic Analytics User ID. It is 1:1 with `faculty_id`
+        across all 570 pairs observed in ri_matches (verified). Faculty who
+        never appear in ri_matches (e.g. no matched grants) get `aauid = NA`.
+
+        AAUID is preserved here for possible future enrichment (Academic
+        Analytics research-interest data). It is NOT used as a join key
+        elsewhere in the pipeline.
+        """
+        log.info("Building faculty_id_lookup.parquet...")
+
+        ri = _lower_cols(self.raw["ri_matches"])[["clientfacultyid", "aauid"]].copy()
+        ri["clientfacultyid"] = ri["clientfacultyid"].astype(str)
+        ri["aauid"] = ri["aauid"].astype(str).replace({"nan": "", "None": ""}).fillna("")
+        # 1:1 crosswalk (verified elsewhere) — pick the first observation per faculty_id
+        aauid_map = (
+            ri.drop_duplicates("clientfacultyid")
+              .set_index("clientfacultyid")["aauid"]
+              .to_dict()
+        )
+
+        out = faculty_df[["faculty_id", "superior_academic_unit", "academic_unit"]].copy()
+        out = out.rename(columns={"superior_academic_unit": "college"})
+        out["aauid"] = out["faculty_id"].astype(str).map(aauid_map).fillna("")
+
+        for c in ("college", "academic_unit"):
+            out[c] = out[c].astype("object").fillna("")
+
+        n_with_aauid = int((out["aauid"] != "").sum())
+        self._log_check(
+            f"faculty_id_lookup: {len(out)} faculty rows | "
+            f"{n_with_aauid} with AAUID ({n_with_aauid/max(len(out),1)*100:.1f}%) | "
+            f"remainder are faculty with no ri_matches entry"
+        )
+        return out.reset_index(drop=True)
+
+    def build_personid_to_faculty(
+        self, grants_df: pd.DataFrame, faculty_grants_df: pd.DataFrame
+    ) -> pd.DataFrame:
+        """Observational bridge: grants-with-abstract.PersonId → faculty_id.
+
+        Uses STRICT 100% co-occurrence majority vote. A personid resolves to a
+        faculty_id only when exactly ONE candidate faculty co-occurs on every
+        matched grant that personid uploaded. Anything less is flagged.
+
+        Output columns:
+          personid                : abstract.PersonId (string)
+          faculty_id              : resolved canonical faculty_id, or "" if unresolved
+          resolution_method       : "strict_100pct" | "ambiguous_no_winner"
+                                    | "no_shared_grants"
+          n_shared_grants         : matched grants this personid uploaded
+          n_candidate_faculty_ids : distinct faculty candidates before the vote
+          winner_share            : co-occurrence share of the resolved faculty
+                                    (or the highest share seen if unresolved)
+
+        See docs/ID_RECONCILIATION.md for rationale.
+        """
+        log.info("Building personid_to_faculty.parquet (strict 100% majority vote)...")
+
+        raw_abs = _lower_cols(self.raw["grants_abs"])
+        raw_abs["personid"] = raw_abs["personid"].fillna("").astype(str).str.strip()
+        raw_abs["sourceactivityid"] = (
+            raw_abs["sourceactivityid"].fillna("").astype(str).str.strip()
+        )
+
+        neu_grant_ids = set(grants_df["grant_id"].astype(str))
+
+        # Every (personid, grant) pair that landed in the matched half:
+        matched = (
+            raw_abs[
+                raw_abs["sourceactivityid"].isin(neu_grant_ids)
+                & (raw_abs["sourceactivityid"] != "")
+                & (raw_abs["personid"] != "")
+            ][["personid", "sourceactivityid"]]
+             .rename(columns={"sourceactivityid": "grant_id"})
+             .drop_duplicates()
+        )
+
+        fg = faculty_grants_df[["grant_id", "faculty_id"]].copy()
+        fg["grant_id"] = fg["grant_id"].astype(str)
+        fg["faculty_id"] = fg["faculty_id"].astype(str)
+        fg = fg[fg["faculty_id"] != self.UNMATCHED_ID]
+
+        # Bridge: (personid, grant_id) × (grant_id, faculty_id)
+        bridge = matched.merge(fg, on="grant_id", how="inner").drop_duplicates(
+            ["personid", "grant_id", "faculty_id"]
+        )
+
+        n_grants_per_pid = (
+            matched.groupby("personid")["grant_id"].nunique().rename("n_grants")
+        )
+        # Co-occurrence per (personid, faculty_id):
+        cooc = (
+            bridge.groupby(["personid", "faculty_id"])["grant_id"]
+            .nunique()
+            .rename("n_cooc")
+            .reset_index()
+        )
+        cooc = cooc.merge(n_grants_per_pid, on="personid", how="left")
+        cooc["share"] = cooc["n_cooc"] / cooc["n_grants"]
+
+        all_personids = raw_abs.loc[raw_abs["personid"] != "", "personid"].unique()
+        rows: list[dict] = []
+        for pid in all_personids:
+            block = cooc[cooc["personid"] == pid]
+            if len(block) == 0:
+                rows.append({
+                    "personid": pid,
+                    "faculty_id": "",
+                    "resolution_method": "no_shared_grants",
+                    "n_shared_grants": 0,
+                    "n_candidate_faculty_ids": 0,
+                    "winner_share": pd.NA,
+                })
+                continue
+            n_grants = int(block["n_grants"].iloc[0])
+            n_cand = len(block)
+            perfect = block[block["share"] >= 1.0 - 1e-9]
+            if len(perfect) == 1:
+                rows.append({
+                    "personid": pid,
+                    "faculty_id": perfect["faculty_id"].iloc[0],
+                    "resolution_method": "strict_100pct",
+                    "n_shared_grants": n_grants,
+                    "n_candidate_faculty_ids": n_cand,
+                    "winner_share": 1.0,
+                })
+            else:
+                # zero perfect candidates OR >=2 perfect (tie) → unresolved
+                rows.append({
+                    "personid": pid,
+                    "faculty_id": "",
+                    "resolution_method": "ambiguous_no_winner",
+                    "n_shared_grants": n_grants,
+                    "n_candidate_faculty_ids": n_cand,
+                    "winner_share": float(block["share"].max()),
+                })
+
+        out = (
+            pd.DataFrame(rows)
+            .sort_values(
+                ["resolution_method", "n_shared_grants", "personid"],
+                ascending=[True, False, True],
+            )
+            .reset_index(drop=True)
+        )
+        # Consistent dtypes for parquet
+        out["personid"] = out["personid"].astype(str)
+        out["faculty_id"] = out["faculty_id"].astype(str)
+        out["resolution_method"] = out["resolution_method"].astype("category")
+        out["n_shared_grants"] = out["n_shared_grants"].astype("int32")
+        out["n_candidate_faculty_ids"] = out["n_candidate_faculty_ids"].astype("int32")
+
+        counts = out["resolution_method"].value_counts()
+        self._log_check(
+            f"personid_to_faculty: {len(out)} personids | "
+            f"resolved (strict_100pct): {int(counts.get('strict_100pct', 0))} | "
+            f"ambiguous: {int(counts.get('ambiguous_no_winner', 0))} | "
+            f"no shared grants: {int(counts.get('no_shared_grants', 0))}"
+        )
+        return out
+
     # ── Export ───────────────────────────────────────────────────────────────
 
     def export(self) -> None:
@@ -551,6 +840,17 @@ class DataPipeline:
             self.processed["faculty_grants"],
             self.processed["faculty"],
             self.processed["grants"],
+        )
+        self.processed["faculty_missing_metadata"]   = self.build_faculty_missing_metadata(
+            self.processed["faculty_grants"],
+            self.processed["faculty"],
+        )
+        self.processed["faculty_id_lookup"]          = self.build_faculty_id_lookup(
+            self.processed["faculty"]
+        )
+        self.processed["personid_to_faculty"]        = self.build_personid_to_faculty(
+            self.processed["grants"],
+            self.processed["faculty_grants"],
         )
         self.export()
         log.info("Pipeline complete.")

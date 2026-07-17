@@ -14,7 +14,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 NOTEBOOKS_DIR = ROOT / "notebooks"
-INDEX_PATH = ROOT / "docs" / "index.html"
+INDEX_PATH = ROOT / "docs" / "onlineoutput" / "index.html"
 
 LIST_BLOCK_RE = re.compile(
     r'(<ul class="notebook-list">)(.*?)(</ul>)',
