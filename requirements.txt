@@ -21,14 +21,27 @@ python-dateutil>=2.9
 networkx>=3.3
 python-louvain>=0.16
 
-# NLP / topic modeling (Week 8)
+# NLP / topic modeling (Week 8) — legacy LDA track (src/topics_lda.py)
 scikit-learn>=1.4
 gensim>=4.3
 pyLDAvis>=3.4
 nltk>=3.8
 wordcloud>=1.9
 
+# Topic modeling v2 — SPECTER2 + BERTopic (src/topics_bertopic.py,
+# src/build_specter2_embeddings.py). LOCAL-ONLY: needs HuggingFace network to
+# download models/adapters, so it cannot run in CI/sandbox. See
+# docs/TOPIC_WORK_FORWARD_PLAN.md §5.11.
+torch>=2.2
+transformers>=4.40
+adapters>=0.2            # SPECTER2 proximity adapter (allenai/specter2)
+sentence-transformers>=2.7
+bertopic>=0.16
+umap-learn>=0.5
+hdbscan>=0.8
+
 # Code quality
 ruff>=0.4
 black>=24.3
 nbstripout>=0.7
+pytest>=8.0

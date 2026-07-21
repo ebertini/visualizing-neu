@@ -1,6 +1,11 @@
 """Compute SPECTER2 embeddings for every grant that has abstract text.
 
-Run once. Re-run only when grants.parquet changes.
+Run once. Re-run (and BUST the existing cache) whenever grants.parquet OR
+src/clean_text.py changes — the text fed to SPECTER2 now passes through the
+shared cleaner, so a cleaner change invalidates cached vectors.
+
+Cannot run in CI / any sandbox without HuggingFace network access; this is a
+local-machine step (see docs/TOPIC_WORK_FORWARD_PLAN.md §5.11).
 
 Outputs:
   data/processed/specter2_embeddings.npy   – (N, 768) float32 array
@@ -14,6 +19,13 @@ import pandas as pd
 import torch
 from transformers import AutoTokenizer
 from adapters import AutoAdapterModel
+
+# Import the shared cleaner whether run as a script (`python src/build_..._.py`)
+# or as a module (`python -m src.build_specter2_embeddings`).
+try:
+    from src.clean_text import clean_abstract, clean_title
+except ImportError:  # run as a script: src/ is already on sys.path[0]
+    from clean_text import clean_abstract, clean_title
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PROC = REPO_ROOT / "data" / "processed"
@@ -46,7 +58,13 @@ def main() -> None:
 
     # Encode any grant with either a title or a substantive abstract
     gr = gr[(gr["_title"].str.len() > 0) | (gr["abstract"].str.len() >= 50)].reset_index(drop=True)
-    print(f"encoding {len(gr)} grants...")
+
+    # Clean once, up front, with the shared cleaner. Funding-mechanism boilerplate
+    # and mangled markup are out-of-distribution noise for SPECTER2 (trained on
+    # published-paper prose), so we strip them BEFORE encoding — not just for LDA.
+    gr["_title_clean"] = gr["_title"].map(clean_title)
+    gr["_abstract_clean"] = gr["abstract"].map(clean_abstract)
+    print(f"encoding {len(gr)} grants (cleaned via src/clean_text.py)...")
 
     ids: list[str] = []
     vecs: list[np.ndarray] = []
@@ -54,7 +72,7 @@ def main() -> None:
     t0 = time.time()
     for start in range(0, len(gr), BATCH):
         chunk = gr.iloc[start : start + BATCH]
-        texts = [f"{t}{sep}{a}" for t, a in zip(chunk["_title"], chunk["abstract"])]
+        texts = [f"{t}{sep}{a}" for t, a in zip(chunk["_title_clean"], chunk["_abstract_clean"])]
         inputs = tok(texts, padding=True, truncation=True, return_tensors="pt",
                      return_token_type_ids=False, max_length=MAX_LEN).to(device)
         with torch.no_grad():
