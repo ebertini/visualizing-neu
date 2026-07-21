@@ -55,23 +55,40 @@ def main() -> None:
         gr["_title"] = gr["grantname"]
     gr["abstract"] = gr["abstract"].fillna("").astype(str)
     gr["_title"]   = gr["_title"].fillna("").astype(str)
-
     # Encode any grant with either a title or a substantive abstract
-    gr = gr[(gr["_title"].str.len() > 0) | (gr["abstract"].str.len() >= 50)].reset_index(drop=True)
+    gr = gr[(gr["_title"].str.len() > 0) | (gr["abstract"].str.len() >= 50)]
+
+    # doc_id is the canonical key: grant_id for grants, 'orphan-<id>' for the M2
+    # extra_neu_abstracts pseudo-docs (recovered orphan abstracts with a resolved
+    # faculty but no matching NEU grant). BERTopic (M3) sees the union.
+    corpus = pd.DataFrame({"doc_id": gr["grant_id"], "_title": gr["_title"], "abstract": gr["abstract"]})
+    extra_path = PROC / "extra_neu_abstracts.parquet"
+    if extra_path.exists():
+        ex = pd.read_parquet(extra_path)
+        ex_corpus = pd.DataFrame({
+            "doc_id": ex["doc_id"].astype(str),
+            "_title": ex["title"].fillna("").astype(str),
+            "abstract": ex["abstract"].fillna("").astype(str),
+        })
+        corpus = pd.concat([corpus, ex_corpus], ignore_index=True)
+        print(f"corpus = {len(gr)} grants + {len(ex_corpus)} orphan pseudo-docs = {len(corpus)}")
+    else:
+        print(f"corpus = {len(gr)} grants (no extra_neu_abstracts.parquet found)")
+    corpus = corpus.reset_index(drop=True)
 
     # Clean once, up front, with the shared cleaner. Funding-mechanism boilerplate
     # and mangled markup are out-of-distribution noise for SPECTER2 (trained on
     # published-paper prose), so we strip them BEFORE encoding — not just for LDA.
-    gr["_title_clean"] = gr["_title"].map(clean_title)
-    gr["_abstract_clean"] = gr["abstract"].map(clean_abstract)
-    print(f"encoding {len(gr)} grants (cleaned via src/clean_text.py)...")
+    corpus["_title_clean"] = corpus["_title"].map(clean_title)
+    corpus["_abstract_clean"] = corpus["abstract"].map(clean_abstract)
+    print(f"encoding {len(corpus)} documents (cleaned via src/clean_text.py)...")
 
     ids: list[str] = []
     vecs: list[np.ndarray] = []
     sep = tok.sep_token
     t0 = time.time()
-    for start in range(0, len(gr), BATCH):
-        chunk = gr.iloc[start : start + BATCH]
+    for start in range(0, len(corpus), BATCH):
+        chunk = corpus.iloc[start : start + BATCH]
         texts = [f"{t}{sep}{a}" for t, a in zip(chunk["_title_clean"], chunk["_abstract_clean"])]
         inputs = tok(texts, padding=True, truncation=True, return_tensors="pt",
                      return_token_type_ids=False, max_length=MAX_LEN).to(device)
@@ -79,12 +96,12 @@ def main() -> None:
             out = model(**inputs)
         emb = out.last_hidden_state[:, 0, :].detach().cpu().numpy().astype(np.float32)
         vecs.append(emb)
-        ids.extend(chunk["grant_id"].astype(str).tolist())
+        ids.extend(chunk["doc_id"].astype(str).tolist())
         if start % (BATCH * 20) == 0:
             elapsed = time.time() - t0
             rate = (start + BATCH) / max(elapsed, 0.1)
-            eta = (len(gr) - start) / max(rate, 0.1)
-            print(f"  {start + len(chunk):5d}/{len(gr)}  "
+            eta = (len(corpus) - start) / max(rate, 0.1)
+            print(f"  {start + len(chunk):5d}/{len(corpus)}  "
                   f"({rate:.1f} docs/s, ETA {eta / 60:.1f} min)")
 
     X = np.vstack(vecs)

@@ -56,7 +56,10 @@ def default_vectorizer() -> CountVectorizer:
     Keeps topic keywords consistent with the LDA track's vocabulary controls.
     """
     stops = list(ENGLISH_STOP_WORDS | set(DOMAIN_STOPS))
-    return CountVectorizer(stop_words=stops, ngram_range=(1, 2), min_df=5)
+    # min_df=2 on the per-topic c-TF-IDF documents: light singleton/typo filtering
+    # while keeping terms distinctive to a few topics. Higher values (e.g. 5) crash
+    # on coarse configs where the topic count drops below the threshold.
+    return CountVectorizer(stop_words=stops, ngram_range=(1, 2), min_df=2)
 
 
 def _diagnostics(topics: list[int], embeddings: np.ndarray,
@@ -147,16 +150,25 @@ def _load_docs_aligned_to_cache() -> tuple[list[str], list[str], np.ndarray]:
     title_col = "title_from_abstract" if "title_from_abstract" in gr.columns else "grantname"
     gr["_title"] = gr[title_col].where(gr[title_col].astype(str).str.len() > 0, gr["grantname"])
     gr["abstract"] = gr["abstract"].fillna("").astype(str)
-    by_id = gr.set_index("grant_id")
+    by_id = {gid: (t, a) for gid, t, a in zip(gr["grant_id"], gr["_title"], gr["abstract"])}
 
-    docs: list[str] = []
-    for gid in ids:
-        if gid in by_id.index:
-            row = by_id.loc[gid]
-            ct, ca = clean_title(row["_title"]), clean_abstract(row["abstract"])
-            docs.append(f"{ct}. {ca}".strip())
+    # M2 orphan pseudo-docs ('orphan-<id>') live in extra_neu_abstracts, not grants.
+    extra_path = PROC / "extra_neu_abstracts.parquet"
+    if extra_path.exists():
+        ex = pd.read_parquet(extra_path)
+        for did, t, a in zip(ex["doc_id"], ex["title"], ex["abstract"]):
+            by_id[str(did)] = (str(t or ""), str(a or ""))
+
+    docs, missing = [], 0
+    for did in ids:
+        if did in by_id:
+            t, a = by_id[did]
+            docs.append(f"{clean_title(t)}. {clean_abstract(a)}".strip())
         else:
             docs.append("")  # keep alignment; should not happen if cache is fresh
+            missing += 1
+    if missing:
+        print(f"WARNING: {missing} cache ids not found in grants/extras (cache stale?)")
     if len(docs) != len(embeddings):
         raise ValueError(f"docs ({len(docs)}) and embeddings ({len(embeddings)}) misaligned")
     return docs, ids, embeddings
@@ -174,9 +186,10 @@ def main() -> None:
 
     topics = topic_model.topics_
     assignments = pd.DataFrame({
-        "grant_id": ids,
+        "doc_id": ids,                               # grant_id, or 'orphan-<id>' for extras
         "topic_id": topics,
         "is_noise": [t == -1 for t in topics],
+        "is_extra": [str(i).startswith("orphan-") for i in ids],
     })
     assignments.to_parquet(PROC / "topic_assignments.parquet", index=False)
     print(f"wrote {PROC / 'topic_assignments.parquet'}  ({len(assignments)} rows)")

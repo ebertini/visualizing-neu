@@ -29,7 +29,8 @@ jobs:
       
       - name: Convert notebooks to HTML
         run: |
-          python -m nbconvert --to html notebooks/*.ipynb --output-dir=docs
+          mkdir -p docs/onlineoutput
+          python -m nbconvert --to html notebooks/*.ipynb --output-dir=docs/onlineoutput
           # Create .nojekyll to bypass Jekyll processing
           touch docs/.nojekyll
 
@@ -42,7 +43,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'docs'
+          path: 'docs/onlineoutput'
       
       - name: Deploy to GitHub Pages
         id: deployment
