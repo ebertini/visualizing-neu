@@ -31,6 +31,10 @@ jobs:
         run: |
           mkdir -p docs/onlineoutput
           python -m nbconvert --to html notebooks/*.ipynb --output-dir=docs/onlineoutput
+          # Copy interactive EnricoVis apps
+          cp docs/EnricoVis/grant_atlas.html docs/onlineoutput/
+          cp docs/EnricoVis/topic_hierarchy.html docs/onlineoutput/
+          cp docs/EnricoVis/topic_islands.html docs/onlineoutput/
           # Create .nojekyll to bypass Jekyll processing
           touch docs/.nojekyll
 
