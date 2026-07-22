@@ -1,0 +1,12 @@
+# Normalize line endings so Windows-saved files don't show up as whole-file diffs.
+* text=auto eol=lf
+
+# Notebooks are JSON — always LF, never CRLF.
+*.ipynb text eol=lf
+
+# Data and binary artifacts: never touch.
+*.parquet binary
+*.xlsx binary
+*.npy binary
+*.png binary
+*.jpg binary
