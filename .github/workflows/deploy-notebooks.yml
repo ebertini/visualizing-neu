@@ -35,6 +35,8 @@ jobs:
           cp docs/EnricoVis/grant_atlas.html docs/onlineoutput/
           cp docs/EnricoVis/topic_hierarchy.html docs/onlineoutput/
           cp docs/EnricoVis/topic_islands.html docs/onlineoutput/
+          # Copy the standalone methods report
+          cp docs/topic_work_report.html docs/onlineoutput/
           # Create .nojekyll to bypass Jekyll processing
           touch docs/.nojekyll
 
