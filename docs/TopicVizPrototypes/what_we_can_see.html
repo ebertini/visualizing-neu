@@ -18,7 +18,7 @@
   }
   header .headline b{font-weight:650}
   main{display:block}
-  #stage{height:58vh;min-height:420px;border-bottom:1px solid var(--hair)}
+  #stage{height:58vh;min-height:420px;border-bottom:1px solid var(--hair);display:flex;flex-direction:column}
   #panels{
     padding:24px 24px 48px;display:grid;grid-template-columns:1fr 1fr;gap:28px;
     max-width:1180px;margin:0 auto;
@@ -50,35 +50,37 @@
   </header>
   <main>
     <section id="stage">
-      <svg id="chart"></svg>
+      <div class="chartwrap" id="chartwrap">
+        <svg id="chart"></svg>
 
-      <div class="dock" id="dock">
-        <div class="dockbar">
-          <span class="title">Controls</span>
-          <button class="fold" id="fold" aria-label="Hide controls" aria-expanded="true" title="Hide controls">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
-          </button>
+        <div class="dock" id="dock">
+          <div class="dockbar">
+            <span class="title">Controls</span>
+            <button class="fold" id="fold" aria-label="Hide controls" aria-expanded="true" title="Hide controls">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+            </button>
+          </div>
+          <div class="card">
+            <label class="toggle">
+              <input type="checkbox" id="invertToggle">
+              <span class="track"></span>
+              <span class="lbl">Spotlight the gaps</span>
+            </label>
+            <div class="hint">Inverts the ramp so low-coverage cells stand out instead of high-coverage ones.</div>
+          </div>
+          <div class="card">
+            <h2>Agency</h2>
+            <div id="legend2" class="legend2"></div>
+            <div class="hint">Click a row to highlight it below</div>
+          </div>
         </div>
-        <div class="card">
-          <label class="toggle">
-            <input type="checkbox" id="invertToggle">
-            <span class="track"></span>
-            <span class="lbl">Spotlight the gaps</span>
-          </label>
-          <div class="hint">Inverts the ramp so low-coverage cells stand out instead of high-coverage ones.</div>
-        </div>
-        <div class="card">
-          <h2>Agency</h2>
-          <div id="legend2" class="legend2"></div>
-          <div class="hint">Click a row to highlight it below</div>
-        </div>
+
+        <button class="opener" id="opener" aria-label="Show controls" aria-expanded="false" title="Show controls">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/><circle cx="10" cy="8" r="2.3" fill="#fff"/><circle cx="15" cy="16" r="2.3" fill="#fff"/></svg>
+        </button>
+
+        <div id="tip"></div>
       </div>
-
-      <button class="opener" id="opener" aria-label="Show controls" aria-expanded="false" title="Show controls">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/><circle cx="10" cy="8" r="2.3" fill="#fff"/><circle cx="15" cy="16" r="2.3" fill="#fff"/></svg>
-      </button>
-
-      <div id="tip"></div>
       <div class="caveats" id="caveats"></div>
     </section>
 
@@ -105,7 +107,7 @@ const COVERAGE = {"years":[1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,200
 (function(){
 "use strict";
 const E = window.ENRICO;
-const stage = document.getElementById("stage");
+const stage = document.getElementById("chartwrap");
 const tip = E.setupTooltip(document.getElementById("tip"), stage);
 const svg = d3.select("#chart");
 

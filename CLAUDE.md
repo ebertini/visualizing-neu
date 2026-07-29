@@ -31,6 +31,15 @@ pip install -r requirements.txt          # Python 3.11+; CPU-only for everything
 python src/build_dataset.py              # ~30s; regenerates ALL data/processed/*.parquet
 python src/build_specter2_embeddings.py  # one-shot SPECTER2 cache for notebook 07 (~5–8 min CPU)
 jupyter lab notebooks/01_schema_overview.ipynb   # run notebooks 01→07 in order
+
+# TopicVizPrototypes' lighter build path (pandas/pyarrow/openpyxl/rapidfuzz only,
+# not the full torch/bertopic stack): requirements-viz.txt + a venv.
+# Bare `python3.11 -m venv` FAILS on this machine (uv-managed Python is a
+# relocatable build that needs uv's own wiring — see CLAUDE.md history /
+# session logs for the exact error). Use uv instead:
+uv venv --python 3.11 .venv && uv pip install --python .venv/bin/python -r requirements-viz.txt
+python -m src.build_viz_aggregates       # refreshes docs/TopicVizPrototypes/data/*.json (~1s)
+python scripts/_inline_topicviz_data.py  # re-embeds that data into the two prototype HTML files
 ```
 
 `build_dataset.py` flags (both optional): `--input-dir DataSet --output-dir data/processed`.
@@ -76,8 +85,9 @@ Reads 6 raw files from `DataSet/`, cleans/joins, and writes 7 tables to `data/pr
    - `unknown` (missing dates): 180 rows / ~$153M
 2. **Funding-credit model matters.** PI-only vs full-credit vs fractional split materially reorder faculty leaderboards — always state which model a chart uses. (`src/README.md` has the three canonical snippets.)
 3. **Data is NSF/NIH-skewed** (~88% of dollars). Internal/foundation/industry funding is largely invisible.
-4. **Abstract coverage:** only **1,928 of 2,676 grants (72%)** have usable abstract text; only ~37% of the 8,075 abstract rows match a grant_id. The **NIH abstract "cliff"** (near-0% coverage from 2020+) is a **data-collection artifact, not a funding decline** — only NIH RePORTER backfill can fix it.
-5. Prefer `startdate`/`startdateyear` over `awarddate` (98% null). Use `totaldollars` from `ri_matches`, not the abstract file's unreliable `Dollar Amount`.
+4. **Abstract coverage:** only **1,928 of 2,676 grants (72%)** have usable abstract text; only ~37% of the 8,075 abstract rows match a grant_id. The **NIH abstract "cliff"** (near-0% coverage from 2020+) is a **data-collection artifact, not a funding decline** — only NIH RePORTER backfill can fix it. Reassuringly, missing the abstract barely hurts BERTopic assignment confidence: unassigned rate is **28.0%** for grants with an abstract vs **27.6%** for title-only grants — titles carry most of the signal (verified in `docs/TopicVizPrototypes/what_we_can_see.html`).
+5. **"Unassigned" (no confident topic) is the single largest topic bucket by dollars** — 808 grants / **$607M / 27.8%** of the corpus (746 HDBSCAN noise + 62 in the flagged topic-11 artifact), bigger than any one of the 8 parent themes. Any topic-based chart must show it, not drop it.
+6. Prefer `startdate`/`startdateyear` over `awarddate` (98% null). Use `totaldollars` from `ri_matches`, not the abstract file's unreliable `Dollar Amount`.
 
 ## Notebooks (`notebooks/`, run 01→07 in order)
 
@@ -112,7 +122,7 @@ All share a bootstrap: `warnings.filterwarnings('ignore')`, walk up parents to f
 - `TOPIC_WORK_FORWARD_PLAN.md` — the BERTopic migration + orphan-reconciliation roadmap (M1–M5).
 - `TOPIC_WORK_EXECUTION_REPORT.md` — companion to the forward plan; documents what M1–M4 actually shipped (see "Topic modeling — state of play" above for the current summary). M5 not started.
 - `EnricoVis/` — **a parallel visualization effort by the PI**, not this user's own work (treat as read-only reference unless told otherwise). 3 self-contained interactive HTML apps (`grant_atlas`, `topic_islands`, `topic_hierarchy`) + their SPECTER2 pipeline; `grants_visualization_work_breakdown.md` is the handoff doc. Published copies live in `onlineoutput/` (below).
-- `TopicVizPrototypes/` — **the user's own** topic-model visualization prototypes (`topic_flow.html` — funding over time, `what_we_can_see.html` — abstract-coverage honesty view), built to reinforce their own analysis. Reads EnricoVis's canonical BERTopic/SPECTER2 output as a read-only upstream input (`docs/EnricoVis/data/{grants_umap,topics}.json`) via `src/build_viz_aggregates.py`, but writes only into its own `data/` and `shared/` (CSS/JS kit extracted from EnricoVis's house style, kept separate). Round 1 of a planned series; see the script's module docstring for the M1–M4-style build notes.
+- `TopicVizPrototypes/` — **the user's own** topic-model visualization prototypes (`topic_flow.html` — funding over time, `what_we_can_see.html` — abstract-coverage honesty view), built to reinforce their own analysis. Reads EnricoVis's canonical BERTopic/SPECTER2 output as a read-only upstream input (`docs/EnricoVis/data/{grants_umap,topics}.json`) via `src/build_viz_aggregates.py`, but writes only into its own `data/` and `shared/` (CSS/JS kit extracted from EnricoVis's house style, kept separate). Round 1 of a planned series — **Round 2 (planned, not yet built):** a money-vs-volume slope chart + count/dollar-weighted treemap, and an agency→theme→college Sankey (gated on a college-string normalization pass and a fractional-credit-model decision).
 - `onlineoutput/` — the actual published site (nbconverted notebooks + EnricoVis apps + TopicVizPrototypes apps + index.html); committed to git despite being CI build output.
 - **Deprecated:** `WEEKLY_PLAN.md` (the 13-week plan and Dash kiosk/browser delivery target it described are superseded — see "What this project is" above) and `07_grant_projection_specter2.html` (nb07's interactive BERTopic projection, written to `docs/` root; superseded, not copied into `onlineoutput/` by the deploy workflow).
 - **Stale / secondary — do not treat as current:** `SETUP_GUIDE_WEEK3_OLD.md` (old table names/counts), `PUBLISHING.md` (describes an old `docs/index.html` / `--output-dir=docs` setup the workflow no longer uses — actual output goes to `onlineoutput/`), and `NedaNotebooks/` (a parallel EDA track with a different conda env and different numbers — `Capstone_Report_Jun_2 (1).pdf` lives here too, as parallel-work supporting material, not the canonical pipeline's report).

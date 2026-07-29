@@ -15,7 +15,7 @@
   #app{position:static;display:block;height:auto;min-height:100%}
   header{position:sticky;top:0;background:var(--bg);z-index:9}
   main{display:block}
-  #stage{height:64vh;min-height:440px;border-bottom:1px solid var(--hair)}
+  #stage{height:64vh;min-height:440px;border-bottom:1px solid var(--hair);display:flex;flex-direction:column}
   #smallwrap{padding:22px 24px 48px}
   #smallwrap h2{
     margin:0 0 3px;font-size:13px;font-weight:650;letter-spacing:-.005em;
@@ -60,39 +60,41 @@
   </header>
   <main>
     <section id="stage">
-      <svg id="chart"></svg>
+      <div class="chartwrap" id="chartwrap">
+        <svg id="chart"></svg>
 
-      <div class="dock" id="dock">
-        <div class="dockbar">
-          <span class="title">Controls</span>
-          <button class="fold" id="fold" aria-label="Hide controls" aria-expanded="true" title="Hide controls">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
-          </button>
+        <div class="dock" id="dock">
+          <div class="dockbar">
+            <span class="title">Controls</span>
+            <button class="fold" id="fold" aria-label="Hide controls" aria-expanded="true" title="Hide controls">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+            </button>
+          </div>
+
+          <div class="card">
+            <h2>Metric</h2>
+            <div id="metricSeg"></div>
+          </div>
+
+          <div class="card">
+            <h2>View</h2>
+            <div id="offsetSeg"></div>
+            <div class="hint">Absolute shows the $ level (e.g. the 2018 peak). Share % shows composition shifting over time.</div>
+          </div>
+
+          <div class="card">
+            <h2>Parent theme</h2>
+            <div id="legend2"></div>
+            <div class="hint">Hover to highlight · click to pin · click a row to toggle</div>
+          </div>
         </div>
 
-        <div class="card">
-          <h2>Metric</h2>
-          <div id="metricSeg"></div>
-        </div>
+        <button class="opener" id="opener" aria-label="Show controls" aria-expanded="false" title="Show controls">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/><circle cx="10" cy="8" r="2.3" fill="#fff"/><circle cx="15" cy="16" r="2.3" fill="#fff"/></svg>
+        </button>
 
-        <div class="card">
-          <h2>View</h2>
-          <div id="offsetSeg"></div>
-          <div class="hint">Absolute shows the $ level (e.g. the 2018 peak). Share % shows composition shifting over time.</div>
-        </div>
-
-        <div class="card">
-          <h2>Parent theme</h2>
-          <div id="legend2"></div>
-          <div class="hint">Hover to highlight · click to pin · click a row to toggle</div>
-        </div>
+        <div id="tip"></div>
       </div>
-
-      <button class="opener" id="opener" aria-label="Show controls" aria-expanded="false" title="Show controls">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/><circle cx="10" cy="8" r="2.3" fill="#fff"/><circle cx="15" cy="16" r="2.3" fill="#fff"/></svg>
-      </button>
-
-      <div id="tip"></div>
       <div class="caveats" id="caveats"></div>
     </section>
 
@@ -145,7 +147,7 @@ const hiddenBands = new Set();     // legend-toggled off
 let hoverBand = null, pinnedBand = null;
 
 const svg = d3.select("#chart");
-const stage = document.getElementById("stage");
+const stage = document.getElementById("chartwrap");
 const tip = E.setupTooltip(document.getElementById("tip"), stage);
 
 const MARGIN = {top:26,right:26,bottom:34,left:56};
