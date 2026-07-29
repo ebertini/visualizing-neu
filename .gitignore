@@ -229,3 +229,6 @@ data/processed/
 # OS / editor
 .DS_Store
 .vscode/
+
+# Claude Code session logs (local-only)
+.claude/sessions/

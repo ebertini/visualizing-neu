@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What We Can See — Grant Abstract Coverage</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<link rel="stylesheet" href="shared/enrico.css">
+<script src="shared/enrico.js"></script>
+<style>
+  /* Same scrolling override as topic_flow.html — a hero + panels layout,
+     not a fixed fullscreen canvas. */
+  body{overflow:auto}
+  #app{position:static;display:block;height:auto;min-height:100%}
+  header{position:sticky;top:0;background:var(--bg);z-index:9}
+  header .headline{
+    flex-basis:100%;font-size:13px;color:var(--ink);line-height:1.5;margin-top:2px;
+  }
+  header .headline b{font-weight:650}
+  main{display:block}
+  #stage{height:58vh;min-height:420px;border-bottom:1px solid var(--hair)}
+  #panels{
+    padding:24px 24px 48px;display:grid;grid-template-columns:1fr 1fr;gap:28px;
+    max-width:1180px;margin:0 auto;
+  }
+  @media (max-width:860px){#panels{grid-template-columns:1fr}}
+  .panel h2{margin:0 0 4px;font-size:13px;font-weight:650;letter-spacing:-.005em}
+  .panel .sub2{font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:12px}
+  .panel svg{display:block;width:100%;overflow:visible}
+
+  #chart{position:absolute;inset:0;width:100%;height:100%}
+  .rowlabel{font-family:var(--mono);font-size:10.5px;fill:var(--ink)}
+  .rowlabel .n{fill:var(--muted)}
+  .heatrow{cursor:pointer}
+  .heatrow.dim{opacity:.32}
+  .expectbox{fill:none;stroke:#8a4b00;stroke-width:1.4;stroke-dasharray:4 3}
+  .expectlabel{font-family:var(--mono);font-size:9.5px;fill:#8a4b00}
+  .mosaic text{font-family:var(--mono);font-size:10.5px}
+  .mosaic .lbl-big{font-weight:650;fill:var(--ink)}
+  .mosaic .lbl-small{fill:var(--muted)}
+  .cliffdot{fill:#8a4b00}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>What We Can See</h1>
+    <div class="sub"><b id="count">0</b> grants · a map of evidence, not an apology</div>
+    <div class="headline" id="headline"></div>
+  </header>
+  <main>
+    <section id="stage">
+      <svg id="chart"></svg>
+
+      <div class="dock" id="dock">
+        <div class="dockbar">
+          <span class="title">Controls</span>
+          <button class="fold" id="fold" aria-label="Hide controls" aria-expanded="true" title="Hide controls">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+          </button>
+        </div>
+        <div class="card">
+          <label class="toggle">
+            <input type="checkbox" id="invertToggle">
+            <span class="track"></span>
+            <span class="lbl">Spotlight the gaps</span>
+          </label>
+          <div class="hint">Inverts the ramp so low-coverage cells stand out instead of high-coverage ones.</div>
+        </div>
+        <div class="card">
+          <h2>Agency</h2>
+          <div id="legend2" class="legend2"></div>
+          <div class="hint">Click a row to highlight it below</div>
+        </div>
+      </div>
+
+      <button class="opener" id="opener" aria-label="Show controls" aria-expanded="false" title="Show controls">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/><circle cx="10" cy="8" r="2.3" fill="#fff"/><circle cx="15" cy="16" r="2.3" fill="#fff"/></svg>
+      </button>
+
+      <div id="tip"></div>
+      <div class="caveats" id="caveats"></div>
+    </section>
+
+    <section id="panels">
+      <div class="panel">
+        <h2>Does losing the abstract change assignment?</h2>
+        <div class="sub2" id="mosaicSub">abstract presence × topic assignment</div>
+        <svg id="mosaic" viewBox="0 0 480 260"></svg>
+      </div>
+      <div class="panel">
+        <h2>NIH vs NSF coverage, 2005–2025</h2>
+        <div class="sub2">The divergence is the proof this is a collection artifact, not a research-quality signal</div>
+        <svg id="cliffchart" viewBox="0 0 480 260"></svg>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+const VIZ_META = {"frozen_inputs":{"projection":"SPECTER2 + UMAP + HDBSCAN","n_points":2676,"n_topics":25},"agencies":[{"key":"NSF","label":"National Science Foundation","color":"#0072B2"},{"key":"NIH","label":"National Institutes of Health","color":"#E69F00"},{"key":"NIH-SUB","label":"National Institutes of Health - SubAward","color":"#56B4E9"},{"key":"Navy","label":"Office of Naval Research","color":"#009E73"},{"key":"NASA","label":"National Aeronautics and Space Administration","color":"#9467BD"},{"key":"Army","label":"Army Research Office","color":"#E7298A"},{"key":"DOE","label":"Department Of Energy","color":"#66A61E"},{"key":"AFRO","label":"Air Force Research Office","color":"#A6761D"},{"key":"Other","label":"Department of Agriculture","color":"#B0B4BB"}],"parents":[{"id":0,"name":"Life Sciences & Biomedicine","color":"#4E79A7"},{"id":1,"name":"Physical Sciences & Engineering","color":"#F28E2B"},{"id":2,"name":"Environment, Ocean & Climate","color":"#59A14F"},{"id":3,"name":"Computing & Cybersecurity","color":"#B07AA1"},{"id":4,"name":"Networks, Signals & Control","color":"#76B7B2"},{"id":5,"name":"AI, Robotics & Cognition","color":"#EDC948"},{"id":6,"name":"Society, Health & Mobility","color":"#9C755F"},{"id":7,"name":"Education & Learning","color":"#D37295"},{"id":-1,"name":"Unassigned","color":"#c7ccd3"}],"topics":[{"id":0,"name":"Materials & Condensed-Matter Physics","parent":1,"terms":["materials","quantum","magnetic","spin","energy","properties","devices","material","electronic","fundamental"],"share":0.099,"artifact":false,"noise":false},{"id":1,"name":"Machine Learning, Robotics & Cognition","parent":5,"terms":["learning","brain","robots","cognitive","control","speech","human","tasks","motor","neural"],"share":0.0942,"artifact":false,"noise":false},{"id":2,"name":"Mathematics & Theoretical Physics","parent":1,"terms":["theory","physics","algebras","quantum","geometry","representation","representation theory","algebra","particle","groups"],"share":0.0475,"artifact":false,"noise":false},{"id":3,"name":"Molecular & Computational Biology","parent":0,"terms":["protein","proteins","dna","biological","molecular","function","biology","physics","computational","binding"],"share":0.0411,"artifact":false,"noise":false},{"id":4,"name":"Cancer & Drug Delivery / Therapeutics","parent":0,"terms":["cancer","tumor","delivery","drug","cells","therapeutic","therapy","vivo","drugs","intracellular"],"share":0.0381,"artifact":false,"noise":false},{"id":5,"name":"Marine Ecology & Biogeochemistry","parent":2,"terms":["marine","ocean","species","ecosystem","environmental","carbon","diversity","change","coastal","climate"],"share":0.0351,"artifact":false,"noise":false},{"id":6,"name":"Wireless Networks & Communications","parent":4,"terms":["wireless","spectrum","networks","network","ghz","5g","communication","algorithms","radio","wireless networks"],"share":0.031,"artifact":false,"noise":false},{"id":7,"name":"STEM Education & Faculty/Workforce Development","parent":7,"terms":["faculty","stem","education","icorps","women","graduate","national","mentoring","innovation","node"],"share":0.0277,"artifact":false,"noise":false},{"id":8,"name":"Security, Privacy & Cryptography","parent":3,"terms":["security","privacy","attacks","hardware","cryptographic","secure","sidechannel","private","computation","attack"],"share":0.0262,"artifact":false,"noise":false},{"id":9,"name":"Public & Behavioral Health","parent":6,"terms":["health","patients","delirium","risk","intervention","care","mental","hiv","alcohol","mental health"],"share":0.0239,"artifact":false,"noise":false},{"id":10,"name":"Structural & Earthquake Engineering","parent":1,"terms":["wind","energy","buildings","structural","sensor","collapse","structures","sensing","earthquake","monitoring"],"share":0.0228,"artifact":false,"noise":false},{"id":11,"name":"Mixed / low-coherence (fisheries + thin-metadata)","parent":-1,"terms":["fisheries","cholesterol","follicles","natural human","fishery","natural","ovarian","linkages","human","lobster"],"share":0.0232,"artifact":true,"noise":false},{"id":12,"name":"Neurophysiology & Ion Channels","parent":0,"terms":["brain","cardiac","channel","activity","channels","neurons","neural","imaging","heart","ca2"],"share":0.0213,"artifact":false,"noise":false},{"id":13,"name":"Programming Languages & Formal Methods","parent":3,"terms":["software","languages","programming","language","contracts","verification","components","developers","programming languages","tools"],"share":0.0224,"artifact":false,"noise":false},{"id":14,"name":"Tissue Engineering & Regenerative Medicine","parent":0,"terms":["tissue","cell","stem","cells","vascular","bone","regeneration","mechanical","stem cells","collagen"],"share":0.0206,"artifact":false,"noise":false},{"id":15,"name":"Network Science & Complex Systems","parent":4,"terms":["networks","network","social","algorithms","complex","complex networks","dynamics","routing","graphs","computer"],"share":0.0209,"artifact":false,"noise":false},{"id":16,"name":"Neuropharmacology & Addiction","parent":0,"terms":["addiction","receptors","ligands","drug","receptor","abuse","novel","agonists","compounds","genetic"],"share":0.0202,"artifact":false,"noise":false},{"id":17,"name":"Coastal Resilience & Flood Hazards","parent":2,"terms":["water","coastal","flood","flooding","river","hurricane","sediment","drinking water","communities","natural"],"share":0.0202,"artifact":false,"noise":false},{"id":18,"name":"Antimicrobial & Infectious Disease","parent":0,"terms":["compounds","bacteria","microorganisms","antibiotics","drug","species","infection","lead","antimicrobial","cells"],"share":0.0168,"artifact":false,"noise":false},{"id":19,"name":"Underwater Acoustic Networks","parent":2,"terms":["underwater","acoustic","ocean","marine","layer","networking","testbed","ice","physical layer","sensing"],"share":0.0153,"artifact":false,"noise":false},{"id":20,"name":"Mobility, Supply Chains & Illicit Networks","parent":6,"terms":["trafficking","mobility","social","supply","urban","infrastructure","transit","human","networks","health"],"share":0.0138,"artifact":false,"noise":false},{"id":21,"name":"Control Theory & Distributed Optimization","parent":4,"terms":["control","power","robust","optimization","framework","delays","network","distributed","uncertainty","performance"],"share":0.0105,"artifact":false,"noise":false},{"id":22,"name":"Environmental Health Policy & Chemical Exposure","parent":2,"terms":["environmental","health","chemicals","social","environmental health","conference","labor","exposure","policy","scientists"],"share":0.0105,"artifact":false,"noise":false},{"id":23,"name":"Cloud & High-Performance Computing","parent":3,"terms":["computing","cloud","storage","biomedical imaging","checkpointing","hardware","computer","biomedical","cloud computing","memory"],"share":0.0101,"artifact":false,"noise":false},{"id":24,"name":"Learning Games & Computational Thinking","parent":7,"terms":["learning","game","physical activity","computer","education","narrative","computational thinking","physical","activity","thinking"],"share":0.009,"artifact":false,"noise":false},{"id":-1,"name":"Unassigned / noise","parent":-1,"terms":[],"share":0.2788,"artifact":false,"noise":true}],"years":{"min":1995,"max":2026,"dense_from":2005,"dense_to":2025,"prelude_years":[1995,1997,1998,2000,2001,2002,2003,2004],"prelude_n":118,"complete_through":2024},"totals":{"n_grants":2676,"dollars":2183457207.0,"unassigned_n":808,"unassigned_dollars":607015051.0,"unassigned_share":0.278},"caveats":[{"id":"neu_status","severity":"high","text":"The $2.18B headline is not money Northeastern raised — grants are attributed to a faculty member even if the award predates their NEU hire."},{"id":"nih_cliff","severity":"high","text":"NIH abstract coverage collapses from 64% (2019) to 0% from 2021 onward. This is a data-collection artifact, not a funding decline — NIH grant counts hold steady while the evidence behind each topic label thins out."},{"id":"unassigned","severity":"med","text":"808 grants (27.8% of dollars) carry no confident topic — 746 HDBSCAN noise + 62 in a flagged artifact bucket (topic 11). Shown as a grey ‘Unassigned’ band, never dropped."},{"id":"t11_artifact","severity":"med","text":"Topic 11 (“Mixed / low-coherence”) is a flagged artifact: 28 of its 62 grants carry the placeholder title “Grant”. It has no parent theme."},{"id":"sparse_prelude","severity":"low","text":"1995–2004 (118 grants total) is too sparse to stack reliably and is shown separately from the 2005–2025 series."},{"id":"partial_recent","severity":"low","text":"2025 is a partial year; 2026 has essentially no data yet."},{"id":"agency_skew","severity":"low","text":"~88% of dollars are NSF/NIH. Internal, foundation, and industry funding are largely invisible."}],"validation":["n_points = 2676 (expect 2676)","total dollars = 2,183,457,207 (expect 2,183,457,207)","topic_time reconciled n = 2676 (expect 2676)","parent series sum to totals_by_year at every year ✓","NIH-SUB coverage = 0.0 (expect 0.0)","Navy coverage = 0.0 (expect 0.0)","AFRO coverage = 0.0 (expect 0.0)","Unassigned = 808 grants, $607,015,051 (27.8%)","abstract_source provenance path = parquet","unassigned rate: has-abstract 28.0%, title-only 27.6% (should be close)"]};
+const COVERAGE = {"years":[1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],"agencies":["NSF","NIH","NIH-SUB","Navy","NASA","Army","DOE","AFRO","Other"],"colors":{"NSF":"#0072B2","NIH":"#E69F00","NIH-SUB":"#56B4E9","Navy":"#009E73","NASA":"#9467BD","Army":"#E7298A","DOE":"#66A61E","AFRO":"#A6761D","Other":"#B0B4BB"},"cells":[{"agency":"NSF","year":1995,"n":1,"abs":1,"noise":1,"title_only":0,"cov":1.0},{"agency":"NSF","year":1997,"n":4,"abs":4,"noise":1,"title_only":0,"cov":1.0},{"agency":"NSF","year":1998,"n":2,"abs":2,"noise":1,"title_only":0,"cov":1.0},{"agency":"NSF","year":2000,"n":1,"abs":1,"noise":1,"title_only":0,"cov":1.0},{"agency":"Navy","year":2000,"n":1,"abs":0,"noise":0,"title_only":1,"cov":0.0},{"agency":"NSF","year":2001,"n":10,"abs":9,"noise":1,"title_only":1,"cov":0.9},{"agency":"DOE","year":2002,"n":1,"abs":0,"noise":0,"title_only":1,"cov":0.0},{"agency":"NSF","year":2002,"n":17,"abs":16,"noise":4,"title_only":1,"cov":0.9412},{"agency":"Navy","year":2002,"n":1,"abs":0,"noise":0,"title_only":1,"cov":0.0},{"agency":"Army","year":2003,"n":2,"abs":0,"noise":0,"title_only":2,"cov":0.0},{"agency":"NSF","year":2003,"n":26,"abs":26,"noise":6,"title_only":0,"cov":1.0},{"agency":"Navy","year":2003,"n":2,"abs":0,"noise":0,"title_only":2,"cov":0.0},{"agency":"Other","year":2003,"n":1,"abs":1,"noise":1,"title_only":0,"cov":1.0},{"agency":"Army","year":2004,"n":1,"abs":0,"noise":1,"title_only":1,"cov":0.0},{"agency":"DOE","year":2004,"n":3,"abs":1,"noise":0,"title_only":2,"cov":0.3333},{"agency":"NASA","year":2004,"n":2,"abs":0,"noise":0,"title_only":2,"cov":0.0},{"agency":"NIH","year":2004,"n":4,"abs":4,"noise":2,"title_only":0,"cov":1.0},{"agency":"NSF","year":2004,"n":34,"abs":31,"noise":12,"title_only":3,"cov":0.9118},{"agency":"Navy","year":2004,"n":4,"abs":0,"noise":0,"title_only":4,"cov":0.0},{"agency":"Other","year":2004,"n":1,"abs":0,"noise":1,"title_only":1,"cov":0.0},{"agency":"AFRO","year":2005,"n":1,"abs":0,"noise":0,"title_only":1,"cov":0.0},{"agency":"NIH","year":2005,"n":54,"abs":53,"noise":13,"title_only":1,"cov":0.9815},{"agency":"NIH-SUB","year":2005,"n":10,"abs":0,"noise":2,"title_only":10,"cov":0.0},{"agency":"NSF","year":2005,"n":47,"abs":45,"noise":8,"title_only":2,"cov":0.9574},{"agency":"Navy","year":2005,"n":3,"abs":0,"noise":0,"title_only":3,"cov":0.0},{"agency":"Other","year":2005,"n":2,"abs":0,"noise":0,"title_only":2,"cov":0.0},{"agency":"AFRO","year":2006,"n":2,"abs":0,"noise":1,"title_only":2,"cov":0.0},{"agency":"Army","year":2006,"n":1,"abs":0,"noise":0,"title_only":1,"cov":0.0},{"agency":"DOE","year":2006,"n":1,"abs":0,"noise":0,"title_only":1,"cov":0.0},{"agency":"NASA","year":2006,"n":1,"abs":0,"noise":0,"title_only":1,"cov":0.0},{"agency":"NIH","year":2006,"n":16,"abs":15,"noise":3,"title_only":1,"cov":0.9375},{"agency":"NIH-SUB","year":2006,"n":4,"abs":0,"noise":1,"title_only":4,"cov":0.0},{"agency":"NSF","year":2006,"n":43,"abs":39,"noise":13,"title_only":4,"cov":0.907},{"agency":"Navy","year":2006,"n":5,"abs":0,"noise":0,"title_only":5,"cov":0.0},{"agency":"AFRO","year":2007,"n":1,"abs":0,"noise":0,"title_only":1,"cov":0.0},{"agency":"Army","year":2007,"n":2,"abs":0,"noise":1,"title_only":2,"cov":0.0},{"agency":"DOE","year":2007,"n":2,"abs":1,"noise":1,"title_only":1,"cov":0.5},{"agency":"NASA","year":2007,"n":4,"abs":4,"noise":0,"title_only":0,"cov":1.0},{"agency":"NIH","year":2007,"n":19,"abs":18,"noise":5,"title_only":1,"cov":0.9474},{"agency":"NIH-SUB","year":2007,"n":4,"abs":0,"noise":0,"title_only":4,"cov":0.0},{"agency":"NSF","year":2007,"n":60,"abs":57,"noise":12,"title_only":3,"cov":0.95},{"agency":"Navy","year":2007,"n":7,"abs":0,"noise":0,"title_only":7,"cov":0.0},{"agency":"Other","year":2007,"n":4,"abs":2,"noise":1,"title_only":2,"cov":0.5},{"agency":"AFRO","year":2008,"n":1,"abs":0,"noise":0,"title_only":1,"cov":0.0},{"agency":"Army","year":2008,"n":2,"abs":0,"noise":0,"title_only":2,"cov":0.0},{"agency":"DOE","year":2008,"n":3,"abs":0,"noise":0,"title_only":3,"cov":0.0},{"agency":"NIH","year":2008,"n":14,"abs":12,"noise":4,"title_only":2,"cov":0.8571},{"agency":"NIH-SUB","year":2008,"n":7,"abs":0,"noise":0,"title_only":7,"cov":0.0},{"agency":"NSF","year":2008,"n":49,"abs":45,"noise":18,"title_only":4,"cov":0.9184},{"agency":"Navy","year":2008,"n":4,"abs":0,"noise":0,"title_only":4,"cov":0.0},{"agency":"Other","year":2008,"n":7,"abs":2,"noise":1,"title_only":5,"cov":0.2857},{"agency":"AFRO","year":2009,"n":2,"abs":0,"noise":0,"title_only":2,"cov":0.0},{"agency":"Army","year":2009,"n":5,"abs":0,"noise":1,"title_only":5,"cov":0.0},{"agency":"DOE","year":2009,"n":1,"abs":0,"noise":0,"title_only":1,"cov":0.0},{"agency":"NIH","year":2009,"n":26,"abs":25,"noise":6,"title_only":1,"cov":0.9615},{"agency":"NIH-SUB","year":2009,"n":7,"abs":0,"noise":1,"title_only":7,"cov":0.0},{"agency":"NSF","year":2009,"n":73,"abs":67,"noise":15,"title_only":6,"cov":0.9178},{"agency":"Navy","year":2009,"n":6,"abs":0,"noise":1,"title_only":6,"cov":0.0},{"agency":"Other","year":2009,"n":5,"abs":1,"noise":0,"title_only":4,"cov":0.2},{"agency":"AFRO","year":2010,"n":2,"abs":0,"noise":1,"title_only":2,"cov":0.0},{"agency":"Army","year":2010,"n":3,"abs":0,"noise":0,"title_only":3,"cov":0.0},{"agency":"DOE","year":2010,"n":1,"abs":0,"noise":0,"title_only":1,"cov":0.0},{"agency":"NASA","year":2010,"n":1,"abs":1,"noise":0,"title_only":0,"cov":1.0},{"agency":"NIH","year":2010,"n":26,"abs":22,"noise":4,"title_only":4,"cov":0.8462},{"agency":"NIH-SUB","year":2010,"n":23,"abs":0,"noise":13,"title_only":23,"cov":0.0},{"agency":"NSF","year":2010,"n":75,"abs":71,"noise":24,"title_only":4,"cov":0.9467},{"agency":"Navy","year":2010,"n":5,"abs":0,"noise":0,"title_only":5,"cov":0.0},{"agency":"Other","year":2010,"n":3,"abs":1,"noise":1,"title_only":2,"cov":0.3333},{"agency":"AFRO","year":2011,"n":2,"abs":0,"noise":1,"title_only":2,"cov":0.0},{"agency":"Army","year":2011,"n":4,"abs":0,"noise":2,"title_only":4,"cov":0.0},{"agency":"DOE","year":2011,"n":2,"abs":0,"noise":1,"title_only":2,"cov":0.0},{"agency":"NIH","year":2011,"n":17,"abs":16,"noise":2,"title_only":1,"cov":0.9412},{"agency":"NIH-SUB","year":2011,"n":2,"abs":0,"noise":0,"title_only":2,"cov":0.0},{"agency":"NSF","year":2011,"n":69,"abs":63,"noise":18,"title_only":6,"cov":0.913},{"agency":"Navy","year":2011,"n":4,"abs":0,"noise":0,"title_only":4,"cov":0.0},{"agency":"Other","year":2011,"n":3,"abs":0,"noise":0,"title_only":3,"cov":0.0},{"agency":"AFRO","year":2012,"n":4,"abs":0,"noise":2,"title_only":4,"cov":0.0},{"agency":"Army","year":2012,"n":5,"abs":0,"noise":0,"title_only":5,"cov":0.0},{"agency":"DOE","year":2012,"n":1,"abs":0,"noise":0,"title_only":1,"cov":0.0},{"agency":"NASA","year":2012,"n":3,"abs":3,"noise":0,"title_only":0,"cov":1.0},{"agency":"NIH","year":2012,"n":23,"abs":23,"noise":7,"title_only":0,"cov":1.0},{"agency":"NIH-SUB","year":2012,"n":1,"abs":0,"noise":0,"title_only":1,"cov":0.0},{"agency":"NSF","year":2012,"n":67,"abs":64,"noise":16,"title_only":3,"cov":0.9552},{"agency":"Navy","year":2012,"n":5,"abs":0,"noise":2,"title_only":5,"cov":0.0},{"agency":"Other","year":2012,"n":2,"abs":0,"noise":1,"title_only":2,"cov":0.0},{"agency":"Army","year":2013,"n":3,"abs":0,"noise":2,"title_only":3,"cov":0.0},{"agency":"DOE","year":2013,"n":1,"abs":0,"noise":0,"title_only":1,"cov":0.0},{"agency":"NASA","year":2013,"n":2,"abs":2,"noise":0,"title_only":0,"cov":1.0},{"agency":"NIH","year":2013,"n":13,"abs":12,"noise":2,"title_only":1,"cov":0.9231},{"agency":"NIH-SUB","year":2013,"n":2,"abs":0,"noise":1,"title_only":2,"cov":0.0},{"agency":"NSF","year":2013,"n":66,"abs":63,"noise":21,"title_only":3,"cov":0.9545},{"agency":"Navy","year":2013,"n":2,"abs":0,"noise":0,"title_only":2,"cov":0.0},{"agency":"Other","year":2013,"n":2,"abs":0,"noise":0,"title_only":2,"cov":0.0},{"agency":"AFRO","year":2014,"n":2,"abs":0,"noise":0,"title_only":2,"cov":0.0},{"agency":"Army","year":2014,"n":1,"abs":0,"noise":0,"title_only":1,"cov":0.0},{"agency":"DOE","year":2014,"n":1,"abs":1,"noise":0,"title_only":0,"cov":1.0},{"agency":"NASA","year":2014,"n":1,"abs":1,"noise":0,"title_only":0,"cov":1.0},{"agency":"NIH","year":2014,"n":25,"abs":22,"noise":5,"title_only":3,"cov":0.88},{"agency":"NIH-SUB","year":2014,"n":14,"abs":0,"noise":12,"title_only":14,"cov":0.0},{"agency":"NSF","year":2014,"n":81,"abs":72,"noise":20,"title_only":9,"cov":0.8889},{"agency":"Navy","year":2014,"n":3,"abs":0,"noise":1,"title_only":3,"cov":0.0},{"agency":"Other","year":2014,"n":6,"abs":1,"noise":2,"title_only":5,"cov":0.1667},{"agency":"AFRO","year":2015,"n":5,"abs":0,"noise":1,"title_only":5,"cov":0.0},{"agency":"Army","year":2015,"n":1,"abs":0,"noise":0,"title_only":1,"cov":0.0},{"agency":"DOE","year":2015,"n":2,"abs":2,"noise":0,"title_only":0,"cov":1.0},{"agency":"NASA","year":2015,"n":3,"abs":3,"noise":0,"title_only":0,"cov":1.0},{"agency":"NIH","year":2015,"n":24,"abs":23,"noise":5,"title_only":1,"cov":0.9583},{"agency":"NIH-SUB","year":2015,"n":3,"abs":0,"noise":2,"title_only":3,"cov":0.0},{"agency":"NSF","year":2015,"n":74,"abs":69,"noise":23,"title_only":5,"cov":0.9324},{"agency":"Other","year":2015,"n":4,"abs":2,"noise":1,"title_only":2,"cov":0.5},{"agency":"AFRO","year":2016,"n":1,"abs":0,"noise":0,"title_only":1,"cov":0.0},{"agency":"Army","year":2016,"n":1,"abs":0,"noise":0,"title_only":1,"cov":0.0},{"agency":"NASA","year":2016,"n":2,"abs":2,"noise":0,"title_only":0,"cov":1.0},{"agency":"NIH","year":2016,"n":33,"abs":31,"noise":10,"title_only":2,"cov":0.9394},{"agency":"NIH-SUB","year":2016,"n":5,"abs":0,"noise":2,"title_only":5,"cov":0.0},{"agency":"NSF","year":2016,"n":98,"abs":91,"noise":27,"title_only":7,"cov":0.9286},{"agency":"Navy","year":2016,"n":7,"abs":0,"noise":3,"title_only":7,"cov":0.0},{"agency":"Other","year":2016,"n":5,"abs":1,"noise":3,"title_only":4,"cov":0.2},{"agency":"AFRO","year":2017,"n":1,"abs":0,"noise":0,"title_only":1,"cov":0.0},{"agency":"Army","year":2017,"n":4,"abs":0,"noise":1,"title_only":4,"cov":0.0},{"agency":"DOE","year":2017,"n":2,"abs":2,"noise":0,"title_only":0,"cov":1.0},{"agency":"NASA","year":2017,"n":1,"abs":0,"noise":0,"title_only":1,"cov":0.0},{"agency":"NIH","year":2017,"n":34,"abs":31,"noise":8,"title_only":3,"cov":0.9118},{"agency":"NIH-SUB","year":2017,"n":2,"abs":0,"noise":1,"title_only":2,"cov":0.0},{"agency":"NSF","year":2017,"n":99,"abs":93,"noise":28,"title_only":6,"cov":0.9394},{"agency":"Navy","year":2017,"n":3,"abs":0,"noise":2,"title_only":3,"cov":0.0},{"agency":"Other","year":2017,"n":3,"abs":1,"noise":1,"title_only":2,"cov":0.3333},{"agency":"AFRO","year":2018,"n":1,"abs":0,"noise":0,"title_only":1,"cov":0.0},{"agency":"Army","year":2018,"n":2,"abs":0,"noise":1,"title_only":2,"cov":0.0},{"agency":"DOE","year":2018,"n":4,"abs":3,"noise":0,"title_only":1,"cov":0.75},{"agency":"NASA","year":2018,"n":2,"abs":0,"noise":0,"title_only":2,"cov":0.0},{"agency":"NIH","year":2018,"n":32,"abs":28,"noise":11,"title_only":4,"cov":0.875},{"agency":"NIH-SUB","year":2018,"n":5,"abs":0,"noise":1,"title_only":5,"cov":0.0},{"agency":"NSF","year":2018,"n":95,"abs":84,"noise":28,"title_only":11,"cov":0.8842},{"agency":"Navy","year":2018,"n":1,"abs":0,"noise":0,"title_only":1,"cov":0.0},{"agency":"Other","year":2018,"n":2,"abs":0,"noise":0,"title_only":2,"cov":0.0},{"agency":"Army","year":2019,"n":4,"abs":0,"noise":0,"title_only":4,"cov":0.0},{"agency":"DOE","year":2019,"n":1,"abs":1,"noise":0,"title_only":0,"cov":1.0},{"agency":"NASA","year":2019,"n":3,"abs":0,"noise":0,"title_only":3,"cov":0.0},{"agency":"NIH","year":2019,"n":28,"abs":18,"noise":9,"title_only":10,"cov":0.6429},{"agency":"NSF","year":2019,"n":105,"abs":37,"noise":29,"title_only":68,"cov":0.3524},{"agency":"Navy","year":2019,"n":4,"abs":0,"noise":0,"title_only":4,"cov":0.0},{"agency":"Other","year":2019,"n":9,"abs":1,"noise":7,"title_only":8,"cov":0.1111},{"agency":"AFRO","year":2020,"n":2,"abs":0,"noise":0,"title_only":2,"cov":0.0},{"agency":"Army","year":2020,"n":4,"abs":0,"noise":1,"title_only":4,"cov":0.0},{"agency":"DOE","year":2020,"n":3,"abs":3,"noise":0,"title_only":0,"cov":1.0},{"agency":"NASA","year":2020,"n":3,"abs":0,"noise":0,"title_only":3,"cov":0.0},{"agency":"NIH","year":2020,"n":25,"abs":1,"noise":6,"title_only":24,"cov":0.04},{"agency":"NIH-SUB","year":2020,"n":5,"abs":0,"noise":5,"title_only":5,"cov":0.0},{"agency":"NSF","year":2020,"n":101,"abs":99,"noise":42,"title_only":2,"cov":0.9802},{"agency":"Navy","year":2020,"n":7,"abs":0,"noise":0,"title_only":7,"cov":0.0},{"agency":"Other","year":2020,"n":4,"abs":1,"noise":3,"title_only":3,"cov":0.25},{"agency":"AFRO","year":2021,"n":1,"abs":0,"noise":0,"title_only":1,"cov":0.0},{"agency":"Army","year":2021,"n":1,"abs":0,"noise":0,"title_only":1,"cov":0.0},{"agency":"DOE","year":2021,"n":1,"abs":0,"noise":0,"title_only":1,"cov":0.0},{"agency":"NASA","year":2021,"n":4,"abs":0,"noise":1,"title_only":4,"cov":0.0},{"agency":"NIH","year":2021,"n":29,"abs":0,"noise":10,"title_only":29,"cov":0.0},{"agency":"NIH-SUB","year":2021,"n":1,"abs":0,"noise":0,"title_only":1,"cov":0.0},{"agency":"NSF","year":2021,"n":85,"abs":84,"noise":24,"title_only":1,"cov":0.9882},{"agency":"Navy","year":2021,"n":2,"abs":0,"noise":0,"title_only":2,"cov":0.0},{"agency":"Other","year":2021,"n":4,"abs":2,"noise":2,"title_only":2,"cov":0.5},{"agency":"Army","year":2022,"n":2,"abs":0,"noise":0,"title_only":2,"cov":0.0},{"agency":"NASA","year":2022,"n":10,"abs":0,"noise":1,"title_only":10,"cov":0.0},{"agency":"NIH","year":2022,"n":38,"abs":0,"noise":9,"title_only":38,"cov":0.0},{"agency":"NIH-SUB","year":2022,"n":4,"abs":0,"noise":2,"title_only":4,"cov":0.0},{"agency":"NSF","year":2022,"n":69,"abs":69,"noise":23,"title_only":0,"cov":1.0},{"agency":"Navy","year":2022,"n":5,"abs":0,"noise":0,"title_only":5,"cov":0.0},{"agency":"Other","year":2022,"n":7,"abs":1,"noise":4,"title_only":6,"cov":0.1429},{"agency":"AFRO","year":2023,"n":3,"abs":0,"noise":1,"title_only":3,"cov":0.0},{"agency":"DOE","year":2023,"n":5,"abs":0,"noise":1,"title_only":5,"cov":0.0},{"agency":"NASA","year":2023,"n":3,"abs":0,"noise":0,"title_only":3,"cov":0.0},{"agency":"NIH","year":2023,"n":27,"abs":0,"noise":9,"title_only":27,"cov":0.0},{"agency":"NIH-SUB","year":2023,"n":4,"abs":0,"noise":3,"title_only":4,"cov":0.0},{"agency":"NSF","year":2023,"n":85,"abs":85,"noise":25,"title_only":0,"cov":1.0},{"agency":"Navy","year":2023,"n":4,"abs":0,"noise":0,"title_only":4,"cov":0.0},{"agency":"Other","year":2023,"n":10,"abs":3,"noise":1,"title_only":7,"cov":0.3},{"agency":"DOE","year":2024,"n":2,"abs":0,"noise":1,"title_only":2,"cov":0.0},{"agency":"NASA","year":2024,"n":3,"abs":0,"noise":0,"title_only":3,"cov":0.0},{"agency":"NIH","year":2024,"n":23,"abs":0,"noise":10,"title_only":23,"cov":0.0},{"agency":"NIH-SUB","year":2024,"n":2,"abs":0,"noise":2,"title_only":2,"cov":0.0},{"agency":"NSF","year":2024,"n":86,"abs":86,"noise":29,"title_only":0,"cov":1.0},{"agency":"Navy","year":2024,"n":1,"abs":0,"noise":0,"title_only":1,"cov":0.0},{"agency":"Other","year":2024,"n":2,"abs":0,"noise":0,"title_only":2,"cov":0.0},{"agency":"NASA","year":2025,"n":1,"abs":0,"noise":0,"title_only":1,"cov":0.0},{"agency":"NIH","year":2025,"n":16,"abs":0,"noise":2,"title_only":16,"cov":0.0},{"agency":"NSF","year":2025,"n":63,"abs":58,"noise":23,"title_only":5,"cov":0.9206},{"agency":"Navy","year":2025,"n":1,"abs":0,"noise":0,"title_only":1,"cov":0.0},{"agency":"Other","year":2025,"n":1,"abs":0,"noise":1,"title_only":1,"cov":0.0},{"agency":"NSF","year":2026,"n":1,"abs":1,"noise":0,"title_only":0,"cov":1.0}],"by_year":{"n":[1,0,4,2,0,2,10,19,31,49,117,73,103,87,125,139,103,111,91,134,116,152,149,144,154,154,128,135,141,119,82,1],"abs":[1,0,4,2,0,1,9,16,27,36,98,54,82,59,93,95,79,90,77,97,99,125,127,115,57,104,86,70,88,86,58,1],"cov":[1.0,null,1.0,1.0,null,0.5,0.9,0.8421,0.871,0.7347,0.8376,0.7397,0.7961,0.6782,0.744,0.6835,0.767,0.8108,0.8462,0.7239,0.8534,0.8224,0.8523,0.7986,0.3701,0.6753,0.6719,0.5185,0.6241,0.7227,0.7073,1.0]},"by_agency":{"NSF":{"n":1686,"abs":1532,"cov":0.9087},"NIH":{"n":546,"abs":354,"cov":0.6484},"NIH-SUB":{"n":105,"abs":0,"cov":0.0},"Navy":{"n":87,"abs":0,"cov":0.0},"NASA":{"n":49,"abs":16,"cov":0.3265},"Army":{"n":48,"abs":0,"cov":0.0},"DOE":{"n":37,"abs":14,"cov":0.3784},"AFRO":{"n":31,"abs":0,"cov":0.0},"Other":{"n":87,"abs":20,"cov":0.2299}},"provenance":{"internal":1928,"orphan_recovered":8,"none":740,"source":"parquet"},"unassigned":{"n":808,"noise_n":746,"t11_n":62,"share":0.3019},"crosstab":{"abs_assigned":1394,"abs_unassigned":542,"title_assigned":536,"title_unassigned":204},"cliffs":[{"agency":"NIH","last_good_year":2019,"first_zero_year":2021,"text":"NIH abstract coverage falls from 64% (2019) to 3% (2020) to 0% (2021-2025). Data-collection artifact; only NIH RePORTER backfill can repair it."}]};
+</script>
+<script>
+(function(){
+"use strict";
+const E = window.ENRICO;
+const stage = document.getElementById("stage");
+const tip = E.setupTooltip(document.getElementById("tip"), stage);
+const svg = d3.select("#chart");
+
+const AGENCIES = COVERAGE.agencies;                 // ORDER, 9
+const YEARS = COVERAGE.years;                        // full 1995-2026
+const rampUp = d3.interpolateRgb(E.NOISE_GREY, "#0072B2");
+let invert = false;
+let selectedAgency = null;
+
+const cellByKey = {};
+COVERAGE.cells.forEach(c=> cellByKey[c.agency+"|"+c.year] = c);
+const nMax = d3.max(COVERAGE.cells, c=>c.n) || 1;
+
+const totalGrants = d3.sum(AGENCIES, a=>COVERAGE.by_agency[a].n);
+document.getElementById("count").textContent = totalGrants.toLocaleString();
+
+const covPct = COVERAGE.provenance;
+const haveAbs = covPct.internal + covPct.orphan_recovered;
+document.getElementById("headline").innerHTML =
+  `<b>${E.fmtPct(haveAbs/totalGrants,1)}</b> of grants have an abstract. `+
+  `<b>${covPct.none.toLocaleString()}</b> have only a title. `+
+  `<b>${COVERAGE.unassigned.n.toLocaleString()}</b> (${E.fmtPct(COVERAGE.unassigned.share)}) carry no confident topic — `+
+  `kept as <i>Unassigned</i>, never forced into a cluster.`;
+
+/* ---------- hero: agency x year coverage heatmap ---------- */
+function render(){
+  const W = stage.clientWidth, H = stage.clientHeight;
+  svg.attr("viewBox",`0 0 ${W} ${H}`);
+  svg.selectAll("*").remove();
+
+  const margin = {top:14,right:20,bottom:34,left:150};
+  const plotW = W - margin.left - margin.right, plotH = H - margin.top - margin.bottom;
+  const rowH = plotH / AGENCIES.length;
+  const colW = plotW / YEARS.length;
+
+  const ramp = invert ? (t=>rampUp(1-t)) : rampUp;
+
+  const g = svg.append("g").attr("transform",`translate(${margin.left},${margin.top})`);
+
+  AGENCIES.forEach((agency,ri)=>{
+    const rowG = g.append("g").attr("class","heatrow")
+      .attr("transform",`translate(0,${ri*rowH})`)
+      .classed("dim", selectedAgency!=null && selectedAgency!==agency)
+      .on("click", ()=>{ selectedAgency = (selectedAgency===agency?null:agency); render(); });
+
+    const stats = COVERAGE.by_agency[agency];
+    rowG.append("text").attr("class","rowlabel")
+      .attr("x",-8).attr("y",rowH/2+3.5).attr("text-anchor","end")
+      .html(`${E.esc(agency)} <tspan class="n">· ${stats.n} · ${E.fmtPct(stats.cov)}</tspan>`);
+
+    YEARS.forEach((yr,ci)=>{
+      const cell = cellByKey[agency+"|"+yr];
+      const cx = ci*colW + colW/2, cy = rowH/2;
+      if(!cell || cell.n===0){
+        rowG.append("circle").attr("cx",cx).attr("cy",cy).attr("r",1)
+          .attr("fill","#d8dbe0");
+        return;
+      }
+      const size = Math.min(colW,rowH) - 2;
+      const inset = (size/2) * (1 - Math.sqrt(cell.n/nMax));
+      const s = Math.max(2, size - inset*2);
+      rowG.append("rect")
+        .attr("x",cx-s/2).attr("y",cy-s/2).attr("width",s).attr("height",s)
+        .attr("rx",1.5)
+        .attr("fill", ramp(cell.cov==null?0:cell.cov))
+        .on("mousemove", ev=>{
+          tip.show(
+            `<div class="t">${E.esc(agency)} · ${yr}</div>`+
+            `<div class="meta">${cell.n} grants · ${cell.abs} with an abstract (${E.fmtPct(cell.cov)})</div>`+
+            `<div class="meta">${cell.n-cell.abs} topic labels come from titles alone</div>`+
+            `<div class="meta">${cell.noise} of ${cell.n} unassigned this cell</div>`,
+            ev.clientX, ev.clientY
+          );
+        })
+        .on("mouseleave", ()=>tip.hide());
+    });
+  });
+
+  // x-axis (years, sparse ticks)
+  const xAxisG = svg.append("g").attr("transform",`translate(${margin.left},${margin.top+plotH+6})`);
+  YEARS.forEach((yr,ci)=>{
+    if(yr%5!==0) return;
+    xAxisG.append("text").attr("class","rowlabel")
+      .attr("x",ci*colW+colW/2).attr("y",10).attr("text-anchor","middle").text(yr);
+  });
+
+  // "expected in next snapshot" box on NIH x 2020-2025
+  const nihIdx = AGENCIES.indexOf("NIH");
+  const y2020 = YEARS.indexOf(2020), y2025 = YEARS.indexOf(2025);
+  if(nihIdx>=0 && y2020>=0 && y2025>=0){
+    const bx = margin.left + y2020*colW, bw = (y2025-y2020+1)*colW;
+    const by = margin.top + nihIdx*rowH;
+    svg.append("rect").attr("class","expectbox")
+      .attr("x",bx+1).attr("y",by+1).attr("width",bw-2).attr("height",rowH-2);
+    svg.append("text").attr("class","expectlabel")
+      .attr("x",bx+bw/2).attr("y",by-4).attr("text-anchor","middle")
+      .text("expected in next snapshot");
+  }
+}
+
+/* ---------- panel 2: mosaic (abstract presence x assignment) ---------- */
+function renderMosaic(){
+  const svg2 = d3.select("#mosaic").attr("class","mosaic");
+  svg2.selectAll("*").remove();
+  const W=480,H=260, pad=6, top=14, bottom=34;
+  const ct = COVERAGE.crosstab;
+  const nAbs = ct.abs_assigned+ct.abs_unassigned, nTitle = ct.title_assigned+ct.title_unassigned;
+  const total = nAbs+nTitle;
+  const wAbs = (W-2*pad)*(nAbs/total), wTitle = (W-2*pad)*(nTitle/total);
+
+  function col(x0,w,assigned,unassigned,label,n){
+    const h = H-top-bottom;
+    const hA = h*(assigned/(assigned+unassigned)), hU = h-hA;
+    // unassigned on top (visually matches "Unassigned pinned low-confidence" convention... here
+    // top = smaller & worse, consistent with "gaps spotlighted" reading top-down)
+    svg2.append("rect").attr("x",x0).attr("y",top).attr("width",w).attr("height",hU)
+      .attr("fill",E.NOISE_GREY).attr("opacity",.9);
+    svg2.append("rect").attr("x",x0).attr("y",top+hU).attr("width",w).attr("height",hA)
+      .attr("fill","#0072B2").attr("opacity",.85);
+    svg2.append("text").attr("class","lbl-small").attr("x",x0+w/2).attr("y",top+hU/2+3).attr("text-anchor","middle")
+      .attr("fill", hU>22? "#4a4f57":"none")
+      .text(hU>22 ? `${unassigned} unassigned (${(unassigned/(assigned+unassigned)*100).toFixed(0)}%)` : "");
+    svg2.append("text").attr("class","lbl-big").attr("x",x0+w/2).attr("y",top+hU+hA/2+3).attr("text-anchor","middle")
+      .attr("fill","#fff")
+      .text(`${assigned} assigned`);
+    svg2.append("text").attr("class","lbl-big").attr("x",x0+w/2).attr("y",top+h+18).attr("text-anchor","middle")
+      .text(`${label} (n=${n})`);
+  }
+  col(pad, wAbs, ct.abs_assigned, ct.abs_unassigned, "Has abstract", nAbs);
+  col(pad+wAbs+4, wTitle-4, ct.title_assigned, ct.title_unassigned, "Title only", nTitle);
+
+  const absRate = ct.abs_unassigned/nAbs, titleRate = ct.title_unassigned/nTitle;
+  document.getElementById("mosaicSub").textContent =
+    `Unassigned rate: ${E.fmtPct(absRate)} with an abstract vs ${E.fmtPct(titleRate)} title-only — `+
+    `titles carry most of the signal.`;
+}
+
+/* ---------- panel 3: NIH vs NSF coverage line, 2005-2025 ---------- */
+function renderCliff(){
+  const svg3 = d3.select("#cliffchart");
+  svg3.selectAll("*").remove();
+  const W=480,H=260, margin={top:10,right:16,bottom:26,left:34};
+  const yrs = YEARS.filter(y=>y>=2005 && y<=2025);
+  const x = d3.scaleLinear().domain([2005,2025]).range([margin.left,W-margin.right]);
+  const y = d3.scaleLinear().domain([0,1]).range([H-margin.bottom,margin.top]);
+
+  svg3.append("g").attr("transform",`translate(${margin.left},0)`)
+    .call(d3.axisLeft(y).ticks(5).tickFormat(d3.format(".0%")).tickSize(-(W-margin.left-margin.right)))
+    .call(g=>g.selectAll(".tick line").attr("stroke",'var(--hair)'))
+    .call(g=>g.select(".domain").remove());
+  svg3.append("g").attr("transform",`translate(0,${H-margin.bottom})`)
+    .call(d3.axisBottom(x).ticks(6).tickFormat(d3.format("d")));
+
+  function series(agency){
+    return yrs.map(yr=>{
+      const c = cellByKey[agency+"|"+yr];
+      return {yr, cov: c ? c.cov : null};
+    });
+  }
+  const line = d3.line().defined(d=>d.cov!=null).x(d=>x(d.yr)).y(d=>y(d.cov)).curve(d3.curveLinear);
+
+  [["NSF","#0072B2"],["NIH","#E69F00"]].forEach(([agency,color])=>{
+    const data = series(agency);
+    svg3.append("path").attr("d",line(data)).attr("fill","none").attr("stroke",color).attr("stroke-width",2);
+    svg3.selectAll(`.dot-${agency}`).data(data.filter(d=>d.cov!=null)).join("circle")
+      .attr("cx",d=>x(d.yr)).attr("cy",d=>y(d.cov)).attr("r",2.4).attr("fill",color);
+    const last = [...data].reverse().find(d=>d.cov!=null);
+    if(last) svg3.append("text").attr("x",x(last.yr)+5).attr("y",y(last.cov)+3)
+      .attr("class","rowlabel").attr("fill",color).text(agency);
+  });
+  svg3.append("line").attr("x1",x(2019.5)).attr("x2",x(2019.5))
+    .attr("y1",margin.top).attr("y2",H-margin.bottom)
+    .attr("stroke","#8a4b00").attr("stroke-dasharray","4 3").attr("stroke-width",1.2);
+}
+
+/* ---------- legend / agency filter ---------- */
+function buildLegend(){
+  const wrap = document.getElementById("legend2");
+  wrap.innerHTML = "";
+  AGENCIES.forEach(a=>{
+    const stats = COVERAGE.by_agency[a];
+    const b = document.createElement("button");
+    b.className = "legrow" + (selectedAgency!=null && selectedAgency!==a ? " off":"");
+    b.innerHTML = `<span class="swatch" style="background:${COVERAGE.colors[a]}"></span>`+
+      `<span class="name">${E.esc(a)}</span><span class="n">${E.fmtPct(stats.cov)}</span>`;
+    b.onclick = ()=>{ selectedAgency = (selectedAgency===a?null:a); buildLegend(); render(); };
+    wrap.appendChild(b);
+  });
+}
+
+document.getElementById("invertToggle").addEventListener("change",e=>{ invert=e.target.checked; render(); });
+E.setupDock({dock:document.getElementById("dock"),fold:document.getElementById("fold"),opener:document.getElementById("opener")});
+E.renderCaveats(document.getElementById("caveats"), VIZ_META.caveats, ["nih_cliff","unassigned","t11_artifact"]);
+
+buildLegend();
+render();
+renderMosaic();
+renderCliff();
+window.addEventListener("resize", render);
+})();
+</script>
+</body>
+</html>

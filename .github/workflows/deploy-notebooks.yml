@@ -35,6 +35,12 @@ jobs:
           cp docs/EnricoVis/grant_atlas.html docs/onlineoutput/
           cp docs/EnricoVis/topic_hierarchy.html docs/onlineoutput/
           cp docs/EnricoVis/topic_islands.html docs/onlineoutput/
+          # Round-1 topic-model visualization prototypes (see docs/EnricoVis/shared/
+          # for the CSS/JS kit they load externally, unlike the three self-contained
+          # apps above — must be copied alongside them)
+          cp docs/EnricoVis/topic_flow.html docs/onlineoutput/
+          cp docs/EnricoVis/what_we_can_see.html docs/onlineoutput/
+          cp -r docs/EnricoVis/shared docs/onlineoutput/shared
           # Copy the standalone methods report
           cp docs/topic_work_report.html docs/onlineoutput/
           # Create .nojekyll to bypass Jekyll processing

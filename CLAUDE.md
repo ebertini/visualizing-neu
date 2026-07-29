@@ -4,7 +4,7 @@ Guidance for working in this repository. Read this before touching data, noteboo
 
 ## What this project is
 
-An exploratory **data-visualization project on Northeastern University's faculty funding and grant history** (window ~1995–2026, ~$2.18B in awards). The deliverable is an interactive visualization telling the story of NEU grant funding. Current work is EDA + topic modeling in Jupyter notebooks published to GitHub Pages; the eventual target (see `docs/WEEKLY_PLAN.md`) is a dual-mode **Plotly Dash** dashboard — a touchscreen **kiosk** build plus a responsive public browser build from one codebase.
+An exploratory **data-visualization project on Northeastern University's faculty funding and grant history** (window ~1995–2026, ~$2.18B in awards). The deliverable is an interactive visualization telling the story of NEU grant funding. Current work is EDA + topic modeling in Jupyter notebooks published to GitHub Pages. A dual-mode **Plotly Dash** dashboard (touchscreen **kiosk** build + responsive public browser build from one codebase) is still a possible final goal, but that direction is under-defined and `docs/WEEKLY_PLAN.md`, which used to describe it, is now deprecated. The best current sense of what the final deliverable could look like is the interactive EnricoVis apps published at `docs/onlineoutput/` — `topic_hierarchy`, `topic_islands`, `grant_atlas`.
 
 Sanity-check names (known-good faculty for spot-checking joins): **Saiph Savage, Michael Ann DeVito, Benjamin Gyori**. ID-reconciliation running example: **Chris Martens** (`faculty_id 2963712`).
 
@@ -32,7 +32,7 @@ jupyter lab notebooks/01_schema_overview.ipynb   # run notebooks 01→07 in orde
 
 `build_dataset.py` flags (both optional): `--input-dir DataSet --output-dir data/processed`.
 
-Publishing (GitHub Pages via `.github/workflows/deploy-notebooks.yml`): on push to `main`, notebooks are `nbconvert`ed to HTML into `docs/`, `scripts/generate_index.py` rebuilds the index, and the `docs/` folder deploys. To do it locally: `python -m nbconvert --to html notebooks/*.ipynb --output-dir=docs`.
+Publishing (GitHub Pages via `.github/workflows/deploy-notebooks.yml`): on push to `main`, notebooks are `nbconvert`ed to HTML into `docs/onlineoutput/`, `scripts/generate_index.py` rebuilds the index there, and `docs/onlineoutput/` (not `docs/` itself) deploys. To do it locally: `python -m nbconvert --to html notebooks/*.ipynb --output-dir=docs/onlineoutput`.
 
 ## The data pipeline (`src/build_dataset.py`)
 
@@ -87,15 +87,17 @@ All share a bootstrap: `warnings.filterwarnings('ignore')`, walk up parents to f
 | 03 | funding_over_time | Annual/cumulative funding 2000–2025, rolling avg, college×year heatmap, agency mix, pre/post-COVID |
 | 04 | who_gets_funded | Concentration (**Gini ≈ 0.632**, top-10 ≈19.6%), top-25 faculty, top-15 depts, agency×dept, `neu_status` attribution |
 | 05 | collaboration_network | Co-PI NetworkX graph, degree/PageRank/betweenness, Louvain communities, cross-college matrix |
-| 06 | research_topics | **LDA k=8** over abstracts; coherence + confidence validation; topics × time/college/agency/funding. Writes `outputs/topic_assignments.csv` |
-| 07 | topic_deep_dive | College profiles, 32 sub-topics (LDA k=4/parent), JS-distance dendrogram, UMAP (TF-IDF + SPECTER2). Consumes nb06's CSV; writes interactive HTML to `docs/` |
+| 06 | research_topics | **LDA k=8** over abstracts — now historical/legacy, kept standalone for comparison, no longer feeds nb07 or EnricoVis; coherence + confidence validation; topics × time/college/agency/funding. Writes `outputs/topic_assignments.csv` |
+| 07 | topic_deep_dive | **BERTopic (canonical)** — loads `topic_assignments.parquet` (25 topics + "Unassigned" noise cluster) independently of nb06; college profiles, 8-parent-theme hierarchy, SPECTER2-centroid dendrogram, UMAP on canonical SPECTER2 coords. Writes interactive HTML (`docs/07_grant_projection_specter2.html` — deprecated/unpublished, see reference map) |
 
 ## Topic modeling — state of play
 
-- **Two LDA regimes currently coexist:** analytical notebooks use **LDA k=8**; the EnricoVis HTML apps use **LDA k=12** with an 8→25 hierarchy.
-- **The forward plan (`docs/TOPIC_WORK_FORWARD_PLAN.md`) retires both LDA regimes for BERTopic** (SPECTER2 → UMAP → HDBSCAN → c-TF-IDF). Check that doc before extending topic work.
-- **LDA label drift is the biggest gotcha:** LDA assigns topic IDs randomly, so the hand-curated `TOPIC_LABELS` silently break after any corpus/param change. Re-inspect top terms and rewrite labels after every rerun. (nb07 auto-realigns via crosstab argmax.)
+- **BERTopic is now the canonical topic model** (SPECTER2 → UMAP → HDBSCAN → c-TF-IDF): **25 topics + an explicit "Unassigned" noise cluster**, `min_cluster_size=25` (stable across 3 seeds). Fit via `src/topics_bertopic.py`, output is `data/processed/topic_assignments.parquet`, consumed by nb07 and all three EnricoVis apps (`grant_atlas`, `topic_islands`, `topic_hierarchy`). See `docs/TOPIC_WORK_EXECUTION_REPORT.md` for what M1–M4 actually delivered, including the corpus growing 2,676 → 2,741 docs via orphan-abstract reconciliation.
+- **LDA is now historical, not canonical.** `src/topics_lda.py` is kept as a labelled legacy module; nb06 (`research_topics`, LDA k=8) still runs standalone for comparison but no longer feeds nb07 or the EnricoVis apps (previously nb07 consumed nb06's `outputs/topic_assignments.csv`; it now loads the BERTopic parquet independently). BERTopic fixed LDA's cross-vocabulary mis-parenting (e.g. Alshawabkeh Puerto-Rico environmental grants, previously mis-bucketed under Biomedical).
+- **Text cleaning is unified** in `src/clean_text.py` (with a regression test suite), shared by both the legacy LDA path and the canonical BERTopic path.
+- **LDA label drift is still a live gotcha if you touch nb06:** LDA assigns topic IDs randomly, so hand-curated labels silently break after any corpus/param change. This doesn't apply to the canonical BERTopic path, which uses c-TF-IDF-derived labels from a shared `topic_labels.json`.
 - **SPECTER2 / UMAP / HDBSCAN CANNOT run in a sandbox/CI container** (no HuggingFace network access). Always precompute locally and commit the cached artifacts (`specter2_embeddings.npy` + `specter2_ids.txt`); CI and HTML apps consume only committed artifacts/JSON.
+- **M5 (per `docs/TOPIC_WORK_FORWARD_PLAN.md`) is not yet started** — NIH RePORTER abstract backfill, LDA-vs-BERTopic agreement crosstab, sub-topic label curation, faculty-embedding UMAP, topic×dollars trends, and a report notebook are all still open.
 
 ## `docs/` reference map
 
@@ -105,9 +107,11 @@ All share a bootstrap: `warnings.filterwarnings('ignore')`, walk up parents to f
 - `INSIGHTS.md` — narrative findings across all notebooks (local-only, not published).
 - `TOPIC_ANALYSIS_COMPENDIUM.md` — definitive LDA parameters, coverage bias, follow-ups.
 - `TOPIC_WORK_FORWARD_PLAN.md` — the BERTopic migration + orphan-reconciliation roadmap (M1–M5).
-- `WEEKLY_PLAN.md` — 13-week plan; the Dash kiosk/browser delivery target and design rules (≥56px tap targets, colorblind-safe, WCAG AA).
-- `EnricoVis/` — 3 self-contained interactive HTML apps (`grant_atlas`, `topic_islands`, `topic_hierarchy`) + their SPECTER2 pipeline; `grants_visualization_work_breakdown.md` is the handoff doc.
-- **Stale / secondary — do not treat as current schema:** `SETUP_GUIDE_WEEK3_OLD.md` (old table names/counts) and `NedaNotebooks/` (a parallel EDA track with a different conda env and different numbers).
+- `TOPIC_WORK_EXECUTION_REPORT.md` — companion to the forward plan; documents what M1–M4 actually shipped (see "Topic modeling — state of play" above for the current summary). M5 not started.
+- `EnricoVis/` — 3 self-contained interactive HTML apps (`grant_atlas`, `topic_islands`, `topic_hierarchy`) + their SPECTER2 pipeline; `grants_visualization_work_breakdown.md` is the handoff doc. Published copies live in `onlineoutput/` (below) — currently the best preview of what a final dashboard could look like.
+- `onlineoutput/` — the actual published site (nbconverted notebooks + EnricoVis apps + index.html); committed to git despite being CI build output.
+- **Deprecated:** `WEEKLY_PLAN.md` (the 13-week plan and Dash kiosk/browser delivery target it described are superseded — see "What this project is" above) and `07_grant_projection_specter2.html` (nb07's interactive BERTopic projection, written to `docs/` root; superseded, not copied into `onlineoutput/` by the deploy workflow).
+- **Stale / secondary — do not treat as current:** `SETUP_GUIDE_WEEK3_OLD.md` (old table names/counts), `PUBLISHING.md` (describes an old `docs/index.html` / `--output-dir=docs` setup the workflow no longer uses — actual output goes to `onlineoutput/`), and `NedaNotebooks/` (a parallel EDA track with a different conda env and different numbers — `Capstone_Report_Jun_2 (1).pdf` lives here too, as parallel-work supporting material, not the canonical pipeline's report).
 
 ## Conventions & gotchas
 
