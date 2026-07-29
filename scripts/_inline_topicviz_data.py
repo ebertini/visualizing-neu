@@ -1,18 +1,23 @@
 """
-_inline_enricovis_data.py — ad-hoc diagnostic/build helper, not part of the
+_inline_topicviz_data.py — ad-hoc diagnostic/build helper, not part of the
 pipeline (see the underscore-prefix convention in CLAUDE.md).
 
-Re-inlines the current docs/EnricoVis/data/*.json into the Round-1 prototype
-HTML files (topic_flow.html, what_we_can_see.html), which embed their data as
-`const NAME = <json>;` rather than fetch()-ing it — CI never publishes
-docs/EnricoVis/data/, so a fetch() build would 404 on GitHub Pages (see
-docs/TOPIC_WORK_EXECUTION_REPORT.md and the topic_flow.html module comment).
+Re-inlines the current docs/TopicVizPrototypes/data/*.json into the Round-1
+prototype HTML files (topic_flow.html, what_we_can_see.html), which embed
+their data as `const NAME = <json>;` rather than fetch()-ing it — CI never
+publishes source data/ directories, so a fetch() build would 404 on GitHub
+Pages (see docs/TOPIC_WORK_EXECUTION_REPORT.md and the topic_flow.html
+module comment).
+
+These prototypes are the user's own analysis work (docs/TopicVizPrototypes/),
+kept separate from docs/EnricoVis/ (a parallel visualization effort by the
+PI) — see src/build_viz_aggregates.py's module docstring for the split.
 
 Run this after any `python -m src.build_viz_aggregates` if you've edited the
 HTML template and need to resync the embedded data blocks.
 
 Usage:
-    .venv/bin/python scripts/_inline_enricovis_data.py
+    .venv/bin/python scripts/_inline_topicviz_data.py
 """
 from __future__ import annotations
 
@@ -20,8 +25,8 @@ import re
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-DATA_DIR = REPO_ROOT / "docs" / "EnricoVis" / "data"
-VIZ_DIR = REPO_ROOT / "docs" / "EnricoVis"
+DATA_DIR = REPO_ROOT / "docs" / "TopicVizPrototypes" / "data"
+VIZ_DIR = REPO_ROOT / "docs" / "TopicVizPrototypes"
 
 # (html filename, [(JS const name, json filename), ...])
 TARGETS = [

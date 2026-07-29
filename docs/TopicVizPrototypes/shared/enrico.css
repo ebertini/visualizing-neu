@@ -1,10 +1,11 @@
 /* ============================================================
-   EnricoVis shared kit — design tokens + common components.
-   Extracted from docs/EnricoVis/grant_atlas.html (the most-evolved
-   of the three original apps) so new prototypes don't re-copy the
-   house style by hand. The three original apps (grant_atlas,
-   topic_islands, topic_hierarchy) are NOT retrofitted to use this —
-   they ship and work; this file is for new views only.
+   docs/TopicVizPrototypes shared kit — design tokens + common components.
+   This is the user's own prototype work (kept separate from
+   docs/EnricoVis/, a parallel visualization effort by the PI). The visual
+   language is deliberately extracted from docs/EnricoVis/grant_atlas.html
+   so these prototypes read as part of the same family rather than a
+   clashing one-off — but this file lives here, not in EnricoVis/, and the
+   three original EnricoVis apps are NOT retrofitted to use it.
 
    Usage: <link rel="stylesheet" href="shared/enrico.css">
    then add view-specific rules in the page's own <style> block.

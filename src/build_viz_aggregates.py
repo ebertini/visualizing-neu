@@ -1,14 +1,20 @@
 """
 build_viz_aggregates.py — Round 1 of the topic-model visualization prototypes
-(see docs/EnricoVis/... `topic_flow.html` and `what_we_can_see.html`).
+(see docs/TopicVizPrototypes/`topic_flow.html` and `what_we_can_see.html`).
+
+These prototypes are the user's own analysis work, kept separate from
+docs/EnricoVis/ (a parallel visualization effort by the PI). They DO read
+EnricoVis's canonical BERTopic/SPECTER2 output as an upstream input — that
+model is the PI's, reused here rather than re-fit — but every derived file
+this script writes goes to docs/TopicVizPrototypes/, never into EnricoVis/.
 
 Unlike src/build_viz_data.py, this script does NOT need specter2_umap_2d.npy /
 topic_assignments.parquet / outputs/topic_labels.json — those inputs are
 absent locally and not regenerable without a HuggingFace SPECTER2 download.
 Topic assignments and UMAP coords are effectively frozen; the real BERTopic
-output already lives in the three committed files this script reads FROM:
+output already lives in the two committed files this script reads FROM:
 
-Reads (frozen, read-only — this script must never write to these):
+Reads (frozen, read-only, owned by docs/EnricoVis/ — never write here):
   docs/EnricoVis/data/grants_umap.json   2,676 grant points: id/agency/amount/
                                           year/titleOnly/dom(topic)/isNoise
   docs/EnricoVis/data/topics.json        26 entries: 25 topics + noise, each
@@ -18,9 +24,9 @@ Reads (locally built, optional — enriches provenance if present):
   data/processed/grants.parquet          grant_id -> abstract_source
                                           ("internal"/"orphan_recovered"/"")
 
-Writes (docs/EnricoVis/data/, committed, inlined into the prototypes at
-build time — CI does not publish docs/EnricoVis/data/, see
-docs/TOPIC_WORK_EXECUTION_REPORT.md):
+Writes (docs/TopicVizPrototypes/data/, committed, inlined into the
+prototypes at build time — CI does not publish source data/ directories,
+see docs/TOPIC_WORK_EXECUTION_REPORT.md):
   viz_meta.json     shared dimensions (agencies, parents, topics, year axis,
                      totals) + the single canonical caveats[] array
   topic_time.json   topic & parent share/dollars per year, dense 2005-2025
@@ -40,14 +46,18 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PROC = REPO_ROOT / "data" / "processed"
-VIZ_DIR = REPO_ROOT / "docs" / "EnricoVis" / "data"
+ENRICOVIS_DATA = REPO_ROOT / "docs" / "EnricoVis" / "data"     # read-only upstream (PI's work)
+OUT_DIR = REPO_ROOT / "docs" / "TopicVizPrototypes" / "data"   # writable (this script's own output)
 
-# These three are frozen inputs (see module docstring) — never overwrite them.
+# Guard against ever writing into the PI's frozen EnricoVis output — this
+# script's OUT_DIR is a different directory already, but keep the stem
+# check too as a belt-and-suspenders safety net.
 FROZEN_STEMS = {"grants_umap", "topics", "grants_hier"}
 
 # 8-parent-theme names/colors — copied verbatim from docs/EnricoVis/topic_hierarchy.html
-# (PARENT_COLORS) and docs/EnricoVis/shared/enrico.js (PARENT_NAMES), which must in turn
-# stay in sync with this list. Do not hand-edit one without the other two.
+# (PARENT_COLORS, the PI's file) and docs/TopicVizPrototypes/shared/enrico.js
+# (PARENT_NAMES, this project's own copy), which must in turn stay in sync
+# with this list. Do not hand-edit one without the other two.
 PARENT_NAMES = [
     "Life Sciences & Biomedicine", "Physical Sciences & Engineering", "Environment, Ocean & Climate",
     "Computing & Cybersecurity", "Networks, Signals & Control", "AI, Robotics & Cognition",
@@ -136,8 +146,8 @@ def _parent_index(parent_key: str | None) -> int:
 
 
 def load_frozen() -> tuple[list[dict], list[dict]]:
-    grants_umap = json.loads((VIZ_DIR / "grants_umap.json").read_text(encoding="utf-8"))
-    topics = json.loads((VIZ_DIR / "topics.json").read_text(encoding="utf-8"))
+    grants_umap = json.loads((ENRICOVIS_DATA / "grants_umap.json").read_text(encoding="utf-8"))
+    topics = json.loads((ENRICOVIS_DATA / "topics.json").read_text(encoding="utf-8"))
     return grants_umap["points"], topics
 
 
@@ -439,9 +449,9 @@ def main() -> None:
         print("\n--check-only: nothing written.")
         return
 
-    VIZ_DIR.mkdir(parents=True, exist_ok=True)
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
     for name, obj in [("viz_meta", viz_meta), ("topic_time", topic_time), ("coverage", coverage)]:
-        p = VIZ_DIR / f"{name}.json"
+        p = OUT_DIR / f"{name}.json"
         _guard_output_path(p)
         p.write_text(json.dumps(obj, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
         print(f"wrote {p.relative_to(REPO_ROOT)}  ({p.stat().st_size / 1024:.0f} KB)")

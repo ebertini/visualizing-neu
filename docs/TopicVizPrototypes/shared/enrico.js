@@ -1,14 +1,16 @@
 /* ============================================================
-   EnricoVis shared kit — palettes + reusable D3 helpers.
+   docs/TopicVizPrototypes shared kit — palettes + reusable D3 helpers.
+   This is the user's own prototype work (kept separate from
+   docs/EnricoVis/, a parallel visualization effort by the PI).
    Load AFTER the d3 CDN script and BEFORE the page's own inline
    data/logic. Everything lives on the global `ENRICO` namespace so
-   it never collides with a page's own top-level consts (the three
-   original apps each declare their own COLORS/TOPICS/etc.).
+   it never collides with a page's own top-level consts.
 
-   Source of truth for every palette here: docs/EnricoVis/grant_atlas.html
-   (agency), topic_islands.html (25-topic), topic_hierarchy.html (8-parent).
-   Copied verbatim — do not hand-edit a hex value in one place without
-   updating the other three app files, or the system's color meaning drifts.
+   Palettes here were copied verbatim from docs/EnricoVis/grant_atlas.html
+   (agency), topic_islands.html (25-topic), topic_hierarchy.html (8-parent)
+   at extraction time, to keep colors reading consistently across both the
+   PI's apps and these prototypes. If the PI's palettes change upstream,
+   this copy will silently drift — re-sync by hand if that matters.
    ============================================================ */
 (function (global) {
   "use strict";
