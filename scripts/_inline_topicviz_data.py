@@ -31,7 +31,11 @@ VIZ_DIR = REPO_ROOT / "docs" / "TopicVizPrototypes"
 # (html filename, [(JS const name, json filename), ...])
 TARGETS = [
     ("topic_flow.html", [("VIZ_META", "viz_meta.json"), ("TOPIC_TIME", "topic_time.json")]),
-    ("what_we_can_see.html", [("VIZ_META", "viz_meta.json"), ("COVERAGE", "coverage.json")]),
+    ("what_we_can_see.html", [
+        ("VIZ_META", "viz_meta.json"), ("COVERAGE", "coverage.json"),
+        ("FACETS", "facets.json"), ("MISSINGNESS", "missingness.json"),
+        ("FUNNEL", "funnel.json"),
+    ]),
 ]
 
 

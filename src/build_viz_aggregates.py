@@ -23,6 +23,14 @@ Reads (frozen, read-only, owned by docs/EnricoVis/ — never write here):
 Reads (locally built, optional — enriches provenance if present):
   data/processed/grants.parquet          grant_id -> abstract_source
                                           ("internal"/"orphan_recovered"/"")
+  data/processed/faculty_grants.parquet  grant_id -> PI's faculty_id + neu_status
+  data/processed/faculty_id_lookup.parquet  faculty_id -> college/academic_unit
+  data/processed/faculty.parquet         faculty_id -> hire_date (known/unknown)
+  data/processed/grant_orphan_recovery.parquet  full M2 audit (403 usable
+                                          orphans -> update/extra/duplicate/
+                                          unattributed), see src/reconcile_orphans.py
+  data/processed/grant_orphaned_abstracts.parquet  the raw 5,095-row orphan pool
+  data/processed/extra_neu_abstracts.parquet  the 65 'extra' pseudo-docs
 
 Writes (docs/TopicVizPrototypes/data/, committed, inlined into the
 prototypes at build time — CI does not publish source data/ directories,
@@ -33,6 +41,13 @@ see docs/TOPIC_WORK_EXECUTION_REPORT.md):
                      + a pre-2005 "prelude" summary (too sparse to stack)
   coverage.json     abstract coverage by agency x year, the NIH cliff, and
                      the Unassigned/artifact breakdown
+  facets.json       per-grant facet table (columnar/dictionary-encoded) for
+                     the "every grant, arranged" unit visualization
+  missingness.json  per-field known/missing/not-applicable counts across
+                     the whole corpus, for the missingness matrix panel
+  funnel.json       the abstract-sourcing pipeline (raw records -> matched
+                     rows -> unique grants -> grants with text) plus the M2
+                     orphan-recovery branch (update/extra/duplicate/unattributed)
 
 Run:
     .venv/bin/python -m src.build_viz_aggregates [--check-only]
@@ -126,7 +141,85 @@ CAVEATS = [
         "severity": "low",
         "text": "~88% of dollars are NSF/NIH. Internal, foundation, and industry funding are largely invisible.",
     },
+    {
+        "id": "roster_snapshot",
+        "severity": "high",
+        "text": (
+            "The faculty roster is a 2025 snapshot. Departed, retired, or renamed "
+            "faculty have no college — their grants are shown honestly as "
+            "'PI not on 2025 roster', not silently dropped."
+        ),
+    },
+    {
+        "id": "college_unmapped",
+        "severity": "low",
+        "text": (
+            "A handful of raw college strings (e.g. 'Math?', 'Network science "
+            "institute') don't match a known college and are shown as their own bin "
+            "rather than guessed at."
+        ),
+    },
+    {
+        "id": "external_collaborators",
+        "severity": "high",
+        "text": (
+            "Every record is stamped 'Northeastern' regardless of who else worked on "
+            "it — external co-investigators at other institutions are invisible here. "
+            "The collaboration network this data can support is NEU-internal only."
+        ),
+    },
 ]
+
+# Two per-grant "we can't attribute this" bins, used across facets.json and
+# missingness.json — distinct from each other on purpose:
+#   NO_PI_LABEL         — the grant has no PI row in faculty_grants at all
+#   PI_OFF_ROSTER_LABEL — a PI row exists, but that faculty_id has no college
+#                          in faculty_id_lookup (roster snapshot gap)
+NO_PI_LABEL = "No PI matched"
+PI_OFF_ROSTER_LABEL = "PI not on 2025 roster"
+
+# Known duplicate/typo college strings observed in faculty_id_lookup.college.
+# Everything NOT in this map passes through unchanged — including genuine
+# oddities ("Math?", "Network science institute", "Northeastern University")
+# which surface as their own honest bin rather than being guessed into one
+# of the real colleges.
+COLLEGE_NORMALIZE = {
+    "Engineering": "College of Engineering",
+    "College of science": "College of Science",
+    "Khoury": "Khoury College of Computer Sciences",
+}
+
+DOLLAR_BANDS = [
+    (0, 100_000, "< $100K"),
+    (100_000, 500_000, "$100K–$500K"),
+    (500_000, 1_000_000, "$500K–$1M"),
+    (1_000_000, 5_000_000, "$1M–$5M"),
+    (5_000_000, float("inf"), "≥ $5M"),
+]
+
+# The one cliff this round documents — verified: NIH+NIH-SUB coverage falls
+# from 64% (2019) to 3% (2020) to 0% (2021-2025). A module-level constant
+# (not inline in build_coverage) so both viz_meta.json AND coverage.json can
+# carry it — topic_flow.html only loads VIZ_META, what_we_can_see.html loads
+# both, and previously both HTML files hardcoded the 2019.5 marker position
+# themselves instead of reading it from here.
+CLIFFS = [{
+    "agency": "NIH",
+    "last_good_year": 2019,
+    "first_zero_year": 2021,
+    "text": (
+        "NIH abstract coverage falls from 64% (2019) to 3% (2020) to 0% "
+        "(2021-2025). Data-collection artifact; only NIH RePORTER backfill "
+        "can repair it."
+    ),
+}]
+
+
+def _dollar_band(amount: float) -> int:
+    for i, (lo, hi, _label) in enumerate(DOLLAR_BANDS):
+        if lo <= amount < hi:
+            return i
+    return len(DOLLAR_BANDS) - 1
 
 
 def _guard_output_path(path: Path) -> None:
@@ -173,12 +266,252 @@ def load_abstract_source(points: list[dict]) -> tuple[dict[str, str], str]:
     return {p["id"]: ("none" if p["titleOnly"] else "internal") for p in points}, "derived"
 
 
+def load_pi_attrs(points: list[dict]) -> tuple[dict[str, dict], str]:
+    """grant_id -> {college, academic_unit, hire_date_known, neu_status, on_roster}
+    for the grant's PI row (is_pi==True) in faculty_grants.parquet, joined to
+    faculty_id_lookup.parquet (college/academic_unit) and faculty.parquet
+    (hire_date). A grant absent from this dict has NO PI row at all — the
+    caller is responsible for mapping that to NO_PI_LABEL, not this function
+    (it only reports what it found).
+
+    Degrades honestly to an empty dict + "derived" if the parquets aren't
+    built locally — every grant then reads as NO_PI_LABEL downstream, same
+    spirit as load_abstract_source's fallback.
+    """
+    fg_path = PROC / "faculty_grants.parquet"
+    fl_path = PROC / "faculty_id_lookup.parquet"
+    fac_path = PROC / "faculty.parquet"
+    if not (fg_path.exists() and fl_path.exists() and fac_path.exists()):
+        return {}, "derived"
+
+    import pandas as pd  # local import: keep this script runnable with json alone
+
+    fg = pd.read_parquet(fg_path, columns=["faculty_id", "grant_id", "is_pi", "neu_status"])
+    fl = pd.read_parquet(fl_path, columns=["faculty_id", "college", "academic_unit"])
+    fac = pd.read_parquet(fac_path, columns=["faculty_id", "hire_date"])
+
+    college_by_faculty = dict(zip(fl["faculty_id"], fl["college"]))
+    unit_by_faculty = dict(zip(fl["faculty_id"], fl["academic_unit"]))
+    hire_known_by_faculty = dict(zip(fac["faculty_id"], fac["hire_date"].notna()))
+
+    pi_rows = fg[fg["is_pi"]].drop_duplicates(subset="grant_id", keep="first")
+
+    out: dict[str, dict] = {}
+    for row in pi_rows.itertuples(index=False):
+        gid = str(row.grant_id).strip()
+        raw_college = college_by_faculty.get(row.faculty_id)
+        on_roster = raw_college is not None and str(raw_college).strip() != ""
+        raw_unit = unit_by_faculty.get(row.faculty_id)
+        college = (
+            COLLEGE_NORMALIZE.get(str(raw_college).strip(), str(raw_college).strip())
+            if on_roster else PI_OFF_ROSTER_LABEL
+        )
+        academic_unit = str(raw_unit).strip() if raw_unit is not None and str(raw_unit).strip() else PI_OFF_ROSTER_LABEL
+        out[gid] = {
+            "college": college,
+            "academic_unit": academic_unit,
+            "hire_date_known": bool(hire_known_by_faculty.get(row.faculty_id, False)),
+            "neu_status": row.neu_status or "unknown",
+            "on_roster": on_roster,
+        }
+    return out, "parquet"
+
+
+def build_facets(points: list[dict], topics: list[dict]) -> dict:
+    """Per-grant facet table for the "every grant, arranged" unit visualization.
+    Columnar/dictionary-encoded rather than an array of 2,676 objects — keeps
+    the inlined HTML payload small and every column trivial to bin in d3.
+    Every categorical column has a bin for missing values; no grant is ever
+    dropped from a facet, by construction (see the invariant tests in
+    validate()).
+    """
+    from src.build_viz_data import ORDER
+
+    abs_src, abs_source = load_abstract_source(points)
+    pi_attrs, pi_source = load_pi_attrs(points)
+    parent_of_topic = {t["id"]: _parent_index(t.get("parent")) for t in topics}
+
+    ag_levels = list(ORDER)
+    ag_index = {k: i for i, k in enumerate(ag_levels)}
+    st_levels = ["earned_at_neu", "prior_institution", "unknown", NO_PI_LABEL]
+    st_index = {k: i for i, k in enumerate(st_levels)}
+    asrc_levels = ["internal", "orphan_recovered", "none"]
+    asrc_index = {k: i for i, k in enumerate(asrc_levels)}
+    amt_levels = [label for (_lo, _hi, label) in DOLLAR_BANDS]
+
+    # College levels are collected dynamically (the roster isn't a fixed enum),
+    # but the two miss bins always come first so they read as a deliberate
+    # "gap" column rather than being buried among real colleges.
+    col_levels: list[str] = [NO_PI_LABEL, PI_OFF_ROSTER_LABEL]
+    col_index: dict[str, int] = {NO_PI_LABEL: 0, PI_OFF_ROSTER_LABEL: 1}
+
+    def college_idx(label: str) -> int:
+        if label not in col_index:
+            col_index[label] = len(col_levels)
+            col_levels.append(label)
+        return col_index[label]
+
+    ids: list[str] = []
+    cols: dict[str, list[int]] = {k: [] for k in
+                                   ("ag", "yr", "col", "st", "ab", "asrc", "tp", "tid", "pi", "amt")}
+
+    for p in points:
+        gid = str(p["id"]).strip()
+        ids.append(gid)
+        cols["ag"].append(ag_index[p["agency"]])
+        cols["yr"].append(p["year"] if p["year"] is not None else -1)
+        cols["tp"].append(parent_of_topic.get(p["dom"], -1))
+        cols["tid"].append(p["dom"])
+        cols["ab"].append(0 if p["titleOnly"] else 1)
+        cols["asrc"].append(asrc_index.get(abs_src.get(gid, "none"), asrc_index["none"]))
+        cols["amt"].append(_dollar_band(p["amount"]))
+
+        attrs = pi_attrs.get(gid)
+        if attrs is None:
+            cols["col"].append(college_idx(NO_PI_LABEL))
+            cols["st"].append(st_index[NO_PI_LABEL])
+            cols["pi"].append(0)
+        else:
+            cols["col"].append(college_idx(attrs["college"]))
+            cols["st"].append(st_index.get(attrs["neu_status"], st_index["unknown"]))
+            cols["pi"].append(1 if attrs["on_roster"] else 0)
+
+    return {
+        "n": len(points),
+        "ids": ids,
+        "levels": {"ag": ag_levels, "col": col_levels, "st": st_levels, "asrc": asrc_levels, "amt": amt_levels},
+        "cols": cols,
+        "provenance": {"abstract_source": abs_source, "pi_attrs": pi_source},
+    }
+
+
+def build_missingness(points: list[dict], pi_attrs: dict[str, dict], abs_src: dict[str, str]) -> dict:
+    """Per-field known/missing/not-applicable counts across the whole corpus,
+    for the missingness matrix panel. Every field is scored against all 2,676
+    grants — none of these have a genuine "not applicable" case in this
+    corpus today, but the field is kept in the schema so a future facet
+    (e.g. a field that only applies to a subset) doesn't need a schema change.
+    """
+    n = len(points)
+    fields = []
+
+    def row(field_id: str, label: str, known: int) -> None:
+        fields.append({"id": field_id, "label": label, "known": known, "missing": n - known, "na": 0})
+
+    row("agency", "Agency", sum(1 for _ in points))  # always populated in this corpus
+    row("dollars", "Dollar amount", sum(1 for p in points if p["amount"] is not None))
+    row("dates", "Start year", sum(1 for p in points if p["year"] is not None))
+    row("abstract", "Abstract text", sum(1 for p in points if not p["titleOnly"]))
+    row("topic", "Topic label", sum(1 for p in points if p["dom"] not in (-1, ARTIFACT_TOPIC_ID)))
+
+    def has(gid: str, pred) -> bool:
+        attrs = pi_attrs.get(gid)
+        return attrs is not None and pred(attrs)
+
+    row("pi_link", "PI matched to a grant record",
+        sum(1 for p in points if pi_attrs.get(str(p["id"]).strip()) is not None))
+    row("college", "PI's college",
+        sum(1 for p in points if has(str(p["id"]).strip(), lambda a: a["on_roster"])))
+    row("department", "PI's academic unit",
+        sum(1 for p in points if has(str(p["id"]).strip(), lambda a: a["on_roster"])))
+    row("hire_date", "PI's hire date",
+        sum(1 for p in points if has(str(p["id"]).strip(), lambda a: a["hire_date_known"])))
+    row("neu_status", "Pre-hire vs. at-NEU attribution",
+        sum(1 for p in points
+            if has(str(p["id"]).strip(), lambda a: a["neu_status"] in ("earned_at_neu", "prior_institution"))))
+
+    fields.sort(key=lambda f: f["missing"], reverse=True)
+    return {"n": n, "fields": fields}
+
+
+# Two facts verified directly against the raw grants-with-abstract.xlsx via
+# src/build_dataset.py's own logged run (data/processed/PIPELINE_VALIDATION.txt)
+# and NOT recomputable from any committed parquet alone — build_dataset.py's
+# matched/orphaned split happens on the raw upload-system rows before either
+# is persisted in full, so only the two output sizes below (and their
+# difference) survive to disk. Update these two numbers if build_dataset.py
+# is ever rerun against a materially different raw abstract export.
+RAW_ABSTRACT_RECORDS = 8075
+RAW_MATCHED_UNIQUE_GRANTS = 2410  # rows whose sourceactivityid hit an NEU grant_id, deduped to one-per-grant
+
+
+def build_funnel() -> dict:
+    """The abstract-sourcing pipeline (raw upload records -> rows that match
+    an NEU grant_id -> deduped unique grants -> grants that end up with real
+    text) plus the M2 orphan-recovery branch (src/reconcile_orphans.py) off
+    the "didn't match" step. Deliberately does NOT continue the trunk on to
+    "grants with a confident topic" — that's a different, independent
+    attribute (title-only grants get topics too; see the mosaic panel above)
+    and chaining it here would wrongly imply topic assignment requires text.
+
+    Degrades honestly (branch omitted, not zeroed) if the M2 outputs aren't
+    built locally.
+    """
+    orphaned_path = PROC / "grant_orphaned_abstracts.parquet"
+    recovery_path = PROC / "grant_orphan_recovery.parquet"
+    extra_path = PROC / "extra_neu_abstracts.parquet"
+    grants_path = PROC / "grants.parquet"
+
+    if not (orphaned_path.exists() and grants_path.exists()):
+        return {"trunk": [], "branch": None, "totals": {}, "provenance": "derived"}
+
+    import pandas as pd
+
+    orphaned_n = len(pd.read_parquet(orphaned_path, columns=["id"]))
+    g = pd.read_parquet(grants_path, columns=["abstract_source"])
+    has_text_n = int((g["abstract_source"] == "internal").sum())
+
+    # Labels here are the ones rendered directly in the funnel chart, so they're
+    # written for the dashboard's stakeholder audience — no column/file names
+    # (grant_id, .parquet, etc.); that provenance detail belongs in the code
+    # comments and docs, not in audience-facing chart text.
+    trunk = [
+        {"id": "raw_records", "label": "Raw abstract records uploaded", "n": RAW_ABSTRACT_RECORDS},
+        {"id": "matched_rows", "label": "Rows matching an NEU grant", "n": RAW_ABSTRACT_RECORDS - orphaned_n},
+        {"id": "matched_grants", "label": "Unique NEU grants matched (most recent record kept)", "n": RAW_MATCHED_UNIQUE_GRANTS},
+        {"id": "has_text", "label": "Grants that end up with usable text", "n": has_text_n},
+    ]
+
+    if not (recovery_path.exists() and extra_path.exists()):
+        return {"trunk": trunk, "branch": None, "totals": {"grants_total": len(g)}, "provenance": "partial"}
+
+    rec = pd.read_parquet(recovery_path, columns=["bucket"])
+    bucket_n = rec["bucket"].value_counts().to_dict()
+    extra_n = len(pd.read_parquet(extra_path, columns=["doc_id"]))
+
+    branch = {
+        "from": "raw_records",
+        "n": orphaned_n,
+        "label": "Records with no matching NEU grant (“orphans”)",
+        "steps": [
+            {"id": "usable", "label": "Substantial enough text to attempt a match", "n": sum(bucket_n.values())},
+            {"id": "update", "label": "Backfilled onto an existing abstract-less grant", "n": bucket_n.get("update", 0)},
+            {"id": "extra", "label": "Added as a new record for the topic model", "n": bucket_n.get("extra", extra_n)},
+            {"id": "duplicate", "label": "Re-upload of an already-abstracted grant (dropped, not double-counted)", "n": bucket_n.get("duplicate", 0)},
+            {"id": "unattributed", "label": "No faculty resolved (dropped)", "n": bucket_n.get("unattributed", 0)},
+        ],
+    }
+
+    totals = {
+        "grants_total": len(g),
+        "has_text_final": int(g["abstract_source"].isin(["internal", "orphan_recovered"]).sum()),
+        "corpus_for_bertopic": len(g) + extra_n,
+    }
+    return {"trunk": trunk, "branch": branch, "totals": totals, "provenance": "parquet"}
+
+
 def build_viz_meta(points: list[dict], topics: list[dict]) -> dict:
     from src.build_viz_data import COLORS, ORDER  # reuse verbatim, palettes can't drift
 
     agencies = []
     for key in ORDER:
-        label = next((p["agencyLabel"] for p in points if p["agency"] == key), key)
+        if key == "Other":
+            # "Other" is a bucket of several agencies (HHS, NEH, NOAA, USDA, ...)
+            # below the naming threshold — taking any single point's agencyLabel
+            # here previously mislabeled the whole bucket as one of them.
+            label = "Other (HHS, NEH, NOAA, USDA, and other small agencies)"
+        else:
+            label = next((p["agencyLabel"] for p in points if p["agency"] == key), key)
         agencies.append({"key": key, "label": label, "color": COLORS[key]})
 
     parents = [
@@ -232,9 +565,13 @@ def build_viz_meta(points: list[dict], topics: list[dict]) -> dict:
             "dollars": total_dollars,
             "unassigned_n": unassigned_n,
             "unassigned_dollars": unassigned_dollars,
-            "unassigned_share": round(unassigned_dollars / total_dollars, 4),
+            # dollar share, NOT count share — see coverage.json's unassigned.share_n
+            # for the count-share sibling. The two were both called "share" before
+            # and were easy to mix up across the two files.
+            "unassigned_share_d": round(unassigned_dollars / total_dollars, 4),
         },
         "caveats": CAVEATS,
+        "cliffs": CLIFFS,
     }
 
 
@@ -338,19 +675,6 @@ def build_coverage(points: list[dict]) -> dict:
         "title_unassigned": sum(1 for p in points if p["titleOnly"] and p["dom"] == -1),
     }
 
-    # The one cliff this round documents — verified: NIH+NIH-SUB coverage
-    # falls from 64% (2019) to 3% (2020) to 0% (2021-2025).
-    cliffs = [{
-        "agency": "NIH",
-        "last_good_year": 2019,
-        "first_zero_year": 2021,
-        "text": (
-            "NIH abstract coverage falls from 64% (2019) to 3% (2020) to 0% "
-            "(2021-2025). Data-collection artifact; only NIH RePORTER backfill "
-            "can repair it."
-        ),
-    }]
-
     return {
         "years": years,
         "agencies": ORDER,
@@ -370,14 +694,17 @@ def build_coverage(points: list[dict]) -> dict:
             "n": unassigned_n + t11_n,
             "noise_n": unassigned_n,
             "t11_n": t11_n,
-            "share": round((unassigned_n + t11_n) / len(points), 4),
+            # count share, NOT dollar share — see viz_meta.json's totals.unassigned_share_d
+            # for the dollar-share sibling.
+            "share_n": round((unassigned_n + t11_n) / len(points), 4),
         },
         "crosstab": crosstab,
-        "cliffs": cliffs,
+        "cliffs": CLIFFS,
     }
 
 
-def validate(points: list[dict], viz_meta: dict, topic_time: dict, coverage: dict) -> list[str]:
+def validate(points: list[dict], viz_meta: dict, topic_time: dict, coverage: dict,
+             facets: dict, missingness: dict, funnel: dict) -> list[str]:
     lines = []
     n = len(points)
     total_dollars = sum(p["amount"] for p in points)
@@ -419,7 +746,7 @@ def validate(points: list[dict], viz_meta: dict, topic_time: dict, coverage: dic
     assert viz_meta["totals"]["unassigned_n"] == coverage["unassigned"]["n"] == 808, "Unassigned count drifted from 808"
     lines.append(f"Unassigned = {coverage['unassigned']['n']} grants, "
                  f"${viz_meta['totals']['unassigned_dollars']:,.0f} "
-                 f"({viz_meta['totals']['unassigned_share']:.1%})")
+                 f"({viz_meta['totals']['unassigned_share_d']:.1%})")
 
     lines.append(f"abstract_source provenance path = {coverage['provenance']['source']}")
 
@@ -428,6 +755,48 @@ def validate(points: list[dict], viz_meta: dict, topic_time: dict, coverage: dic
     abs_rate = ct["abs_unassigned"] / (ct["abs_assigned"] + ct["abs_unassigned"])
     title_rate = ct["title_unassigned"] / (ct["title_assigned"] + ct["title_unassigned"])
     lines.append(f"unassigned rate: has-abstract {abs_rate:.1%}, title-only {title_rate:.1%} (should be close)")
+
+    # facets.json — the "no grant ever dropped by a facet change" invariant.
+    for col_name, values in facets["cols"].items():
+        assert len(values) == n, f"facets column '{col_name}' length != {n}"
+    lines.append(f"facets: {len(facets['cols'])} columns, all length {n} ✓")
+    lines.append(f"facets: pi_attrs provenance path = {facets['provenance']['pi_attrs']}")
+
+    no_pi_idx = facets["levels"]["col"].index(NO_PI_LABEL)
+    off_roster_idx = facets["levels"]["col"].index(PI_OFF_ROSTER_LABEL)
+    no_pi_n = sum(1 for v in facets["cols"]["col"] if v == no_pi_idx)
+    off_roster_n = sum(1 for v in facets["cols"]["col"] if v == off_roster_idx)
+    lines.append(f"facets: {no_pi_n} grants with '{NO_PI_LABEL}', {off_roster_n} with '{PI_OFF_ROSTER_LABEL}'")
+    if facets["provenance"]["pi_attrs"] == "parquet":
+        # Verified against a rebuilt corpus at plan time: 312 grants have no PI
+        # row at all; 48 PI rows (13 distinct faculty) resolve to a PI absent
+        # from faculty_id_lookup. Both come from data/processed/*.parquet, so
+        # only assert them when that path was actually taken.
+        assert no_pi_n == 312, f"'{NO_PI_LABEL}' count drifted from 312 (got {no_pi_n})"
+        assert off_roster_n == 48, f"'{PI_OFF_ROSTER_LABEL}' count drifted from 48 (got {off_roster_n})"
+
+    # missingness.json — every field scored against the same 2676-grant corpus.
+    for f in missingness["fields"]:
+        assert f["known"] + f["missing"] + f["na"] == n, f"missingness field '{f['id']}' doesn't sum to {n}"
+    lines.append(f"missingness: {len(missingness['fields'])} fields, all reconcile to {n} ✓")
+
+    # funnel.json — the trunk must be monotonically non-increasing, and the
+    # raw/matched/orphaned split must reconcile to the known raw record count.
+    if funnel["provenance"] != "derived":
+        trunk_ns = [s["n"] for s in funnel["trunk"]]
+        assert trunk_ns == sorted(trunk_ns, reverse=True), "funnel trunk is not monotonically non-increasing"
+        assert trunk_ns[0] == RAW_ABSTRACT_RECORDS, "funnel trunk doesn't start at the verified raw record count"
+        lines.append(f"funnel trunk: {' -> '.join(str(x) for x in trunk_ns)}")
+        if funnel["branch"] is not None:
+            matched_rows_n = trunk_ns[1]
+            assert matched_rows_n + funnel["branch"]["n"] == RAW_ABSTRACT_RECORDS, \
+                "matched rows + orphaned rows don't sum to the raw record count"
+            bucket_sum = sum(s["n"] for s in funnel["branch"]["steps"][1:])  # update+extra+duplicate+unattributed
+            assert bucket_sum == funnel["branch"]["steps"][0]["n"], \
+                "orphan recovery buckets don't sum to the 'usable' step"
+            lines.append(f"funnel branch: {funnel['branch']['n']} orphans, "
+                         f"{funnel['branch']['steps'][0]['n']} usable, buckets sum to usable ✓")
+
     return lines
 
 
@@ -440,8 +809,13 @@ def main() -> None:
     viz_meta = build_viz_meta(points, topics)
     topic_time = build_topic_time(points, topics)
     coverage = build_coverage(points)
+    facets = build_facets(points, topics)
+    abs_src, _ = load_abstract_source(points)
+    pi_attrs, _ = load_pi_attrs(points)
+    missingness = build_missingness(points, pi_attrs, abs_src)
+    funnel = build_funnel()
 
-    report = validate(points, viz_meta, topic_time, coverage)
+    report = validate(points, viz_meta, topic_time, coverage, facets, missingness, funnel)
     viz_meta["validation"] = report
     print("\n".join(report))
 
@@ -450,7 +824,10 @@ def main() -> None:
         return
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    for name, obj in [("viz_meta", viz_meta), ("topic_time", topic_time), ("coverage", coverage)]:
+    for name, obj in [
+        ("viz_meta", viz_meta), ("topic_time", topic_time), ("coverage", coverage),
+        ("facets", facets), ("missingness", missingness), ("funnel", funnel),
+    ]:
         p = OUT_DIR / f"{name}.json"
         _guard_output_path(p)
         p.write_text(json.dumps(obj, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
