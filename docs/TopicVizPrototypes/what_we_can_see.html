@@ -47,7 +47,13 @@
   .drawer .drawerbody b{font-weight:650}
   .panel .drawer{margin-top:10px}
   .panel .drawer .drawerbody{max-width:none}
-  #facetstage{height:66vh;min-height:480px;border-bottom:1px solid var(--hair);display:flex;flex-direction:column}
+  /* No fixed height here on purpose — JS sets #facetchartwrap's height to
+     match the actual bin layout each render (see renderFacetChart). A fixed
+     height meant the SVG's viewBox grew taller as "Split by" produced more,
+     smaller bins, and the browser scaled the whole drawing down to fit —
+     shrinking every bin instead of growing the page. min-height is just the
+     floor for a small bin count (e.g. arranging by agency alone). */
+  #facetstage{min-height:480px;border-bottom:1px solid var(--hair);display:flex;flex-direction:column}
   #facetchartwrap{flex:1;min-height:0}
   #facetchart{position:absolute;inset:0;width:100%;height:100%}
   .facetselect{
@@ -626,8 +632,22 @@ function renderFacetChart() {
   const colorMap = new Map(colorLevels.map(lv => [lv.key, lv.color]));
   const colorVals = colorDef.values();
 
+  // A fine-grained "Split by" (e.g. parent theme) can produce many small
+  // bins, growing totalH well past the container's old fixed height — the
+  // SVG's viewBox would grow to match, but the browser then scaled the
+  // whole drawing down to fit the still-fixed container, shrinking every
+  // bin. Instead, size the container itself to the content: grow #facetstage
+  // (via #facetchartwrap, its flexed child) to fit, with the same 480px
+  // floor the CSS used to hardcode, so a small bin count doesn't collapse
+  // the stage to nothing either. flex is overridden to "0 0 auto" because
+  // "flex:1" (its default here) sets flex-basis:0%, which would ignore an
+  // explicit height entirely.
+  const chartH = Math.max(480, totalH + 24);
+  wrap.style.flex = "0 0 auto";
+  wrap.style.height = `${chartH}px`;
+
   const svgEl = d3.select("#facetchart");
-  svgEl.attr("viewBox", `0 0 ${W} ${Math.max(totalH + 16, wrap.clientHeight)}`);
+  svgEl.attr("viewBox", `0 0 ${W} ${chartH}`);
 
   const plot = svgEl.selectAll("g.plotroot").data([null]).join("g")
     .attr("class", "plotroot")
