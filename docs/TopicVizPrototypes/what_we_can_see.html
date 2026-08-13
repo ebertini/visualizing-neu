@@ -36,22 +36,25 @@
   .sectionhead .sub2{font-family:var(--mono);font-size:11px;color:var(--muted)}
 
   /* Facet grid's own sectionhead sits side by side with the Selected Grant
-     panel — both are "information" rather than the visualization itself.
-     Scoped to `.sectionhead-row > .sectionhead` (a descendant selector,
-     more specific than the plain `.sectionhead` rule above) so every
-     OTHER section's own header — missingsection/stagesection/panels/
+     panel — both are "information" rather than the visualization itself,
+     and split the row exactly evenly (1fr 1fr, same pattern #panels below
+     already uses for its own two-column split) rather than one growing to
+     fill leftover space while the other caps out. Scoped to
+     `.sectionhead-row > .sectionhead` (a descendant selector, more
+     specific than the plain `.sectionhead` rule above) so every OTHER
+     section's own header — missingsection/stagesection/panels/
      negspacesection, none of which use this wrapper — is untouched.
-     flex-wrap so narrow viewports stack instead of squeezing two columns.
      No max-width/margin:auto (unlike the plain .sectionhead rule below,
      which centers at 1180px) — #facetstage/#facetchartwrap below it are
      full-bleed with no width cap of their own, so this row spans the same
      100% width instead of sitting as a narrower, centered island above a
      wider canvas. */
   .sectionhead-row{
-    display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap;
+    display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start;
     padding:20px 24px 2px;
   }
-  .sectionhead-row > .sectionhead{flex:1 1 380px;max-width:none;margin:0;padding:0}
+  @media (max-width:860px){.sectionhead-row{grid-template-columns:1fr}}
+  .sectionhead-row > .sectionhead{max-width:none;margin:0;padding:0}
 
   /* Caveats, relocated here from a full-width bar at the bottom of the
      chart (PI feedback: it read as an afterthought down there for how
@@ -80,7 +83,7 @@
     border-left:3px solid transparent;transition:background .15s,border-color .15s;
   }
   .sectionhead-row > .selectedgrant-panel{
-    flex:1 1 320px;max-width:420px;margin:0;padding:2px 0 2px 16px;
+    max-width:none;margin:0;padding:2px 0 2px 16px;
   }
   .selectedgrant-panel h2{
     margin:0 0 6px;font-family:var(--mono);font-size:10.5px;font-weight:600;
@@ -129,6 +132,11 @@
      Both #facetlabels and #facetscroll are positioned in px via JS (their
      `left` depends on whether the dock is open) rather than CSS alone. */
   #facetlabels{position:absolute;top:0;bottom:0;pointer-events:none;overflow:hidden}
+  /* Row labels can be wrapped/truncated (wrapLabel) but still need the full
+     name on hover — scoped to #facetlabels so this doesn't also make the
+     Coverage tab's heatmap row labels (the OTHER thing named .rowlabel)
+     newly interactive. */
+  #facetlabels .rowlabel{pointer-events:auto;cursor:default}
   /* Unlike the old #facetchart (position:absolute;inset:0;width:100%;
      height:100%, which stretched the SVG — and therefore its viewBox — to
      exactly fill the container), #facetscroll is the one that fills the
@@ -1190,7 +1198,9 @@ function renderFacetChart() {
         .map((line, li) => `<tspan x="0"${li > 0 ? ` dy="${LABEL_LINE_H}"` : ""}>${E.esc(line)}</tspan>`)
         .join("");
       return `${lines}<tspan class="n"> · ${d.total.toLocaleString()}</tspan>`;
-    });
+    })
+    .on("mousemove", (ev, d) => facetTip.show(`<div class="t">${E.esc(aLevels[d.ai].label)}</div>`, ev.clientX, ev.clientY))
+    .on("mouseleave", () => facetTip.hide());
 
   const plot = svgEl.selectAll("g.plotroot").data([null]).join("g").attr("class", "plotroot");
 
@@ -1210,7 +1220,9 @@ function renderFacetChart() {
     .attr("class", "colhdr").attr("x", CELL_PAD).attr("y", 11)
     .html(d => d.lines
       .map((line, li) => `<tspan x="${CELL_PAD}"${li > 0 ? ` dy="${LABEL_LINE_H}"` : ""}>${E.esc(line)}</tspan>`)
-      .join(""));
+      .join(""))
+    .on("mousemove", (ev, d) => facetTip.show(`<div class="t">${E.esc(d.lv.label)}</div>`, ev.clientX, ev.clientY))
+    .on("mouseleave", () => facetTip.hide());
 
   // Empty-cell placeholder — the same "no grants here" hairline token
   // enrico.js's drawCoverageStrip uses for "no grants that year", so
