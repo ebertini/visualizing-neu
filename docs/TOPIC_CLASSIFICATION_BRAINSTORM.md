@@ -1,0 +1,65 @@
+# Keyword-classifier brainstorm — outcome & next design questions
+
+Record of two conversations with Enrico on the keyword→classifier topic method, and what's still open going into the next design pass. No longer pre-meeting prep — the meeting happened; this is what came out of it plus the narrowed set of questions that remain.
+
+(UI feedback from the same conversation — removing PI-matched/abstract facets, a new parent-theme palette, a "none" color option, label abbreviation, grant title on hover — has been implemented separately in `what_we_can_see.html` and isn't covered here.)
+
+---
+
+## Where things landed
+
+**First exchange (Slack).** Confirmed the architecture — a transparent classifier where topics are defined by human-inspectable keyword lists, and documents are linked to topics through those lists — while leaving two mechanisms explicitly open: how the keyword list gets extracted/curated, and what function links topics to documents through them.
+
+**Second exchange (in person).** Talking through the existing pipeline — SPECTER2 embeddings, BERTopic, clusters already computed — resolved the first mechanism largely by recognizing it already exists: "cluster documents, then extract keywords from the clusters" is exactly what the BERTopic pipeline already does. The 25 existing topics and their c-TF-IDF keyword sets (`docs/EnricoVis/data/topics.json`) are a legitimate Step-1 output as-is — no new clustering work is required. (What a curation pass on those lists still needs to cover is its own open question below — this doesn't mean the lists are ready to use unmodified.)
+
+On the second mechanism — how a document actually gets connected to a topic — the resolution is a **hybrid**, not a single method:
+
+1. A **manual curation pass** on the existing topic labels/keyword lists — a human review step.
+2. An **LLM**, given a grant's text and the curated keyword lists, decides which topic(s) it belongs to — replacing both the hand-coded scoring-function idea (count / TF-IDF-weighted / coverage matching) and a trained classifier (logistic regression / random forest / XGBoost) that were both on the table before.
+
+This is a real decision, not just a restatement of the Slack message — it resolves the *shape* of the method. It is not a finished spec: LLM choice, prompt design, cost at 2,676-grant scale, and exactly how curation and classification sequence together are all still undecided. **Building the actual pipeline is separate, future work — not started, and not scoped yet.**
+
+"Which student, which prior work" (the person Enrico wants looped in) — no update; still unresolved as far as this record shows.
+
+---
+
+## Constraints worth keeping in mind
+
+Still true regardless of the new direction:
+
+1. **The only keyword lists that currently exist are outputs of the model this method was originally framed as an alternative to.** `docs/EnricoVis/data/topics.json` holds 25 topics × 10 c-TF-IDF terms each (mirrored in `viz_meta.json`), derived from the BERTopic clusters. Now that reusing them is the explicit plan (rather than a fallback), this is less a concern than a starting point — but it does mean the curation pass is editing BERTopic's own output, not building something independent of it.
+2. **There is no BERTopic confidence or coherence score to compare against.** BERTopic ran with hard assignments only (`calculate_probabilities=False`), so every committed artifact is one-hot. The often-quoted "27.6% / 28.0%" figures are *unassigned rates*, not confidences.
+3. **The embedding stack (SPECTER2/UMAP/HDBSCAN) can't be re-run in this environment** — no HuggingFace network access locally or in CI. BERTopic can't be refit with a different vectorizer, so the BERTopic side of any comparison is limited to what's already frozen: `{grant → dominant topic, is-noise flag, its 10 top terms, UMAP x/y}`. Note this constraint's original framing — "a purely lexical method would be the only part that reproduces exactly anywhere" — matters less now that assignment goes through an LLM rather than a deterministic keyword-match function; LLM output isn't perfectly reproducible either (see Axis 2 below).
+4. **The existing stopword list was tuned against the opposite objective.** `src/clean_text.py`'s `DOMAIN_STOPS` (~124 terms) removes words like *science, engineering, technology, design, data, information, systems, model, method, field* — because they were merging otherwise-distinct *unsupervised* topics. In the BERTopic pipeline these go straight into the vectorizer's stopword list, so multi-word terms containing them — "data science," "systems engineering," "information theory" — never survive into the 10-term lists in the first place. This is now directly the curation pass's problem to fix, not a hypothetical one.
+5. **740 of 2,676 grants are title-only** (roughly 10 words vs. ~200 for an abstract). Less mechanically relevant now that matching isn't a hand-coded count function, but still worth keeping in mind for prompt design — a title-only grant gives an LLM much less to work with.
+6. **The aggressive text-cleaning path strips digits and hyphens.** `COVID-19`, `CRISPR-based`, `PM2.5`, `2D materials` would silently degrade if a keyword list is built against that cleaned text — worth checking which cleaning path (if any) the curation pass and the LLM prompt actually use.
+
+---
+
+## Open questions — curation (the manual pass on keyword lists)
+
+- **Who does it, and against what criteria?** Still no written procedure — no sampling rule, no accept/reject/merge criteria, no record of *why* a term was added or dropped. If curation is now explicitly part of the method (not just tidying), its reasoning is part of the method's transparency claim, not overhead around it.
+- **Does it restore the `DOMAIN_STOPS`-stripped phrases (constraint 4), or is that out of scope?**
+- **Is 10 terms per topic enough?** That number was tuned for "enough to label a cluster for a human reading a legend" — a very different bar than "enough for an LLM to reliably tell topics apart," especially for topics that are close to each other in subject matter. Curation may need to *add* terms, not just clean the existing ones.
+- **Can a term belong to more than one topic's list, or does curation need to actively disambiguate?** This is close to the center of the whole exercise — the concrete failure this method exists to fix is a term like "neural networks" meaning ML in one context and neuroscience in another (the Alshawabkeh Puerto Rico grants being mis-bucketed under Biomedical was the original motivating example). Curation is exactly where that gets resolved or doesn't.
+- **Does the curated output stay a flat term list, or become something richer?** Since the consumer is now an LLM rather than an exact-match function, curation could productively add more than keywords — short topic descriptions, example grants, explicit non-examples — that a keyword-matcher couldn't have used but an LLM prompt can.
+- **Which student, which prior work?** Still the highest-leverage unresolved question — `docs/NedaNotebooks/04_topic_validation.ipynb` (lemmatized preprocessing, a richer stopword scheme, coherence + confidence validation already written) remains the strongest candidate for "prior work" if that's what he meant.
+
+## Open questions — the LLM classification step
+
+- **Which LLM**, and what that implies for cost/access — this repo currently makes no LLM API calls anywhere, so this is new infrastructure, not a reuse of something already wired up.
+- **Prompt design:** does one call see all 25 topics' curated lists and pick among them (single classification call per grant), or is each grant checked against each topic separately (25 calls per grant)? Very different cost and consistency profiles.
+- **Single-label or multi-label?** An LLM makes multi-label materially easier to actually build than a hand-coded scorer would have been — worth revisiting whether single-topic-per-grant (which every existing artifact and visualization currently assumes) is still the right constraint, or whether it's worth reworking that assumption now that it's cheap to support multiple.
+- **The abstain rule.** Can the LLM say "none of the 25 topics fit this grant"? BERTopic's Unassigned bucket (808 grants / $607M / 27.8% of the corpus) is the main honesty claim the dashboard is built around, and shrinking it is presumably a chunk of this method's appeal — so this needs an explicit, deliberate answer, not whatever the LLM happens to default to.
+- **Cost and latency at scale.** 2,676 grants, and re-run cost every time the corpus or the curated keyword lists change (which, per the curation questions above, may happen more than once).
+- **Reproducibility.** LLM output isn't as deterministic as a keyword-match function — worth deciding whether fixing temperature/prompt version is enough for a dashboard meant to be auditable, or whether something else (e.g. majority vote across repeated calls) is needed.
+- The old scoring-function question (binary / count / TF-IDF-weighted / coverage matching) and the exact/stemmed/soft-match question are both **moot now** — an LLM doesn't need a hand-coded matching rule. Removed from this list.
+
+## How we'll know it worked
+
+Unchanged from before — still applies directly to an LLM-based classifier's output:
+
+- **There's no ground truth in this project at all** — no grant has ever been hand-labeled by a person. A stratified gold set (maybe 150–200 grants, stratified across agency, abstract-present vs. title-only, and BERTopic-assigned vs. unassigned) would let the LLM classifier be *scored* against something real, not just compared to BERTopic. This doesn't depend on any of the open questions above being resolved first, so it's a reasonable thing to start on independently.
+- **What's the actual comparison axis** — raw agreement with BERTopic's hard labels, or specifically how much of the 808-grant Unassigned bucket the new method can confidently place?
+- **A validation harness already exists and is a strong fit.** `docs/NedaNotebooks/04_topic_validation.ipynb` already has coherence scoring, a confidence-margin metric with threshold sweeps, manual spot-checks, and a logistic-regression separability test — an LLM classifier's output could drop straight into that harness as a new label column. Separately, `src/build_viz_aggregates.py`'s validation step could absorb a new per-grant assignment as an additional column and get "every grant accounted for" checking for free.
+- **Where does this land in the deliverable?** A side-by-side comparison panel added to the dashboard (the still-open "topic-reliability" panel), or an eventual replacement of BERTopic as canonical? Still open, and still changes how much of the existing visualization work would need to move.

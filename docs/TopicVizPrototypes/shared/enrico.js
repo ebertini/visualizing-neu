@@ -187,6 +187,25 @@
     return { render, get yLo() { return yLo; }, get yHi() { return yHi; } };
   }
 
+  // ---- coverage ramp (house grey->blue), t in [0,1] = coverage FRACTION.
+  // Deliberately anchored at NOISE_GREY: 0% coverage is meant to visually
+  // read as kin to "Unassigned" (thin evidence looks like the same grey as
+  // no-confident-topic), which is the point of this specific encoding. Only
+  // use this for a genuine coverage/fraction value — see seqColor below for
+  // ordinal facets where the low end is real data, not an absence.
+  const coverageRamp = d3.interpolateRgb(NOISE_GREY, "#0072B2");
+
+  // ---- sequential ramp for ORDINAL facets (a start year, a dollar band)
+  // that want "later/more reads as more saturated" without a categorical
+  // palette's implication of unordered peers. Anchored at a light BLUE, not
+  // NOISE_GREY — unlike coverageRamp above, the low end here is real data
+  // (the earliest year, the smallest dollar band), and #c7ccd3 is reserved
+  // for Unassigned/no-data system-wide; reusing coverageRamp here would make
+  // "earliest year" visually indistinguishable from "no data".
+  // seqColor(t) takes t in [0,1]; callers normalize their own domain first.
+  const sequentialRamp = d3.interpolateRgb("#bcd9ec", "#0072B2");
+  const seqColor = (t) => sequentialRamp(Math.max(0, Math.min(1, t)));
+
   // ---- coverage evidence strip: a thin per-year ribbon, fill = coverage
   // fraction on the house grey->blue ramp. Shared by topic_flow.html
   // (under the x-axis) and what_we_can_see.html (as its hero encoding),
@@ -195,7 +214,6 @@
   // years: array of year numbers (dense, including zero-coverage years).
   // coverageByYear: Map/object year -> fraction in [0,1] or null/undefined
   //   for "no grants that year" (rendered as a hairline, not a hole).
-  const coverageRamp = d3.interpolateRgb(NOISE_GREY, "#0072B2");
   function drawCoverageStrip(sel, { x, width, height, years, coverageByYear }) {
     const cellW = Math.max(1, width);
     sel.selectAll("rect.cov-cell")
@@ -213,6 +231,84 @@
       .attr("rx", 1);
   }
 
+  // ---- accessible tab strip: role=tablist/tab/tabpanel, arrow-key nav
+  // (Left/Right/Home/End), and a #hash sync so a tab is linkable and
+  // survives reload. Built for pages with several stacked sections that
+  // used to rely on scrolling (see what_we_can_see.html).
+  //
+  // Render-on-first-activation is the CALLER's job, not this helper's: a
+  // hidden (display:none) panel measures clientWidth as 0, so any render
+  // function that lays out from its container's width must never run
+  // against a panel that isn't actually visible yet. onActivate(key,
+  // firstTime) tells the caller exactly when to do that first render.
+  //
+  // opts: {tablist: Element, tabs: [{key, label, panel: Element}],
+  //        initial?: key, onActivate(key, firstTime)}
+  function setupTabs(opts) {
+    const { tablist, tabs, onActivate } = opts;
+    const activated = new Set();
+    let current = null;
+    const btns = {};
+
+    tablist.innerHTML = "";
+    tablist.setAttribute("role", "tablist");
+
+    tabs.forEach((t) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = t.label;
+      b.className = "tab";
+      b.id = `tab-${t.key}`;
+      b.setAttribute("role", "tab");
+      b.setAttribute("aria-controls", t.panel.id);
+      b.tabIndex = -1;
+      t.panel.setAttribute("role", "tabpanel");
+      t.panel.setAttribute("aria-labelledby", b.id);
+      b.addEventListener("click", () => activate(t.key));
+      b.addEventListener("keydown", (e) => {
+        const idx = tabs.findIndex((x) => x.key === t.key);
+        let ni = null;
+        if (e.key === "ArrowRight") ni = (idx + 1) % tabs.length;
+        else if (e.key === "ArrowLeft") ni = (idx - 1 + tabs.length) % tabs.length;
+        else if (e.key === "Home") ni = 0;
+        else if (e.key === "End") ni = tabs.length - 1;
+        if (ni != null) {
+          e.preventDefault();
+          activate(tabs[ni].key);
+          btns[tabs[ni].key].focus();
+        }
+      });
+      btns[t.key] = b;
+      tablist.appendChild(b);
+    });
+
+    function activate(key) {
+      if (key === current) return;
+      current = key;
+      tabs.forEach((t) => {
+        const active = t.key === key;
+        btns[t.key].classList.toggle("active", active);
+        btns[t.key].setAttribute("aria-selected", String(active));
+        btns[t.key].tabIndex = active ? 0 : -1;
+        t.panel.hidden = !active;
+      });
+      if (location.hash.slice(1) !== key) history.replaceState(null, "", `#${key}`);
+      const firstTime = !activated.has(key);
+      activated.add(key);
+      onActivate(key, firstTime);
+    }
+
+    const fromHash = tabs.find((t) => t.key === location.hash.slice(1));
+    const startKey = (fromHash || tabs.find((t) => t.key === opts.initial) || tabs[0]).key;
+    activate(startKey);
+    window.addEventListener("hashchange", () => {
+      const t = tabs.find((x) => x.key === location.hash.slice(1));
+      if (t) activate(t.key);
+    });
+
+    return { activate, get current() { return current; } };
+  }
+
   // ---- caveat footer: renders viz_meta.caveats[] filtered to the ids a
   // given view touches, so disclosure text lives in exactly one place. ----
   function renderCaveats(containerEl, caveats, ids) {
@@ -224,9 +320,9 @@
 
   global.ENRICO = {
     COLORS, ORDER, TOPIC_COLORS, PARENT_COLORS, PARENT_NAMES, NOISE_GREY,
-    topicColor, parentColor, parentName,
+    topicColor, parentColor, parentName, seqColor,
     fmtAmt, fmtPct, esc,
-    setupDock, setupTooltip, setupSegmented, setupYearSlider,
+    setupDock, setupTooltip, setupSegmented, setupYearSlider, setupTabs,
     drawCoverageStrip, renderCaveats,
   };
 })(window);

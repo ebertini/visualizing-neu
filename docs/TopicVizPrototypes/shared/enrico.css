@@ -48,7 +48,7 @@ header .sub b{color:var(--ink);font-weight:600}
 .dock.collapsed{transform:translateX(calc(-100% - 18px));opacity:0;pointer-events:none}
 .dockbar{
   display:flex;align-items:center;justify-content:space-between;
-  background:var(--panel);border:1px solid var(--hair);border-radius:12px;
+  background:var(--panel);border:1px solid var(--hair);border-radius:0;
   box-shadow:var(--shadow);padding:6px 6px 6px 13px;
 }
 .dockbar .title{
@@ -57,21 +57,21 @@ header .sub b{color:var(--ink);font-weight:600}
 }
 .fold,.opener{
   display:grid;place-items:center;border:1px solid var(--hair);background:#fff;
-  border-radius:8px;cursor:pointer;color:var(--ink);padding:0;
+  border-radius:0;cursor:pointer;color:var(--ink);padding:0;
 }
 .fold{width:28px;height:28px;flex:none}
 .fold:hover,.opener:hover{background:#f4f5f7}
 .fold:focus-visible,.opener:focus-visible{outline:2px solid var(--c-nsf);outline-offset:1px}
 .opener{
   position:absolute;top:14px;left:14px;z-index:6;width:40px;height:40px;
-  border-radius:11px;box-shadow:var(--shadow);
+  box-shadow:var(--shadow);
   opacity:0;transform:translateX(-8px);pointer-events:none;
   transition:opacity .2s,transform .2s;
 }
 .opener.show{opacity:1;transform:none;pointer-events:auto}
 
 .card{
-  background:var(--panel);border:1px solid var(--hair);border-radius:12px;
+  background:var(--panel);border:1px solid var(--hair);border-radius:0;
   box-shadow:var(--shadow);padding:12px 13px;
 }
 .card h2{
@@ -111,7 +111,7 @@ header .sub b{color:var(--ink);font-weight:600}
 
 /* Segmented control (peer options, e.g. "$ / count") — use instead of .toggle
    when the choice isn't binary on/off but a set of peers. */
-.segmented{display:flex;border:1px solid var(--hair);border-radius:8px;overflow:hidden}
+.segmented{display:flex;border:1px solid var(--hair);border-radius:0;overflow:hidden}
 .segmented button{
   flex:1;border:0;background:#fff;padding:7px 10px;font-family:var(--mono);
   font-size:11px;color:var(--muted);cursor:pointer;border-right:1px solid var(--hair);
@@ -121,9 +121,27 @@ header .sub b{color:var(--ink);font-weight:600}
 .segmented button.active{background:var(--c-nsf);color:#fff}
 .segmented button:focus-visible{outline:2px solid var(--c-nsf);outline-offset:-2px}
 
+/* Tab strip (role=tablist/tab/tabpanel, via setupTabs) — for pages with
+   several stacked sections that used to rely on scrolling. Deliberately its
+   own component rather than reusing .segmented: tabs live under the sticky
+   header (full-width, wrapping), segmented controls live inside a dock card
+   (narrow, single row) — different container, different sizing. */
+.tabs{
+  display:flex;flex-wrap:wrap;gap:2px;padding:0 22px 10px;
+  border-bottom:1px solid var(--hair);
+}
+.tab{
+  border:0;background:none;padding:7px 12px;border-radius:8px 8px 0 0;
+  font-family:var(--mono);font-size:11.5px;color:var(--muted);cursor:pointer;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+}
+.tab:hover{background:#f4f5f7;color:var(--ink)}
+.tab.active{color:var(--ink);border-bottom-color:var(--c-nsf);font-weight:600}
+.tab:focus-visible{outline:2px solid var(--c-nsf);outline-offset:1px}
+
 .btnrow{display:flex;gap:8px;margin-top:2px}
 .btn{
-  flex:1;border:1px solid var(--hair);background:#fff;border-radius:8px;padding:7px 8px;
+  flex:1;border:1px solid var(--hair);background:#fff;border-radius:0;padding:7px 8px;
   font-family:var(--mono);font-size:11px;color:var(--ink);cursor:pointer;
 }
 .btn:hover{background:#f4f5f7}

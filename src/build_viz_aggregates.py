@@ -42,7 +42,9 @@ see docs/TOPIC_WORK_EXECUTION_REPORT.md):
   coverage.json     abstract coverage by agency x year, the NIH cliff, and
                      the Unassigned/artifact breakdown
   facets.json       per-grant facet table (columnar/dictionary-encoded) for
-                     the "every grant, arranged" unit visualization
+                     the "every grant, arranged" unit visualization, plus
+                     parallel "titles"/"abstracts" arrays (full text, shown
+                     for whichever grant is currently selected)
   missingness.json  per-field known/missing/not-applicable counts across
                      the whole corpus, for the missingness matrix panel
   funnel.json       the abstract-sourcing pipeline (raw records -> matched
@@ -266,6 +268,29 @@ def load_abstract_source(points: list[dict]) -> tuple[dict[str, str], str]:
     return {p["id"]: ("none" if p["titleOnly"] else "internal") for p in points}, "derived"
 
 
+def load_abstract_text(points: list[dict]) -> tuple[dict[str, str], str]:
+    """Best-effort grant_id -> full abstract text, for the facet grid's
+    "read the abstract for the selected grant" feature. A separate loader
+    rather than folded into load_abstract_source above — that function has
+    two other call sites (build_coverage, missingness) that only need the
+    abstract_source column, not the (much larger) text itself.
+
+    Degrades to an empty dict (not a fabricated summary) if grants.parquet
+    hasn't been built locally — the caller then shows "no abstract on
+    record" for every grant, which is honest (if more pessimistic than
+    reality) rather than silently wrong.
+    """
+    parquet_path = PROC / "grants.parquet"
+    if not parquet_path.exists():
+        return {}, "derived"
+    import pandas as pd  # local import: keep this script runnable with json alone
+
+    g = pd.read_parquet(parquet_path, columns=["grant_id", "abstract"])
+    g["grant_id"] = g["grant_id"].astype(str).str.strip()
+    text = dict(zip(g["grant_id"], g["abstract"].fillna("")))
+    return {p["id"]: (text.get(str(p["id"]).strip(), "") or "").strip() for p in points}, "parquet"
+
+
 def load_pi_attrs(points: list[dict]) -> tuple[dict[str, dict], str]:
     """grant_id -> {college, academic_unit, hire_date_known, neu_status, on_roster}
     for the grant's PI row (is_pi==True) in faculty_grants.parquet, joined to
@@ -328,6 +353,7 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
     from src.build_viz_data import ORDER
 
     abs_src, abs_source = load_abstract_source(points)
+    abs_text, abs_text_source = load_abstract_text(points)
     pi_attrs, pi_source = load_pi_attrs(points)
     parent_of_topic = {t["id"]: _parent_index(t.get("parent")) for t in topics}
 
@@ -352,12 +378,22 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
         return col_index[label]
 
     ids: list[str] = []
-    cols: dict[str, list[int]] = {k: [] for k in
-                                   ("ag", "yr", "col", "st", "ab", "asrc", "tp", "tid", "pi", "amt")}
+    titles: list[str] = []
+    abstracts: list[str] = []
+    # "amt" is the 5-level band index used for arranging/splitting (a small,
+    # legible enum); "amt_raw" is the actual dollar float, added so the facet
+    # grid can offer a real "sort by size ($)" — bands alone can't distinguish
+    # a $102K grant from a $480K one within "$100K-$500K". Kept as a separate
+    # column rather than replacing "amt" so existing band-based arrangements
+    # are untouched.
+    cols: dict[str, list[float]] = {k: [] for k in
+                                     ("ag", "yr", "col", "st", "ab", "asrc", "tp", "tid", "pi", "amt", "amt_raw")}
 
     for p in points:
         gid = str(p["id"]).strip()
         ids.append(gid)
+        titles.append(p["title"] or "")
+        abstracts.append(abs_text.get(gid, ""))
         cols["ag"].append(ag_index[p["agency"]])
         cols["yr"].append(p["year"] if p["year"] is not None else -1)
         cols["tp"].append(parent_of_topic.get(p["dom"], -1))
@@ -365,6 +401,7 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
         cols["ab"].append(0 if p["titleOnly"] else 1)
         cols["asrc"].append(asrc_index.get(abs_src.get(gid, "none"), asrc_index["none"]))
         cols["amt"].append(_dollar_band(p["amount"]))
+        cols["amt_raw"].append(p["amount"])
 
         attrs = pi_attrs.get(gid)
         if attrs is None:
@@ -379,9 +416,11 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
     return {
         "n": len(points),
         "ids": ids,
+        "titles": titles,
+        "abstracts": abstracts,
         "levels": {"ag": ag_levels, "col": col_levels, "st": st_levels, "asrc": asrc_levels, "amt": amt_levels},
         "cols": cols,
-        "provenance": {"abstract_source": abs_source, "pi_attrs": pi_source},
+        "provenance": {"abstract_source": abs_source, "pi_attrs": pi_source, "abstract_text": abs_text_source},
     }
 
 
@@ -759,8 +798,26 @@ def validate(points: list[dict], viz_meta: dict, topic_time: dict, coverage: dic
     # facets.json — the "no grant ever dropped by a facet change" invariant.
     for col_name, values in facets["cols"].items():
         assert len(values) == n, f"facets column '{col_name}' length != {n}"
-    lines.append(f"facets: {len(facets['cols'])} columns, all length {n} ✓")
+    assert len(facets["titles"]) == n, f"facets titles length != {n}"
+    assert len(facets["abstracts"]) == n, f"facets abstracts length != {n}"
+    lines.append(f"facets: {len(facets['cols'])} columns, all length {n} ✓ (+ titles, abstracts)")
     lines.append(f"facets: pi_attrs provenance path = {facets['provenance']['pi_attrs']}")
+
+    # Abstract text — when grants.parquet was available (provenance ==
+    # "parquet"), this should match the known has-abstract count exactly;
+    # a mismatch means the join between facets["abstracts"] and the
+    # committed FACETS.cols.ab (has-abstract flag) has drifted apart.
+    n_with_abstract = sum(1 for a in facets["abstracts"] if a)
+    lines.append(f"facets: abstract text present for {n_with_abstract}/{n} grants "
+                 f"(provenance={facets['provenance']['abstract_text']})")
+    if facets["provenance"]["abstract_text"] == "parquet":
+        assert n_with_abstract == 1936, f"abstract-text count drifted from 1936 (got {n_with_abstract})"
+
+    # amt_raw must reconcile to the same total dollars as everything else —
+    # a cheap way to catch a mis-keyed or truncated per-unit dollar column.
+    amt_raw_total = sum(facets["cols"]["amt_raw"])
+    assert abs(amt_raw_total - total_dollars) < 1.0, "facets.amt_raw doesn't reconcile to total dollars"
+    lines.append(f"facets: amt_raw reconciles to total dollars (${amt_raw_total:,.0f}) ✓")
 
     no_pi_idx = facets["levels"]["col"].index(NO_PI_LABEL)
     off_roster_idx = facets["levels"]["col"].index(PI_OFF_ROSTER_LABEL)
