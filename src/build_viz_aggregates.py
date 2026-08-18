@@ -784,7 +784,7 @@ def build_missingness_abstract_records() -> dict:
 
     import pandas as pd
 
-    orph = pd.read_parquet(orphaned_path, columns=["id", "personid", "abstract"])
+    orph = pd.read_parquet(orphaned_path, columns=["id", "personid"])
     orphaned_n = len(orph)
     n = RAW_ABSTRACT_RECORDS
     matched_n = n - orphaned_n
@@ -795,12 +795,14 @@ def build_missingness_abstract_records() -> dict:
         "where": "No Northeastern grant shares this record's source ID — it's likely a collaborator's or non-NU award.",
     }]
 
-    has_text = int((orph["abstract"].fillna("").astype(str).str.strip() != "").sum())
-    fields.append({
-        "id": "has_text", "label": "Has abstract text",
-        "known": has_text, "missing": orphaned_n - has_text, "na": matched_n,
-        "where": "Scored only among unmatched records — a matched record's text is already counted in the grants view.",
-    })
+    # A "has abstract text" field lived here once — dropped as confusing,
+    # not just mislabeled: scored only among the 5,095 unmatched records
+    # (matched ones are already counted in the grants-grain "Abstract text"
+    # field), it read as a smaller, contradicting count of the SAME fact
+    # the grants grain reports, when it was actually answering a much
+    # narrower question. The funnel section already tells this exact story
+    # more precisely, as "usable" text (grant_orphan_recovery.parquet's own
+    # threshold, not just non-empty) — no need to duplicate it here.
 
     if bridge_path.exists():
         bridge = pd.read_parquet(bridge_path, columns=["personid", "faculty_id"])
