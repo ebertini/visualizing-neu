@@ -33,8 +33,8 @@ TARGETS = [
     ("topic_flow.html", [("VIZ_META", "viz_meta.json"), ("TOPIC_TIME", "topic_time.json")]),
     ("what_we_can_see.html", [
         ("VIZ_META", "viz_meta.json"), ("COVERAGE", "coverage.json"),
-        ("FACETS", "facets.json"), ("MISSINGNESS", "missingness.json"),
-        ("FUNNEL", "funnel.json"),
+        ("FACETS", "facets.json"), ("FACETS_PI", "facets_pi.json"),
+        ("MISSINGNESS", "missingness.json"), ("FUNNEL", "funnel.json"),
     ]),
 ]
 

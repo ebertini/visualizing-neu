@@ -25,12 +25,28 @@ Reads (locally built, optional — enriches provenance if present):
                                           ("internal"/"orphan_recovered"/"")
   data/processed/faculty_grants.parquet  grant_id -> PI's faculty_id + neu_status
   data/processed/faculty_id_lookup.parquet  faculty_id -> college/academic_unit
-  data/processed/faculty.parquet         faculty_id -> hire_date (known/unknown)
+  data/processed/faculty.parquet         faculty_id -> hire_date (known/unknown);
+                                          also the full HR roster (2,247 rows)
+                                          used directly for the PI-grain
+                                          missingness fields and facets_pi.json
   data/processed/grant_orphan_recovery.parquet  full M2 audit (403 usable
                                           orphans -> update/extra/duplicate/
                                           unattributed), see src/reconcile_orphans.py
   data/processed/grant_orphaned_abstracts.parquet  the raw 5,095-row orphan pool
   data/processed/extra_neu_abstracts.parquet  the 65 'extra' pseudo-docs
+  data/processed/faculty_missing_metadata.parquet  the 13 grant-active
+                                          faculty absent from the HR roster —
+                                          included in facets_pi.json as their
+                                          own bin, never dropped
+  data/processed/personid_to_faculty.parquet  the abstract-upload personid ->
+                                          faculty_id bridge, used only for the
+                                          abstract_records missingness grain
+  data/processed/new_abstract_recovery.parquet  grant_ids the newer AcAn
+                                          Grants export can supply abstract
+                                          text for (see scripts/_check_new_abstracts.py) —
+                                          surfaced as a "recoverable" segment
+                                          on the grants-grain abstract field,
+                                          not adopted into the pipeline itself
 
 Writes (docs/TopicVizPrototypes/data/, committed, inlined into the
 prototypes at build time — CI does not publish source data/ directories,
@@ -45,8 +61,13 @@ see docs/TOPIC_WORK_EXECUTION_REPORT.md):
                      the "every grant, arranged" unit visualization, plus
                      parallel "titles"/"abstracts" arrays (full text, shown
                      for whichever grant is currently selected)
-  missingness.json  per-field known/missing/not-applicable counts across
-                     the whole corpus, for the missingness matrix panel
+  facets_pi.json    per-PI facet table (same columnar shape as facets.json)
+                     for the "every PI" unit visualization, over all 2,247
+                     roster faculty (not just the 570 with grants)
+  missingness.json  per-field known/missing/not-applicable counts, split
+                     into three grains — grants (2,676), PIs (2,247), and
+                     raw abstract-upload records (8,075) — for the
+                     "What's missing" panel
   funnel.json       the abstract-sourcing pipeline (raw records -> matched
                      rows -> unique grants -> grants with text) plus the M2
                      orphan-recovery branch (update/extra/duplicate/unattributed)
@@ -179,6 +200,11 @@ CAVEATS = [
 #                          in faculty_id_lookup (roster snapshot gap)
 NO_PI_LABEL = "No PI matched"
 PI_OFF_ROSTER_LABEL = "PI not on 2025 roster"
+# Third "gap" label, distinct from the two above — used on the PI-grain
+# side (facets_pi.json / missingness_pis) for a roster field that's simply
+# blank on this person's HR record, which is a different fact from "this
+# grant has no PI" or "this PI is off the roster".
+PI_NOT_RECORDED = "Not recorded"
 
 # Known duplicate/typo college strings observed in faculty_id_lookup.college.
 # Everything NOT in this map passes through unchanged — including genuine
@@ -424,43 +450,395 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
     }
 
 
-def build_missingness(points: list[dict], pi_attrs: dict[str, dict], abs_src: dict[str, str]) -> dict:
-    """Per-field known/missing/not-applicable counts across the whole corpus,
-    for the missingness matrix panel. Every field is scored against all 2,676
-    grants — none of these have a genuine "not applicable" case in this
-    corpus today, but the field is kept in the schema so a future facet
-    (e.g. a field that only applies to a subset) doesn't need a schema change.
+NGRANTS_BANDS = [(0, 1, "0"), (1, 2, "1"), (2, 5, "2–4"), (5, 10, "5–9"), (10, float("inf"), "10+")]
+
+
+def _ngrants_band(n: int) -> int:
+    for i, (lo, hi, _label) in enumerate(NGRANTS_BANDS):
+        if lo <= n < hi:
+            return i
+    return len(NGRANTS_BANDS) - 1
+
+
+def build_facets_pi(fac, points: list[dict], topics: list[dict]) -> dict:
+    """Per-PI facet table (same columnar shape as build_facets above) for the
+    "every PI" unit visualization — over all 2,247 roster faculty, not just
+    the 570 who appear on a grant. That's the deliberate point: most of the
+    faculty body has no grant in this corpus at all, and "no grants" is a
+    first-class bin on every facet here rather than those rows being dropped.
+
+    Degrades to an empty table (n=0) if faculty.parquet isn't built locally
+    — mirrors the same honest-degrade pattern as build_facets/load_pi_attrs.
+
+    Funding is credited PI-only (dollars from grants where is_pi is True),
+    per CLAUDE.md's funding-credit-model caveat — the "amt"/"amt_raw" facets
+    here are explicitly "dollars as PI", not full- or fractional-credit.
     """
+    if fac is None:
+        return {"n": 0, "ids": [], "names": [], "levels": {}, "cols": {}, "grant_titles": [], "provenance": "derived"}
+
+    import pandas as pd
+
+    fg_path = PROC / "faculty_grants.parquet"
+    if not fg_path.exists():
+        return {"n": 0, "ids": [], "names": [], "levels": {}, "cols": {}, "grant_titles": [], "provenance": "derived"}
+    fg = pd.read_parquet(fg_path, columns=["faculty_id", "grant_id", "is_pi"])
+    fg["faculty_id"] = fg["faculty_id"].astype(str)
+    fg["grant_id"] = fg["grant_id"].astype(str).str.strip()
+
+    parent_of_topic = {t["id"]: _parent_index(t.get("parent")) for t in topics}
+    point_by_id = {str(p["id"]).strip(): p for p in points}
+
+    ids: list[str] = []
+    names: list[str] = []
+    cols: dict[str, list] = {k: [] for k in
+                              ("col", "dept", "rank", "track", "tenure", "hire_yr",
+                               "status", "hasgrants", "ngrants", "amt", "amt_raw", "tp")}
+    grant_titles: list[list[str]] = []
+
+    col_levels: list[str] = []
+    col_index: dict[str, int] = {}
+
+    def college_idx(raw: str) -> int:
+        label = COLLEGE_NORMALIZE.get(raw, raw) if raw else PI_NOT_RECORDED
+        if label not in col_index:
+            col_index[label] = len(col_levels)
+            col_levels.append(label)
+        return col_index[label]
+
+    dept_levels: list[str] = [PI_NOT_RECORDED]
+    dept_index: dict[str, int] = {PI_NOT_RECORDED: 0}
+
+    def dept_idx(raw: str) -> int:
+        label = raw if raw else PI_NOT_RECORDED
+        if label not in dept_index:
+            dept_index[label] = len(dept_levels)
+            dept_levels.append(label)
+        return dept_index[label]
+
+    rank_levels: list[str] = [PI_NOT_RECORDED]
+    rank_index: dict[str, int] = {PI_NOT_RECORDED: 0}
+
+    def rank_idx(raw: str) -> int:
+        label = raw if raw else PI_NOT_RECORDED
+        if label not in rank_index:
+            rank_index[label] = len(rank_levels)
+            rank_levels.append(label)
+        return rank_index[label]
+
+    track_levels: list[str] = [PI_NOT_RECORDED]
+    track_index: dict[str, int] = {PI_NOT_RECORDED: 0}
+
+    def track_idx(raw: str) -> int:
+        label = raw if raw else PI_NOT_RECORDED
+        if label not in track_index:
+            track_index[label] = len(track_levels)
+            track_levels.append(label)
+        return track_index[label]
+
+    tenure_levels = ["Tenured", "Tenure Track", "Tenure On Entry", PI_NOT_RECORDED]
+    tenure_index = {k: i for i, k in enumerate(tenure_levels)}
+    status_levels = ["Active", "Departed"]
+    hasgrants_levels = ["No grants in this corpus", "Has grants"]
+    amt_levels = ["No grants as PI"] + [label for (_lo, _hi, label) in DOLLAR_BANDS]
+    ngrants_levels = [label for (_lo, _hi, label) in NGRANTS_BANDS]  # index-parallel to _ngrants_band's return
+    # Index 0 is the "no PI grants" bin (covers both "no grants at all" and
+    # "grants but never as PI" — both mean zero PI-credited dollars/theme);
+    # then -1 (Unassigned) followed by the 8 named parents, matching
+    # build_viz_meta's `parents` order. A sentinel distinct from any real
+    # parent index (-1..7) is used while building cols["tp"] below and
+    # remapped to 0 afterward — parent index 0 is a real value ("Life
+    # Sciences & Biomedicine") and must not collide with the "no PI grants"
+    # bin the way a literal 0 sentinel would.
+    tp_levels = ["No grants as PI", "Unassigned"] + PARENT_NAMES
+    NO_PI_GRANTS_TP = -99
+    tp_index_map = {-1: 1, **{i: 2 + i for i in range(8)}}
+
+    # Group faculty_grants by faculty_id once, up front, rather than
+    # filtering the whole table per roster row (2,247 rows x 3,144-row scan).
+    by_faculty: dict[str, "pd.DataFrame"] = {fid: g for fid, g in fg.groupby("faculty_id")}
+
+    for row in fac.itertuples(index=False):
+        fid = str(row.faculty_id)
+        ids.append(fid)
+        names.append(str(row.faculty_name).strip() if pd.notna(row.faculty_name) else "")
+
+        raw_college = str(row.superior_academic_unit) if pd.notna(row.superior_academic_unit) else ""
+        cols["col"].append(college_idx(raw_college))
+        raw_dept = str(row.academic_unit) if pd.notna(row.academic_unit) else ""
+        cols["dept"].append(dept_idx(raw_dept))
+        raw_rank = str(row.academic_rank) if pd.notna(row.academic_rank) else ""
+        cols["rank"].append(rank_idx(raw_rank))
+        raw_track = str(row.academic_track_type) if pd.notna(row.academic_track_type) else ""
+        cols["track"].append(track_idx(raw_track))
+        raw_tenure = str(row.tenure_status) if pd.notna(row.tenure_status) else ""
+        cols["tenure"].append(tenure_index.get(raw_tenure, tenure_index[PI_NOT_RECORDED]))
+        cols["hire_yr"].append(int(row.hire_date.year) if pd.notna(row.hire_date) else -1)
+        cols["status"].append(0 if pd.isna(row.termination_date) else 1)
+
+        their_grants = by_faculty.get(fid)
+        if their_grants is None or their_grants.empty:
+            cols["hasgrants"].append(0)
+            cols["ngrants"].append(_ngrants_band(0))
+            cols["amt"].append(0)
+            cols["amt_raw"].append(0.0)
+            cols["tp"].append(NO_PI_GRANTS_TP)
+            grant_titles.append([])
+            continue
+
+        n_grants = their_grants["grant_id"].nunique()
+        pi_grant_ids = their_grants.loc[their_grants["is_pi"], "grant_id"].tolist()
+        pi_points = [point_by_id[g] for g in pi_grant_ids if g in point_by_id]
+        pi_dollars = sum(p["amount"] for p in pi_points)
+
+        cols["hasgrants"].append(1)
+        cols["ngrants"].append(_ngrants_band(n_grants))
+        cols["amt_raw"].append(pi_dollars)
+        if not pi_points:
+            cols["amt"].append(0)
+            cols["tp"].append(NO_PI_GRANTS_TP)
+        else:
+            cols["amt"].append(1 + _dollar_band(pi_dollars))
+            parent_counts: dict[int, int] = {}
+            for p in pi_points:
+                pid = parent_of_topic.get(p["dom"], -1)
+                parent_counts[pid] = parent_counts.get(pid, 0) + 1
+            dominant = max(parent_counts.items(), key=lambda kv: (kv[1], -kv[0]))[0]
+            cols["tp"].append(dominant)
+        grant_titles.append([p["title"] or "" for p in pi_points][:8])
+
+    cols["tp"] = [0 if v == NO_PI_GRANTS_TP else tp_index_map[v] for v in cols["tp"]]
+
+    return {
+        "n": len(ids),
+        "ids": ids,
+        "names": names,
+        "levels": {
+            "col": col_levels, "dept": dept_levels, "rank": rank_levels, "track": track_levels,
+            "tenure": tenure_levels, "status": status_levels, "hasgrants": hasgrants_levels,
+            "ngrants": ngrants_levels, "amt": amt_levels, "tp": tp_levels,
+        },
+        "cols": cols,
+        "grant_titles": grant_titles,
+        "provenance": "parquet",
+    }
+
+
+def load_recoverable() -> set[str]:
+    """grant_ids the newer AcAn Grants export can supply abstract text for
+    (see scripts/_check_new_abstracts.py) — a diagnostic, not a pipeline
+    input, so this degrades to an empty set (no "recoverable" segment shown)
+    rather than erroring if that script hasn't been run locally."""
+    path = PROC / "new_abstract_recovery.parquet"
+    if not path.exists():
+        return set()
+    import pandas as pd
+
+    df = pd.read_parquet(path, columns=["grant_id"])
+    return set(df["grant_id"].astype(str).str.strip())
+
+
+def load_faculty_roster() -> tuple["pd.DataFrame | None", "pd.DataFrame | None", str]:
+    """The full 2,247-row HR roster (faculty.parquet) plus aauid coverage
+    (faculty_id_lookup.parquet), for the PI-grain missingness fields and
+    facets_pi.json. Degrades to (None, None, "derived") if not built locally
+    — the caller then omits the PI grain / PI facet grid entirely rather than
+    fabricating roster data.
+    """
+    fac_path = PROC / "faculty.parquet"
+    lookup_path = PROC / "faculty_id_lookup.parquet"
+    if not fac_path.exists():
+        return None, None, "derived"
+    import pandas as pd
+
+    fac = pd.read_parquet(fac_path)
+    lookup = pd.read_parquet(lookup_path) if lookup_path.exists() else None
+    return fac, lookup, "parquet"
+
+
+def build_missingness_grants(points: list[dict], pi_attrs: dict[str, dict], recoverable: set[str]) -> dict:
+    """Per-field known/missing/(recoverable) counts across all 2,676 grants."""
     n = len(points)
     fields = []
 
-    def row(field_id: str, label: str, known: int) -> None:
-        fields.append({"id": field_id, "label": label, "known": known, "missing": n - known, "na": 0})
+    def row(field_id: str, label: str, known: int, where: str, extra: dict | None = None) -> None:
+        f = {"id": field_id, "label": label, "known": known, "missing": n - known, "na": 0, "where": where}
+        if extra:
+            f.update(extra)
+        fields.append(f)
 
-    row("agency", "Agency", sum(1 for _ in points))  # always populated in this corpus
-    row("dollars", "Dollar amount", sum(1 for p in points if p["amount"] is not None))
-    row("dates", "Start year", sum(1 for p in points if p["year"] is not None))
-    row("abstract", "Abstract text", sum(1 for p in points if not p["titleOnly"]))
-    row("topic", "Topic label", sum(1 for p in points if p["dom"] not in (-1, ARTIFACT_TOPIC_ID)))
+    row("agency", "Agency", sum(1 for _ in points), "Always recorded in this corpus.")
+    row("dollars", "Dollar amount", sum(1 for p in points if p["amount"] is not None),
+        "Always recorded in this corpus.")
+    row("dates", "Start year", sum(1 for p in points if p["year"] is not None),
+        "Always recorded in this corpus.")
+
+    abs_known = sum(1 for p in points if not p["titleOnly"])
+    abs_recoverable = sum(
+        1 for p in points if p["titleOnly"] and str(p["id"]).strip() in recoverable
+    )
+    row("abstract", "Abstract text", abs_known,
+        "No abstract record matched this grant in the upload system.",
+        extra={"recoverable": abs_recoverable} if recoverable else None)
+
+    row("topic", "Topic label", sum(1 for p in points if p["dom"] not in (-1, ARTIFACT_TOPIC_ID)),
+        "No confident cluster was found for this grant, or it fell into a flagged low-quality group.")
 
     def has(gid: str, pred) -> bool:
         attrs = pi_attrs.get(gid)
         return attrs is not None and pred(attrs)
 
     row("pi_link", "PI matched to a grant record",
-        sum(1 for p in points if pi_attrs.get(str(p["id"]).strip()) is not None))
+        sum(1 for p in points if pi_attrs.get(str(p["id"]).strip()) is not None),
+        "No principal investigator record links to this grant at all.")
     row("college", "PI's college",
-        sum(1 for p in points if has(str(p["id"]).strip(), lambda a: a["on_roster"])))
+        sum(1 for p in points if has(str(p["id"]).strip(), lambda a: a["on_roster"])),
+        "The PI isn't on the current faculty roster snapshot (often: departed or renamed).")
+    # Real, independent check — NOT the same predicate as "college" above.
+    # academic_unit is its own column (PI_OFF_ROSTER_LABEL when blank), so a
+    # PI can be on-roster with a known college but a blank department, or
+    # vice versa; the two used to share one predicate here, which silently
+    # made this row a duplicate of "college" above.
     row("department", "PI's academic unit",
-        sum(1 for p in points if has(str(p["id"]).strip(), lambda a: a["on_roster"])))
+        sum(1 for p in points if has(str(p["id"]).strip(), lambda a: a["academic_unit"] != PI_OFF_ROSTER_LABEL)),
+        "The PI's department wasn't recorded on the roster snapshot, even where their college was.")
     row("hire_date", "PI's hire date",
-        sum(1 for p in points if has(str(p["id"]).strip(), lambda a: a["hire_date_known"])))
+        sum(1 for p in points if has(str(p["id"]).strip(), lambda a: a["hire_date_known"])),
+        "The PI's hire date is missing from the roster (mostly the small manually-added supplement).")
     row("neu_status", "Pre-hire vs. at-NEU attribution",
         sum(1 for p in points
-            if has(str(p["id"]).strip(), lambda a: a["neu_status"] in ("earned_at_neu", "prior_institution"))))
+            if has(str(p["id"]).strip(), lambda a: a["neu_status"] in ("earned_at_neu", "prior_institution"))),
+        "Depends on knowing both the grant's start date and the PI's hire date.")
 
     fields.sort(key=lambda f: f["missing"], reverse=True)
-    return {"n": n, "fields": fields}
+    return {"n": n, "fields": fields, "provenance": "parquet" if pi_attrs else "derived"}
+
+
+def build_missingness_pis(fac, lookup) -> dict:
+    """Per-field known/missing/not-applicable counts across all 2,247 roster
+    faculty (fac = faculty.parquet, lookup = faculty_id_lookup.parquet, both
+    already-loaded DataFrames). Distinct denominator from the grants grain —
+    most of the roster (1,690 of 2,247) never appears on a grant at all, and
+    that's exactly the gap this grain is for.
+    """
+    if fac is None:
+        return {"n": 0, "fields": [], "provenance": "derived"}
+    n = len(fac)
+
+    def col_known(series) -> int:
+        return int((series.astype(str).str.strip() != "").sum())
+
+    fields = []
+
+    def row(field_id: str, label: str, known: int, na: int, where: str) -> None:
+        fields.append({
+            "id": field_id, "label": label, "known": known,
+            "missing": n - known - na, "na": na, "where": where,
+        })
+
+    row("name", "Name on record", col_known(fac["faculty_name"].fillna("")), 0,
+        "Only populated for faculty who appear on at least one grant — the roster export itself doesn't carry names.")
+    row("college", "College", col_known(fac["superior_academic_unit"].astype("string").fillna("")), 0,
+        "Missing from the roster export for this person.")
+    row("department", "Department", col_known(fac["academic_unit"].astype("string").fillna("")), 0,
+        "Missing from the roster export for this person.")
+    row("rank", "Academic rank", col_known(fac["academic_rank"].astype("string").fillna("")), 0,
+        "Missing from the roster export for this person.")
+    row("track", "Appointment track", col_known(fac["academic_track_type"].astype("string").fillna("")), 0,
+        "Missing from the roster export for this person.")
+    row("tenure", "Tenure status", col_known(fac["tenure_status"].astype("string").fillna("")), 0,
+        "The single largest gap on the roster — tenure status isn't recorded for most non-tenure-track titles.")
+    row("terminal_degree", "Terminal degree", col_known(fac["terminal_degrees"].astype("string").fillna("")), 0,
+        "Missing from the roster export for this person.")
+    row("hire_date", "Hire date", int(fac["hire_date"].notna().sum()), 0,
+        "Missing only for the small hand-added supplement of faculty absent from the HR export.")
+
+    if lookup is not None:
+        aauid_known = col_known(lookup.set_index("faculty_id").reindex(fac["faculty_id"])["aauid"].fillna(""))
+    else:
+        aauid_known = 0
+    row("aauid", "Analytics vendor ID", aauid_known, 0,
+        "Only populated for faculty who appear on at least one grant — it's sourced from the grant tables, not the roster.")
+
+    active = fac["termination_date"].isna()
+    row("employment_status", "Departure status", int((~active).sum()), int(active.sum()),
+        "Not applicable — this person is still active, so there's nothing to record.")
+
+    fields.sort(key=lambda f: f["missing"], reverse=True)
+    return {"n": n, "fields": fields, "provenance": "parquet"}
+
+
+def build_missingness_abstract_records() -> dict:
+    """Per-field known/missing/not-applicable counts across the 8,075 raw
+    abstract-upload records (grants-with-abstract.xlsx), restricted to what's
+    derivable from committed parquets — RAW_ABSTRACT_RECORDS is the one
+    number this script trusts without a raw-file read (see the comment on
+    it below); everything else here comes from grant_orphaned_abstracts.parquet
+    (the 5,095-row orphan pool) and personid_to_faculty.parquet (the ID
+    bridge). Degrades to an empty grain if either is missing locally.
+    """
+    orphaned_path = PROC / "grant_orphaned_abstracts.parquet"
+    bridge_path = PROC / "personid_to_faculty.parquet"
+    if not orphaned_path.exists():
+        return {"n": 0, "fields": [], "provenance": "derived"}
+
+    import pandas as pd
+
+    orph = pd.read_parquet(orphaned_path, columns=["id", "personid", "abstract"])
+    orphaned_n = len(orph)
+    n = RAW_ABSTRACT_RECORDS
+    matched_n = n - orphaned_n
+
+    fields = [{
+        "id": "matched_grant", "label": "Matches a Northeastern grant",
+        "known": matched_n, "missing": orphaned_n, "na": 0,
+        "where": "No Northeastern grant shares this record's source ID — it's likely a collaborator's or non-NU award.",
+    }]
+
+    has_text = int((orph["abstract"].fillna("").astype(str).str.strip() != "").sum())
+    fields.append({
+        "id": "has_text", "label": "Has abstract text",
+        "known": has_text, "missing": orphaned_n - has_text, "na": matched_n,
+        "where": "Scored only among unmatched records — a matched record's text is already counted in the grants view.",
+    })
+
+    if bridge_path.exists():
+        bridge = pd.read_parquet(bridge_path, columns=["personid", "faculty_id"])
+        resolved_ids = set(bridge.loc[bridge["faculty_id"].astype(str).str.strip() != "", "personid"])
+        pi_resolved = int(orph["personid"].astype(str).isin(resolved_ids).sum())
+        fields.append({
+            "id": "pi_resolved", "label": "Writer matched to a faculty member",
+            "known": pi_resolved, "missing": orphaned_n - pi_resolved, "na": matched_n,
+            "where": "Scored only among unmatched records — this record's writer ID doesn't map to anyone on the faculty roster via the ID bridge.",
+        })
+    else:
+        # Can't score this without the bridge — the whole grain is "not
+        # applicable" rather than a fabricated 0-known claim.
+        fields.append({
+            "id": "pi_resolved", "label": "Writer matched to a faculty member",
+            "known": 0, "missing": 0, "na": n,
+            "where": "Scored only among unmatched records — this record's writer ID doesn't map to anyone on the faculty roster via the ID bridge.",
+        })
+
+    fields.sort(key=lambda f: f["missing"], reverse=True)
+    return {"n": n, "fields": fields, "provenance": "parquet"}
+
+
+def build_missingness(points: list[dict], pi_attrs: dict[str, dict], recoverable: set[str],
+                       fac, lookup) -> dict:
+    """Per-field known/missing/not-applicable counts, split by grain — grants,
+    PIs, and raw abstract-upload records — for the "What's missing" panel.
+    Each grain has its own natural denominator; scoring PI-level gaps against
+    2,676 grants (or vice versa) would misrepresent what's actually missing
+    and from what population.
+    """
+    return {
+        "grains": {
+            "grants": build_missingness_grants(points, pi_attrs, recoverable),
+            "pis": build_missingness_pis(fac, lookup),
+            "abstract_records": build_missingness_abstract_records(),
+        },
+    }
 
 
 # Two facts verified directly against the raw grants-with-abstract.xlsx via
@@ -743,7 +1121,7 @@ def build_coverage(points: list[dict]) -> dict:
 
 
 def validate(points: list[dict], viz_meta: dict, topic_time: dict, coverage: dict,
-             facets: dict, missingness: dict, funnel: dict) -> list[str]:
+             facets: dict, facets_pi: dict, missingness: dict, funnel: dict) -> list[str]:
     lines = []
     n = len(points)
     total_dollars = sum(p["amount"] for p in points)
@@ -832,10 +1210,45 @@ def validate(points: list[dict], viz_meta: dict, topic_time: dict, coverage: dic
         assert no_pi_n == 312, f"'{NO_PI_LABEL}' count drifted from 312 (got {no_pi_n})"
         assert off_roster_n == 48, f"'{PI_OFF_ROSTER_LABEL}' count drifted from 48 (got {off_roster_n})"
 
-    # missingness.json — every field scored against the same 2676-grant corpus.
-    for f in missingness["fields"]:
-        assert f["known"] + f["missing"] + f["na"] == n, f"missingness field '{f['id']}' doesn't sum to {n}"
-    lines.append(f"missingness: {len(missingness['fields'])} fields, all reconcile to {n} ✓")
+    # missingness.json — each grain's fields must sum to that grain's own n,
+    # not the grant count (n above) — grains have different denominators.
+    for grain_id, grain in missingness["grains"].items():
+        for f in grain["fields"]:
+            assert f["known"] + f["missing"] + f["na"] == grain["n"], \
+                f"missingness grain '{grain_id}' field '{f['id']}' doesn't sum to {grain['n']}"
+        lines.append(f"missingness[{grain_id}]: n={grain['n']}, {len(grain['fields'])} fields, "
+                      f"all reconcile ✓ (provenance={grain['provenance']})")
+
+    grants_grain = missingness["grains"]["grants"]
+    assert grants_grain["n"] == n, "grants-grain missingness n doesn't match the corpus"
+    pis_grain = missingness["grains"]["pis"]
+    if pis_grain["provenance"] == "parquet":
+        assert pis_grain["n"] == 2247, f"PI-grain n drifted from 2247 (got {pis_grain['n']})"
+
+    # facets_pi.json — same "nobody ever dropped" invariant as facets.json
+    # above, scored against the PI-grain's own n (2,247 roster faculty, not
+    # the 2,676 grants).
+    if facets_pi["provenance"] == "parquet":
+        n_pi = facets_pi["n"]
+        assert n_pi == 2247, f"facets_pi n drifted from 2247 (got {n_pi})"
+        for col_name, values in facets_pi["cols"].items():
+            assert len(values) == n_pi, f"facets_pi column '{col_name}' length != {n_pi}"
+        assert len(facets_pi["names"]) == n_pi and len(facets_pi["grant_titles"]) == n_pi
+        n_has_grants = sum(facets_pi["cols"]["hasgrants"])
+        n_as_pi = sum(1 for v in facets_pi["cols"]["tp"] if v != 0)
+        lines.append(f"facets_pi: {n_pi} faculty, {n_has_grants} with grants (expect 557), "
+                      f"{n_as_pi} ever a PI in this corpus")
+        # 557, not faculty_grants.parquet's overall 570 grant-bearing faculty
+        # count: 13 of those 570 are the faculty_missing_metadata rows (grant-
+        # active but absent from the HR roster), so they never appear in
+        # `fac` at all and are correctly outside this roster-scoped (n=2,247)
+        # population, not a data drift.
+        assert n_has_grants == 557, f"facets_pi grant-bearing count drifted from 557 (got {n_has_grants})"
+        # n_as_pi is not hard-asserted: it only credits a PI grant if it also
+        # resolves in the frozen grants_umap corpus (2,676 grants), while
+        # faculty_grants itself spans 2,680 distinct grant_ids — a PI whose
+        # only credited grant(s) fall outside that frozen set would
+        # undercount here by construction, not by a real data drift.
 
     # funnel.json — the trunk must be monotonically non-increasing, and the
     # raw/matched/orphaned split must reconcile to the known raw record count.
@@ -867,12 +1280,14 @@ def main() -> None:
     topic_time = build_topic_time(points, topics)
     coverage = build_coverage(points)
     facets = build_facets(points, topics)
-    abs_src, _ = load_abstract_source(points)
     pi_attrs, _ = load_pi_attrs(points)
-    missingness = build_missingness(points, pi_attrs, abs_src)
+    recoverable = load_recoverable()
+    fac, lookup, _ = load_faculty_roster()
+    facets_pi = build_facets_pi(fac, points, topics)
+    missingness = build_missingness(points, pi_attrs, recoverable, fac, lookup)
     funnel = build_funnel()
 
-    report = validate(points, viz_meta, topic_time, coverage, facets, missingness, funnel)
+    report = validate(points, viz_meta, topic_time, coverage, facets, facets_pi, missingness, funnel)
     viz_meta["validation"] = report
     print("\n".join(report))
 
@@ -883,7 +1298,7 @@ def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     for name, obj in [
         ("viz_meta", viz_meta), ("topic_time", topic_time), ("coverage", coverage),
-        ("facets", facets), ("missingness", missingness), ("funnel", funnel),
+        ("facets", facets), ("facets_pi", facets_pi), ("missingness", missingness), ("funnel", funnel),
     ]:
         p = OUT_DIR / f"{name}.json"
         _guard_output_path(p)

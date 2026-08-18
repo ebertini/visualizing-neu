@@ -215,3 +215,48 @@ These limitations will be **prominently disclosed** in all deliverables:
    - **NLP analysis consideration:** Restrict topic modeling to grants with non-empty abstracts; report coverage by year/college.
 
 ---
+
+## 9. New abstract export cross-check (2026-08-17)
+
+The data team dropped a refreshed abstract export, `DataSet/AcAn Grants 2026-08-13.xlsx`
+(11,785 rows vs. the pipeline's current `grants-with-abstract.xlsx`, 8,075 rows — identical
+25-column schema, not a new table). `scripts/_check_new_abstracts.py` cross-checked it against
+the 740 NEU grants that currently have no abstract text, **without adopting it into the
+pipeline** (see below for why).
+
+**Findings:**
+- **198 of the 740 text-less grants gain usable abstract text** from the new export —
+  187 NIH, 11 NSF.
+- **The NIH post-2019 coverage cliff narrows but does not close.** Of the NIH/NIH-SUB grants
+  missing an abstract in each post-cliff year, the new export recovers: 2020 — 24/29, 2021 —
+  29/30, 2022 — 37/42, 2023 — 27/31, 2024 — 23/25, 2025 — 16/16. That's a much larger recovery
+  than the pre-check estimate (~198 total was in the right range, but the concentration in
+  2020–2025 — 161 of the 198 — was not anticipated going in). It is still not a full fix: a
+  public NIH RePORTER backfill (the existing recommendation above) remains the only way to
+  close the cliff completely, and the recovered grants still need a topic assignment, since
+  the frozen BERTopic corpus (2,676 docs) doesn't include this new text yet.
+- **151 already-matched grants get updated/longer abstract text** on top of the 198 net-new
+  recoveries (285 raw upload records, pre-grant-matching, gained text on an `Id` shared with
+  the old export).
+- By BERTopic parent theme, the 198 recoverable grants split: 67 Unassigned, 63 Life Sciences
+  & Biomedicine, 40 AI/Robotics/Cognition, 16 Society/Health/Mobility, 5 Physical
+  Sciences/Engineering, 4 Education & Learning, 3 Environment/Ocean/Climate — consistent with
+  NIH's biomedical/health skew.
+
+**Why not adopted into the pipeline yet:** repointing `src/build_dataset.py` at the new file
+would fire roughly eight hardcoded assertions in `src/build_viz_aggregates.py`'s `validate()`
+(2,676 grants, $2.18B total, 1,936 grants with abstract text, 808 Unassigned, three
+zero-coverage agencies) and would desync the recovered text from the PI's frozen
+SPECTER2/UMAP/HDBSCAN output, which can't be re-run in this environment (no HuggingFace network
+access — see `CLAUDE.md`). A newly-recovered abstract would have no topic assignment until the
+model is re-fit locally. That re-fit, plus deciding how the recovered text feeds the
+still-unspecced keyword→classifier method (`docs/TOPIC_CLASSIFICATION_BRAINSTORM.md`), is the
+next real step here — this cross-check is meant to make that decision evidence-backed, not to
+make it.
+
+**Where this surfaces today:** `docs/TopicVizPrototypes/what_we_can_see.html`'s "What's missing
+& where it goes" tab shows the 198 recoverable grants as a distinct segment on the "Abstract
+text" row (known / recoverable / still missing), sourced from
+`data/processed/new_abstract_recovery.parquet`.
+
+---

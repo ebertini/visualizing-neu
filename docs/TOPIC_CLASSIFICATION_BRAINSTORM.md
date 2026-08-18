@@ -21,6 +21,63 @@ This is a real decision, not just a restatement of the Slack message — it reso
 
 "Which student, which prior work" (the person Enrico wants looped in) — no update; still unresolved as far as this record shows.
 
+## What we can see notes — addressed 2026-08-17
+
+All six items below are implemented in `docs/TopicVizPrototypes/what_we_can_see.html`
+(mark size fixed at 4.8px regardless of Rows/Columns arrangement; the dock is a floating
+overlay, default-collapsed; the Selected panel is a floating card, not a modal, opened by
+click and closed via its own close button or Esc; "Arrange by"/"Split by" renamed to
+Rows/Columns; drawer prose trimmed throughout). *"Selected grants should be a pop up"* is
+interpreted as *floating card*, not a blocking modal — a modal was tried in an earlier round
+and explicitly rejected (marks are already individually clickable once the click-precision
+problem is fixed, which is the actual thing a modal would have added).
+
+* ~~remove a lot of the text...~~ — drawers cut to 1–2 sentences per section.
+* ~~preserve the size of the individual grant boxes~~ — one fixed mark size (4.8px) for
+  every Rows × Columns combination; only the number of columns per bin adapts to available
+  width.
+* ~~selected grants should be a pop up~~ — floating card, not a modal (see above).
+* ~~"arrange by"/"split by" → rows/columns~~ — done.
+* ~~control panels as an overlay~~ — the dock floats over the chart, default-collapsed, no
+  longer reserves layout width.
+* ~~whats missing & where it goes, split by grants vs. PIs, absorb coverage's bar-graph
+  detail~~ — see "open questions" below, now resolved into the shipped design.
+
+## open questions — resolved 2026-08-17
+
+* **Which tables have what missing (grants / PIs / abstracts)** — `missingness.json` now has
+  three grains (`grants` n=2,676, `pis` n=2,247 roster faculty, `abstract_records` n=8,075 raw
+  upload records), each scored against its own population with a plain-language `where` string
+  per field.
+* **What's missing, split by grants vs. PIs, folding in coverage's detail** — the "What's
+  missing & where it goes" tab now has a Grants/PIs/Abstract records switch over the missing-
+  fields bars, a "Why abstract coverage is so uneven" section carrying the by-agency and
+  by-year coverage bars (salvaged from the deprecated Coverage tab's heatmap) plus the kept
+  NIH-vs-NSF cliff chart and the mosaic panel's one-line finding, and the funnel unchanged.
+  The Coverage tab and the "Does it matter? What we can't see" tab (including its "What we
+  cannot see" card deck) are both retired — that content now lives in the caveats already
+  surfaced on this tab (`neu_status`, `external_collaborators`, `roster_snapshot`, etc. in
+  `viz_meta.json`'s `caveats[]`) rather than as a separate non-quantitative card grid.
+* **A table showing what's missing and where it goes, split by grants vs. PIs** — a sortable
+  table (Field / Known / Missing / % missing / Recoverable / Where the gap comes from) sits
+  below the missing-fields bars on the same tab, grain-aware via the same switch.
+* **"Every grant" analog for PIs** — a new "Every PI" tab, over all 2,247 roster faculty
+  (not just the 570 with a grant in this corpus — "no grants" is a first-class facet bin, the
+  same "nobody's silently dropped" invariant `facets.json` already holds for grants). Dollars
+  and parent theme are credited PI-only (not full- or fractional-credit), per the funding-
+  credit-model caveat.
+* **Cross-check `DataSet/AcAn Grants 2026-08-13.xlsx`** — done; full results in
+  `docs/data_quality_report.md` §9. Headline: 198 of the 740 text-less grants become
+  recoverable (187 NIH, 11 NSF), concentrated in 2020–2025 (161 of the 198), so the new export
+  narrows the NIH cliff more than the pre-check estimate suggested — but doesn't close it.
+  **Not adopted into the pipeline this round**: it would break several hardcoded corpus-size
+  assertions in `build_viz_aggregates.py` and, more fundamentally, desync the recovered text
+  from the frozen BERTopic/SPECTER2 output (2,676 docs, can't be re-fit in this environment).
+  It's surfaced today only as a "recoverable" segment in the What's-missing view. The "second
+  iteration of What we can see with new topic modelling information" this note asks about —
+  re-fitting the topic model over the recovered text, and whether that's the moment to also
+  pilot the keyword→classifier method below — is real future work, not yet scoped or started.
+
 ---
 
 ## Constraints worth keeping in mind
