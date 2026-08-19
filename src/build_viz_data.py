@@ -33,18 +33,15 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+try:
+    from src.viz_constants import COLORS, ORDER
+except ImportError:  # run from within src/
+    from viz_constants import COLORS, ORDER
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PROC = REPO_ROOT / "data" / "processed"
 OUTPUTS = REPO_ROOT / "outputs"
 VIZ_DIR = REPO_ROOT / "docs" / "EnricoVis" / "data"
-
-# Agency short-code buckets + colours (matches the apps' COLORS/ORDER, EnricoVis
-# decision #2: NIH-SUB kept separate).
-COLORS = {
-    "NSF": "#0072B2", "NIH": "#E69F00", "NIH-SUB": "#56B4E9", "Navy": "#009E73",
-    "NASA": "#9467BD", "Army": "#E7298A", "DOE": "#66A61E", "AFRO": "#A6761D", "Other": "#B0B4BB",
-}
-ORDER = ["NSF", "NIH", "NIH-SUB", "Navy", "NASA", "Army", "DOE", "AFRO", "Other"]
 
 
 def agency_bucket(name: str) -> str:

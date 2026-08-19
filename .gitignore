@@ -218,7 +218,15 @@ __marimo__/
 .streamlit/secrets.toml
 
 # output
-outputs/
+# outputs/* (not a bare "outputs/") so the negation below can actually
+# re-include one file — git cannot un-ignore a path whose PARENT DIRECTORY
+# is itself excluded, only a path excluded by a wildcard on its contents.
+outputs/*
+# Exception: topic_labels.json is the curated "single source of truth" for
+# BERTopic topic labels + parent-theme grouping (docs/TOPIC_WORK_FORWARD_PLAN.md
+# M3 calls it "committed" — the blanket outputs/ rule above silently
+# prevented that). See docs/TOPIC_MODEL_REFIT_CHECKLIST.md.
+!outputs/topic_labels.json
 
 # Processed data artifacts (parquet, pickled frames, etc.) — never commit
 data/processed/

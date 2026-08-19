@@ -376,7 +376,7 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
     dropped from a facet, by construction (see the invariant tests in
     validate()).
     """
-    from src.build_viz_data import ORDER
+    from src.viz_constants import ORDER
 
     abs_src, abs_source = load_abstract_source(points)
     abs_text, abs_text_source = load_abstract_text(points)
@@ -420,7 +420,13 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
         ids.append(gid)
         titles.append(p["title"] or "")
         abstracts.append(abs_text.get(gid, ""))
-        cols["ag"].append(ag_index[p["agency"]])
+        # .get(..., "Other") rather than a bare [] — every point SHOULD already
+        # carry one of the 9 ORDER buckets (build_viz_data.py's agency_bucket()
+        # already defaults to "Other"), but a defensive fallback here means an
+        # agency string outside that set bins as "Other" instead of crashing
+        # the whole build, matching how every other unknown value in this file
+        # gets an explicit bin rather than raising.
+        cols["ag"].append(ag_index.get(p["agency"], ag_index["Other"]))
         cols["yr"].append(p["year"] if p["year"] is not None else -1)
         cols["tp"].append(parent_of_topic.get(p["dom"], -1))
         cols["tid"].append(p["dom"])
@@ -552,7 +558,11 @@ def build_facets_pi(fac, points: list[dict], topics: list[dict]) -> dict:
     # bin the way a literal 0 sentinel would.
     tp_levels = ["No grants as PI", "Unassigned"] + PARENT_NAMES
     NO_PI_GRANTS_TP = -99
-    tp_index_map = {-1: 1, **{i: 2 + i for i in range(8)}}
+    # range(len(PARENT_NAMES)), not a bare range(8): a refit with a different
+    # parent-theme count must not KeyError here — see validate()'s parent-count
+    # drift check, which is what actually tells you PARENT_NAMES itself needs
+    # updating for a new count.
+    tp_index_map = {-1: 1, **{i: 2 + i for i in range(len(PARENT_NAMES))}}
 
     # Group faculty_grants by faculty_id once, up front, rather than
     # filtering the whole table per roster row (2,247 rows x 3,144-row scan).
@@ -607,7 +617,13 @@ def build_facets_pi(fac, points: list[dict], topics: list[dict]) -> dict:
             cols["tp"].append(dominant)
         grant_titles.append([p["title"] or "" for p in pi_points][:8])
 
-    cols["tp"] = [0 if v == NO_PI_GRANTS_TP else tp_index_map[v] for v in cols["tp"]]
+    # .get(v, 1) rather than [v]: falls back to the "Unassigned" bin (index 1)
+    # for a parent id PARENT_NAMES doesn't have a name for yet — e.g. right
+    # after a refit adds a 9th parent theme but before a human has updated
+    # PARENT_NAMES/PARENT_COLORS (validate()'s parent-count drift check is
+    # what actually flags that gap; this is just the "don't crash in the
+    # meantime" half of the fix).
+    cols["tp"] = [0 if v == NO_PI_GRANTS_TP else tp_index_map.get(v, 1) for v in cols["tp"]]
 
     return {
         "n": len(ids),
@@ -920,7 +936,7 @@ def build_funnel() -> dict:
 
 
 def build_viz_meta(points: list[dict], topics: list[dict]) -> dict:
-    from src.build_viz_data import COLORS, ORDER  # reuse verbatim, palettes can't drift
+    from src.viz_constants import COLORS, ORDER  # reuse verbatim, palettes can't drift
 
     agencies = []
     for key in ORDER:
@@ -933,8 +949,13 @@ def build_viz_meta(points: list[dict], topics: list[dict]) -> dict:
             label = next((p["agencyLabel"] for p in points if p["agency"] == key), key)
         agencies.append({"key": key, "label": label, "color": COLORS[key]})
 
+    # PARENT_COLORS[i % len(PARENT_COLORS)], not PARENT_COLORS[i]: matches the
+    # modulo pattern the frontend already uses for this same 8-color palette
+    # (e.g. shared/enrico.js's parentColor()) — a 9th PARENT_NAMES entry
+    # reuses a color instead of raising IndexError if PARENT_COLORS wasn't
+    # (yet) extended to match.
     parents = [
-        {"id": i, "name": name, "color": PARENT_COLORS[i]}
+        {"id": i, "name": name, "color": PARENT_COLORS[i % len(PARENT_COLORS)]}
         for i, name in enumerate(PARENT_NAMES)
     ] + [{"id": -1, "name": "Unassigned", "color": "#c7ccd3"}]
 
@@ -965,7 +986,12 @@ def build_viz_meta(points: list[dict], topics: list[dict]) -> dict:
         "frozen_inputs": {
             "projection": "SPECTER2 + UMAP + HDBSCAN",
             "n_points": len(points),
-            "n_topics": 25,
+            # len(...), not a literal 25 — about.html renders this verbatim
+            # ("N topics + an explicit Unassigned noise cluster"); a hardcoded
+            # count would silently disagree with the actual topic model after
+            # a refit. Excludes the id=-1 noise entry, same convention as
+            # everywhere else in this file that counts "real" topics.
+            "n_topics": len([t for t in topics if t["id"] >= 0]),
         },
         "agencies": agencies,
         "parents": parents,
@@ -1003,18 +1029,29 @@ def build_topic_time(points: list[dict], topics: list[dict]) -> dict:
         return {"n": [0] * len(years), "d": [0.0] * len(years)}
 
     topic_series = {str(t["id"]): blank() for t in topics}          # "-1".."24"
-    parent_series = {str(i): blank() for i in range(-1, 8)}
+    # range(-1, len(PARENT_NAMES)), not a bare range(-1, 8): every parent
+    # index a point can carry (via _parent_index) must have a bucket here, or
+    # the lookups below KeyError. A refit that changes the parent count
+    # doesn't need this file re-edited past updating PARENT_NAMES itself.
+    parent_series = {str(i): blank() for i in range(-1, len(PARENT_NAMES))}
     topic_title_only = {str(t["id"]): [0] * len(years) for t in topics}
-    parent_title_only = {str(i): [0] * len(years) for i in range(-1, 8)}
+    parent_title_only = {str(i): [0] * len(years) for i in range(-1, len(PARENT_NAMES))}
     totals = blank()
 
     prelude_n, prelude_d = 0, 0.0
-    prelude_by_parent = {str(i): 0 for i in range(-1, 8)}
+    prelude_by_parent = {str(i): 0 for i in range(-1, len(PARENT_NAMES))}
 
     for p in points:
         yr = p["year"]
         tid = p["dom"]
         pid = parent_of_topic.get(tid, -1)
+        # Clamp to Unassigned (-1) if pid names a parent beyond what
+        # PARENT_NAMES currently has a bucket for (parent_series/
+        # prelude_by_parent/etc. above are only sized to range(-1,
+        # len(PARENT_NAMES))) — same "don't crash, fall back to Unassigned"
+        # stance as build_facets_pi's tp_index_map.get(v, 1).
+        if pid >= len(PARENT_NAMES):
+            pid = -1
         amt = p["amount"]
         if yr is None or yr < DENSE_FROM or yr > DENSE_TO:
             if yr is not None and yr < DENSE_FROM:
@@ -1043,7 +1080,7 @@ def build_topic_time(points: list[dict], topics: list[dict]) -> dict:
 
 
 def build_coverage(points: list[dict]) -> dict:
-    from src.build_viz_data import COLORS, ORDER
+    from src.viz_constants import COLORS, ORDER
 
     abs_src, src_path = load_abstract_source(points)
 
@@ -1122,16 +1159,52 @@ def build_coverage(points: list[dict]) -> dict:
     }
 
 
-def validate(points: list[dict], viz_meta: dict, topic_time: dict, coverage: dict,
-             facets: dict, facets_pi: dict, missingness: dict, funnel: dict) -> list[str]:
+def validate(points: list[dict], topics: list[dict], viz_meta: dict, topic_time: dict,
+             coverage: dict, facets: dict, facets_pi: dict, missingness: dict,
+             funnel: dict) -> list[str]:
     lines = []
     n = len(points)
     total_dollars = sum(p["amount"] for p in points)
-    lines.append(f"n_points = {n} (expect 2676)")
-    assert n == 2676, "point count drifted from the frozen grants_umap.json"
+    # Informational, not asserted: these two are the first numbers a topic-
+    # model refit or a new grants export legitimately changes. See the
+    # internal-reconciliation asserts below (which stay hard) for the checks
+    # that actually catch a broken build regardless of corpus size.
+    lines.append(f"n_points = {n}")
+    lines.append(f"total dollars = {total_dollars:,.0f}")
 
-    lines.append(f"total dollars = {total_dollars:,.0f} (expect 2,183,457,207)")
-    assert abs(total_dollars - 2_183_457_207) < 1.0, "dollar total drifted"
+    # Parent-theme shape drift — PARENT_NAMES/PARENT_COLORS (this file) and
+    # their manually-synced copies in shared/enrico.js (and, for visual
+    # consistency with the PI's read-only EnricoVis apps, topic_hierarchy.html)
+    # don't auto-update from the topic model. Nothing crashes on a mismatch
+    # (see the modulo/`.get()` fallbacks added where PARENT_NAMES/PARENT_COLORS
+    # are consumed) but a silently-wrong parent count is easy to miss without
+    # this being loud about it.
+    seen_parents = {t.get("parent") for t in topics if t.get("parent")}
+    if len(seen_parents) != len(PARENT_NAMES):
+        lines.append(
+            f"⚠ parent count drifted: topics.json has {len(seen_parents)} parent groups, "
+            f"PARENT_NAMES/PARENT_COLORS here have {len(PARENT_NAMES)}. Update both "
+            f"(and their manually-synced copies in docs/TopicVizPrototypes/shared/enrico.js "
+            f"and, if desired, docs/EnricoVis/topic_hierarchy.html — see the module docstring)."
+        )
+    else:
+        lines.append(f"parent count = {len(seen_parents)} (matches PARENT_NAMES/PARENT_COLORS) ✓")
+
+    # ARTIFACT_TOPIC_ID can't be derived automatically — parent: null alone
+    # doesn't distinguish a real artifact bucket from the noise topic or any
+    # other unparented one — but it CAN be checked for staleness: after a
+    # refit it should still point at some real, unparented topic (or be unset
+    # if this fit doesn't have an equivalent artifact bucket).
+    artifact_topic = next((t for t in topics if t["id"] == ARTIFACT_TOPIC_ID), None)
+    if artifact_topic is None or artifact_topic.get("parent") is not None:
+        lines.append(
+            f"⚠ ARTIFACT_TOPIC_ID={ARTIFACT_TOPIC_ID} no longer names a real, unparented topic — "
+            f"re-check which topic (if any) is this refit's artifact bucket and update the "
+            f"constant (or set it to a sentinel with no matching id if there isn't one this time)."
+        )
+    else:
+        lines.append(f"ARTIFACT_TOPIC_ID={ARTIFACT_TOPIC_ID} still names "
+                      f"'{artifact_topic['name']}', unparented ✓")
 
     # topic_time reconciliation: dense-window totals + prelude must equal the corpus.
     dense_n = sum(topic_time["totals_by_year"]["n"])
@@ -1151,18 +1224,22 @@ def validate(points: list[dict], viz_meta: dict, topic_time: dict, coverage: dic
 
     # per-year parent series must sum to totals_by_year at every index.
     for i in range(len(topic_time["years"])):
-        s = sum(topic_time["series"]["parent"][str(k)]["n"][i] for k in range(-1, 8))
+        s = sum(topic_time["series"]["parent"][str(k)]["n"][i] for k in range(-1, len(PARENT_NAMES)))
         assert s == topic_time["totals_by_year"]["n"][i], f"parent series don't sum to totals at year index {i}"
     lines.append("parent series sum to totals_by_year at every year ✓")
 
-    # zero-coverage agencies — a genuine, verified invariant in this corpus.
+    # Zero-coverage agencies — a verified fact of the CURRENT corpus, not a
+    # structural invariant (a new abstract export, e.g., could genuinely move
+    # NIH-SUB off 0.0 — see docs/data_quality_report.md §9). Informational.
     for a in ("NIH-SUB", "Navy", "AFRO"):
         cov = coverage["by_agency"][a]["cov"]
-        lines.append(f"{a} coverage = {cov} (expect 0.0)")
-        assert cov == 0.0, f"{a} coverage is no longer 0 — update the assumption or the corpus changed"
+        lines.append(f"{a} coverage = {cov}")
 
-    # Unassigned block — must match across viz_meta and coverage.
-    assert viz_meta["totals"]["unassigned_n"] == coverage["unassigned"]["n"] == 808, "Unassigned count drifted from 808"
+    # Unassigned block — the cross-check between viz_meta and coverage stays
+    # hard (they're computed two different ways and must agree regardless of
+    # corpus); the literal 808 doesn't (that's the whole point of a refit).
+    assert viz_meta["totals"]["unassigned_n"] == coverage["unassigned"]["n"], \
+        "Unassigned count disagrees between viz_meta and coverage"
     lines.append(f"Unassigned = {coverage['unassigned']['n']} grants, "
                  f"${viz_meta['totals']['unassigned_dollars']:,.0f} "
                  f"({viz_meta['totals']['unassigned_share_d']:.1%})")
@@ -1184,14 +1261,21 @@ def validate(points: list[dict], viz_meta: dict, topic_time: dict, coverage: dic
     lines.append(f"facets: pi_attrs provenance path = {facets['provenance']['pi_attrs']}")
 
     # Abstract text — when grants.parquet was available (provenance ==
-    # "parquet"), this should match the known has-abstract count exactly;
-    # a mismatch means the join between facets["abstracts"] and the
-    # committed FACETS.cols.ab (has-abstract flag) has drifted apart.
+    # "parquet"), the count of non-empty facets["abstracts"] entries should
+    # match facets["cols"]["ab"]'s has-abstract flag exactly (independently
+    # sourced: one from the live grants.parquet text, the other from the
+    # frozen corpus's titleOnly flag) — a mismatch means that join has
+    # drifted apart. This is a genuine cross-check, not a corpus-size literal,
+    # so it stays a hard assert; the count itself is informational.
     n_with_abstract = sum(1 for a in facets["abstracts"] if a)
     lines.append(f"facets: abstract text present for {n_with_abstract}/{n} grants "
                  f"(provenance={facets['provenance']['abstract_text']})")
     if facets["provenance"]["abstract_text"] == "parquet":
-        assert n_with_abstract == 1936, f"abstract-text count drifted from 1936 (got {n_with_abstract})"
+        n_flagged_has_abstract = sum(facets["cols"]["ab"])
+        assert n_with_abstract == n_flagged_has_abstract, (
+            f"abstract text present ({n_with_abstract}) disagrees with the has-abstract "
+            f"flag ({n_flagged_has_abstract}) — the two are independently sourced and should agree"
+        )
 
     # amt_raw must reconcile to the same total dollars as everything else —
     # a cheap way to catch a mis-keyed or truncated per-unit dollar column.
@@ -1204,13 +1288,10 @@ def validate(points: list[dict], viz_meta: dict, topic_time: dict, coverage: dic
     no_pi_n = sum(1 for v in facets["cols"]["col"] if v == no_pi_idx)
     off_roster_n = sum(1 for v in facets["cols"]["col"] if v == off_roster_idx)
     lines.append(f"facets: {no_pi_n} grants with '{NO_PI_LABEL}', {off_roster_n} with '{PI_OFF_ROSTER_LABEL}'")
-    if facets["provenance"]["pi_attrs"] == "parquet":
-        # Verified against a rebuilt corpus at plan time: 312 grants have no PI
-        # row at all; 48 PI rows (13 distinct faculty) resolve to a PI absent
-        # from faculty_id_lookup. Both come from data/processed/*.parquet, so
-        # only assert them when that path was actually taken.
-        assert no_pi_n == 312, f"'{NO_PI_LABEL}' count drifted from 312 (got {no_pi_n})"
-        assert off_roster_n == 48, f"'{PI_OFF_ROSTER_LABEL}' count drifted from 48 (got {off_roster_n})"
+    # Informational only below — these counts are a fact of the current
+    # grant/roster data (data/processed/*.parquet), not the topic model, but
+    # still legitimately change on any rebuild of that data (a new grants
+    # export, an HR roster refresh), so they're not asserted against a literal.
 
     # missingness.json — each grain's fields must sum to that grain's own n,
     # not the grant count (n above) — grains have different denominators.
@@ -1225,44 +1306,59 @@ def validate(points: list[dict], viz_meta: dict, topic_time: dict, coverage: dic
     assert grants_grain["n"] == n, "grants-grain missingness n doesn't match the corpus"
     pis_grain = missingness["grains"]["pis"]
     if pis_grain["provenance"] == "parquet":
-        assert pis_grain["n"] == 2247, f"PI-grain n drifted from 2247 (got {pis_grain['n']})"
+        lines.append(f"missingness[pis]: n={pis_grain['n']}")  # roster size — informational
 
     # facets_pi.json — same "nobody ever dropped" invariant as facets.json
-    # above, scored against the PI-grain's own n (2,247 roster faculty, not
-    # the 2,676 grants).
+    # above, scored against the PI-grain's own n (roster faculty count, not
+    # the grant count).
     if facets_pi["provenance"] == "parquet":
         n_pi = facets_pi["n"]
-        assert n_pi == 2247, f"facets_pi n drifted from 2247 (got {n_pi})"
+        # Cross-check against missingness's independently-built PI grain
+        # (different function, same underlying roster) rather than a
+        # literal — a genuine invariant that survives a roster refresh.
+        if pis_grain["provenance"] == "parquet":
+            assert n_pi == pis_grain["n"], (
+                f"facets_pi n ({n_pi}) disagrees with missingness[pis] n ({pis_grain['n']}) — "
+                "both should be the same roster faculty count"
+            )
         for col_name, values in facets_pi["cols"].items():
             assert len(values) == n_pi, f"facets_pi column '{col_name}' length != {n_pi}"
         assert len(facets_pi["names"]) == n_pi and len(facets_pi["grant_titles"]) == n_pi
         n_has_grants = sum(facets_pi["cols"]["hasgrants"])
         n_as_pi = sum(1 for v in facets_pi["cols"]["tp"] if v != 0)
-        lines.append(f"facets_pi: {n_pi} faculty, {n_has_grants} with grants (expect 557), "
+        lines.append(f"facets_pi: {n_pi} faculty, {n_has_grants} with grants, "
                       f"{n_as_pi} ever a PI in this corpus")
-        # 557, not faculty_grants.parquet's overall 570 grant-bearing faculty
-        # count: 13 of those 570 are the faculty_missing_metadata rows (grant-
-        # active but absent from the HR roster), so they never appear in
-        # `fac` at all and are correctly outside this roster-scoped (n=2,247)
-        # population, not a data drift.
-        assert n_has_grants == 557, f"facets_pi grant-bearing count drifted from 557 (got {n_has_grants})"
-        # n_as_pi is not hard-asserted: it only credits a PI grant if it also
-        # resolves in the frozen grants_umap corpus (2,676 grants), while
-        # faculty_grants itself spans 2,680 distinct grant_ids — a PI whose
-        # only credited grant(s) fall outside that frozen set would
-        # undercount here by construction, not by a real data drift.
+        # Both counts below are informational, not asserted against a
+        # literal — they're facts of the current grant/roster data (a new
+        # grants export or HR roster refresh legitimately changes them), not
+        # of the topic model. n_as_pi in particular only credits a PI grant
+        # if it also resolves in the frozen grants_umap corpus, while
+        # faculty_grants itself can span a slightly larger grant_id set — a
+        # PI whose only credited grant(s) fall outside that set undercounts
+        # here by construction, not by a real data drift.
 
     # funnel.json — the trunk must be monotonically non-increasing, and the
-    # raw/matched/orphaned split must reconcile to the known raw record count.
+    # raw/matched/orphaned split must reconcile.
     if funnel["provenance"] != "derived":
         trunk_ns = [s["n"] for s in funnel["trunk"]]
         assert trunk_ns == sorted(trunk_ns, reverse=True), "funnel trunk is not monotonically non-increasing"
-        assert trunk_ns[0] == RAW_ABSTRACT_RECORDS, "funnel trunk doesn't start at the verified raw record count"
+        # RAW_ABSTRACT_RECORDS (8075, see its own comment) has no source in
+        # any committed parquet — it was verified once by hand against a
+        # PIPELINE_VALIDATION.txt from a past build_dataset.py run. Report it
+        # as a hint rather than assert against it; after a real raw-data
+        # rebuild, re-derive the expectation from the FRESH
+        # data/processed/PIPELINE_VALIDATION.txt instead of trusting this
+        # stale constant.
+        lines.append(f"funnel trunk starts at {trunk_ns[0]} raw records "
+                      f"(RAW_ABSTRACT_RECORDS constant = {RAW_ABSTRACT_RECORDS})")
         lines.append(f"funnel trunk: {' -> '.join(str(x) for x in trunk_ns)}")
         if funnel["branch"] is not None:
+            # trunk_ns[0], not RAW_ABSTRACT_RECORDS: this reconciles the
+            # funnel against ITS OWN reported raw count, which is refit-proof
+            # (the constant above is not).
             matched_rows_n = trunk_ns[1]
-            assert matched_rows_n + funnel["branch"]["n"] == RAW_ABSTRACT_RECORDS, \
-                "matched rows + orphaned rows don't sum to the raw record count"
+            assert matched_rows_n + funnel["branch"]["n"] == trunk_ns[0], \
+                "matched rows + orphaned rows don't sum to the funnel's own raw record count"
             bucket_sum = sum(s["n"] for s in funnel["branch"]["steps"][1:])  # update+extra+duplicate+unattributed
             assert bucket_sum == funnel["branch"]["steps"][0]["n"], \
                 "orphan recovery buckets don't sum to the 'usable' step"
@@ -1289,7 +1385,7 @@ def main() -> None:
     missingness = build_missingness(points, pi_attrs, recoverable, fac, lookup)
     funnel = build_funnel()
 
-    report = validate(points, viz_meta, topic_time, coverage, facets, facets_pi, missingness, funnel)
+    report = validate(points, topics, viz_meta, topic_time, coverage, facets, facets_pi, missingness, funnel)
     viz_meta["validation"] = report
     print("\n".join(report))
 

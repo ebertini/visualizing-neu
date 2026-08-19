@@ -19,7 +19,19 @@ Run:
 Writes:
     data/processed/bertopic_model/         (BERTopic.save, pickle)
     data/processed/topic_assignments.parquet   grant_id -> topic_id, is_noise
+    data/processed/specter2_umap_2d.npy    2-D UMAP of the same embeddings, for the
+                                            viz only (n_components=5 above feeds
+                                            HDBSCAN; this is a separate fit, same
+                                            seed) — closes a gap where this file
+                                            previously had no producing script
+                                            (src/build_viz_data.py:72 reads it)
     outputs/bertopic_diagnostics.json      cluster sizes, %-noise, intra-cosine, seed
+    outputs/topic_labels.json              SEED ONLY, written if absent: every topic's
+                                            label defaults to its c-TF-IDF top-3 terms,
+                                            parent defaults to null (Unassigned) — see
+                                            docs/TOPIC_MODEL_REFIT_CHECKLIST.md. Never
+                                            overwrites an existing (possibly hand-
+                                            curated) file.
 """
 from __future__ import annotations
 
@@ -174,6 +186,46 @@ def _load_docs_aligned_to_cache() -> tuple[list[str], list[str], np.ndarray]:
     return docs, ids, embeddings
 
 
+def _save_umap_2d(embeddings: np.ndarray, seed: int = SEED) -> None:
+    """Fit + persist a SEPARATE 2-D UMAP of the same embeddings, for the viz only.
+
+    Distinct from the n_components=5 UMAP `fit()` uses to feed HDBSCAN (that one
+    is never persisted — it's an internal step of the BERTopic pipeline). This is
+    plotting-only, unconditionally overwritten on every run (same pattern as
+    src/build_specter2_embeddings.py's cache), and is what src/build_viz_data.py
+    reads to place points on the grant_atlas / topic_islands scatterplots.
+    """
+    umap_2d = UMAP(
+        n_components=2, n_neighbors=15, min_dist=0.0,
+        metric="cosine", random_state=seed,
+    ).fit_transform(embeddings)
+    out = PROC / "specter2_umap_2d.npy"
+    np.save(out, umap_2d)
+    print(f"wrote {out}  {umap_2d.shape}")
+
+
+def _seed_topic_labels(topic_model: BERTopic) -> dict:
+    """Build a SEED outputs/topic_labels.json — every topic's c-TF-IDF top terms
+    as its label, no parent grouping. Schema matches what src/build_viz_data.py
+    reads (labels["_meta"]["n_topics"], labels["topics"][str(id)]["label"/"top_terms"/
+    "parent"], labels["parents"][pid]["label"/"topic_ids"]).
+
+    This is a bootstrap, not a substitute for curation: parent-theme grouping and
+    nicer labels are a deliberate, optional human pass on top (see
+    docs/TOPIC_MODEL_REFIT_CHECKLIST.md) — this just guarantees the file is always
+    valid and buildable immediately after a fit, with zero manual steps required.
+    """
+    all_topics = topic_model.get_topics()  # {topic_id: [(word, score), ...]}
+    topic_ids = sorted(tid for tid in all_topics if tid != -1)
+    topics_meta = {}
+    for tid in topic_ids:
+        words = [w for w, _score in all_topics[tid]]
+        label = ", ".join(words[:3]) if words else f"Topic {tid}"
+        topics_meta[str(tid)] = {"label": label, "top_terms": words[:10], "parent": None}
+    topics_meta["-1"] = {"label": "Unassigned / noise", "top_terms": [], "parent": None}
+    return {"_meta": {"n_topics": len(topic_ids)}, "topics": topics_meta, "parents": {}}
+
+
 def main() -> None:
     docs, ids, embeddings = _load_docs_aligned_to_cache()
     print(f"fitting BERTopic on {len(docs)} docs / {embeddings.shape} embeddings...")
@@ -198,6 +250,17 @@ def main() -> None:
     print(f"wrote {OUTPUTS / 'bertopic_diagnostics.json'}")
     print(f"  topics={diagnostics['n_topics']}  noise={diagnostics['pct_noise']}%  "
           f"intra-cosine={diagnostics['mean_intra_cluster_cosine']}")
+
+    _save_umap_2d(embeddings)
+
+    labels_path = OUTPUTS / "topic_labels.json"
+    if labels_path.exists():
+        print(f"{labels_path} already exists — leaving it alone (may be hand-curated). "
+              "Delete it first if you want a fresh auto-generated seed.")
+    else:
+        labels_path.write_text(json.dumps(_seed_topic_labels(topic_model), indent=2))
+        print(f"wrote {labels_path}  (seed: c-TF-IDF labels, no parent grouping yet — "
+              "see docs/TOPIC_MODEL_REFIT_CHECKLIST.md)")
 
 
 if __name__ == "__main__":
