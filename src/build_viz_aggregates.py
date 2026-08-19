@@ -48,9 +48,10 @@ Reads (locally built, optional — enriches provenance if present):
                                           on the grants-grain abstract field,
                                           not adopted into the pipeline itself
 
-Writes (docs/TopicVizPrototypes/data/, committed, inlined into the
-prototypes at build time — CI does not publish source data/ directories,
-see docs/TOPIC_WORK_EXECUTION_REPORT.md):
+Writes (docs/TopicVizPrototypes/data/, committed — the three prototype
+pages fetch() these at load from an ES module; there is no inlined second
+copy. CI publishes this directory alongside the HTML, see
+.github/workflows/deploy-notebooks.yml and docs/TOPIC_WORK_EXECUTION_REPORT.md):
   viz_meta.json     shared dimensions (agencies, parents, topics, year axis,
                      totals) + the single canonical caveats[] array
   topic_time.json   topic & parent share/dollars per year, dense 2005-2025
@@ -101,7 +102,22 @@ PARENT_NAMES = [
     "Computing & Cybersecurity", "Networks, Signals & Control", "AI, Robotics & Cognition",
     "Society, Health & Mobility", "Education & Learning",
 ]
-PARENT_COLORS = ["#4E79A7", "#F28E2B", "#59A14F", "#B07AA1", "#76B7B2", "#EDC948", "#9C755F", "#D37295"]
+# 8 real names above + 4 SPARE colors below (indices 8-11) — pre-allocated
+# headroom so a refit that adds a 9th+ parent theme (always a human curation
+# step — BERTopic itself never produces parent groups, see
+# docs/TOPIC_MODEL_REFIT_CHECKLIST.md) gets a real, distinct color the moment
+# it's named in PARENT_NAMES, instead of silently reusing color 0
+# (`i % len(PARENT_COLORS)` wraps once `i` reaches 8). The 4 spares are hues
+# already used in shared/enrico.js's TOPIC_COLORS, kept red-free/grey-free to
+# match this palette's existing convention (grey is reserved for NOISE_GREY).
+# Every color-consuming line below already keys off len(PARENT_COLORS)/
+# len(PARENT_NAMES), not a literal 8 or 12, so this extension changes nothing
+# about today's 8-parent rendering — see the modulo-safety comments at the
+# actual usage sites further down this file.
+PARENT_COLORS = [
+    "#4E79A7", "#F28E2B", "#59A14F", "#B07AA1", "#76B7B2", "#EDC948", "#9C755F", "#D37295",
+    "#6B4C9A", "#1B9E77", "#B6992D", "#7570B3",
+]
 
 # Topic 11 is a documented artifact bucket (docs/TOPIC_WORK_EXECUTION_REPORT.md):
 # 28 of 62 docs are placeholder "Grant" title-only ONR/NIH-sub records. It has
@@ -371,7 +387,7 @@ def load_pi_attrs(points: list[dict]) -> tuple[dict[str, dict], str]:
 def build_facets(points: list[dict], topics: list[dict]) -> dict:
     """Per-grant facet table for the "every grant, arranged" unit visualization.
     Columnar/dictionary-encoded rather than an array of 2,676 objects — keeps
-    the inlined HTML payload small and every column trivial to bin in d3.
+    the fetched JSON payload small and every column trivial to bin in d3.
     Every categorical column has a bin for missing values; no grant is ever
     dropped from a facet, by construction (see the invariant tests in
     validate()).

@@ -26,9 +26,28 @@ Runs, in order:
                                                faculty*.parquet etc. — can
                                                change independent of the
                                                topic model).
-  3. scripts/_inline_topicviz_data.py       — always; re-embeds the freshly
-                                               written data/*.json into the
-                                               three prototype HTML files.
+  3. scripts/_check_topicviz.py --data-only — always; verifies every dataset
+                                               the three prototype pages
+                                               fetch() at runtime exists in
+                                               data/ and parses, and that the
+                                               aggregator has no output no
+                                               page reads. Nothing is
+                                               rewritten — data/*.json IS what
+                                               the pages load; there is no
+                                               second copy to keep in sync
+                                               (that used to be
+                                               scripts/_inline_topicviz_data.py's
+                                               job — retired along with the
+                                               inlining it existed to redo).
+
+The three prototype pages fetch() their JSON from ./data/ as ES modules, so
+they need an HTTP origin — they will NOT work opened directly as a file
+(module loading and fetch() are both blocked by file:// CORS rules). Serve
+the directory locally to actually look at them:
+    python -m http.server 8000 --directory docs/TopicVizPrototypes
+GitHub Pages works because .github/workflows/deploy-notebooks.yml copies
+data/, shared/, and each page's own module directory alongside the HTML
+into docs/onlineoutput/ at the same relative paths.
 
 Each step is invoked as `python -m src.<module>` (a real subprocess, using
 the SAME interpreter this script is run with) rather than imported and
@@ -78,10 +97,14 @@ def main() -> None:
               "topic_assignments.parquet — skipping src.build_viz_data.")
 
     _run([python, "-m", "src.build_viz_aggregates"])
-    _run([python, str(REPO_ROOT / "scripts" / "_inline_topicviz_data.py")])
+    _run([python, str(REPO_ROOT / "scripts" / "_check_topicviz.py"), "--data-only"])
 
-    print("\ndone — verify with: "
-          f"{python} scripts/_inline_topicviz_data.py --check")
+    print("\ndone — data/*.json is the single source of truth; the pages fetch() it "
+          "at load. Verify with:\n"
+          f"  {python} -m http.server 8000 --directory docs/TopicVizPrototypes\n"
+          "  then open http://localhost:8000/{what_we_can_see,topic_flow,about}.html\n"
+          "Full structural check set (syntax/import-graph/id cross-reference, needs node):\n"
+          f"  {python} scripts/_check_topicviz.py")
 
 
 if __name__ == "__main__":

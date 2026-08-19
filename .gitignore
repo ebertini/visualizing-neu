@@ -228,6 +228,19 @@ outputs/*
 # prevented that). See docs/TOPIC_MODEL_REFIT_CHECKLIST.md.
 !outputs/topic_labels.json
 
+# CI-only publish copies of docs/TopicVizPrototypes/ siblings, created by
+# .github/workflows/deploy-notebooks.yml so the prototype pages can fetch()
+# their data on GitHub Pages. The real sources are tracked under
+# docs/TopicVizPrototypes/{shared,data,what_we_can_see,topic_flow,about}/ —
+# committing a second copy here would restore exactly the problem the
+# fetch() refactor removed (data/facets.json duplicated and churning on
+# every refresh; see docs/TOPIC_MODEL_REFIT_CHECKLIST.md).
+docs/onlineoutput/shared/
+docs/onlineoutput/data/
+docs/onlineoutput/what_we_can_see/
+docs/onlineoutput/topic_flow/
+docs/onlineoutput/about/
+
 # Processed data artifacts (parquet, pickled frames, etc.) — never commit
 data/processed/
 *.parquet

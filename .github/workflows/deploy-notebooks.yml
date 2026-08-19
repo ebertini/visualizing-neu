@@ -37,16 +37,44 @@ jobs:
           cp docs/EnricoVis/topic_islands.html docs/onlineoutput/
           # Round-1 topic-model visualization prototypes (own analysis work,
           # built on EnricoVis's canonical topic model but kept in a separate
-          # directory — see docs/TopicVizPrototypes/shared/ for the CSS/JS kit
-          # they load externally, unlike the three self-contained apps above)
+          # directory). Unlike the three self-contained EnricoVis apps above,
+          # these fetch() their JSON at runtime from an ES module, so the
+          # whole sibling layout — shared/ (the CSS+JS kit), data/ (the
+          # aggregator's committed JSON), and each page's own module
+          # directory (what_we_can_see/, topic_flow/, about/) — must be
+          # published NEXT TO the HTML at the SAME relative paths they have
+          # in docs/TopicVizPrototypes/, or the pages 404 on their own data.
           cp docs/TopicVizPrototypes/topic_flow.html docs/onlineoutput/
           cp docs/TopicVizPrototypes/what_we_can_see.html docs/onlineoutput/
           cp docs/TopicVizPrototypes/about.html docs/onlineoutput/
-          cp -r docs/TopicVizPrototypes/shared docs/onlineoutput/shared
+          # `mkdir -p` + `cp -r SRC/. DST/` (not `cp -r SRC DST`): if DST ever
+          # already exists as a directory, `cp -r SRC DST` nests as DST/SRC
+          # instead of copying SRC's contents into it — silently 404ing every
+          # page while the workflow stays green. The trailing `/.` form copies
+          # CONTENTS into an existing directory either way.
+          mkdir -p docs/onlineoutput/shared docs/onlineoutput/data \
+                   docs/onlineoutput/what_we_can_see docs/onlineoutput/topic_flow \
+                   docs/onlineoutput/about
+          cp -r docs/TopicVizPrototypes/shared/.           docs/onlineoutput/shared/
+          cp -r docs/TopicVizPrototypes/data/.             docs/onlineoutput/data/
+          cp -r docs/TopicVizPrototypes/what_we_can_see/.  docs/onlineoutput/what_we_can_see/
+          cp -r docs/TopicVizPrototypes/topic_flow/.       docs/onlineoutput/topic_flow/
+          cp -r docs/TopicVizPrototypes/about/.            docs/onlineoutput/about/
           # Copy the standalone methods report
           cp docs/topic_work_report.html docs/onlineoutput/
-          # Create .nojekyll to bypass Jekyll processing
-          touch docs/.nojekyll
+          # Create .nojekyll INSIDE the uploaded artifact (docs/onlineoutput/,
+          # not docs/) — actions/upload-pages-artifact only uploads that
+          # directory, so a .nojekyll outside it never reaches Pages. (Jekyll
+          # doesn't actually run under actions/deploy-pages regardless; this
+          # is cheap insurance if that ever changes.) Also: never name a
+          # published directory with a leading underscore — Jekyll strips
+          # those — and check any new one isn't accidentally matched by a
+          # bare .gitignore entry (e.g. `lib/`, `build/`, `dist/` match at
+          # any depth) with `git check-ignore -v <path>` before committing.
+          touch docs/onlineoutput/.nojekyll
+
+      - name: Verify published TopicVizPrototypes data wiring
+        run: python scripts/_check_topicviz.py --root docs/onlineoutput --data-only
 
       - name: Generate index.html
         run: python scripts/generate_index.py

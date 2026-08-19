@@ -22,15 +22,30 @@
   };
   const ORDER = ["NSF", "NIH", "NIH-SUB", "Navy", "NASA", "Army", "DOE", "AFRO", "Other"];
 
-  // ---- 25-topic palette (Tableau-20 extended) ----
+  // ---- 25-topic palette (Tableau-20 extended), + 5 SPARE colors (indices
+  // 25-29) — pre-allocated headroom so a refit that produces more than 25
+  // leaf topics gets a real, distinct color immediately (topicColor already
+  // wraps via % TOPIC_COLORS.length, so this is a pure size increase, not a
+  // behavior change for the current 25). The 5 spares continue the same
+  // ColorBrewer-Dark2-adjacent family the last 4 original entries came from.
   const TOPIC_COLORS = [
     "#4E79A7", "#A0CBE8", "#F28E2B", "#FFBE7D", "#59A14F", "#8CD17D", "#B6992D", "#F1CE63",
     "#499894", "#86BCB6", "#E15759", "#FF9D9A", "#79706E", "#BAB0AC", "#D37295", "#FABFD2",
     "#B07AA1", "#D4A6C8", "#9D7660", "#D7B5A6", "#6B4C9A", "#1B9E77", "#D95F02", "#7570B3", "#E7298A",
+    "#66A61E", "#E6AB02", "#A6761D", "#8DA0CB", "#66C2A5",
   ];
 
-  // ---- 8-parent-theme palette ----
-  const PARENT_COLORS = ["#4E79A7", "#F28E2B", "#59A14F", "#B07AA1", "#76B7B2", "#EDC948", "#9C755F", "#D37295"];
+  // ---- 8-parent-theme palette, + 4 SPARE colors (indices 8-11) — same
+  // pre-allocated-headroom idea as TOPIC_COLORS above, for whenever a human
+  // curates a 9th+ parent theme (see docs/TOPIC_MODEL_REFIT_CHECKLIST.md —
+  // parent themes are always a manual grouping step, never produced directly
+  // by a refit). Must stay byte-identical to src/build_viz_aggregates.py's
+  // own PARENT_COLORS copy. Red-free/grey-free, matching this palette's
+  // existing convention (grey is reserved for NOISE_GREY).
+  const PARENT_COLORS = [
+    "#4E79A7", "#F28E2B", "#59A14F", "#B07AA1", "#76B7B2", "#EDC948", "#9C755F", "#D37295",
+    "#6B4C9A", "#1B9E77", "#B6992D", "#7570B3",
+  ];
   const PARENT_NAMES = [
     "Life Sciences & Biomedicine", "Physical Sciences & Engineering", "Environment, Ocean & Climate",
     "Computing & Cybersecurity", "Networks, Signals & Control", "AI, Robotics & Cognition",
