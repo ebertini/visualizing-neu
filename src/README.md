@@ -101,12 +101,15 @@ most-recently-updated abstract record per grant from `grants-with-abstract`.
 | `copi_available` | str | From AAD: "Yes" / "No". |
 | `title_from_abstract` | str | Grant title as recorded on the abstract record (often longer / more descriptive than `grantname`). Empty when no abstract matched. |
 | `abstract` | str | Free-text abstract, most-recently-updated per grant. Empty when no abstract matched. |
+| `abstract_source` | str | Provenance: `internal` (base match above), `orphan_recovered` (added later by `reconcile_orphans.py`), `nih_reporter` / `nih_reporter_parent` / `nsf_api` (added later by `build_dataset.py`'s `_apply_abstract_backfill`, gap-fill only — see `src/backfill_nih_reporter.py`, `src/backfill_nsf_awards.py`), or `""` (no abstract). `nih_reporter_parent` is real, stored text but EXCLUDED from the topic-model fit — see `src.clean_text.LOW_TRUST_ABSTRACT_SOURCES` / `usable_abstract()`. |
 | `funding_status` | str | From abstracts: Awarded / Pending / etc. Empty when no abstract matched. |
 | `type_of_funding` | str | From abstracts: Research grant / Contract / Gift / Fellowship / etc. |
 | `funding_source` | str | From abstracts: Federal / State / Private / Foundation / etc. |
 
-Rows: **2,676** unique grants. **1,928 (72%)** have a non-empty abstract; the
-remainder are grants without a matched abstract record.
+Rows: **2,676** unique grants. **1,928 (72%)** have a non-empty abstract from
+the base internal match alone; the NIH RePORTER / NSF Award Search backfill
+(`abstract_source` above) fills several hundred more of the remainder — see
+`docs/data_quality_report.md` §9 for current counts.
 
 ---
 

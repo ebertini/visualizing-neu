@@ -14,7 +14,17 @@ Reads (all produced upstream, local-only):
 
 Writes docs/EnricoVis/data/:
   grants_umap.json   {meta, colors, order, points:[{id,title,agency,agencyLabel,
-                      amount,year,titleOnly,x,y,projection,t[25],dom,isNoise}]}
+                      amount,year,titleOnly,modelTitleOnly,x,y,projection,
+                      t[25],dom,isNoise}]}
+                      `titleOnly` = data availability (NEU has no abstract on
+                      record). `modelTitleOnly` = modeling eligibility (the
+                      topic-model fit saw no abstract text) — differs from
+                      `titleOnly` only for grants tagged with a
+                      src.clean_text.LOW_TRUST_ABSTRACT_SOURCES value. Most
+                      consumers (coverage charts, missingness, the PI's
+                      EnricoVis "title only" badge) want `titleOnly`; anything
+                      asking "did the model actually see text" wants
+                      `modelTitleOnly`.
   topics.json        [{id,name,terms,parent}] for the 25 topics + a noise entry
   hier_topics.json   {parents:[{id,label,topic_ids}]} (parent grouping for the hierarchy app)
 
@@ -35,8 +45,10 @@ import pandas as pd
 
 try:
     from src.viz_constants import COLORS, ORDER
+    from src.clean_text import usable_abstract
 except ImportError:  # run from within src/
     from viz_constants import COLORS, ORDER
+    from clean_text import usable_abstract
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PROC = REPO_ROOT / "data" / "processed"
@@ -99,7 +111,20 @@ def build() -> dict:
             "agencyLabel": str(r.agencyname or "Unknown"),
             "amount": float(r.totaldollars or 0),
             "year": int(r.startdateyear) if pd.notna(r.startdateyear) else None,
+            # DATA availability (does NEU have abstract text on record) — what
+            # every existing consumer (missingness table, coverage-by-year/
+            # agency charts, topic_flow.html, the PI's read-only EnricoVis
+            # apps' "title only" badge) means by "title only". Do NOT redefine
+            # this to modeling eligibility — see modelTitleOnly below for that.
             "titleOnly": bool(str(r.abstract or "") == ""),
+            # MODELING eligibility (did the topic-model fit actually see
+            # abstract text) — differs from titleOnly only for grants tagged
+            # with a src.clean_text.LOW_TRUST_ABSTRACT_SOURCES value (e.g.
+            # nih_reporter_parent: real text is on record, but excluded from
+            # the fit). Use this, not titleOnly, for anything that means
+            # "did the model see real text for this doc" (e.g. a per-topic
+            # abstract-vs-title-only confidence breakdown).
+            "modelTitleOnly": bool(usable_abstract(r.abstract, getattr(r, "abstract_source", "")) == ""),
             "x": round(x, 3),
             "y": round(y, 3),
             "projection": "specter2-umap",

@@ -8,8 +8,13 @@ Cannot run in CI / any sandbox without HuggingFace network access; this is a
 local-machine step (see docs/TOPIC_WORK_FORWARD_PLAN.md §5.11).
 
 Outputs:
-  data/processed/specter2_embeddings.npy   – (N, 768) float32 array
-  data/processed/specter2_ids.txt          – parallel list of `grant_id`s
+  data/processed/specter2_embeddings.npy      – (N, 768) float32 array
+  data/processed/specter2_ids.txt             – parallel list of `grant_id`s
+  data/processed/specter2_doc_manifest.parquet – row-aligned with the ids above:
+      doc_id, title_chars, abstract_chars, abstract_source — a cheap record
+      of exactly what reached the tokenizer, so a light-deps test can verify
+      grants with abstract_source in clean_text.LOW_TRUST_ABSTRACT_SOURCES
+      (e.g. nih_reporter_parent) were actually embedded title-only.
 """
 from __future__ import annotations
 import time
@@ -23,14 +28,15 @@ from adapters import AutoAdapterModel
 # Import the shared cleaner whether run as a script (`python src/build_..._.py`)
 # or as a module (`python -m src.build_specter2_embeddings`).
 try:
-    from src.clean_text import clean_abstract, clean_title
+    from src.clean_text import clean_abstract, clean_title, usable_abstract
 except ImportError:  # run as a script: src/ is already on sys.path[0]
-    from clean_text import clean_abstract, clean_title
+    from clean_text import clean_abstract, clean_title, usable_abstract
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PROC = REPO_ROOT / "data" / "processed"
 OUT_VEC = PROC / "specter2_embeddings.npy"
 OUT_IDS = PROC / "specter2_ids.txt"
+OUT_MANIFEST = PROC / "specter2_doc_manifest.parquet"
 BATCH = 8
 MAX_LEN = 512
 
@@ -55,20 +61,38 @@ def main() -> None:
         gr["_title"] = gr["grantname"]
     gr["abstract"] = gr["abstract"].fillna("").astype(str)
     gr["_title"]   = gr["_title"].fillna("").astype(str)
+    # Mask out LOW_TRUST_ABSTRACT_SOURCES text (e.g. nih_reporter_parent — a
+    # subaward's borrowed parent-center abstract) BEFORE the length filter
+    # below, so those grants fall through to title-only encoding exactly as
+    # if the abstract were never recovered. The real text stays in
+    # grants.parquet for display; only this modeling copy is masked.
+    if "abstract_source" in gr.columns:
+        src = gr["abstract_source"].fillna("").astype(str)
+        gr["abstract"] = [usable_abstract(a, s) for a, s in zip(gr["abstract"], src)]
     # Encode any grant with either a title or a substantive abstract
     gr = gr[(gr["_title"].str.len() > 0) | (gr["abstract"].str.len() >= 50)]
 
     # doc_id is the canonical key: grant_id for grants, 'orphan-<id>' for the M2
     # extra_neu_abstracts pseudo-docs (recovered orphan abstracts with a resolved
     # faculty but no matching NEU grant). BERTopic (M3) sees the union.
-    corpus = pd.DataFrame({"doc_id": gr["grant_id"], "_title": gr["_title"], "abstract": gr["abstract"]})
+    gr_source = gr["abstract_source"].fillna("").astype(str) if "abstract_source" in gr.columns \
+        else pd.Series([""] * len(gr), index=gr.index)
+    corpus = pd.DataFrame({
+        "doc_id": gr["grant_id"], "_title": gr["_title"], "abstract": gr["abstract"],
+        "abstract_source": gr_source,
+    })
     extra_path = PROC / "extra_neu_abstracts.parquet"
     if extra_path.exists():
         ex = pd.read_parquet(extra_path)
+        ex_source = ex["abstract_source"].fillna("").astype(str) if "abstract_source" in ex.columns \
+            else pd.Series([""] * len(ex), index=ex.index)
+        ex_abstract = [usable_abstract(a, s) for a, s in
+                       zip(ex["abstract"].fillna("").astype(str), ex_source)]
         ex_corpus = pd.DataFrame({
             "doc_id": ex["doc_id"].astype(str),
             "_title": ex["title"].fillna("").astype(str),
-            "abstract": ex["abstract"].fillna("").astype(str),
+            "abstract": ex_abstract,
+            "abstract_source": ex_source,
         })
         corpus = pd.concat([corpus, ex_corpus], ignore_index=True)
         print(f"corpus = {len(gr)} grants + {len(ex_corpus)} orphan pseudo-docs = {len(corpus)}")
@@ -108,6 +132,19 @@ def main() -> None:
     print(f"final shape: {X.shape}  ({time.time() - t0:.1f}s total)")
     np.save(OUT_VEC, X)
     OUT_IDS.write_text("\n".join(ids))
+
+    # Cheap, row-aligned record of exactly what reached the tokenizer — lets
+    # a light-deps test (tests/test_low_trust_exclusion.py) confirm
+    # LOW_TRUST_ABSTRACT_SOURCES grants were actually embedded title-only,
+    # without needing torch/HF to re-derive it.
+    manifest = pd.DataFrame({
+        "doc_id": corpus["doc_id"].astype(str),
+        "title_chars": corpus["_title_clean"].str.len(),
+        "abstract_chars": corpus["_abstract_clean"].str.len(),
+        "abstract_source": corpus["abstract_source"],
+    })
+    manifest.to_parquet(OUT_MANIFEST, index=False)
+    print(f"wrote {OUT_MANIFEST}")
     print(f"wrote {OUT_VEC}  ({OUT_VEC.stat().st_size / 1e6:.1f} MB)")
     print(f"wrote {OUT_IDS}")
 

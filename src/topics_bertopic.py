@@ -49,9 +49,9 @@ from hdbscan import HDBSCAN
 from umap import UMAP
 
 try:
-    from src.clean_text import DOMAIN_STOPS, clean_abstract, clean_title
+    from src.clean_text import DOMAIN_STOPS, model_doc_halves
 except ImportError:  # run from within src/
-    from clean_text import DOMAIN_STOPS, clean_abstract, clean_title
+    from clean_text import DOMAIN_STOPS, model_doc_halves
 
 SEED = 42
 MIN_CLUSTER_SIZE = 25
@@ -161,21 +161,40 @@ def _load_docs_aligned_to_cache() -> tuple[list[str], list[str], np.ndarray]:
     gr["grant_id"] = gr["grant_id"].astype(str)
     title_col = "title_from_abstract" if "title_from_abstract" in gr.columns else "grantname"
     gr["_title"] = gr[title_col].where(gr[title_col].astype(str).str.len() > 0, gr["grantname"])
+    # A null title_from_abstract passes the .where() condition above (NaN's
+    # str() is "nan", which has length 3), so it needs its own fillna rather
+    # than relying on the .where() alone — found while auditing this file
+    # against build_specter2_embeddings.py's matching logic, which already
+    # had this fillna. 0 nulls in the current corpus, but cheap to close.
+    gr["_title"] = gr["_title"].fillna("").astype(str)
     gr["abstract"] = gr["abstract"].fillna("").astype(str)
-    by_id = {gid: (t, a) for gid, t, a in zip(gr["grant_id"], gr["_title"], gr["abstract"])}
+    # Mask LOW_TRUST_ABSTRACT_SOURCES text (e.g. nih_reporter_parent) so the
+    # doc-text BERTopic sees for c-TF-IDF keyword extraction matches what
+    # build_specter2_embeddings.py already embedded — a grant tagged
+    # low-trust reads as title-only in both places, not just one.
+    # by_id stores RAW (title, abstract, abstract_source) — model_doc_halves
+    # does the masking + cleaning in one place at doc-build time below, so
+    # this and build_specter2_embeddings.py can't drift on how they treat
+    # LOW_TRUST_ABSTRACT_SOURCES or NaN titles.
+    src = gr["abstract_source"].fillna("").astype(str) if "abstract_source" in gr.columns \
+        else pd.Series([""] * len(gr), index=gr.index)
+    by_id = {gid: (t, a, s) for gid, t, a, s in zip(gr["grant_id"], gr["_title"], gr["abstract"], src)}
 
     # M2 orphan pseudo-docs ('orphan-<id>') live in extra_neu_abstracts, not grants.
     extra_path = PROC / "extra_neu_abstracts.parquet"
     if extra_path.exists():
         ex = pd.read_parquet(extra_path)
-        for did, t, a in zip(ex["doc_id"], ex["title"], ex["abstract"]):
-            by_id[str(did)] = (str(t or ""), str(a or ""))
+        ex_src = ex["abstract_source"].fillna("").astype(str) if "abstract_source" in ex.columns \
+            else pd.Series([""] * len(ex), index=ex.index)
+        for did, t, a, s in zip(ex["doc_id"], ex["title"], ex["abstract"], ex_src):
+            by_id[str(did)] = (t, a, s)
 
     docs, missing = [], 0
     for did in ids:
         if did in by_id:
-            t, a = by_id[did]
-            docs.append(f"{clean_title(t)}. {clean_abstract(a)}".strip())
+            t, a, s = by_id[did]
+            title, abstract = model_doc_halves(t, a, s)
+            docs.append(f"{title}. {abstract}".strip())
         else:
             docs.append("")  # keep alignment; should not happen if cache is fresh
             missing += 1

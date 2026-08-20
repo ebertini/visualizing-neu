@@ -129,6 +129,46 @@ def clean_document(title: str, abstract: str) -> str:
     return ct
 
 
+# Abstract sources whose text is real enough to store/display, but NOT
+# trustworthy enough to feed the topic model — currently just the NIH
+# RePORTER parent-center fallback (a subaward grant whose specific subproject
+# has no abstract of its own borrows its parent center's text instead; see
+# src/backfill_nih_reporter.py). grants.parquet keeps the real text either
+# way (CSV export, a future detail view); only the MODELING path excludes it.
+LOW_TRUST_ABSTRACT_SOURCES = frozenset({"nih_reporter_parent"})
+
+
+def _safe_str(value) -> str:
+    """"" for None or float NaN, else str(value). `str(value or "")` looks
+    equivalent but isn't: `bool(float("nan"))` is True, so a NaN would
+    survive as the literal string "nan" rather than becoming "" — this
+    checks for NaN directly (a NaN is the only float that's != itself)
+    rather than relying on truthiness.
+    """
+    if value is None or (isinstance(value, float) and value != value):
+        return ""
+    return str(value)
+
+
+def usable_abstract(abstract: str, abstract_source: str = "") -> str:
+    """Abstract text as the topic model may see it: "" when `abstract_source`
+    is low-trust, even though the real text is stored elsewhere for display.
+    """
+    if _safe_str(abstract_source).strip() in LOW_TRUST_ABSTRACT_SOURCES:
+        return ""
+    return _safe_str(abstract)
+
+
+def model_doc_halves(title: str, abstract: str, abstract_source: str = "") -> tuple[str, str]:
+    """The (cleaned title, cleaned modeling-abstract) pair every fit-time
+    consumer (build_specter2_embeddings.py, topics_bertopic.py) should build
+    its doc text from, so they can't drift apart on how they treat
+    LOW_TRUST_ABSTRACT_SOURCES OR on NaN-handling for the title half (found
+    while auditing this: one caller had its own `.fillna("")` for the title,
+    the other didn't — `_safe_str` here means neither needs to anymore)."""
+    return clean_title(_safe_str(title)), clean_abstract(usable_abstract(abstract, abstract_source))
+
+
 # ──────────────────────────────────────────────────────────────────────────────
 # Aggressive cleaner + vocabulary controls — feed LDA / bag-of-words
 # ──────────────────────────────────────────────────────────────────────────────

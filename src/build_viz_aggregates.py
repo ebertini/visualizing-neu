@@ -16,7 +16,13 @@ output already lives in the two committed files this script reads FROM:
 
 Reads (frozen, read-only, owned by docs/EnricoVis/ — never write here):
   docs/EnricoVis/data/grants_umap.json   2,676 grant points: id/agency/amount/
-                                          year/titleOnly/dom(topic)/isNoise
+                                          year/titleOnly/modelTitleOnly/
+                                          dom(topic)/isNoise. titleOnly = data
+                                          availability; modelTitleOnly = did
+                                          the fit see text (differs only for
+                                          LOW_TRUST_ABSTRACT_SOURCES grants —
+                                          absent entirely on an older,
+                                          pre-backfill grants_umap.json).
   docs/EnricoVis/data/topics.json        26 entries: 25 topics + noise, each
                                           with a "parent" ("P0".."P7" or null)
 
@@ -82,6 +88,11 @@ import argparse
 import json
 import re
 from pathlib import Path
+
+try:
+    from src.clean_text import LOW_TRUST_ABSTRACT_SOURCES
+except ImportError:  # run from within src/
+    from clean_text import LOW_TRUST_ABSTRACT_SOURCES
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PROC = REPO_ROOT / "data" / "processed"
@@ -289,10 +300,13 @@ def load_frozen() -> tuple[list[dict], list[dict]]:
 
 
 def load_abstract_source(points: list[dict]) -> tuple[dict[str, str], str]:
-    """Best-effort grant_id -> abstract_source ('internal'/'orphan_recovered'/'none').
-    Falls back to deriving it from `titleOnly` (exactly equivalent when the
-    real value is absent, since titleOnly IS `abstract == ""` at the source —
-    see src/build_viz_data.py) if grants.parquet hasn't been built locally.
+    """Best-effort grant_id -> abstract_source ('internal'/'nih_reporter'/
+    'nih_reporter_parent'/'nsf_api'/'orphan_recovered'/'none'). Falls back to
+    deriving a two-value approximation from `titleOnly` (data availability —
+    exactly correct for the has-text/no-text question) if grants.parquet
+    hasn't been built locally: 'none' or a generic 'internal' — the fallback
+    can tell IF a grant has text but not WHICH of the newer sources provided
+    it, since `titleOnly` alone doesn't carry that distinction.
     """
     parquet_path = PROC / "grants.parquet"
     if parquet_path.exists():
@@ -403,7 +417,13 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
     ag_index = {k: i for i, k in enumerate(ag_levels)}
     st_levels = ["earned_at_neu", "prior_institution", "unknown", NO_PI_LABEL]
     st_index = {k: i for i, k in enumerate(st_levels)}
-    asrc_levels = ["internal", "orphan_recovered", "none"]
+    # Every real src.build_dataset.py abstract_source value, so a backfilled
+    # grant (nih_reporter/nsf_api/nih_reporter_parent) doesn't collapse into
+    # "none" (the opposite of the truth — it has real, sourced text). Not
+    # currently rendered by any facet UI (see what_we_can_see/facets.js:70-72)
+    # but emitted in the data, so this enum should still be complete.
+    asrc_levels = ["internal", "nih_reporter", "nih_reporter_parent", "nsf_api",
+                   "orphan_recovered", "none"]
     asrc_index = {k: i for i, k in enumerate(asrc_levels)}
     amt_levels = [label for (_lo, _hi, label) in DOLLAR_BANDS]
 
@@ -910,6 +930,13 @@ def build_funnel() -> dict:
 
     orphaned_n = len(pd.read_parquet(orphaned_path, columns=["id"]))
     g = pd.read_parquet(grants_path, columns=["abstract_source"])
+    # Deliberate choice: this trunk step narrates ONE specific pipeline (the
+    # internal upload system's own raw records -> matched rows -> matched
+    # grants), so "has_text" here means "the internal match succeeded" —
+    # NOT the corpus-wide has-text count (that's has_text_final below,
+    # which the M2 branch and the external NIH/NSF backfill both feed).
+    # Do not extend this to nih_reporter/nsf_api — they come from an
+    # entirely different upload, outside what this trunk is describing.
     has_text_n = int((g["abstract_source"] == "internal").sum())
 
     # Labels here are the ones rendered directly in the funnel chart, so they're
@@ -943,9 +970,18 @@ def build_funnel() -> dict:
         ],
     }
 
+    # Corpus-wide "ends up carrying [MODELING-usable] text" — the "Net
+    # effect" sentence rendered in what_we_can_see/missing.js ties this
+    # number directly to "the topic model's corpus", so it must match what
+    # the model actually sees: every non-empty abstract_source EXCEPT the
+    # low-trust ones (nih_reporter_parent has real text, but is excluded
+    # from the fit — see src.clean_text.LOW_TRUST_ABSTRACT_SOURCES).
+    has_text_final = int(
+        ((g["abstract_source"] != "") & (~g["abstract_source"].isin(LOW_TRUST_ABSTRACT_SOURCES))).sum()
+    )
     totals = {
         "grants_total": len(g),
-        "has_text_final": int(g["abstract_source"].isin(["internal", "orphan_recovered"]).sum()),
+        "has_text_final": has_text_final,
         "corpus_for_bertopic": len(g) + extra_n,
     }
     return {"trunk": trunk, "branch": branch, "totals": totals, "provenance": "parquet"}
@@ -1140,11 +1176,21 @@ def build_coverage(points: list[dict]) -> dict:
     # abstract-presence x assignment crosstab — the reassuring finding this
     # view should lead with: losing the abstract barely moves the unassigned
     # rate (titles carry most of the signal for BERTopic's HDBSCAN step).
+    # This is a MODELING question (did the fit actually see abstract text),
+    # so it must use modelTitleOnly, not titleOnly (data availability) — they
+    # differ for grants tagged with a LOW_TRUST_ABSTRACT_SOURCES value.
+    # .get() fallback: a frozen grants_umap.json from before this field
+    # existed has no modelTitleOnly key at all, so fall back to titleOnly
+    # (the only information available at that point, and correct for every
+    # point anyway before any low-trust backfill existed).
+    def _model_title_only(p: dict) -> bool:
+        return p.get("modelTitleOnly", p["titleOnly"])
+
     crosstab = {
-        "abs_assigned": sum(1 for p in points if not p["titleOnly"] and p["dom"] != -1),
-        "abs_unassigned": sum(1 for p in points if not p["titleOnly"] and p["dom"] == -1),
-        "title_assigned": sum(1 for p in points if p["titleOnly"] and p["dom"] != -1),
-        "title_unassigned": sum(1 for p in points if p["titleOnly"] and p["dom"] == -1),
+        "abs_assigned": sum(1 for p in points if not _model_title_only(p) and p["dom"] != -1),
+        "abs_unassigned": sum(1 for p in points if not _model_title_only(p) and p["dom"] == -1),
+        "title_assigned": sum(1 for p in points if _model_title_only(p) and p["dom"] != -1),
+        "title_unassigned": sum(1 for p in points if _model_title_only(p) and p["dom"] == -1),
     }
 
     return {
@@ -1187,6 +1233,20 @@ def validate(points: list[dict], topics: list[dict], viz_meta: dict, topic_time:
     # that actually catch a broken build regardless of corpus size.
     lines.append(f"n_points = {n}")
     lines.append(f"total dollars = {total_dollars:,.0f}")
+
+    # Informational: surface every abstract_source value in play, so a new or
+    # renamed tag (e.g. from a future backfill) shows up here instead of
+    # silently landing in an unlabeled bucket somewhere downstream. Reuses
+    # coverage["provenance"] (build_coverage() already computes this exact,
+    # value-agnostic histogram) rather than a second load_abstract_source()
+    # call + a third grants.parquet read.
+    src_counts = {k: v for k, v in coverage.get("provenance", {}).items() if k != "source"}
+    src_method = coverage.get("provenance", {}).get("source", "unknown")
+    if src_counts:
+        lines.append(
+            f"abstract_source counts ({src_method}): "
+            + ", ".join(f"{k}={v}" for k, v in sorted(src_counts.items(), key=lambda kv: -kv[1]))
+        )
 
     # Parent-theme shape drift — PARENT_NAMES/PARENT_COLORS (this file) and
     # their manually-synced copies in shared/enrico.js (and, for visual
