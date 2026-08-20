@@ -40,18 +40,26 @@ main{display:block}
   border-top:0;background:none;padding:8px 0 0;font-size:10px;
 }
 
-/* The "Selected grant"/"Selected PI" card floats bottom-right, and is
-   hidden entirely (not just empty) until something's selected — see
-   grid.js's renderSelectedCard. Not a dock card: a detail/output panel
-   is a different kind of thing than a control input, and a 236px dock
-   lane leaves no room for an abstract or a grant list.
-   position:fixed (viewport-relative), not absolute (chartwrap-relative):
-   the chartwrap's height grows to content and can run several thousand
-   px tall, so an absolutely-positioned bottom-right card could open off
-   screen at the bottom of the whole chart. Fixed keeps it in the corner
-   of the viewport, visible wherever you clicked, through scrolling. */
+/* The "Selected grant"/"Selected PI" card floats over the top-right
+   corner of its own chart canvas (#facetchartwrap/#pichartwrap, both
+   position:relative — see below), and is hidden entirely (not just
+   empty) until something's selected — see grid.js's renderSelectedCard.
+   Not a dock card: a detail/output panel is a different kind of thing
+   than a control input, and a 236px dock lane leaves no room for an
+   abstract or a grant list.
+   position:absolute (chartwrap-relative), anchored top:/right: — safe
+   regardless of how tall the chartwrap's content grows (it can run
+   several thousand px tall), unlike a BOTTOM-anchored absolute position,
+   which would need the total height known up front to avoid opening off
+   the bottom of the chart. Deliberately NOT position:fixed (viewport-
+   relative, an earlier design): that kept the card on screen while
+   scrolling past a very tall chart, but also meant it could land over
+   the section's own toolbar/legend row above the canvas depending on
+   viewport scroll position — direct feedback preferred it reliably
+   pinned over the canvas's own top-right corner instead, accepting that
+   it now scrolls away once you scroll past the canvas's own top. */
 .selectedgrant-panel.floating{
-  position:fixed;right:18px;place-items: center;z-index:6;
+  position:absolute;top:32px;right:12px;z-index:6;
   width:340px;max-width:calc(100vw - 36px);max-height:calc(100vh - 72px);
   overflow-y:auto;background:var(--panel);border:1px solid var(--hair);
   border-radius:0;box-shadow:var(--shadow);padding:13px 14px;
@@ -207,7 +215,6 @@ main{display:block}
 .detailblock .t{font-weight:bold;margin-bottom:5px;letter-spacing:-.005em;font-size:12.5px}
 .detailblock .meta{font-style:italic;font-family:var(--mono);font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px}
 
-.selected-empty{font-size:11.5px;color:var(--muted);line-height:1.4}
 /* Capped height + its own scroll — an abstract or grant list can run
    long, and this card already floats over the chart rather than pushing
    other content around, so it caps out and scrolls internally instead of
