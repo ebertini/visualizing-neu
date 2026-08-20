@@ -130,11 +130,17 @@ PARENT_COLORS = [
     "#6B4C9A", "#1B9E77", "#B6992D", "#7570B3",
 ]
 
-# Topic 11 is a documented artifact bucket (docs/TOPIC_WORK_EXECUTION_REPORT.md):
-# 28 of 62 docs are placeholder "Grant" title-only ONR/NIH-sub records. It has
-# no parent theme and is folded into "Unassigned" everywhere in the hierarchy
-# app — we do the same here for the parent-level series.
-ARTIFACT_TOPIC_ID = 11
+# Topic 14 is a documented artifact bucket, re-identified after the 2026-08-20
+# refit (previously topic 11, pre-backfill fit): 28 of 51 docs are placeholder
+# "Grant" title-only ONR records — the SAME 28 ONR docs as before (ONR has no
+# usable public abstract API, so the NIH RePORTER / NSF Award Search backfill
+# never touched them); the NIH-SubAward portion that used to share this bucket
+# shrank since most of those grants now have real text (see
+# data/nih_nsf_backfill/). It has no parent theme and is folded into
+# "Unassigned" everywhere in the hierarchy app — we do the same here for the
+# parent-level series. Re-derive this id after any future refit rather than
+# assuming it stays 14 — see docs/TOPIC_MODEL_REFIT_CHECKLIST.md §3.
+ARTIFACT_TOPIC_ID = 14
 
 DENSE_FROM, DENSE_TO = 2005, 2025
 
@@ -149,28 +155,32 @@ CAVEATS = [
     },
     {
         "id": "nih_cliff",
-        "severity": "high",
+        "severity": "low",
         "text": (
-            "NIH abstract coverage collapses from 64% (2019) to 0% from 2021 onward. "
-            "This is a data-collection artifact, not a funding decline — NIH grant "
-            "counts hold steady while the evidence behind each topic label thins out."
+            "UPDATE (2026-08-20): this used to read 'NIH abstract coverage collapses "
+            "from 64% (2019) to 0% from 2021 onward' — a data-collection artifact, not "
+            "a funding decline. A live NIH RePORTER backfill (src/backfill_nih_reporter.py) "
+            "has since closed it: 2020-2025 NIH/NIH-SubAward coverage now runs 94-100%. "
+            "Kept here, downgraded, as a record that this was a real prior limitation."
         ),
     },
     {
         "id": "unassigned",
         "severity": "med",
         "text": (
-            "808 grants (27.8% of dollars) carry no confident topic — 746 HDBSCAN "
-            "noise + 62 in a flagged artifact bucket (topic 11). Shown as a grey "
-            "‘Unassigned’ band, never dropped."
+            "697 grants (26.0% of grants, 26.7% of dollars) carry no confident topic — "
+            "646 HDBSCAN noise + 51 in a flagged artifact bucket (topic 14). Shown as a "
+            "grey ‘Unassigned’ band, never dropped."
         ),
     },
     {
-        "id": "t11_artifact",
+        "id": "t14_artifact",
         "severity": "med",
         "text": (
-            "Topic 11 (“Mixed / low-coherence”) is a flagged artifact: 28 of its "
-            "62 grants carry the placeholder title “Grant”. It has no parent theme."
+            "Topic 14 (“Mixed / low-coherence”) is a flagged artifact: 28 of its "
+            "51 grants carry the placeholder title “Grant” (all Office of Naval "
+            "Research — ONR has no public abstract API, so this backfill couldn't "
+            "reach them). It has no parent theme."
         ),
     },
     {

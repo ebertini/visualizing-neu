@@ -54,7 +54,15 @@ except ImportError:  # run from within src/
     from clean_text import DOMAIN_STOPS, model_doc_halves
 
 SEED = 42
-MIN_CLUSTER_SIZE = 25
+# Re-swept 2026-08-20 after the NIH RePORTER / NSF Award Search backfill grew
+# the real-abstract fraction of the corpus (data/nih_nsf_backfill/) — the old
+# default of 25 is no longer stable at this corpus composition: across 3
+# seeds it produced anywhere from 4 topics (one 2,503-doc mega-cluster, 91%
+# of the corpus, 0% noise) to 27 reasonable topics, i.e. a coin-flip on
+# whether the fit degenerates. 20 is the tightest value that stayed stable
+# across all 3 seeds (32±0.5 topics, ~24.5% noise) per `python -m
+# src.tune_bertopic` — see outputs/bertopic_sweep.json for the full sweep.
+MIN_CLUSTER_SIZE = 20
 UMAP_N_COMPONENTS = 5      # 5-D UMAP feeds HDBSCAN (2-D is only for the viz)
 
 REPO_ROOT = Path(__file__).resolve().parent.parent

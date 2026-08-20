@@ -114,8 +114,8 @@
     </section>
 
     <section id="smallwrap">
-      <h2>The 25 leaf topics</h2>
-      <div class="sub2">Free y-axis per cell (peak labeled) — a 25-band stack is unreadable, 25 sparklines are fine. Dashed border = flagged artifact bucket.</div>
+      <h2>The 32 leaf topics</h2>
+      <div class="sub2">Free y-axis per cell (peak labeled) — a 32-band stack is unreadable, 32 sparklines are fine. Dashed border = flagged artifact bucket.</div>
       <div id="smallmults"></div>
     </section>
   </main>
@@ -378,7 +378,7 @@ function buildLegend(){
   });
 }
 
-/* ---------- small multiples (25 leaf topics) ---------- */
+/* ---------- small multiples (32 leaf topics) ---------- */
 function buildSmallMultiples(){
   const grid = document.getElementById("smallmults");
   grid.innerHTML = "";
@@ -433,7 +433,7 @@ E.setupSegmented({
 });
 E.setupDock({dock:document.getElementById("dock"),fold:document.getElementById("fold"),opener:document.getElementById("opener")});
 E.renderCaveats(document.getElementById("caveats"), VIZ_META.caveats,
-  ["neu_status","nih_cliff","unassigned","t11_artifact","sparse_prelude","partial_recent"]);
+  ["neu_status","nih_cliff","unassigned","t14_artifact","sparse_prelude","partial_recent"]);
 
 buildLegend();
 buildSmallMultiples();

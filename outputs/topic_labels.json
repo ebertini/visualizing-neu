@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "n_topics": 25
+    "n_topics": 32
   },
   "topics": {
     "0": {
@@ -9,31 +9,31 @@
         "materials",
         "quantum",
         "magnetic",
-        "spin",
         "energy",
-        "properties",
+        "spin",
         "devices",
+        "properties",
         "material",
-        "electronic",
-        "fundamental"
+        "fundamental",
+        "power"
       ],
       "parent": "P1"
     },
     "1": {
-      "label": "Machine Learning, Robotics & Cognition",
+      "label": "Public & Behavioral Health",
       "top_terms": [
-        "learning",
-        "brain",
-        "robots",
-        "cognitive",
-        "control",
-        "speech",
-        "human",
-        "tasks",
-        "motor",
-        "neural"
+        "health",
+        "care",
+        "social",
+        "intervention",
+        "hiv",
+        "interventions",
+        "risk",
+        "older",
+        "alcohol",
+        "patients"
       ],
-      "parent": "P5"
+      "parent": "P6"
     },
     "2": {
       "label": "Mathematics & Theoretical Physics",
@@ -47,171 +47,203 @@
         "representation theory",
         "algebra",
         "particle",
-        "groups"
+        "string"
       ],
       "parent": "P1"
     },
     "3": {
-      "label": "Molecular & Computational Biology",
+      "label": "Robotics, Human-Robot Interaction & Motor Learning",
       "top_terms": [
-        "protein",
-        "proteins",
-        "dna",
-        "biological",
-        "molecular",
-        "function",
-        "biology",
-        "physics",
-        "computational",
-        "binding"
+        "robots",
+        "control",
+        "learning",
+        "human",
+        "robot",
+        "motor",
+        "tasks",
+        "humans",
+        "pain",
+        "robotic"
       ],
-      "parent": "P0"
+      "parent": "P5"
     },
     "4": {
+      "label": "Marine Ecology & Biogeochemistry",
+      "top_terms": [
+        "marine",
+        "species",
+        "ocean",
+        "microbial",
+        "ecosystem",
+        "carbon",
+        "diversity",
+        "coral",
+        "environmental",
+        "change"
+      ],
+      "parent": "P2"
+    },
+    "5": {
       "label": "Cancer & Drug Delivery / Therapeutics",
       "top_terms": [
         "cancer",
         "tumor",
         "delivery",
-        "drug",
         "cells",
-        "therapeutic",
+        "drug",
         "therapy",
+        "imaging",
         "vivo",
-        "drugs",
-        "intracellular"
+        "cell",
+        "therapeutic"
       ],
       "parent": "P0"
     },
-    "5": {
-      "label": "Marine Ecology & Biogeochemistry",
-      "top_terms": [
-        "marine",
-        "ocean",
-        "species",
-        "ecosystem",
-        "environmental",
-        "carbon",
-        "diversity",
-        "change",
-        "coastal",
-        "climate"
-      ],
-      "parent": "P2"
-    },
     "6": {
-      "label": "Wireless Networks & Communications",
+      "label": "Cognitive Aging & Affective Neuroscience",
+      "top_terms": [
+        "cognitive",
+        "brain",
+        "older",
+        "adults",
+        "older adults",
+        "training",
+        "emotion",
+        "affective",
+        "fear",
+        "neural"
+      ],
+      "parent": "P5"
+    },
+    "7": {
+      "label": "Wireless Networks & Spectrum Communications",
       "top_terms": [
         "wireless",
         "spectrum",
         "networks",
         "network",
         "ghz",
-        "5g",
         "communication",
-        "algorithms",
+        "5g",
+        "thz",
         "radio",
-        "wireless networks"
+        "devices"
       ],
       "parent": "P4"
     },
-    "7": {
-      "label": "STEM Education & Faculty/Workforce Development",
+    "8": {
+      "label": "Tissue Engineering & Regenerative Medicine",
       "top_terms": [
-        "faculty",
+        "cells",
+        "tissue",
+        "cell",
+        "mechanical",
         "stem",
+        "vascular",
+        "bone",
+        "collagen",
+        "regeneration",
+        "stem cells"
+      ],
+      "parent": "P0"
+    },
+    "9": {
+      "label": "Network Science & Complex Systems",
+      "top_terms": [
+        "networks",
+        "network",
+        "social",
+        "complex",
+        "algorithms",
+        "learning",
+        "complex networks",
+        "analysis",
+        "routing",
+        "query"
+      ],
+      "parent": "P4"
+    },
+    "10": {
+      "label": "STEM Education, Workforce & Entrepreneurship",
+      "top_terms": [
+        "stem",
+        "faculty",
         "education",
         "icorps",
         "women",
         "graduate",
-        "national",
-        "mentoring",
+        "entrepreneurship",
+        "career",
         "innovation",
-        "node"
+        "community"
       ],
       "parent": "P7"
     },
-    "8": {
-      "label": "Security, Privacy & Cryptography",
-      "top_terms": [
-        "security",
-        "privacy",
-        "attacks",
-        "hardware",
-        "cryptographic",
-        "secure",
-        "sidechannel",
-        "private",
-        "computation",
-        "attack"
-      ],
-      "parent": "P3"
-    },
-    "9": {
-      "label": "Public & Behavioral Health",
-      "top_terms": [
-        "health",
-        "patients",
-        "delirium",
-        "risk",
-        "intervention",
-        "care",
-        "mental",
-        "hiv",
-        "alcohol",
-        "mental health"
-      ],
-      "parent": "P6"
-    },
-    "10": {
-      "label": "Structural & Earthquake Engineering",
-      "top_terms": [
-        "wind",
-        "energy",
-        "buildings",
-        "structural",
-        "sensor",
-        "collapse",
-        "structures",
-        "sensing",
-        "earthquake",
-        "monitoring"
-      ],
-      "parent": "P1"
-    },
     "11": {
-      "label": "Mixed / low-coherence (fisheries + thin-metadata)",
+      "label": "Neuropharmacology & Addiction",
       "top_terms": [
-        "fisheries",
-        "cholesterol",
-        "follicles",
-        "natural human",
-        "fishery",
-        "natural",
-        "ovarian",
-        "linkages",
-        "human",
-        "lobster"
+        "ligands",
+        "receptors",
+        "receptor",
+        "addiction",
+        "novel",
+        "drug",
+        "agonists",
+        "compounds",
+        "abuse",
+        "agonist"
       ],
-      "parent": null
+      "parent": "P0"
     },
     "12": {
-      "label": "Neurophysiology & Ion Channels",
+      "label": "Molecular & Computational Biology",
       "top_terms": [
-        "brain",
-        "cardiac",
-        "channel",
-        "activity",
-        "channels",
-        "neurons",
-        "neural",
-        "imaging",
-        "heart",
-        "ca2"
+        "dna",
+        "physics",
+        "biological",
+        "molecular",
+        "biology",
+        "living",
+        "interactions",
+        "dynamics",
+        "cellular",
+        "division"
       ],
       "parent": "P0"
     },
     "13": {
+      "label": "Environmental Health & Community Science",
+      "top_terms": [
+        "environmental",
+        "health",
+        "environmental health",
+        "core",
+        "training",
+        "protect",
+        "social",
+        "community",
+        "trainees",
+        "activities"
+      ],
+      "parent": "P2"
+    },
+    "14": {
+      "label": "Mixed / low-coherence (ONR placeholder titles + thin-metadata)",
+      "top_terms": [
+        "tolerance",
+        "fisheries",
+        "transplantation",
+        "diabetes",
+        "selection",
+        "cell",
+        "repertoire",
+        "compartment",
+        "natural human",
+        "peripheral"
+      ],
+      "parent": null
+    },
+    "15": {
       "label": "Programming Languages & Formal Methods",
       "top_terms": [
         "software",
@@ -219,91 +251,59 @@
         "programming",
         "language",
         "contracts",
-        "verification",
-        "components",
+        "reasoning",
+        "code",
         "developers",
-        "programming languages",
-        "tools"
+        "programmers",
+        "programming languages"
       ],
       "parent": "P3"
     },
-    "14": {
-      "label": "Tissue Engineering & Regenerative Medicine",
-      "top_terms": [
-        "tissue",
-        "cell",
-        "stem",
-        "cells",
-        "vascular",
-        "bone",
-        "regeneration",
-        "mechanical",
-        "stem cells",
-        "collagen"
-      ],
-      "parent": "P0"
-    },
-    "15": {
-      "label": "Network Science & Complex Systems",
-      "top_terms": [
-        "networks",
-        "network",
-        "social",
-        "algorithms",
-        "complex",
-        "complex networks",
-        "dynamics",
-        "routing",
-        "graphs",
-        "computer"
-      ],
-      "parent": "P4"
-    },
     "16": {
-      "label": "Neuropharmacology & Addiction",
-      "top_terms": [
-        "addiction",
-        "receptors",
-        "ligands",
-        "drug",
-        "receptor",
-        "abuse",
-        "novel",
-        "agonists",
-        "compounds",
-        "genetic"
-      ],
-      "parent": "P0"
-    },
-    "17": {
       "label": "Coastal Resilience & Flood Hazards",
       "top_terms": [
-        "water",
         "coastal",
         "flood",
         "flooding",
+        "water",
+        "climate",
         "river",
         "hurricane",
-        "sediment",
-        "drinking water",
         "communities",
-        "natural"
+        "sediment",
+        "hazard"
       ],
       "parent": "P2"
     },
-    "18": {
-      "label": "Antimicrobial & Infectious Disease",
+    "17": {
+      "label": "Privacy, Cryptography & Secure Computation",
       "top_terms": [
-        "compounds",
-        "bacteria",
-        "microorganisms",
-        "antibiotics",
-        "drug",
-        "species",
-        "infection",
-        "lead",
-        "antimicrobial",
-        "cells"
+        "privacy",
+        "cryptographic",
+        "security",
+        "private",
+        "protocols",
+        "secure",
+        "computation",
+        "algorithms",
+        "users",
+        "encryption"
+      ],
+      "parent": "P3"
+    },
+    "18": {
+      "label": "Cardiac & Neuronal Ion-Channel Physiology",
+      "top_terms": [
+        "channel",
+        "cardiac",
+        "channels",
+        "heart",
+        "phosphorylation",
+        "ca2",
+        "neurons",
+        "activity",
+        "ion",
+        "imaging"
       ],
       "parent": "P0"
     },
@@ -315,11 +315,11 @@
         "ocean",
         "marine",
         "layer",
+        "sensing",
         "networking",
         "testbed",
-        "ice",
-        "physical layer",
-        "sensing"
+        "array",
+        "ice"
       ],
       "parent": "P2"
     },
@@ -327,15 +327,15 @@
       "label": "Mobility, Supply Chains & Illicit Networks",
       "top_terms": [
         "trafficking",
-        "mobility",
-        "social",
         "supply",
-        "urban",
-        "infrastructure",
+        "modeling",
         "transit",
-        "human",
+        "debris",
         "networks",
-        "health"
+        "human",
+        "operations",
+        "disease",
+        "illicit"
       ],
       "parent": "P6"
     },
@@ -344,64 +344,176 @@
       "top_terms": [
         "control",
         "power",
-        "robust",
         "optimization",
+        "robust",
+        "algorithms",
+        "distributed",
         "framework",
         "delays",
         "network",
-        "distributed",
-        "uncertainty",
-        "performance"
+        "state"
       ],
       "parent": "P4"
     },
     "22": {
-      "label": "Environmental Health Policy & Chemical Exposure",
+      "label": "Structural & Biophysical Protein Science",
       "top_terms": [
-        "environmental",
-        "health",
-        "chemicals",
-        "social",
-        "environmental health",
-        "conference",
-        "labor",
-        "exposure",
-        "policy",
-        "scientists"
+        "protein",
+        "proteins",
+        "waxs",
+        "solution",
+        "function",
+        "structural",
+        "scattering",
+        "subproject",
+        "protein function",
+        "conformational"
       ],
-      "parent": "P2"
+      "parent": "P0"
     },
     "23": {
+      "label": "Antimicrobial & Microbial Ecology",
+      "top_terms": [
+        "bacteria",
+        "compounds",
+        "microorganisms",
+        "pathogens",
+        "antibiotics",
+        "antimicrobial",
+        "species",
+        "uncultured",
+        "resistance",
+        "infections"
+      ],
+      "parent": "P0"
+    },
+    "24": {
+      "label": "Structural & Earthquake Engineering",
+      "top_terms": [
+        "wind",
+        "collapse",
+        "buildings",
+        "structural",
+        "structures",
+        "steel",
+        "building",
+        "earthquake",
+        "progressive",
+        "energy"
+      ],
+      "parent": "P1"
+    },
+    "25": {
       "label": "Cloud & High-Performance Computing",
       "top_terms": [
         "computing",
         "cloud",
         "storage",
-        "biomedical imaging",
-        "checkpointing",
+        "software",
+        "performance",
         "hardware",
-        "computer",
-        "biomedical",
-        "cloud computing",
+        "hpc",
+        "testbed",
+        "checkpointing",
         "memory"
       ],
       "parent": "P3"
     },
-    "24": {
+    "26": {
+      "label": "Conference & Student Travel Support",
+      "top_terms": [
+        "conference",
+        "travel",
+        "student",
+        "attend",
+        "acm",
+        "international",
+        "student travel",
+        "researchers",
+        "opportunity",
+        "consortium"
+      ],
+      "parent": "P7"
+    },
+    "27": {
+      "label": "Hardware Security & Side-Channel Attacks",
+      "top_terms": [
+        "security",
+        "hardware",
+        "sidechannel",
+        "attacks",
+        "attack",
+        "leakage",
+        "software",
+        "cybersecurity",
+        "iot",
+        "computing"
+      ],
+      "parent": "P3"
+    },
+    "28": {
+      "label": "Cancer Cell Biology & Metastasis",
+      "top_terms": [
+        "cancer",
+        "tumor",
+        "cells",
+        "cell",
+        "migration",
+        "phenotypic",
+        "emt",
+        "invasion",
+        "tumors",
+        "treatment"
+      ],
+      "parent": "P0"
+    },
+    "29": {
+      "label": "Speech, Language & Autism Communication",
+      "top_terms": [
+        "speech",
+        "children",
+        "language",
+        "prosodic",
+        "asd",
+        "prosody",
+        "voice",
+        "communication",
+        "motor",
+        "feeding"
+      ],
+      "parent": "P6"
+    },
+    "30": {
       "label": "Learning Games & Computational Thinking",
       "top_terms": [
         "learning",
         "game",
-        "physical activity",
-        "computer",
+        "thinking",
         "education",
-        "narrative",
+        "stem",
+        "informal",
+        "computer",
         "computational thinking",
-        "physical",
-        "activity",
-        "thinking"
+        "comics",
+        "school"
       ],
       "parent": "P7"
+    },
+    "31": {
+      "label": "Sensor Networks & Energy-Harvesting Monitoring",
+      "top_terms": [
+        "sensor",
+        "energy",
+        "monitoring",
+        "sensing",
+        "power",
+        "health monitoring",
+        "computing",
+        "rfid",
+        "flame",
+        "wireless"
+      ],
+      "parent": "P4"
     },
     "-1": {
       "label": "Unassigned / noise",
@@ -413,12 +525,14 @@
     "P0": {
       "label": "Life Sciences & Biomedicine",
       "topic_ids": [
-        3,
-        4,
+        5,
+        8,
+        11,
         12,
-        14,
-        16,
-        18
+        18,
+        22,
+        23,
+        28
       ]
     },
     "P1": {
@@ -426,52 +540,57 @@
       "topic_ids": [
         0,
         2,
-        10
+        24
       ]
     },
     "P2": {
       "label": "Environment, Ocean & Climate",
       "topic_ids": [
-        5,
-        17,
-        19,
-        22
+        4,
+        13,
+        16,
+        19
       ]
     },
     "P3": {
       "label": "Computing & Cybersecurity",
       "topic_ids": [
-        8,
-        13,
-        23
+        15,
+        17,
+        25,
+        27
       ]
     },
     "P4": {
       "label": "Networks, Signals & Control",
       "topic_ids": [
-        6,
-        15,
-        21
+        7,
+        9,
+        21,
+        31
       ]
     },
     "P5": {
       "label": "AI, Robotics & Cognition",
       "topic_ids": [
-        1
+        3,
+        6
       ]
     },
     "P6": {
       "label": "Society, Health & Mobility",
       "topic_ids": [
-        9,
-        20
+        1,
+        20,
+        29
       ]
     },
     "P7": {
       "label": "Education & Learning",
       "topic_ids": [
-        7,
-        24
+        10,
+        26,
+        30
       ]
     }
   }

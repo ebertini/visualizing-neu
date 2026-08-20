@@ -22,17 +22,17 @@
   };
   const ORDER = ["NSF", "NIH", "NIH-SUB", "Navy", "NASA", "Army", "DOE", "AFRO", "Other"];
 
-  // ---- 25-topic palette (Tableau-20 extended), + 5 SPARE colors (indices
-  // 25-29) — pre-allocated headroom so a refit that produces more than 25
+  // ---- 25-topic palette (Tableau-20 extended), + 7 SPARE colors (indices
+  // 25-31) — pre-allocated headroom so a refit that produces more than 25
   // leaf topics gets a real, distinct color immediately (topicColor already
   // wraps via % TOPIC_COLORS.length, so this is a pure size increase, not a
-  // behavior change for the current 25). The 5 spares continue the same
+  // behavior change for the current 25). The 7 spares continue the same
   // ColorBrewer-Dark2-adjacent family the last 4 original entries came from.
   const TOPIC_COLORS = [
     "#4E79A7", "#A0CBE8", "#F28E2B", "#FFBE7D", "#59A14F", "#8CD17D", "#B6992D", "#F1CE63",
     "#499894", "#86BCB6", "#E15759", "#FF9D9A", "#79706E", "#BAB0AC", "#D37295", "#FABFD2",
     "#B07AA1", "#D4A6C8", "#9D7660", "#D7B5A6", "#6B4C9A", "#1B9E77", "#D95F02", "#7570B3", "#E7298A",
-    "#66A61E", "#E6AB02", "#A6761D", "#8DA0CB", "#66C2A5",
+    "#66A61E", "#E6AB02", "#A6761D", "#8DA0CB", "#66C2A5", "#FC8D62", "#E78AC3",
   ];
 
   // ---- 8-parent-theme palette, + 4 SPARE colors (indices 8-11) — same

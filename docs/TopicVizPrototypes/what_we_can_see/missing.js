@@ -329,7 +329,7 @@ function renderFunnel(){
 // the module comment above.
 export function initMissingTab(){
   document.getElementById("mosaicFinding").textContent = mosaicFindingText();
-  E.renderCaveats(document.getElementById("coverageCaveats"), VIZ_META.caveats, ["nih_cliff", "unassigned", "t11_artifact"]);
+  E.renderCaveats(document.getElementById("coverageCaveats"), VIZ_META.caveats, ["nih_cliff", "unassigned", "t14_artifact"]);
 
   updateMissingSub();
   E.setupSegmented({
