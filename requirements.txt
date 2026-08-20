@@ -17,6 +17,10 @@ ipykernel>=6.29
 rapidfuzz>=3.6
 python-dateutil>=2.9
 
+# NIH RePORTER / NSF Award Search backfill (src/backfill_nih_reporter.py,
+# src/backfill_nsf_awards.py)
+requests>=2.31
+
 # Network analysis (Week 7)
 networkx>=3.3
 python-louvain>=0.16

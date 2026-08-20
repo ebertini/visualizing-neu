@@ -11,3 +11,7 @@ pyarrow>=15.0
 openpyxl>=3.1
 rapidfuzz>=3.6
 python-dateutil>=2.9
+
+# NIH RePORTER / NSF Award Search backfill (src/backfill_nih_reporter.py,
+# src/backfill_nsf_awards.py) — plain public REST APIs, no heavy deps needed.
+requests>=2.31

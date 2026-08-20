@@ -247,6 +247,19 @@ data/processed/
 *.feather
 *.pkl
 
+# Exception: data/nih_nsf_backfill/ pools the NIH RePORTER + NSF Award
+# Search backfill outputs (src/backfill_nih_reporter.py,
+# src/backfill_nsf_awards.py) — TRACKED deliberately, unlike every other
+# *.parquet in the repo. These come from rate-limited external APIs (NIH:
+# <=1 req/s; NSF: sequential per-award lookups) and take real wall-clock
+# time to regenerate; the raw *_raw.parquet caches in particular are what
+# let a parsing bug (e.g. the coPDPI format fix) be reprocessed for free via
+# `--offline` instead of re-fetching. Per the *.parquet rule above, a bare
+# directory ignore can't be re-included — hence the *.parquet-scoped
+# negation, matching the outputs/topic_labels.json exception's pattern.
+!data/nih_nsf_backfill/
+!data/nih_nsf_backfill/*.parquet
+
 # OS / editor
 .DS_Store
 .vscode/
