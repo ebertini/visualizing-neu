@@ -29,9 +29,10 @@ const E = window.ENRICO;
 // color?") — there wasn't a principled one. yr/amt/col used to have no real
 // palette (every level rendered the same flat blue) and were hidden from
 // "Color by" rather than fixed. Every facet below now has a real,
-// distinct-per-level palette instead. (Abstract presence/source and PI-matched
-// were removed as facet options entirely — see the "no longer a facet" note
-// further down; markTooltip still surfaces abstract presence per-grant.)
+// distinct-per-level palette instead. (Abstract source and PI-matched were
+// removed as facet options entirely — see the "no longer a facet" note
+// further down; markTooltip still surfaces abstract presence per-grant.
+// Abstract presence itself ("ab") was reinstated as a facet below.)
 export const GRANT_FACET_DEFS = {
   ag: {
     label: "Agency", ordinal: false, legend: "chips",
@@ -66,12 +67,18 @@ export const GRANT_FACET_DEFS = {
     levels: () => FACETS.levels.st.map((name, i) =>
       ({key: i, label: ST_LABEL[name] || name, color: STATUS_COLOR[name] || NOISE})),
   },
-  // Abstract presence ("ab"), abstract source ("asrc"), and PI matched
-  // ("pi") are no longer facet options — removed per feedback that they
-  // cluttered the controls. FACETS.cols.ab/asrc/pi still exist in the data
-  // (markTooltip reads FACETS.cols.ab directly, not through this table, so
-  // per-grant "Has abstract"/"Title only" context in the hover tooltip is
-  // unaffected) — only the Rows/Columns/Color *options* are gone.
+  // Abstract source ("asrc") and PI matched ("pi") are still not facet
+  // options — removed per feedback that they cluttered the controls.
+  // FACETS.cols.asrc/pi still exist in the data (unused by this table) but
+  // aren't offered as Rows/Columns/Color choices.
+  ab: {
+    label: "Has abstract", ordinal: false, legend: "chips",
+    values: () => FACETS.cols.ab,
+    levels: () => [
+      {key: 0, label: "Title only", color: NOISE},
+      {key: 1, label: "Has abstract", color: "#0072B2"},
+    ],
+  },
   tp: {
     label: "Parent theme", ordinal: false, legend: "chips",
     values: () => FACETS.cols.tp,
@@ -97,7 +104,7 @@ export const GRANT_FACET_DEFS = {
       ({key: i, label: name, color: E.seqColor(arr.length > 1 ? i / (arr.length - 1) : 1)})),
   },
 };
-export const GRANT_ARRANGE_FACETS = ["ag", "yr", "col", "st", "tp", "tid", "amt"];
+export const GRANT_ARRANGE_FACETS = ["ag", "yr", "col", "st", "ab", "tp", "tid", "amt"];
 
 // Mirrors GRANT_FACET_DEFS above, over facets_pi.json (all 2,247 roster
 // faculty) instead of facets.json (2,676 grants) — the "every PI" tab's own

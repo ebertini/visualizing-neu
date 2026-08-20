@@ -51,7 +51,7 @@ main{display:block}
    screen at the bottom of the whole chart. Fixed keeps it in the corner
    of the viewport, visible wherever you clicked, through scrolling. */
 .selectedgrant-panel.floating{
-  position:fixed;right:18px;top:62px;z-index:6;
+  position:fixed;right:18px;place-items: center;z-index:6;
   width:340px;max-width:calc(100vw - 36px);max-height:calc(100vh - 72px);
   overflow-y:auto;background:var(--panel);border:1px solid var(--hair);
   border-radius:0;box-shadow:var(--shadow);padding:13px 14px;
@@ -196,13 +196,16 @@ main{display:block}
 .tooltip .meta{font-family:var(--mono);font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 
 /* markTooltip()'s HTML (.t title line + .meta rows) is reused verbatim
-   in the "Selected grant" dock card (a STATIC, non-floating context),
-   which gets its own unscoped .t/.meta rules rather than requiring a
-   `.tooltip` ancestor class (which also carries position:absolute/
-   pointer-events:none/opacity, none of which apply to a card that's
-   meant to stay put and stay visible). */
-.detailblock .t{font-weight:600;margin-bottom:5px;letter-spacing:-.005em;font-size:12.5px}
-.detailblock .meta{font-family:var(--mono);font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px}
+   in the "Selected grant"/"Selected PI" card (a STATIC, non-floating
+   context) — its own .detailblock-scoped .t/.meta rules apply instead of
+   requiring a `.tooltip` ancestor class (which also carries
+   position:absolute/pointer-events:none/opacity, none of which apply to a
+   card that's meant to stay put and stay visible). .detailblock itself is
+   the class on #selectedBody/#piSelectedBody in what_we_can_see.html —
+   the actual container these two <div>s render buildTooltip()+buildDetail()
+   into (see grid.js's renderSelectedCard). */
+.detailblock .t{font-weight:bold;margin-bottom:5px;letter-spacing:-.005em;font-size:12.5px}
+.detailblock .meta{font-style:italic;font-family:var(--mono);font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px}
 
 .selected-empty{font-size:11.5px;color:var(--muted);line-height:1.4}
 /* Capped height + its own scroll — an abstract or grant list can run
@@ -217,6 +220,19 @@ main{display:block}
 .detailblock .abstract-empty{color:var(--muted);font-style:italic}
 .detailblock .abstract .grantlist{margin:0;padding-left:18px}
 .detailblock .abstract .grantlist li{margin-bottom:4px}
+/* "Show N more" — same native <details>/<summary> disclosure + ▸/▾ marker
+   convention as .drawer ("How this is computed"), sized down to sit inline
+   with the grant list rather than that drawer's own boxed/mono treatment,
+   which would look out of place in this compact floating card. */
+.detailblock .grantmore{margin-top:2px}
+.detailblock .grantmore summary{
+  cursor:pointer;font-size:11.5px;color:var(--muted);list-style:none;user-select:none;
+}
+.detailblock .grantmore summary::-webkit-details-marker{display:none}
+.detailblock .grantmore summary::before{content:"▸ ";display:inline-block}
+.detailblock .grantmore[open] summary::before{content:"▾ "}
+.detailblock .grantmore summary:focus-visible{outline:2px solid var(--c-nsf);outline-offset:2px}
+.detailblock .grantmore .grantlist{margin-top:4px}
 
 /* "What's missing, field by field" — a static horizontal stacked-bar
    list, one row per field, sorted by % missing (server-sorted in

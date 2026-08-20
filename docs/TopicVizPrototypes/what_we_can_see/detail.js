@@ -57,14 +57,27 @@ export function piTooltip(i) {
 // genuinely has no grant in this corpus at all — that's the whole point of
 // this tab existing — so that's said plainly rather than shown as an empty
 // panel that reads like a loading state.
+// Only the first VISIBLE titles show up front; the rest sit behind a native
+// <details> disclosure (same no-JS toggle pattern as the "How this is
+// computed" .drawer elsewhere on this page) — VISIBLE < 8 (the aggregator's
+// own per-PI cap, see grant_titles in build_viz_aggregates.py) means most
+// multi-grant PIs get a collapsed remainder rather than a long list up front.
+const PI_GRANTS_VISIBLE = 5;
+
 export function piDetail(i) {
   const titles = FACETS_PI.grant_titles[i] || [];
   if (!titles.length) {
     return `<div class="abstract abstract-empty">No grants for this person in this corpus.</div>`;
   }
-  const items = titles.map(t => `<li>${E.esc(t || "(no title on record)")}</li>`).join("");
+  const item = t => `<li>${E.esc(t || "(no title on record)")}</li>`;
+  const shown = titles.slice(0, PI_GRANTS_VISIBLE).map(item).join("");
+  const rest = titles.slice(PI_GRANTS_VISIBLE);
+  const more = rest.length
+    ? `<details class="grantmore"><summary>Show ${rest.length} more</summary>` +
+      `<ul class="grantlist">${rest.map(item).join("")}</ul></details>`
+    : "";
   const bandLabel = FACETS_PI.levels.ngrants[FACETS_PI.cols.ngrants[i]];
   const note = titles.length >= 8
     ? `<div class="meta">Showing the first ${titles.length} of ${E.esc(bandLabel)} grants.</div>` : "";
-  return `<div class="abstract"><ul class="grantlist">${items}</ul>${note}</div>`;
+  return `<div class="abstract"><ul class="grantlist">${shown}</ul>${more}${note}</div>`;
 }

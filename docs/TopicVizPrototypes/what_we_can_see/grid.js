@@ -135,6 +135,17 @@ export function createGrid(opts) {
     panel.hidden = selected == null;
     if (selected == null) { body.innerHTML = ""; return; }
     body.innerHTML = buildTooltip(selected) + buildDetail(selected);
+    // "Show N more" (detail.js's piDetail) is a native <details> — no JS
+    // needed for the open/close toggle itself, but opening it can reveal
+    // titles below the panel's own scroll viewport (or the .abstract box's
+    // inner 260px cap) with nothing visibly moving on screen, reading as if
+    // the click did nothing. Scroll the disclosure into view on open so the
+    // newly revealed titles are actually seen.
+    body.querySelectorAll("details.grantmore").forEach(d => {
+      d.addEventListener("toggle", () => {
+        if (d.open) d.scrollIntoView({behavior: reduceMotion() ? "auto" : "smooth", block: "nearest"});
+      });
+    });
   }
   function select(i) { selected = i; renderSelectedCard(); render(); }
   function clearSelection() {
@@ -271,12 +282,35 @@ export function createGrid(opts) {
 
     const plot = svgEl.selectAll("g.plotroot").data([null]).join("g").attr("class", "plotroot");
 
+    // Fixed-order paint layers, created once and reused every render (no
+    // transform on any of them — they're purely a z-order fence, every
+    // child's own x/y/transform is unchanged). Without this, a bare
+    // `plot.selectAll(...).join(...)` per section appends any NEWLY
+    // ENTERING node at the end of `plot`'s existing children, not in
+    // section order — harmless the first render (nothing else exists yet),
+    // but on the SECOND render, cells whose key already existed (e.g. row 0,
+    // when Rows starts on "— none —") get reused in place, while brand-new
+    // cells (row 1+, or a newly-added column) are appended AFTER every
+    // `rect.markrect`. Their `.binhit` sits on top of those rows' marks
+    // (fill:transparent still hit-tests) and swallows `mousemove`, so the
+    // per-mark tooltip silently stopped firing from row 2 onward while
+    // `.binhit`'s own click-to-nearest-mark kept working — the tell that
+    // pinned this down. Layering by section means an entering cell can only
+    // ever land inside cellLayer, which is structurally always beneath
+    // markLayer, so paint order no longer depends on join/enter timing.
+    const layer = cls => plot.selectAll("g." + cls).data([null]).join("g").attr("class", cls);
+    const hdrLayer = layer("l-hdr");
+    const emptyLayer = layer("l-empty");
+    const cellLayer = layer("l-cell");
+    const markLayer = layer("l-mark");
+    const ringLayer = layer("l-ring");
+
     // Column headers (the split facet's levels) — only when a split is
     // active; with none, sLevels is the single unlabeled synthetic level.
     const hdrData = splitKey
       ? sOrder.map((si, idx) => ({si, lv: sLevels[si], lines: layout.colLabelLines[idx]}))
       : [];
-    let hdrG = plot.selectAll("g.colhdr-g").data(hdrData, d => d.lv.key);
+    let hdrG = hdrLayer.selectAll("g.colhdr-g").data(hdrData, d => d.lv.key);
     hdrG.exit().remove();
     hdrG = hdrG.enter().append("g").attr("class", "colhdr-g").merge(hdrG)
       .attr("transform", d => `translate(${layout.colX.get(d.si)},0)`);
@@ -295,14 +329,16 @@ export function createGrid(opts) {
     // Empty-cell placeholder — no level is ever hidden, so an all-zero row
     // still draws a full row of these rather than vanishing.
     const emptyCells = layout.cells.filter(c => c.members.length === 0);
-    plot.selectAll("rect.cellempty").data(emptyCells, c => c.ai + "|" + c.si).join("rect")
+    emptyLayer.selectAll("rect.cellempty").data(emptyCells, c => c.ai + "|" + c.si).join("rect")
       .attr("class", "cellempty")
       .attr("x", c => c.x).attr("y", c => c.y + c.h / 2 - 1).attr("width", c => c.w).attr("height", 2);
 
     // Cell groups: a hit-rect (this cell's own color-level breakdown on
-    // hover) drawn BEFORE the marks below so marks stay on top for their own
-    // hover target and the hit-rect only "shows through" in the gaps.
-    let cellG = plot.selectAll("g.cell-g").data(layout.cells.filter(c => c.members.length > 0), c => c.ai + "|" + c.si);
+    // hover) — marks stay on top for their own hover target (see the
+    // hdrLayer/cellLayer/markLayer/ringLayer fence above; this is now
+    // enforced structurally, not by draw-order-within-plot statement order)
+    // and the hit-rect only "shows through" in the gaps.
+    let cellG = cellLayer.selectAll("g.cell-g").data(layout.cells.filter(c => c.members.length > 0), c => c.ai + "|" + c.si);
     cellG.exit().remove();
     cellG = cellG.enter().append("g").attr("class", "cell-g").merge(cellG)
       .attr("transform", c => `translate(${c.x},${c.y})`);
@@ -331,7 +367,7 @@ export function createGrid(opts) {
     const t = d3.transition().duration(reduceMotion() ? 0 : 420).ease(d3.easeCubicInOut);
     const idxArr = d3.range(data.n);
 
-    const markSel = plot.selectAll("rect.markrect")
+    const markSel = markLayer.selectAll("rect.markrect")
       .data(idxArr, i => data.ids[i])
       .join(
         enter => enter.append("rect")
@@ -354,8 +390,9 @@ export function createGrid(opts) {
     // Selection highlight: a dedicated ring drawn AROUND the selected mark
     // with a visible gap, rather than a stroke ON the mark itself — a border
     // on a 4.8px square competes for the same few pixels as its own fill and
-    // is easy to miss. Drawn AFTER the marks so it always paints on top.
-    const ringSel = plot.selectAll("rect.selectring")
+    // is easy to miss. ringLayer is the last layer, so it always paints on
+    // top of every cell/mark regardless of join/enter order.
+    const ringSel = ringLayer.selectAll("rect.selectring")
       .data(selected != null && positions[selected] ? [selected] : []);
     ringSel.exit().remove();
     ringSel.enter().append("rect").attr("class", "selectring")
