@@ -73,9 +73,15 @@ def check(data: dict) -> tuple[list[str], list[str]]:
         if not leaf.get("notes", "").strip():
             errors.append(f"leaf {lid}: accepted but 'notes' is empty — the transparency "
                            "requirement needs a reason recorded for every accepted group.")
+        active_terms = {kw.get("term") for kw in leaf.get("keywords", [])}
         for rt in leaf.get("rejected_terms", []):
             if not str(rt.get("reason", "")).strip():
                 errors.append(f"leaf {lid}: rejected_terms entry '{rt.get('term')}' has no reason.")
+            if rt.get("term") in active_terms:
+                errors.append(f"leaf {lid}: term '{rt.get('term')}' is in BOTH keywords[] and "
+                               "rejected_terms[] — rejected_terms is a documentation record only, "
+                               "it does not exclude a term from the classifier. Delete it from "
+                               "keywords[] too, or it stays active.")
         for kw in leaf.get("keywords", []):
             df = kw.get("df_corpus")
             if df is None or df == 0:

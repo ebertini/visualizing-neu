@@ -98,7 +98,24 @@ def _section2(tg: dict) -> str:
     return "\n".join(lines)
 
 
-def _section3(vc: dict) -> str:
+LARGE_LEAF_FLOOR = 50  # a term flagged inside a leaf this size or bigger is
+# almost certainly headed for acceptance, so a bad term there matters far
+# more than the same term sitting in a leaf you're about to reject entirely.
+
+
+def _section3(vc: dict, draft: dict) -> str:
+    # Map term -> the leaves it currently lives in, so a flagged term can be
+    # prioritized by whether it's actually inside a large/likely-accepted
+    # leaf, not just shown in arbitrary vocabulary order (a real gap found in
+    # practice: "whether", df=206, precision=0.19, sat inside a 300-term
+    # leaf and was flagged by both criteria but got cut by a naive [:150]
+    # slice in an earlier version of this function).
+    term_to_leaves: dict[str, list[tuple[str, int]]] = {}
+    for lid, leaf in draft["leaves"].items():
+        n = leaf["provenance"]["n_terms"]
+        for kw in leaf["keywords"]:
+            term_to_leaves.setdefault(kw["term"], []).append((lid, n))
+
     flagged = []
     for t in vc["terms"]:
         reasons = []
@@ -107,15 +124,25 @@ def _section3(vc: dict) -> str:
         if t.get("df_corpus", 0) > 150:
             reasons.append(f"high df ({t['df_corpus']})")
         if reasons:
-            flagged.append((t["term"], reasons))
+            leaves_here = term_to_leaves.get(t["term"], [])
+            max_leaf_size = max((n for _, n in leaves_here), default=0)
+            flagged.append((t["term"], reasons, leaves_here, max_leaf_size, t.get("df_corpus", 0)))
+
+    # Sort so a bad term sitting inside a large (likely-accepted) leaf shows
+    # up first — that's the case that actually costs you something if missed.
+    flagged.sort(key=lambda f: (f[3] >= LARGE_LEAF_FLOOR, f[4]), reverse=True)
+
     lines = [f"## 3. Flagged terms needing disambiguation ({len(flagged)}/{len(vc['terms'])} "
              f"= {100*len(flagged)/max(len(vc['terms']),1):.1f}%) — the most valuable page\n"]
+    lines.append(f"Sorted so terms sitting inside a large (>={LARGE_LEAF_FLOOR}-term, likely-accepted) "
+                  "leaf come first — those are the ones actually worth your time.\n")
     lines.append("— review these; everything else can be skimmed —\n")
-    for term, reasons in flagged[:150]:
-        lines.append(f"- `{term}` — {'; '.join(reasons)}")
-    if len(flagged) > 150:
-        lines.append(f"\n... and {len(flagged) - 150} more (see outputs/kw_vocab_candidates.json "
-                      "for the full list, filter on max_topic_precision/df_corpus).")
+    for term, reasons, leaves_here, max_leaf_size, _ in flagged[:300]:
+        where = ", ".join(f"leaf {lid} ({n} terms)" for lid, n in leaves_here) or "(not in any accepted-length leaf)"
+        lines.append(f"- `{term}` — {'; '.join(reasons)} — in: {where}")
+    if len(flagged) > 300:
+        lines.append(f"\n... and {len(flagged) - 300} more, all in smaller/less-consequential leaves "
+                      "(see outputs/kw_vocab_candidates.json for the full list).")
     lines.append("\n— trust below this line —\n")
     return "\n".join(lines)
 
@@ -199,7 +226,7 @@ def render(source: str) -> str:
 
     parts = [
         f"# Keyword-Topic Review Sheet (source: {source})\n",
-        _section0(), _section1(vc, tg), _section2(tg), _section3(vc),
+        _section0(), _section1(vc, tg), _section2(tg), _section3(vc, draft),
         _section4(draft), _section5(draft), _section6(tg), _section7(), _section8(),
     ]
     return "\n\n".join(parts)
