@@ -1,0 +1,4678 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "provenance": "draft",
+    "curation": {
+      "status": "draft",
+      "curated_by": "",
+      "curated_at": ""
+    },
+    "source_fit": {
+      "method": "keyword_clustering",
+      "k_parent": 8,
+      "k_leaf": 33,
+      "candidate_vocab_size": 35640,
+      "prune_target": 2500
+    },
+    "vocab_policy_version": 1
+  },
+  "parents": {
+    "P1": {
+      "label": "molecular, biochemical, the molecular",
+      "status": "draft",
+      "notes": "",
+      "leaf_ids": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "keywords": [
+        {
+          "term": "molecular",
+          "weight": 1.0,
+          "df_corpus": 296,
+          "source": "draft"
+        },
+        {
+          "term": "biochemical",
+          "weight": 1.0,
+          "df_corpus": 93,
+          "source": "draft"
+        },
+        {
+          "term": "the molecular",
+          "weight": 1.0,
+          "df_corpus": 109,
+          "source": "draft"
+        },
+        {
+          "term": "proteins",
+          "weight": 1.0,
+          "df_corpus": 183,
+          "source": "draft"
+        },
+        {
+          "term": "cellular",
+          "weight": 1.0,
+          "df_corpus": 192,
+          "source": "draft"
+        },
+        {
+          "term": "signaling",
+          "weight": 1.0,
+          "df_corpus": 123,
+          "source": "draft"
+        },
+        {
+          "term": "therapeutic",
+          "weight": 1.0,
+          "df_corpus": 152,
+          "source": "draft"
+        },
+        {
+          "term": "binding",
+          "weight": 1.0,
+          "df_corpus": 96,
+          "source": "draft"
+        },
+        {
+          "term": "in vivo",
+          "weight": 1.0,
+          "df_corpus": 165,
+          "source": "draft"
+        },
+        {
+          "term": "cell",
+          "weight": 1.0,
+          "df_corpus": 306,
+          "source": "draft"
+        },
+        {
+          "term": "we have",
+          "weight": 1.0,
+          "df_corpus": 142,
+          "source": "draft"
+        },
+        {
+          "term": "in vitro",
+          "weight": 1.0,
+          "df_corpus": 138,
+          "source": "draft"
+        },
+        {
+          "term": "molecules",
+          "weight": 1.0,
+          "df_corpus": 141,
+          "source": "draft"
+        },
+        {
+          "term": "characterized",
+          "weight": 1.0,
+          "df_corpus": 103,
+          "source": "draft"
+        },
+        {
+          "term": "acid",
+          "weight": 1.0,
+          "df_corpus": 44,
+          "source": "draft"
+        }
+      ],
+      "provenance": {
+        "group_id": "P1",
+        "n_terms": 759,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 22,
+            "concentration_score": 38.971,
+            "raw_n_docs": 1364
+          },
+          {
+            "topic_id": 11,
+            "concentration_score": 21.552,
+            "raw_n_docs": 1250
+          },
+          {
+            "topic_id": 23,
+            "concentration_score": 15.125,
+            "raw_n_docs": 484
+          },
+          {
+            "topic_id": 5,
+            "concentration_score": 14.82,
+            "raw_n_docs": 1482
+          },
+          {
+            "topic_id": 12,
+            "concentration_score": 10.655,
+            "raw_n_docs": 618
+          },
+          {
+            "topic_id": 8,
+            "concentration_score": 9.241,
+            "raw_n_docs": 767
+          },
+          {
+            "topic_id": 28,
+            "concentration_score": 7.583,
+            "raw_n_docs": 182
+          },
+          {
+            "topic_id": 0,
+            "concentration_score": 7.513,
+            "raw_n_docs": 2021
+          },
+          {
+            "topic_id": 18,
+            "concentration_score": 6.674,
+            "raw_n_docs": 287
+          },
+          {
+            "topic_id": 6,
+            "concentration_score": 3.281,
+            "raw_n_docs": 292
+          }
+        ]
+      }
+    },
+    "P2": {
+      "label": "hardware, solutions, deployment",
+      "status": "draft",
+      "notes": "",
+      "leaf_ids": [
+        "5",
+        "6",
+        "7",
+        "8"
+      ],
+      "keywords": [
+        {
+          "term": "hardware",
+          "weight": 1.0,
+          "df_corpus": 147,
+          "source": "draft"
+        },
+        {
+          "term": "solutions",
+          "weight": 1.0,
+          "df_corpus": 195,
+          "source": "draft"
+        },
+        {
+          "term": "deployment",
+          "weight": 1.0,
+          "df_corpus": 94,
+          "source": "draft"
+        },
+        {
+          "term": "reliable",
+          "weight": 1.0,
+          "df_corpus": 119,
+          "source": "draft"
+        },
+        {
+          "term": "security",
+          "weight": 1.0,
+          "df_corpus": 219,
+          "source": "draft"
+        },
+        {
+          "term": "and software",
+          "weight": 1.0,
+          "df_corpus": 75,
+          "source": "draft"
+        },
+        {
+          "term": "architecture",
+          "weight": 1.0,
+          "df_corpus": 110,
+          "source": "draft"
+        },
+        {
+          "term": "hardware and",
+          "weight": 1.0,
+          "df_corpus": 50,
+          "source": "draft"
+        },
+        {
+          "term": "and security",
+          "weight": 1.0,
+          "df_corpus": 55,
+          "source": "draft"
+        },
+        {
+          "term": "scenarios",
+          "weight": 1.0,
+          "df_corpus": 74,
+          "source": "draft"
+        },
+        {
+          "term": "performance",
+          "weight": 1.0,
+          "df_corpus": 396,
+          "source": "draft"
+        },
+        {
+          "term": "operating",
+          "weight": 1.0,
+          "df_corpus": 73,
+          "source": "draft"
+        },
+        {
+          "term": "security and",
+          "weight": 1.0,
+          "df_corpus": 69,
+          "source": "draft"
+        },
+        {
+          "term": "today",
+          "weight": 1.0,
+          "df_corpus": 113,
+          "source": "draft"
+        },
+        {
+          "term": "computing",
+          "weight": 1.0,
+          "df_corpus": 216,
+          "source": "draft"
+        }
+      ],
+      "provenance": {
+        "group_id": "P2",
+        "n_terms": 571,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 7,
+            "concentration_score": 15.552,
+            "raw_n_docs": 1353
+          },
+          {
+            "topic_id": 15,
+            "concentration_score": 9.68,
+            "raw_n_docs": 484
+          },
+          {
+            "topic_id": 19,
+            "concentration_score": 9.463,
+            "raw_n_docs": 388
+          },
+          {
+            "topic_id": 0,
+            "concentration_score": 9.26,
+            "raw_n_docs": 2491
+          },
+          {
+            "topic_id": 27,
+            "concentration_score": 8.52,
+            "raw_n_docs": 213
+          },
+          {
+            "topic_id": 17,
+            "concentration_score": 6.022,
+            "raw_n_docs": 271
+          },
+          {
+            "topic_id": 21,
+            "concentration_score": 5.714,
+            "raw_n_docs": 200
+          },
+          {
+            "topic_id": 25,
+            "concentration_score": 4.633,
+            "raw_n_docs": 139
+          },
+          {
+            "topic_id": 3,
+            "concentration_score": 4.625,
+            "raw_n_docs": 592
+          },
+          {
+            "topic_id": 31,
+            "concentration_score": 3.714,
+            "raw_n_docs": 78
+          }
+        ]
+      }
+    },
+    "P3": {
+      "label": "physics, physics and, symmetry",
+      "status": "draft",
+      "notes": "",
+      "leaf_ids": [
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15"
+      ],
+      "keywords": [
+        {
+          "term": "physics",
+          "weight": 1.0,
+          "df_corpus": 210,
+          "source": "draft"
+        },
+        {
+          "term": "physics and",
+          "weight": 1.0,
+          "df_corpus": 62,
+          "source": "draft"
+        },
+        {
+          "term": "symmetry",
+          "weight": 1.0,
+          "df_corpus": 37,
+          "source": "draft"
+        },
+        {
+          "term": "quantum",
+          "weight": 1.0,
+          "df_corpus": 111,
+          "source": "draft"
+        },
+        {
+          "term": "geometry",
+          "weight": 1.0,
+          "df_corpus": 83,
+          "source": "draft"
+        },
+        {
+          "term": "finite",
+          "weight": 1.0,
+          "df_corpus": 36,
+          "source": "draft"
+        },
+        {
+          "term": "geometry and",
+          "weight": 1.0,
+          "df_corpus": 38,
+          "source": "draft"
+        },
+        {
+          "term": "areas of",
+          "weight": 1.0,
+          "df_corpus": 135,
+          "source": "draft"
+        },
+        {
+          "term": "string theory",
+          "weight": 1.0,
+          "df_corpus": 23,
+          "source": "draft"
+        },
+        {
+          "term": "the physics",
+          "weight": 1.0,
+          "df_corpus": 63,
+          "source": "draft"
+        },
+        {
+          "term": "dimensional",
+          "weight": 1.0,
+          "df_corpus": 38,
+          "source": "draft"
+        },
+        {
+          "term": "mathematics",
+          "weight": 1.0,
+          "df_corpus": 115,
+          "source": "draft"
+        },
+        {
+          "term": "elliptic",
+          "weight": 1.0,
+          "df_corpus": 10,
+          "source": "draft"
+        },
+        {
+          "term": "phenomena",
+          "weight": 1.0,
+          "df_corpus": 75,
+          "source": "draft"
+        },
+        {
+          "term": "geometric",
+          "weight": 1.0,
+          "df_corpus": 50,
+          "source": "draft"
+        }
+      ],
+      "provenance": {
+        "group_id": "P3",
+        "n_terms": 211,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 2,
+            "concentration_score": 17.574,
+            "raw_n_docs": 2267
+          },
+          {
+            "topic_id": 0,
+            "concentration_score": 8.695,
+            "raw_n_docs": 2339
+          },
+          {
+            "topic_id": 12,
+            "concentration_score": 1.31,
+            "raw_n_docs": 76
+          },
+          {
+            "topic_id": 1,
+            "concentration_score": 0.403,
+            "raw_n_docs": 54
+          },
+          {
+            "topic_id": 17,
+            "concentration_score": 0.378,
+            "raw_n_docs": 17
+          },
+          {
+            "topic_id": 9,
+            "concentration_score": 0.253,
+            "raw_n_docs": 21
+          },
+          {
+            "topic_id": 4,
+            "concentration_score": 0.175,
+            "raw_n_docs": 18
+          },
+          {
+            "topic_id": 31,
+            "concentration_score": 0.143,
+            "raw_n_docs": 3
+          },
+          {
+            "topic_id": 5,
+            "concentration_score": 0.13,
+            "raw_n_docs": 13
+          },
+          {
+            "topic_id": 3,
+            "concentration_score": 0.125,
+            "raw_n_docs": 16
+          }
+        ]
+      }
+    },
+    "P4": {
+      "label": "analysis, data analysis, information",
+      "status": "draft",
+      "notes": "",
+      "leaf_ids": [
+        "16",
+        "17"
+      ],
+      "keywords": [
+        {
+          "term": "analysis",
+          "weight": 1.0,
+          "df_corpus": 557,
+          "source": "draft"
+        },
+        {
+          "term": "data analysis",
+          "weight": 1.0,
+          "df_corpus": 70,
+          "source": "draft"
+        },
+        {
+          "term": "information",
+          "weight": 1.0,
+          "df_corpus": 570,
+          "source": "draft"
+        },
+        {
+          "term": "datasets",
+          "weight": 1.0,
+          "df_corpus": 93,
+          "source": "draft"
+        },
+        {
+          "term": "data in",
+          "weight": 1.0,
+          "df_corpus": 73,
+          "source": "draft"
+        },
+        {
+          "term": "of data",
+          "weight": 1.0,
+          "df_corpus": 126,
+          "source": "draft"
+        },
+        {
+          "term": "collection",
+          "weight": 1.0,
+          "df_corpus": 122,
+          "source": "draft"
+        },
+        {
+          "term": "statistical",
+          "weight": 1.0,
+          "df_corpus": 155,
+          "source": "draft"
+        },
+        {
+          "term": "mining",
+          "weight": 1.0,
+          "df_corpus": 39,
+          "source": "draft"
+        },
+        {
+          "term": "methods",
+          "weight": 1.0,
+          "df_corpus": 675,
+          "source": "draft"
+        },
+        {
+          "term": "data mining",
+          "weight": 1.0,
+          "df_corpus": 23,
+          "source": "draft"
+        },
+        {
+          "term": "databases",
+          "weight": 1.0,
+          "df_corpus": 38,
+          "source": "draft"
+        },
+        {
+          "term": "data science",
+          "weight": 1.0,
+          "df_corpus": 35,
+          "source": "draft"
+        },
+        {
+          "term": "network analysis",
+          "weight": 1.0,
+          "df_corpus": 19,
+          "source": "draft"
+        },
+        {
+          "term": "analysis and",
+          "weight": 1.0,
+          "df_corpus": 121,
+          "source": "draft"
+        }
+      ],
+      "provenance": {
+        "group_id": "P4",
+        "n_terms": 40,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 9,
+            "concentration_score": 1.747,
+            "raw_n_docs": 145
+          },
+          {
+            "topic_id": 20,
+            "concentration_score": 0.811,
+            "raw_n_docs": 30
+          },
+          {
+            "topic_id": 0,
+            "concentration_score": 0.766,
+            "raw_n_docs": 206
+          },
+          {
+            "topic_id": 1,
+            "concentration_score": 0.381,
+            "raw_n_docs": 51
+          },
+          {
+            "topic_id": 23,
+            "concentration_score": 0.344,
+            "raw_n_docs": 11
+          },
+          {
+            "topic_id": 5,
+            "concentration_score": 0.33,
+            "raw_n_docs": 33
+          },
+          {
+            "topic_id": 29,
+            "concentration_score": 0.273,
+            "raw_n_docs": 6
+          },
+          {
+            "topic_id": 4,
+            "concentration_score": 0.262,
+            "raw_n_docs": 27
+          },
+          {
+            "topic_id": 17,
+            "concentration_score": 0.244,
+            "raw_n_docs": 11
+          },
+          {
+            "topic_id": 13,
+            "concentration_score": 0.118,
+            "raw_n_docs": 6
+          }
+        ]
+      }
+    },
+    "P5": {
+      "label": "interventions, adults, behavioral",
+      "status": "draft",
+      "notes": "",
+      "leaf_ids": [
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24"
+      ],
+      "keywords": [
+        {
+          "term": "interventions",
+          "weight": 1.0,
+          "df_corpus": 149,
+          "source": "draft"
+        },
+        {
+          "term": "adults",
+          "weight": 1.0,
+          "df_corpus": 90,
+          "source": "draft"
+        },
+        {
+          "term": "behavioral",
+          "weight": 1.0,
+          "df_corpus": 168,
+          "source": "draft"
+        },
+        {
+          "term": "findings",
+          "weight": 1.0,
+          "df_corpus": 209,
+          "source": "draft"
+        },
+        {
+          "term": "outcomes",
+          "weight": 1.0,
+          "df_corpus": 315,
+          "source": "draft"
+        },
+        {
+          "term": "population",
+          "weight": 1.0,
+          "df_corpus": 198,
+          "source": "draft"
+        },
+        {
+          "term": "mental",
+          "weight": 1.0,
+          "df_corpus": 45,
+          "source": "draft"
+        },
+        {
+          "term": "cognitive",
+          "weight": 1.0,
+          "df_corpus": 124,
+          "source": "draft"
+        },
+        {
+          "term": "longitudinal",
+          "weight": 1.0,
+          "df_corpus": 58,
+          "source": "draft"
+        },
+        {
+          "term": "and cognitive",
+          "weight": 1.0,
+          "df_corpus": 36,
+          "source": "draft"
+        },
+        {
+          "term": "people",
+          "weight": 1.0,
+          "df_corpus": 219,
+          "source": "draft"
+        },
+        {
+          "term": "children",
+          "weight": 1.0,
+          "df_corpus": 71,
+          "source": "draft"
+        },
+        {
+          "term": "examine",
+          "weight": 1.0,
+          "df_corpus": 216,
+          "source": "draft"
+        },
+        {
+          "term": "psychological",
+          "weight": 1.0,
+          "df_corpus": 23,
+          "source": "draft"
+        },
+        {
+          "term": "whether",
+          "weight": 1.0,
+          "df_corpus": 206,
+          "source": "draft"
+        }
+      ],
+      "provenance": {
+        "group_id": "P5",
+        "n_terms": 440,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 1,
+            "concentration_score": 13.866,
+            "raw_n_docs": 1858
+          },
+          {
+            "topic_id": 6,
+            "concentration_score": 13.056,
+            "raw_n_docs": 1162
+          },
+          {
+            "topic_id": 29,
+            "concentration_score": 8.864,
+            "raw_n_docs": 195
+          },
+          {
+            "topic_id": 3,
+            "concentration_score": 8.086,
+            "raw_n_docs": 1035
+          },
+          {
+            "topic_id": 0,
+            "concentration_score": 4.375,
+            "raw_n_docs": 1177
+          },
+          {
+            "topic_id": 4,
+            "concentration_score": 3.806,
+            "raw_n_docs": 392
+          },
+          {
+            "topic_id": 30,
+            "concentration_score": 3.571,
+            "raw_n_docs": 75
+          },
+          {
+            "topic_id": 13,
+            "concentration_score": 2.255,
+            "raw_n_docs": 115
+          },
+          {
+            "topic_id": 20,
+            "concentration_score": 2.162,
+            "raw_n_docs": 80
+          },
+          {
+            "topic_id": 26,
+            "concentration_score": 2.069,
+            "raw_n_docs": 60
+          }
+        ]
+      }
+    },
+    "P6": {
+      "label": "yielding",
+      "status": "draft",
+      "notes": "",
+      "leaf_ids": [
+        "25"
+      ],
+      "keywords": [
+        {
+          "term": "yielding",
+          "weight": 1.0,
+          "df_corpus": 13,
+          "source": "draft"
+        }
+      ],
+      "provenance": {
+        "group_id": "P6",
+        "n_terms": 1,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 0,
+            "concentration_score": 0.015,
+            "raw_n_docs": 4
+          }
+        ]
+      }
+    },
+    "P7": {
+      "label": "environmental, coastal, and environmental",
+      "status": "draft",
+      "notes": "",
+      "leaf_ids": [
+        "26",
+        "27",
+        "28",
+        "29"
+      ],
+      "keywords": [
+        {
+          "term": "environmental",
+          "weight": 1.0,
+          "df_corpus": 270,
+          "source": "draft"
+        },
+        {
+          "term": "coastal",
+          "weight": 1.0,
+          "df_corpus": 57,
+          "source": "draft"
+        },
+        {
+          "term": "and environmental",
+          "weight": 1.0,
+          "df_corpus": 83,
+          "source": "draft"
+        },
+        {
+          "term": "water",
+          "weight": 1.0,
+          "df_corpus": 133,
+          "source": "draft"
+        },
+        {
+          "term": "river",
+          "weight": 1.0,
+          "df_corpus": 29,
+          "source": "draft"
+        },
+        {
+          "term": "environmental science",
+          "weight": 1.0,
+          "df_corpus": 14,
+          "source": "draft"
+        },
+        {
+          "term": "of coastal",
+          "weight": 1.0,
+          "df_corpus": 15,
+          "source": "draft"
+        },
+        {
+          "term": "sediment",
+          "weight": 1.0,
+          "df_corpus": 20,
+          "source": "draft"
+        },
+        {
+          "term": "land",
+          "weight": 1.0,
+          "df_corpus": 37,
+          "source": "draft"
+        },
+        {
+          "term": "climate",
+          "weight": 1.0,
+          "df_corpus": 77,
+          "source": "draft"
+        },
+        {
+          "term": "flooding",
+          "weight": 1.0,
+          "df_corpus": 26,
+          "source": "draft"
+        },
+        {
+          "term": "flood",
+          "weight": 1.0,
+          "df_corpus": 19,
+          "source": "draft"
+        },
+        {
+          "term": "hurricane",
+          "weight": 1.0,
+          "df_corpus": 20,
+          "source": "draft"
+        },
+        {
+          "term": "and water",
+          "weight": 1.0,
+          "df_corpus": 21,
+          "source": "draft"
+        },
+        {
+          "term": "mississippi",
+          "weight": 1.0,
+          "df_corpus": 12,
+          "source": "draft"
+        }
+      ],
+      "provenance": {
+        "group_id": "P7",
+        "n_terms": 201,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 4,
+            "concentration_score": 10.786,
+            "raw_n_docs": 1111
+          },
+          {
+            "topic_id": 13,
+            "concentration_score": 7.765,
+            "raw_n_docs": 396
+          },
+          {
+            "topic_id": 16,
+            "concentration_score": 5.896,
+            "raw_n_docs": 283
+          },
+          {
+            "topic_id": 24,
+            "concentration_score": 4.625,
+            "raw_n_docs": 148
+          },
+          {
+            "topic_id": 20,
+            "concentration_score": 0.676,
+            "raw_n_docs": 25
+          },
+          {
+            "topic_id": 19,
+            "concentration_score": 0.659,
+            "raw_n_docs": 27
+          },
+          {
+            "topic_id": 0,
+            "concentration_score": 0.26,
+            "raw_n_docs": 70
+          },
+          {
+            "topic_id": 3,
+            "concentration_score": 0.125,
+            "raw_n_docs": 16
+          },
+          {
+            "topic_id": 31,
+            "concentration_score": 0.095,
+            "raw_n_docs": 2
+          },
+          {
+            "topic_id": 30,
+            "concentration_score": 0.095,
+            "raw_n_docs": 2
+          }
+        ]
+      }
+    },
+    "P8": {
+      "label": "attend, to present, nsf",
+      "status": "draft",
+      "notes": "",
+      "leaf_ids": [
+        "30",
+        "31",
+        "32",
+        "33"
+      ],
+      "keywords": [
+        {
+          "term": "attend",
+          "weight": 1.0,
+          "df_corpus": 44,
+          "source": "draft"
+        },
+        {
+          "term": "to present",
+          "weight": 1.0,
+          "df_corpus": 40,
+          "source": "draft"
+        },
+        {
+          "term": "nsf",
+          "weight": 1.0,
+          "df_corpus": 184,
+          "source": "draft"
+        },
+        {
+          "term": "conference the",
+          "weight": 1.0,
+          "df_corpus": 24,
+          "source": "draft"
+        },
+        {
+          "term": "student",
+          "weight": 1.0,
+          "df_corpus": 225,
+          "source": "draft"
+        },
+        {
+          "term": "to attend",
+          "weight": 1.0,
+          "df_corpus": 35,
+          "source": "draft"
+        },
+        {
+          "term": "conference in",
+          "weight": 1.0,
+          "df_corpus": 22,
+          "source": "draft"
+        },
+        {
+          "term": "their work",
+          "weight": 1.0,
+          "df_corpus": 36,
+          "source": "draft"
+        },
+        {
+          "term": "researchers and",
+          "weight": 1.0,
+          "df_corpus": 110,
+          "source": "draft"
+        },
+        {
+          "term": "conference",
+          "weight": 1.0,
+          "df_corpus": 140,
+          "source": "draft"
+        },
+        {
+          "term": "present their",
+          "weight": 1.0,
+          "df_corpus": 26,
+          "source": "draft"
+        },
+        {
+          "term": "students to",
+          "weight": 1.0,
+          "df_corpus": 150,
+          "source": "draft"
+        },
+        {
+          "term": "to present their",
+          "weight": 1.0,
+          "df_corpus": 15,
+          "source": "draft"
+        },
+        {
+          "term": "participation",
+          "weight": 1.0,
+          "df_corpus": 239,
+          "source": "draft"
+        },
+        {
+          "term": "travel",
+          "weight": 1.0,
+          "df_corpus": 67,
+          "source": "draft"
+        }
+      ],
+      "provenance": {
+        "group_id": "P8",
+        "n_terms": 286,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 26,
+            "concentration_score": 33.345,
+            "raw_n_docs": 967
+          },
+          {
+            "topic_id": 10,
+            "concentration_score": 9.608,
+            "raw_n_docs": 711
+          },
+          {
+            "topic_id": 0,
+            "concentration_score": 6.74,
+            "raw_n_docs": 1813
+          },
+          {
+            "topic_id": 2,
+            "concentration_score": 1.791,
+            "raw_n_docs": 231
+          },
+          {
+            "topic_id": 13,
+            "concentration_score": 1.0,
+            "raw_n_docs": 51
+          },
+          {
+            "topic_id": 4,
+            "concentration_score": 0.883,
+            "raw_n_docs": 91
+          },
+          {
+            "topic_id": 30,
+            "concentration_score": 0.333,
+            "raw_n_docs": 7
+          },
+          {
+            "topic_id": 29,
+            "concentration_score": 0.318,
+            "raw_n_docs": 7
+          },
+          {
+            "topic_id": 3,
+            "concentration_score": 0.25,
+            "raw_n_docs": 32
+          },
+          {
+            "topic_id": 11,
+            "concentration_score": 0.069,
+            "raw_n_docs": 4
+          }
+        ]
+      }
+    }
+  },
+  "leaves": {
+    "1": {
+      "label": "burden on, should",
+      "status": "draft",
+      "parent": "P1",
+      "notes": "AUTO-FLAG: only 2 term(s) in this cluster \u2014 likely PI-idiolect noise rather than a real theme. Verify before accepting; consider moving to dropped_leaves instead.",
+      "keywords": [
+        {
+          "term": "burden on",
+          "weight": 1.0,
+          "df_corpus": 7,
+          "source": "draft"
+        },
+        {
+          "term": "should",
+          "weight": 1.0,
+          "df_corpus": 133,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "1",
+        "legacy_topic_id": 5,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 5,
+            "concentration_score": 0.1,
+            "raw_n_docs": 10
+          },
+          {
+            "topic_id": 3,
+            "concentration_score": 0.016,
+            "raw_n_docs": 2
+          }
+        ],
+        "n_terms": 2
+      }
+    },
+    "2": {
+      "label": "the time of, tolerance to, time of",
+      "status": "draft",
+      "parent": "P1",
+      "notes": "",
+      "keywords": [
+        {
+          "term": "the time of",
+          "weight": 1.0,
+          "df_corpus": 15,
+          "source": "draft"
+        },
+        {
+          "term": "tolerance to",
+          "weight": 1.0,
+          "df_corpus": 6,
+          "source": "draft"
+        },
+        {
+          "term": "time of",
+          "weight": 1.0,
+          "df_corpus": 23,
+          "source": "draft"
+        },
+        {
+          "term": "selection of",
+          "weight": 1.0,
+          "df_corpus": 17,
+          "source": "draft"
+        },
+        {
+          "term": "type 1",
+          "weight": 1.0,
+          "df_corpus": 7,
+          "source": "draft"
+        },
+        {
+          "term": "at the time",
+          "weight": 1.0,
+          "df_corpus": 11,
+          "source": "draft"
+        },
+        {
+          "term": "tolerance",
+          "weight": 1.0,
+          "df_corpus": 33,
+          "source": "draft"
+        },
+        {
+          "term": "governing the",
+          "weight": 1.0,
+          "df_corpus": 6,
+          "source": "draft"
+        },
+        {
+          "term": "the parameters",
+          "weight": 1.0,
+          "df_corpus": 6,
+          "source": "draft"
+        },
+        {
+          "term": "selection",
+          "weight": 1.0,
+          "df_corpus": 74,
+          "source": "draft"
+        },
+        {
+          "term": "the time",
+          "weight": 1.0,
+          "df_corpus": 63,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "2",
+        "legacy_topic_id": 14,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 14,
+            "concentration_score": 0.255,
+            "raw_n_docs": 13
+          },
+          {
+            "topic_id": 11,
+            "concentration_score": 0.138,
+            "raw_n_docs": 8
+          },
+          {
+            "topic_id": 9,
+            "concentration_score": 0.096,
+            "raw_n_docs": 8
+          },
+          {
+            "topic_id": 0,
+            "concentration_score": 0.052,
+            "raw_n_docs": 14
+          },
+          {
+            "topic_id": 2,
+            "concentration_score": 0.023,
+            "raw_n_docs": 3
+          }
+        ],
+        "n_terms": 11
+      }
+    },
+    "3": {
+      "label": "microscopy, imaging, resolution",
+      "status": "draft",
+      "parent": "P1",
+      "notes": "",
+      "keywords": [
+        {
+          "term": "microscopy",
+          "weight": 1.0,
+          "df_corpus": 69,
+          "source": "draft"
+        },
+        {
+          "term": "imaging",
+          "weight": 1.0,
+          "df_corpus": 189,
+          "source": "draft"
+        },
+        {
+          "term": "resolution",
+          "weight": 1.0,
+          "df_corpus": 101,
+          "source": "draft"
+        },
+        {
+          "term": "fluorescence",
+          "weight": 1.0,
+          "df_corpus": 47,
+          "source": "draft"
+        },
+        {
+          "term": "3d",
+          "weight": 1.0,
+          "df_corpus": 87,
+          "source": "draft"
+        },
+        {
+          "term": "experimental",
+          "weight": 1.0,
+          "df_corpus": 354,
+          "source": "draft"
+        },
+        {
+          "term": "mechanical",
+          "weight": 1.0,
+          "df_corpus": 176,
+          "source": "draft"
+        },
+        {
+          "term": "the mechanical",
+          "weight": 1.0,
+          "df_corpus": 41,
+          "source": "draft"
+        },
+        {
+          "term": "optical",
+          "weight": 1.0,
+          "df_corpus": 107,
+          "source": "draft"
+        },
+        {
+          "term": "would",
+          "weight": 1.0,
+          "df_corpus": 220,
+          "source": "draft"
+        },
+        {
+          "term": "force",
+          "weight": 1.0,
+          "df_corpus": 74,
+          "source": "draft"
+        },
+        {
+          "term": "response of",
+          "weight": 1.0,
+          "df_corpus": 39,
+          "source": "draft"
+        },
+        {
+          "term": "spatial",
+          "weight": 1.0,
+          "df_corpus": 136,
+          "source": "draft"
+        },
+        {
+          "term": "light",
+          "weight": 1.0,
+          "df_corpus": 130,
+          "source": "draft"
+        },
+        {
+          "term": "high-resolution",
+          "weight": 1.0,
+          "df_corpus": 44,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "3",
+        "legacy_topic_id": 18,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 18,
+            "concentration_score": 1.884,
+            "raw_n_docs": 81
+          },
+          {
+            "topic_id": 0,
+            "concentration_score": 1.628,
+            "raw_n_docs": 438
+          },
+          {
+            "topic_id": 24,
+            "concentration_score": 1.281,
+            "raw_n_docs": 41
+          },
+          {
+            "topic_id": 5,
+            "concentration_score": 1.13,
+            "raw_n_docs": 113
+          },
+          {
+            "topic_id": 8,
+            "concentration_score": 1.048,
+            "raw_n_docs": 87
+          },
+          {
+            "topic_id": 4,
+            "concentration_score": 0.864,
+            "raw_n_docs": 89
+          },
+          {
+            "topic_id": 6,
+            "concentration_score": 0.18,
+            "raw_n_docs": 16
+          },
+          {
+            "topic_id": 3,
+            "concentration_score": 0.172,
+            "raw_n_docs": 22
+          },
+          {
+            "topic_id": 2,
+            "concentration_score": 0.085,
+            "raw_n_docs": 11
+          }
+        ],
+        "n_terms": 72
+      }
+    },
+    "4": {
+      "label": "biochemical, molecular, the molecular",
+      "status": "draft",
+      "parent": "P1",
+      "notes": "",
+      "keywords": [
+        {
+          "term": "biochemical",
+          "weight": 1.0,
+          "df_corpus": 93,
+          "source": "draft"
+        },
+        {
+          "term": "molecular",
+          "weight": 1.0,
+          "df_corpus": 296,
+          "source": "draft"
+        },
+        {
+          "term": "the molecular",
+          "weight": 1.0,
+          "df_corpus": 109,
+          "source": "draft"
+        },
+        {
+          "term": "proteins",
+          "weight": 1.0,
+          "df_corpus": 183,
+          "source": "draft"
+        },
+        {
+          "term": "binding",
+          "weight": 1.0,
+          "df_corpus": 96,
+          "source": "draft"
+        },
+        {
+          "term": "we have",
+          "weight": 1.0,
+          "df_corpus": 142,
+          "source": "draft"
+        },
+        {
+          "term": "therapeutic",
+          "weight": 1.0,
+          "df_corpus": 152,
+          "source": "draft"
+        },
+        {
+          "term": "signaling",
+          "weight": 1.0,
+          "df_corpus": 123,
+          "source": "draft"
+        },
+        {
+          "term": "cellular",
+          "weight": 1.0,
+          "df_corpus": 192,
+          "source": "draft"
+        },
+        {
+          "term": "in vivo",
+          "weight": 1.0,
+          "df_corpus": 165,
+          "source": "draft"
+        },
+        {
+          "term": "acid",
+          "weight": 1.0,
+          "df_corpus": 44,
+          "source": "draft"
+        },
+        {
+          "term": "in vitro",
+          "weight": 1.0,
+          "df_corpus": 138,
+          "source": "draft"
+        },
+        {
+          "term": "cell",
+          "weight": 1.0,
+          "df_corpus": 306,
+          "source": "draft"
+        },
+        {
+          "term": "provided by",
+          "weight": 1.0,
+          "df_corpus": 329,
+          "source": "draft"
+        },
+        {
+          "term": "molecules",
+          "weight": 1.0,
+          "df_corpus": 141,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "4",
+        "legacy_topic_id": 22,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 22,
+            "concentration_score": 38.971,
+            "raw_n_docs": 1364
+          },
+          {
+            "topic_id": 11,
+            "concentration_score": 21.414,
+            "raw_n_docs": 1242
+          },
+          {
+            "topic_id": 23,
+            "concentration_score": 15.125,
+            "raw_n_docs": 484
+          },
+          {
+            "topic_id": 5,
+            "concentration_score": 13.59,
+            "raw_n_docs": 1359
+          },
+          {
+            "topic_id": 12,
+            "concentration_score": 10.655,
+            "raw_n_docs": 618
+          },
+          {
+            "topic_id": 8,
+            "concentration_score": 8.193,
+            "raw_n_docs": 680
+          },
+          {
+            "topic_id": 28,
+            "concentration_score": 7.583,
+            "raw_n_docs": 182
+          },
+          {
+            "topic_id": 0,
+            "concentration_score": 5.833,
+            "raw_n_docs": 1569
+          },
+          {
+            "topic_id": 18,
+            "concentration_score": 4.791,
+            "raw_n_docs": 206
+          },
+          {
+            "topic_id": 6,
+            "concentration_score": 3.101,
+            "raw_n_docs": 276
+          }
+        ],
+        "n_terms": 674
+      }
+    },
+    "5": {
+      "label": "project is to, detect, of this project",
+      "status": "draft",
+      "parent": "P2",
+      "notes": "",
+      "keywords": [
+        {
+          "term": "project is to",
+          "weight": 1.0,
+          "df_corpus": 298,
+          "source": "draft"
+        },
+        {
+          "term": "detect",
+          "weight": 1.0,
+          "df_corpus": 100,
+          "source": "draft"
+        },
+        {
+          "term": "of this project",
+          "weight": 1.0,
+          "df_corpus": 403,
+          "source": "draft"
+        },
+        {
+          "term": "can be",
+          "weight": 1.0,
+          "df_corpus": 598,
+          "source": "draft"
+        },
+        {
+          "term": "develop a",
+          "weight": 1.0,
+          "df_corpus": 341,
+          "source": "draft"
+        },
+        {
+          "term": "detection",
+          "weight": 1.0,
+          "df_corpus": 203,
+          "source": "draft"
+        },
+        {
+          "term": "techniques",
+          "weight": 1.0,
+          "df_corpus": 566,
+          "source": "draft"
+        },
+        {
+          "term": "detecting",
+          "weight": 1.0,
+          "df_corpus": 52,
+          "source": "draft"
+        },
+        {
+          "term": "based on",
+          "weight": 1.0,
+          "df_corpus": 471,
+          "source": "draft"
+        },
+        {
+          "term": "to develop a",
+          "weight": 1.0,
+          "df_corpus": 186,
+          "source": "draft"
+        },
+        {
+          "term": "this project is",
+          "weight": 1.0,
+          "df_corpus": 372,
+          "source": "draft"
+        },
+        {
+          "term": "project is",
+          "weight": 1.0,
+          "df_corpus": 554,
+          "source": "draft"
+        },
+        {
+          "term": "identification and",
+          "weight": 1.0,
+          "df_corpus": 22,
+          "source": "draft"
+        },
+        {
+          "term": "the goal of",
+          "weight": 1.0,
+          "df_corpus": 273,
+          "source": "draft"
+        },
+        {
+          "term": "to develop",
+          "weight": 1.0,
+          "df_corpus": 588,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "5",
+        "legacy_topic_id": 0,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 0,
+            "concentration_score": 1.948,
+            "raw_n_docs": 524
+          },
+          {
+            "topic_id": 21,
+            "concentration_score": 0.486,
+            "raw_n_docs": 17
+          },
+          {
+            "topic_id": 23,
+            "concentration_score": 0.438,
+            "raw_n_docs": 14
+          },
+          {
+            "topic_id": 7,
+            "concentration_score": 0.356,
+            "raw_n_docs": 31
+          },
+          {
+            "topic_id": 3,
+            "concentration_score": 0.297,
+            "raw_n_docs": 38
+          },
+          {
+            "topic_id": 5,
+            "concentration_score": 0.26,
+            "raw_n_docs": 26
+          },
+          {
+            "topic_id": 31,
+            "concentration_score": 0.19,
+            "raw_n_docs": 4
+          },
+          {
+            "topic_id": 20,
+            "concentration_score": 0.189,
+            "raw_n_docs": 7
+          },
+          {
+            "topic_id": 2,
+            "concentration_score": 0.116,
+            "raw_n_docs": 15
+          },
+          {
+            "topic_id": 18,
+            "concentration_score": 0.093,
+            "raw_n_docs": 4
+          }
+        ],
+        "n_terms": 34
+      }
+    },
+    "6": {
+      "label": "vulnerability, resilience, subject to",
+      "status": "draft",
+      "parent": "P2",
+      "notes": "",
+      "keywords": [
+        {
+          "term": "vulnerability",
+          "weight": 1.0,
+          "df_corpus": 44,
+          "source": "draft"
+        },
+        {
+          "term": "resilience",
+          "weight": 1.0,
+          "df_corpus": 83,
+          "source": "draft"
+        },
+        {
+          "term": "subject to",
+          "weight": 1.0,
+          "df_corpus": 22,
+          "source": "draft"
+        },
+        {
+          "term": "the vulnerability",
+          "weight": 1.0,
+          "df_corpus": 8,
+          "source": "draft"
+        },
+        {
+          "term": "timing",
+          "weight": 1.0,
+          "df_corpus": 31,
+          "source": "draft"
+        },
+        {
+          "term": "disruption",
+          "weight": 1.0,
+          "df_corpus": 39,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "6",
+        "legacy_topic_id": 7,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 7,
+            "concentration_score": 0.126,
+            "raw_n_docs": 11
+          },
+          {
+            "topic_id": 6,
+            "concentration_score": 0.09,
+            "raw_n_docs": 8
+          },
+          {
+            "topic_id": 16,
+            "concentration_score": 0.083,
+            "raw_n_docs": 4
+          },
+          {
+            "topic_id": 2,
+            "concentration_score": 0.054,
+            "raw_n_docs": 7
+          },
+          {
+            "topic_id": 3,
+            "concentration_score": 0.039,
+            "raw_n_docs": 5
+          },
+          {
+            "topic_id": 4,
+            "concentration_score": 0.029,
+            "raw_n_docs": 3
+          }
+        ],
+        "n_terms": 6
+      }
+    },
+    "7": {
+      "label": "software, code, security",
+      "status": "draft",
+      "parent": "P2",
+      "notes": "",
+      "keywords": [
+        {
+          "term": "software",
+          "weight": 1.0,
+          "df_corpus": 295,
+          "source": "draft"
+        },
+        {
+          "term": "code",
+          "weight": 1.0,
+          "df_corpus": 84,
+          "source": "draft"
+        },
+        {
+          "term": "security",
+          "weight": 1.0,
+          "df_corpus": 219,
+          "source": "draft"
+        },
+        {
+          "term": "project s",
+          "weight": 1.0,
+          "df_corpus": 80,
+          "source": "draft"
+        },
+        {
+          "term": "secure",
+          "weight": 1.0,
+          "df_corpus": 90,
+          "source": "draft"
+        },
+        {
+          "term": "developers",
+          "weight": 1.0,
+          "df_corpus": 47,
+          "source": "draft"
+        },
+        {
+          "term": "project develops",
+          "weight": 1.0,
+          "df_corpus": 59,
+          "source": "draft"
+        },
+        {
+          "term": "cloud",
+          "weight": 1.0,
+          "df_corpus": 60,
+          "source": "draft"
+        },
+        {
+          "term": "systems are",
+          "weight": 1.0,
+          "df_corpus": 48,
+          "source": "draft"
+        },
+        {
+          "term": "computer systems",
+          "weight": 1.0,
+          "df_corpus": 12,
+          "source": "draft"
+        },
+        {
+          "term": "scalable",
+          "weight": 1.0,
+          "df_corpus": 129,
+          "source": "draft"
+        },
+        {
+          "term": "the security",
+          "weight": 1.0,
+          "df_corpus": 28,
+          "source": "draft"
+        },
+        {
+          "term": "attacks",
+          "weight": 1.0,
+          "df_corpus": 64,
+          "source": "draft"
+        },
+        {
+          "term": "the project s",
+          "weight": 1.0,
+          "df_corpus": 58,
+          "source": "draft"
+        },
+        {
+          "term": "to make",
+          "weight": 1.0,
+          "df_corpus": 151,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "7",
+        "legacy_topic_id": 15,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 15,
+            "concentration_score": 9.68,
+            "raw_n_docs": 484
+          },
+          {
+            "topic_id": 27,
+            "concentration_score": 7.24,
+            "raw_n_docs": 181
+          },
+          {
+            "topic_id": 17,
+            "concentration_score": 5.956,
+            "raw_n_docs": 268
+          },
+          {
+            "topic_id": 25,
+            "concentration_score": 4.633,
+            "raw_n_docs": 139
+          },
+          {
+            "topic_id": 0,
+            "concentration_score": 2.037,
+            "raw_n_docs": 548
+          },
+          {
+            "topic_id": 1,
+            "concentration_score": 1.896,
+            "raw_n_docs": 254
+          },
+          {
+            "topic_id": 9,
+            "concentration_score": 1.783,
+            "raw_n_docs": 148
+          },
+          {
+            "topic_id": 7,
+            "concentration_score": 1.759,
+            "raw_n_docs": 153
+          },
+          {
+            "topic_id": 3,
+            "concentration_score": 1.211,
+            "raw_n_docs": 155
+          },
+          {
+            "topic_id": 13,
+            "concentration_score": 1.059,
+            "raw_n_docs": 54
+          }
+        ],
+        "n_terms": 263
+      }
+    },
+    "8": {
+      "label": "deployment, wireless, testbed",
+      "status": "draft",
+      "parent": "P2",
+      "notes": "",
+      "keywords": [
+        {
+          "term": "deployment",
+          "weight": 1.0,
+          "df_corpus": 94,
+          "source": "draft"
+        },
+        {
+          "term": "wireless",
+          "weight": 1.0,
+          "df_corpus": 140,
+          "source": "draft"
+        },
+        {
+          "term": "testbed",
+          "weight": 1.0,
+          "df_corpus": 60,
+          "source": "draft"
+        },
+        {
+          "term": "operating",
+          "weight": 1.0,
+          "df_corpus": 73,
+          "source": "draft"
+        },
+        {
+          "term": "power",
+          "weight": 1.0,
+          "df_corpus": 203,
+          "source": "draft"
+        },
+        {
+          "term": "performance",
+          "weight": 1.0,
+          "df_corpus": 396,
+          "source": "draft"
+        },
+        {
+          "term": "deployment of",
+          "weight": 1.0,
+          "df_corpus": 44,
+          "source": "draft"
+        },
+        {
+          "term": "radio",
+          "weight": 1.0,
+          "df_corpus": 59,
+          "source": "draft"
+        },
+        {
+          "term": "sensor networks",
+          "weight": 1.0,
+          "df_corpus": 27,
+          "source": "draft"
+        },
+        {
+          "term": "rf",
+          "weight": 1.0,
+          "df_corpus": 33,
+          "source": "draft"
+        },
+        {
+          "term": "cross-layer",
+          "weight": 1.0,
+          "df_corpus": 19,
+          "source": "draft"
+        },
+        {
+          "term": "of wireless",
+          "weight": 1.0,
+          "df_corpus": 33,
+          "source": "draft"
+        },
+        {
+          "term": "real-time",
+          "weight": 1.0,
+          "df_corpus": 123,
+          "source": "draft"
+        },
+        {
+          "term": "hardware",
+          "weight": 1.0,
+          "df_corpus": 147,
+          "source": "draft"
+        },
+        {
+          "term": "solutions",
+          "weight": 1.0,
+          "df_corpus": 195,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "8",
+        "legacy_topic_id": 7,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 7,
+            "concentration_score": 13.31,
+            "raw_n_docs": 1158
+          },
+          {
+            "topic_id": 19,
+            "concentration_score": 9.073,
+            "raw_n_docs": 372
+          },
+          {
+            "topic_id": 0,
+            "concentration_score": 5.275,
+            "raw_n_docs": 1419
+          },
+          {
+            "topic_id": 21,
+            "concentration_score": 5.229,
+            "raw_n_docs": 183
+          },
+          {
+            "topic_id": 31,
+            "concentration_score": 3.524,
+            "raw_n_docs": 74
+          },
+          {
+            "topic_id": 3,
+            "concentration_score": 3.078,
+            "raw_n_docs": 394
+          },
+          {
+            "topic_id": 27,
+            "concentration_score": 1.28,
+            "raw_n_docs": 32
+          },
+          {
+            "topic_id": 24,
+            "concentration_score": 0.469,
+            "raw_n_docs": 15
+          },
+          {
+            "topic_id": 6,
+            "concentration_score": 0.36,
+            "raw_n_docs": 32
+          },
+          {
+            "topic_id": 20,
+            "concentration_score": 0.243,
+            "raw_n_docs": 9
+          }
+        ],
+        "n_terms": 268
+      }
+    },
+    "9": {
+      "label": "of coupled, scale in",
+      "status": "draft",
+      "parent": "P3",
+      "notes": "AUTO-FLAG: only 2 term(s) in this cluster \u2014 likely PI-idiolect noise rather than a real theme. Verify before accepting; consider moving to dropped_leaves instead.",
+      "keywords": [
+        {
+          "term": "of coupled",
+          "weight": 1.0,
+          "df_corpus": 5,
+          "source": "draft"
+        },
+        {
+          "term": "scale in",
+          "weight": 1.0,
+          "df_corpus": 6,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "9",
+        "legacy_topic_id": 14,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 14,
+            "concentration_score": 0.02,
+            "raw_n_docs": 1
+          },
+          {
+            "topic_id": 0,
+            "concentration_score": 0.007,
+            "raw_n_docs": 2
+          }
+        ],
+        "n_terms": 2
+      }
+    },
+    "10": {
+      "label": "materials, fundamental, materials and",
+      "status": "draft",
+      "parent": "P3",
+      "notes": "",
+      "keywords": [
+        {
+          "term": "materials",
+          "weight": 1.0,
+          "df_corpus": 353,
+          "source": "draft"
+        },
+        {
+          "term": "fundamental",
+          "weight": 1.0,
+          "df_corpus": 453,
+          "source": "draft"
+        },
+        {
+          "term": "materials and",
+          "weight": 1.0,
+          "df_corpus": 79,
+          "source": "draft"
+        },
+        {
+          "term": "thin",
+          "weight": 1.0,
+          "df_corpus": 44,
+          "source": "draft"
+        },
+        {
+          "term": "films",
+          "weight": 1.0,
+          "df_corpus": 42,
+          "source": "draft"
+        },
+        {
+          "term": "spin",
+          "weight": 1.0,
+          "df_corpus": 37,
+          "source": "draft"
+        },
+        {
+          "term": "thermal",
+          "weight": 1.0,
+          "df_corpus": 65,
+          "source": "draft"
+        },
+        {
+          "term": "temperature",
+          "weight": 1.0,
+          "df_corpus": 115,
+          "source": "draft"
+        },
+        {
+          "term": "the fundamental",
+          "weight": 1.0,
+          "df_corpus": 117,
+          "source": "draft"
+        },
+        {
+          "term": "electronic",
+          "weight": 1.0,
+          "df_corpus": 106,
+          "source": "draft"
+        },
+        {
+          "term": "outreach",
+          "weight": 1.0,
+          "df_corpus": 321,
+          "source": "draft"
+        },
+        {
+          "term": "high school",
+          "weight": 1.0,
+          "df_corpus": 181,
+          "source": "draft"
+        },
+        {
+          "term": "physics of",
+          "weight": 1.0,
+          "df_corpus": 58,
+          "source": "draft"
+        },
+        {
+          "term": "the physics of",
+          "weight": 1.0,
+          "df_corpus": 42,
+          "source": "draft"
+        },
+        {
+          "term": "properties",
+          "weight": 1.0,
+          "df_corpus": 386,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "10",
+        "legacy_topic_id": 0,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 0,
+            "concentration_score": 7.639,
+            "raw_n_docs": 2055
+          },
+          {
+            "topic_id": 2,
+            "concentration_score": 2.062,
+            "raw_n_docs": 266
+          },
+          {
+            "topic_id": 12,
+            "concentration_score": 1.31,
+            "raw_n_docs": 76
+          },
+          {
+            "topic_id": 31,
+            "concentration_score": 0.143,
+            "raw_n_docs": 3
+          },
+          {
+            "topic_id": 5,
+            "concentration_score": 0.13,
+            "raw_n_docs": 13
+          },
+          {
+            "topic_id": 1,
+            "concentration_score": 0.09,
+            "raw_n_docs": 12
+          }
+        ],
+        "n_terms": 86
+      }
+    },
+    "11": {
+      "label": "related, related to, continue to",
+      "status": "draft",
+      "parent": "P3",
+      "notes": "",
+      "keywords": [
+        {
+          "term": "related",
+          "weight": 1.0,
+          "df_corpus": 296,
+          "source": "draft"
+        },
+        {
+          "term": "related to",
+          "weight": 1.0,
+          "df_corpus": 148,
+          "source": "draft"
+        },
+        {
+          "term": "continue to",
+          "weight": 1.0,
+          "df_corpus": 109,
+          "source": "draft"
+        },
+        {
+          "term": "continue",
+          "weight": 1.0,
+          "df_corpus": 168,
+          "source": "draft"
+        },
+        {
+          "term": "groups",
+          "weight": 1.0,
+          "df_corpus": 442,
+          "source": "draft"
+        },
+        {
+          "term": "will continue to",
+          "weight": 1.0,
+          "df_corpus": 63,
+          "source": "draft"
+        },
+        {
+          "term": "series",
+          "weight": 1.0,
+          "df_corpus": 164,
+          "source": "draft"
+        },
+        {
+          "term": "and their",
+          "weight": 1.0,
+          "df_corpus": 257,
+          "source": "draft"
+        },
+        {
+          "term": "theme",
+          "weight": 1.0,
+          "df_corpus": 44,
+          "source": "draft"
+        },
+        {
+          "term": "years",
+          "weight": 1.0,
+          "df_corpus": 268,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "11",
+        "legacy_topic_id": 2,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 2,
+            "concentration_score": 1.178,
+            "raw_n_docs": 152
+          },
+          {
+            "topic_id": 0,
+            "concentration_score": 0.19,
+            "raw_n_docs": 51
+          },
+          {
+            "topic_id": 1,
+            "concentration_score": 0.187,
+            "raw_n_docs": 25
+          },
+          {
+            "topic_id": 4,
+            "concentration_score": 0.175,
+            "raw_n_docs": 18
+          }
+        ],
+        "n_terms": 10
+      }
+    },
+    "12": {
+      "label": "the lhc, new physics, the standard model",
+      "status": "draft",
+      "parent": "P3",
+      "notes": "",
+      "keywords": [
+        {
+          "term": "the lhc",
+          "weight": 1.0,
+          "df_corpus": 14,
+          "source": "draft"
+        },
+        {
+          "term": "new physics",
+          "weight": 1.0,
+          "df_corpus": 16,
+          "source": "draft"
+        },
+        {
+          "term": "the standard model",
+          "weight": 1.0,
+          "df_corpus": 17,
+          "source": "draft"
+        },
+        {
+          "term": "lhc",
+          "weight": 1.0,
+          "df_corpus": 18,
+          "source": "draft"
+        },
+        {
+          "term": "of particle physics",
+          "weight": 1.0,
+          "df_corpus": 13,
+          "source": "draft"
+        },
+        {
+          "term": "collider",
+          "weight": 1.0,
+          "df_corpus": 26,
+          "source": "draft"
+        },
+        {
+          "term": "hadron",
+          "weight": 1.0,
+          "df_corpus": 26,
+          "source": "draft"
+        },
+        {
+          "term": "beyond the standard",
+          "weight": 1.0,
+          "df_corpus": 12,
+          "source": "draft"
+        },
+        {
+          "term": "the higgs",
+          "weight": 1.0,
+          "df_corpus": 14,
+          "source": "draft"
+        },
+        {
+          "term": "higgs",
+          "weight": 1.0,
+          "df_corpus": 18,
+          "source": "draft"
+        },
+        {
+          "term": "particle physics",
+          "weight": 1.0,
+          "df_corpus": 30,
+          "source": "draft"
+        },
+        {
+          "term": "the standard",
+          "weight": 1.0,
+          "df_corpus": 27,
+          "source": "draft"
+        },
+        {
+          "term": "of particle",
+          "weight": 1.0,
+          "df_corpus": 23,
+          "source": "draft"
+        },
+        {
+          "term": "boson",
+          "weight": 1.0,
+          "df_corpus": 8,
+          "source": "draft"
+        },
+        {
+          "term": "the cms",
+          "weight": 1.0,
+          "df_corpus": 12,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "12",
+        "legacy_topic_id": 2,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 2,
+            "concentration_score": 3.55,
+            "raw_n_docs": 458
+          },
+          {
+            "topic_id": 9,
+            "concentration_score": 0.024,
+            "raw_n_docs": 2
+          }
+        ],
+        "n_terms": 27
+      }
+    },
+    "13": {
+      "label": "algebraic, invariants, of mathematics",
+      "status": "draft",
+      "parent": "P3",
+      "notes": "",
+      "keywords": [
+        {
+          "term": "algebraic",
+          "weight": 1.0,
+          "df_corpus": 47,
+          "source": "draft"
+        },
+        {
+          "term": "invariants",
+          "weight": 1.0,
+          "df_corpus": 24,
+          "source": "draft"
+        },
+        {
+          "term": "of mathematics",
+          "weight": 1.0,
+          "df_corpus": 32,
+          "source": "draft"
+        },
+        {
+          "term": "representation theory",
+          "weight": 1.0,
+          "df_corpus": 34,
+          "source": "draft"
+        },
+        {
+          "term": "combinatorics",
+          "weight": 1.0,
+          "df_corpus": 21,
+          "source": "draft"
+        },
+        {
+          "term": "theory of",
+          "weight": 1.0,
+          "df_corpus": 83,
+          "source": "draft"
+        },
+        {
+          "term": "the theory",
+          "weight": 1.0,
+          "df_corpus": 60,
+          "source": "draft"
+        },
+        {
+          "term": "lie",
+          "weight": 1.0,
+          "df_corpus": 35,
+          "source": "draft"
+        },
+        {
+          "term": "algebras",
+          "weight": 1.0,
+          "df_corpus": 38,
+          "source": "draft"
+        },
+        {
+          "term": "manifolds",
+          "weight": 1.0,
+          "df_corpus": 25,
+          "source": "draft"
+        },
+        {
+          "term": "quantum groups",
+          "weight": 1.0,
+          "df_corpus": 16,
+          "source": "draft"
+        },
+        {
+          "term": "theory and",
+          "weight": 1.0,
+          "df_corpus": 136,
+          "source": "draft"
+        },
+        {
+          "term": "symmetries of",
+          "weight": 1.0,
+          "df_corpus": 19,
+          "source": "draft"
+        },
+        {
+          "term": "geometric",
+          "weight": 1.0,
+          "df_corpus": 50,
+          "source": "draft"
+        },
+        {
+          "term": "integrable systems",
+          "weight": 1.0,
+          "df_corpus": 13,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "13",
+        "legacy_topic_id": 2,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 2,
+            "concentration_score": 10.783,
+            "raw_n_docs": 1391
+          },
+          {
+            "topic_id": 0,
+            "concentration_score": 0.833,
+            "raw_n_docs": 224
+          },
+          {
+            "topic_id": 17,
+            "concentration_score": 0.378,
+            "raw_n_docs": 17
+          },
+          {
+            "topic_id": 9,
+            "concentration_score": 0.229,
+            "raw_n_docs": 19
+          },
+          {
+            "topic_id": 1,
+            "concentration_score": 0.127,
+            "raw_n_docs": 17
+          },
+          {
+            "topic_id": 3,
+            "concentration_score": 0.125,
+            "raw_n_docs": 16
+          },
+          {
+            "topic_id": 15,
+            "concentration_score": 0.1,
+            "raw_n_docs": 5
+          },
+          {
+            "topic_id": 11,
+            "concentration_score": 0.052,
+            "raw_n_docs": 3
+          }
+        ],
+        "n_terms": 83
+      }
+    },
+    "14": {
+      "label": "anomalous, in such",
+      "status": "draft",
+      "parent": "P3",
+      "notes": "AUTO-FLAG: only 2 term(s) in this cluster \u2014 likely PI-idiolect noise rather than a real theme. Verify before accepting; consider moving to dropped_leaves instead.",
+      "keywords": [
+        {
+          "term": "anomalous",
+          "weight": 1.0,
+          "df_corpus": 11,
+          "source": "draft"
+        },
+        {
+          "term": "in such",
+          "weight": 1.0,
+          "df_corpus": 44,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "14",
+        "legacy_topic_id": 22,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 22,
+            "concentration_score": 0.114,
+            "raw_n_docs": 4
+          },
+          {
+            "topic_id": 0,
+            "concentration_score": 0.026,
+            "raw_n_docs": 7
+          }
+        ],
+        "n_terms": 2
+      }
+    },
+    "15": {
+      "label": "tracing",
+      "status": "draft",
+      "parent": "P3",
+      "notes": "AUTO-FLAG: only 1 term(s) in this cluster \u2014 likely PI-idiolect noise rather than a real theme. Verify before accepting; consider moving to dropped_leaves instead.",
+      "keywords": [
+        {
+          "term": "tracing",
+          "weight": 1.0,
+          "df_corpus": 10,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "15",
+        "legacy_topic_id": 18,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 18,
+            "concentration_score": 0.047,
+            "raw_n_docs": 2
+          }
+        ],
+        "n_terms": 1
+      }
+    },
+    "16": {
+      "label": "infectious, influenza, pandemic",
+      "status": "draft",
+      "parent": "P4",
+      "notes": "",
+      "keywords": [
+        {
+          "term": "infectious",
+          "weight": 1.0,
+          "df_corpus": 35,
+          "source": "draft"
+        },
+        {
+          "term": "influenza",
+          "weight": 1.0,
+          "df_corpus": 9,
+          "source": "draft"
+        },
+        {
+          "term": "pandemic",
+          "weight": 1.0,
+          "df_corpus": 38,
+          "source": "draft"
+        },
+        {
+          "term": "epidemic",
+          "weight": 1.0,
+          "df_corpus": 17,
+          "source": "draft"
+        },
+        {
+          "term": "shortages",
+          "weight": 1.0,
+          "df_corpus": 8,
+          "source": "draft"
+        },
+        {
+          "term": "infection",
+          "weight": 1.0,
+          "df_corpus": 50,
+          "source": "draft"
+        },
+        {
+          "term": "ve",
+          "weight": 1.0,
+          "df_corpus": 5,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "16",
+        "legacy_topic_id": 20,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 20,
+            "concentration_score": 0.811,
+            "raw_n_docs": 30
+          },
+          {
+            "topic_id": 23,
+            "concentration_score": 0.344,
+            "raw_n_docs": 11
+          },
+          {
+            "topic_id": 25,
+            "concentration_score": 0.033,
+            "raw_n_docs": 1
+          }
+        ],
+        "n_terms": 7
+      }
+    },
+    "17": {
+      "label": "analysis, data analysis, datasets",
+      "status": "draft",
+      "parent": "P4",
+      "notes": "",
+      "keywords": [
+        {
+          "term": "analysis",
+          "weight": 1.0,
+          "df_corpus": 557,
+          "source": "draft"
+        },
+        {
+          "term": "data analysis",
+          "weight": 1.0,
+          "df_corpus": 70,
+          "source": "draft"
+        },
+        {
+          "term": "datasets",
+          "weight": 1.0,
+          "df_corpus": 93,
+          "source": "draft"
+        },
+        {
+          "term": "information",
+          "weight": 1.0,
+          "df_corpus": 570,
+          "source": "draft"
+        },
+        {
+          "term": "data in",
+          "weight": 1.0,
+          "df_corpus": 73,
+          "source": "draft"
+        },
+        {
+          "term": "of data",
+          "weight": 1.0,
+          "df_corpus": 126,
+          "source": "draft"
+        },
+        {
+          "term": "statistical",
+          "weight": 1.0,
+          "df_corpus": 155,
+          "source": "draft"
+        },
+        {
+          "term": "methods",
+          "weight": 1.0,
+          "df_corpus": 675,
+          "source": "draft"
+        },
+        {
+          "term": "mining",
+          "weight": 1.0,
+          "df_corpus": 39,
+          "source": "draft"
+        },
+        {
+          "term": "data mining",
+          "weight": 1.0,
+          "df_corpus": 23,
+          "source": "draft"
+        },
+        {
+          "term": "collection",
+          "weight": 1.0,
+          "df_corpus": 122,
+          "source": "draft"
+        },
+        {
+          "term": "analysis and",
+          "weight": 1.0,
+          "df_corpus": 121,
+          "source": "draft"
+        },
+        {
+          "term": "databases",
+          "weight": 1.0,
+          "df_corpus": 38,
+          "source": "draft"
+        },
+        {
+          "term": "data science",
+          "weight": 1.0,
+          "df_corpus": 35,
+          "source": "draft"
+        },
+        {
+          "term": "sets",
+          "weight": 1.0,
+          "df_corpus": 87,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "17",
+        "legacy_topic_id": 9,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 9,
+            "concentration_score": 1.747,
+            "raw_n_docs": 145
+          },
+          {
+            "topic_id": 0,
+            "concentration_score": 0.766,
+            "raw_n_docs": 206
+          },
+          {
+            "topic_id": 1,
+            "concentration_score": 0.381,
+            "raw_n_docs": 51
+          },
+          {
+            "topic_id": 5,
+            "concentration_score": 0.33,
+            "raw_n_docs": 33
+          },
+          {
+            "topic_id": 29,
+            "concentration_score": 0.273,
+            "raw_n_docs": 6
+          },
+          {
+            "topic_id": 4,
+            "concentration_score": 0.262,
+            "raw_n_docs": 27
+          },
+          {
+            "topic_id": 17,
+            "concentration_score": 0.244,
+            "raw_n_docs": 11
+          },
+          {
+            "topic_id": 13,
+            "concentration_score": 0.118,
+            "raw_n_docs": 6
+          },
+          {
+            "topic_id": 31,
+            "concentration_score": 0.095,
+            "raw_n_docs": 2
+          },
+          {
+            "topic_id": 3,
+            "concentration_score": 0.078,
+            "raw_n_docs": 10
+          }
+        ],
+        "n_terms": 33
+      }
+    },
+    "18": {
+      "label": "robots, the robot, robotics",
+      "status": "draft",
+      "parent": "P5",
+      "notes": "",
+      "keywords": [
+        {
+          "term": "robots",
+          "weight": 1.0,
+          "df_corpus": 60,
+          "source": "draft"
+        },
+        {
+          "term": "the robot",
+          "weight": 1.0,
+          "df_corpus": 15,
+          "source": "draft"
+        },
+        {
+          "term": "robotics",
+          "weight": 1.0,
+          "df_corpus": 64,
+          "source": "draft"
+        },
+        {
+          "term": "human-robot",
+          "weight": 1.0,
+          "df_corpus": 21,
+          "source": "draft"
+        },
+        {
+          "term": "manipulation",
+          "weight": 1.0,
+          "df_corpus": 60,
+          "source": "draft"
+        },
+        {
+          "term": "advance",
+          "weight": 1.0,
+          "df_corpus": 297,
+          "source": "draft"
+        },
+        {
+          "term": "movement",
+          "weight": 1.0,
+          "df_corpus": 55,
+          "source": "draft"
+        },
+        {
+          "term": "assistive",
+          "weight": 1.0,
+          "df_corpus": 27,
+          "source": "draft"
+        },
+        {
+          "term": "this research",
+          "weight": 1.0,
+          "df_corpus": 527,
+          "source": "draft"
+        },
+        {
+          "term": "control",
+          "weight": 1.0,
+          "df_corpus": 466,
+          "source": "draft"
+        },
+        {
+          "term": "of complex",
+          "weight": 1.0,
+          "df_corpus": 80,
+          "source": "draft"
+        },
+        {
+          "term": "locomotion",
+          "weight": 1.0,
+          "df_corpus": 17,
+          "source": "draft"
+        },
+        {
+          "term": "project will advance",
+          "weight": 1.0,
+          "df_corpus": 31,
+          "source": "draft"
+        },
+        {
+          "term": "behavior",
+          "weight": 1.0,
+          "df_corpus": 311,
+          "source": "draft"
+        },
+        {
+          "term": "will advance",
+          "weight": 1.0,
+          "df_corpus": 95,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "18",
+        "legacy_topic_id": 3,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 3,
+            "concentration_score": 3.758,
+            "raw_n_docs": 481
+          },
+          {
+            "topic_id": 0,
+            "concentration_score": 0.721,
+            "raw_n_docs": 194
+          },
+          {
+            "topic_id": 1,
+            "concentration_score": 0.709,
+            "raw_n_docs": 95
+          },
+          {
+            "topic_id": 4,
+            "concentration_score": 0.359,
+            "raw_n_docs": 37
+          },
+          {
+            "topic_id": 16,
+            "concentration_score": 0.146,
+            "raw_n_docs": 7
+          },
+          {
+            "topic_id": 21,
+            "concentration_score": 0.114,
+            "raw_n_docs": 4
+          },
+          {
+            "topic_id": 20,
+            "concentration_score": 0.081,
+            "raw_n_docs": 3
+          }
+        ],
+        "n_terms": 42
+      }
+    },
+    "19": {
+      "label": "due to, lead to, a comprehensive",
+      "status": "draft",
+      "parent": "P5",
+      "notes": "",
+      "keywords": [
+        {
+          "term": "due to",
+          "weight": 1.0,
+          "df_corpus": 306,
+          "source": "draft"
+        },
+        {
+          "term": "lead to",
+          "weight": 1.0,
+          "df_corpus": 322,
+          "source": "draft"
+        },
+        {
+          "term": "a comprehensive",
+          "weight": 1.0,
+          "df_corpus": 114,
+          "source": "draft"
+        },
+        {
+          "term": "optimal",
+          "weight": 1.0,
+          "df_corpus": 142,
+          "source": "draft"
+        },
+        {
+          "term": "research is",
+          "weight": 1.0,
+          "df_corpus": 227,
+          "source": "draft"
+        },
+        {
+          "term": "parameters",
+          "weight": 1.0,
+          "df_corpus": 124,
+          "source": "draft"
+        },
+        {
+          "term": "comprehensive",
+          "weight": 1.0,
+          "df_corpus": 183,
+          "source": "draft"
+        },
+        {
+          "term": "failure",
+          "weight": 1.0,
+          "df_corpus": 74,
+          "source": "draft"
+        },
+        {
+          "term": "underlying",
+          "weight": 1.0,
+          "df_corpus": 200,
+          "source": "draft"
+        },
+        {
+          "term": "progressive",
+          "weight": 1.0,
+          "df_corpus": 20,
+          "source": "draft"
+        },
+        {
+          "term": "limited",
+          "weight": 1.0,
+          "df_corpus": 275,
+          "source": "draft"
+        },
+        {
+          "term": "the present",
+          "weight": 1.0,
+          "df_corpus": 42,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "19",
+        "legacy_topic_id": 0,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 0,
+            "concentration_score": 0.483,
+            "raw_n_docs": 130
+          },
+          {
+            "topic_id": 24,
+            "concentration_score": 0.438,
+            "raw_n_docs": 14
+          },
+          {
+            "topic_id": 3,
+            "concentration_score": 0.336,
+            "raw_n_docs": 43
+          },
+          {
+            "topic_id": 6,
+            "concentration_score": 0.247,
+            "raw_n_docs": 22
+          },
+          {
+            "topic_id": 1,
+            "concentration_score": 0.134,
+            "raw_n_docs": 18
+          }
+        ],
+        "n_terms": 12
+      }
+    },
+    "20": {
+      "label": "social, social and, and social",
+      "status": "draft",
+      "parent": "P5",
+      "notes": "",
+      "keywords": [
+        {
+          "term": "social",
+          "weight": 1.0,
+          "df_corpus": 321,
+          "source": "draft"
+        },
+        {
+          "term": "social and",
+          "weight": 1.0,
+          "df_corpus": 59,
+          "source": "draft"
+        },
+        {
+          "term": "and social",
+          "weight": 1.0,
+          "df_corpus": 101,
+          "source": "draft"
+        },
+        {
+          "term": "about",
+          "weight": 1.0,
+          "df_corpus": 469,
+          "source": "draft"
+        },
+        {
+          "term": "attitudes",
+          "weight": 1.0,
+          "df_corpus": 20,
+          "source": "draft"
+        },
+        {
+          "term": "the social",
+          "weight": 1.0,
+          "df_corpus": 52,
+          "source": "draft"
+        },
+        {
+          "term": "work and",
+          "weight": 1.0,
+          "df_corpus": 51,
+          "source": "draft"
+        },
+        {
+          "term": "economic",
+          "weight": 1.0,
+          "df_corpus": 150,
+          "source": "draft"
+        },
+        {
+          "term": "world",
+          "weight": 1.0,
+          "df_corpus": 204,
+          "source": "draft"
+        },
+        {
+          "term": "qualitative",
+          "weight": 1.0,
+          "df_corpus": 60,
+          "source": "draft"
+        },
+        {
+          "term": "decisions",
+          "weight": 1.0,
+          "df_corpus": 107,
+          "source": "draft"
+        },
+        {
+          "term": "skills",
+          "weight": 1.0,
+          "df_corpus": 168,
+          "source": "draft"
+        },
+        {
+          "term": "about the",
+          "weight": 1.0,
+          "df_corpus": 193,
+          "source": "draft"
+        },
+        {
+          "term": "own",
+          "weight": 1.0,
+          "df_corpus": 106,
+          "source": "draft"
+        },
+        {
+          "term": "what",
+          "weight": 1.0,
+          "df_corpus": 221,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "20",
+        "legacy_topic_id": 1,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 1,
+            "concentration_score": 4.313,
+            "raw_n_docs": 578
+          },
+          {
+            "topic_id": 30,
+            "concentration_score": 3.571,
+            "raw_n_docs": 75
+          },
+          {
+            "topic_id": 3,
+            "concentration_score": 2.203,
+            "raw_n_docs": 282
+          },
+          {
+            "topic_id": 20,
+            "concentration_score": 2.081,
+            "raw_n_docs": 77
+          },
+          {
+            "topic_id": 26,
+            "concentration_score": 2.069,
+            "raw_n_docs": 60
+          },
+          {
+            "topic_id": 13,
+            "concentration_score": 1.431,
+            "raw_n_docs": 73
+          },
+          {
+            "topic_id": 0,
+            "concentration_score": 1.375,
+            "raw_n_docs": 370
+          },
+          {
+            "topic_id": 4,
+            "concentration_score": 0.883,
+            "raw_n_docs": 91
+          },
+          {
+            "topic_id": 10,
+            "concentration_score": 0.486,
+            "raw_n_docs": 36
+          },
+          {
+            "topic_id": 9,
+            "concentration_score": 0.265,
+            "raw_n_docs": 22
+          }
+        ],
+        "n_terms": 137
+      }
+    },
+    "21": {
+      "label": "age, evidence, adults",
+      "status": "draft",
+      "parent": "P5",
+      "notes": "",
+      "keywords": [
+        {
+          "term": "age",
+          "weight": 1.0,
+          "df_corpus": 100,
+          "source": "draft"
+        },
+        {
+          "term": "evidence",
+          "weight": 1.0,
+          "df_corpus": 141,
+          "source": "draft"
+        },
+        {
+          "term": "adults",
+          "weight": 1.0,
+          "df_corpus": 90,
+          "source": "draft"
+        },
+        {
+          "term": "and cognitive",
+          "weight": 1.0,
+          "df_corpus": 36,
+          "source": "draft"
+        },
+        {
+          "term": "behavioral",
+          "weight": 1.0,
+          "df_corpus": 168,
+          "source": "draft"
+        },
+        {
+          "term": "whether",
+          "weight": 1.0,
+          "df_corpus": 206,
+          "source": "draft"
+        },
+        {
+          "term": "differences",
+          "weight": 1.0,
+          "df_corpus": 125,
+          "source": "draft"
+        },
+        {
+          "term": "examine",
+          "weight": 1.0,
+          "df_corpus": 216,
+          "source": "draft"
+        },
+        {
+          "term": "findings",
+          "weight": 1.0,
+          "df_corpus": 209,
+          "source": "draft"
+        },
+        {
+          "term": "interventions",
+          "weight": 1.0,
+          "df_corpus": 149,
+          "source": "draft"
+        },
+        {
+          "term": "aim 3",
+          "weight": 1.0,
+          "df_corpus": 104,
+          "source": "draft"
+        },
+        {
+          "term": "population",
+          "weight": 1.0,
+          "df_corpus": 198,
+          "source": "draft"
+        },
+        {
+          "term": "differences in",
+          "weight": 1.0,
+          "df_corpus": 77,
+          "source": "draft"
+        },
+        {
+          "term": "mental",
+          "weight": 1.0,
+          "df_corpus": 45,
+          "source": "draft"
+        },
+        {
+          "term": "life",
+          "weight": 1.0,
+          "df_corpus": 242,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "21",
+        "legacy_topic_id": 6,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 6,
+            "concentration_score": 12.697,
+            "raw_n_docs": 1130
+          },
+          {
+            "topic_id": 29,
+            "concentration_score": 8.864,
+            "raw_n_docs": 195
+          },
+          {
+            "topic_id": 1,
+            "concentration_score": 8.358,
+            "raw_n_docs": 1120
+          },
+          {
+            "topic_id": 4,
+            "concentration_score": 2.563,
+            "raw_n_docs": 264
+          },
+          {
+            "topic_id": 3,
+            "concentration_score": 1.625,
+            "raw_n_docs": 208
+          },
+          {
+            "topic_id": 8,
+            "concentration_score": 1.096,
+            "raw_n_docs": 91
+          },
+          {
+            "topic_id": 0,
+            "concentration_score": 1.082,
+            "raw_n_docs": 291
+          },
+          {
+            "topic_id": 13,
+            "concentration_score": 0.824,
+            "raw_n_docs": 42
+          },
+          {
+            "topic_id": 11,
+            "concentration_score": 0.466,
+            "raw_n_docs": 27
+          },
+          {
+            "topic_id": 24,
+            "concentration_score": 0.312,
+            "raw_n_docs": 10
+          }
+        ],
+        "n_terms": 233
+      }
+    },
+    "22": {
+      "label": "from low",
+      "status": "draft",
+      "parent": "P5",
+      "notes": "AUTO-FLAG: only 1 term(s) in this cluster \u2014 likely PI-idiolect noise rather than a real theme. Verify before accepting; consider moving to dropped_leaves instead.",
+      "keywords": [
+        {
+          "term": "from low",
+          "weight": 1.0,
+          "df_corpus": 6,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "22",
+        "legacy_topic_id": 6,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 6,
+            "concentration_score": 0.022,
+            "raw_n_docs": 2
+          }
+        ],
+        "n_terms": 1
+      }
+    },
+    "23": {
+      "label": "alternative, cas",
+      "status": "draft",
+      "parent": "P5",
+      "notes": "AUTO-FLAG: only 2 term(s) in this cluster \u2014 likely PI-idiolect noise rather than a real theme. Verify before accepting; consider moving to dropped_leaves instead.",
+      "keywords": [
+        {
+          "term": "alternative",
+          "weight": 1.0,
+          "df_corpus": 105,
+          "source": "draft"
+        },
+        {
+          "term": "cas",
+          "weight": 1.0,
+          "df_corpus": 5,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "23",
+        "legacy_topic_id": 0,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 0,
+            "concentration_score": 0.037,
+            "raw_n_docs": 10
+          },
+          {
+            "topic_id": 17,
+            "concentration_score": 0.022,
+            "raw_n_docs": 1
+          }
+        ],
+        "n_terms": 2
+      }
+    },
+    "24": {
+      "label": "use of, potential, designed to",
+      "status": "draft",
+      "parent": "P5",
+      "notes": "",
+      "keywords": [
+        {
+          "term": "use of",
+          "weight": 1.0,
+          "df_corpus": 325,
+          "source": "draft"
+        },
+        {
+          "term": "potential",
+          "weight": 1.0,
+          "df_corpus": 597,
+          "source": "draft"
+        },
+        {
+          "term": "designed to",
+          "weight": 1.0,
+          "df_corpus": 173,
+          "source": "draft"
+        },
+        {
+          "term": "evaluation",
+          "weight": 1.0,
+          "df_corpus": 179,
+          "source": "draft"
+        },
+        {
+          "term": "designed",
+          "weight": 1.0,
+          "df_corpus": 300,
+          "source": "draft"
+        },
+        {
+          "term": "evaluation of",
+          "weight": 1.0,
+          "df_corpus": 69,
+          "source": "draft"
+        },
+        {
+          "term": "testing",
+          "weight": 1.0,
+          "df_corpus": 198,
+          "source": "draft"
+        },
+        {
+          "term": "the use of",
+          "weight": 1.0,
+          "df_corpus": 209,
+          "source": "draft"
+        },
+        {
+          "term": "with a",
+          "weight": 1.0,
+          "df_corpus": 436,
+          "source": "draft"
+        },
+        {
+          "term": "the potential",
+          "weight": 1.0,
+          "df_corpus": 272,
+          "source": "draft"
+        },
+        {
+          "term": "successful",
+          "weight": 1.0,
+          "df_corpus": 287,
+          "source": "draft"
+        },
+        {
+          "term": "evaluation of the",
+          "weight": 1.0,
+          "df_corpus": 19,
+          "source": "draft"
+        },
+        {
+          "term": "neglect",
+          "weight": 1.0,
+          "df_corpus": 5,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "24",
+        "legacy_topic_id": 0,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 0,
+            "concentration_score": 0.677,
+            "raw_n_docs": 182
+          },
+          {
+            "topic_id": 1,
+            "concentration_score": 0.351,
+            "raw_n_docs": 47
+          },
+          {
+            "topic_id": 11,
+            "concentration_score": 0.172,
+            "raw_n_docs": 10
+          },
+          {
+            "topic_id": 3,
+            "concentration_score": 0.164,
+            "raw_n_docs": 21
+          },
+          {
+            "topic_id": 14,
+            "concentration_score": 0.039,
+            "raw_n_docs": 2
+          }
+        ],
+        "n_terms": 13
+      }
+    },
+    "25": {
+      "label": "yielding",
+      "status": "draft",
+      "parent": "P6",
+      "notes": "AUTO-FLAG: only 1 term(s) in this cluster \u2014 likely PI-idiolect noise rather than a real theme. Verify before accepting; consider moving to dropped_leaves instead.",
+      "keywords": [
+        {
+          "term": "yielding",
+          "weight": 1.0,
+          "df_corpus": 13,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "25",
+        "legacy_topic_id": 0,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 0,
+            "concentration_score": 0.015,
+            "raw_n_docs": 4
+          }
+        ],
+        "n_terms": 1
+      }
+    },
+    "26": {
+      "label": "steel, earthquake, full-scale",
+      "status": "draft",
+      "parent": "P7",
+      "notes": "",
+      "keywords": [
+        {
+          "term": "steel",
+          "weight": 1.0,
+          "df_corpus": 11,
+          "source": "draft"
+        },
+        {
+          "term": "earthquake",
+          "weight": 1.0,
+          "df_corpus": 17,
+          "source": "draft"
+        },
+        {
+          "term": "full-scale",
+          "weight": 1.0,
+          "df_corpus": 9,
+          "source": "draft"
+        },
+        {
+          "term": "collapse",
+          "weight": 1.0,
+          "df_corpus": 10,
+          "source": "draft"
+        },
+        {
+          "term": "performance-based",
+          "weight": 1.0,
+          "df_corpus": 6,
+          "source": "draft"
+        },
+        {
+          "term": "of steel",
+          "weight": 1.0,
+          "df_corpus": 7,
+          "source": "draft"
+        },
+        {
+          "term": "existing structures",
+          "weight": 1.0,
+          "df_corpus": 6,
+          "source": "draft"
+        },
+        {
+          "term": "civil",
+          "weight": 1.0,
+          "df_corpus": 37,
+          "source": "draft"
+        },
+        {
+          "term": "of building",
+          "weight": 1.0,
+          "df_corpus": 12,
+          "source": "draft"
+        },
+        {
+          "term": "wind",
+          "weight": 1.0,
+          "df_corpus": 25,
+          "source": "draft"
+        },
+        {
+          "term": "seismic",
+          "weight": 1.0,
+          "df_corpus": 19,
+          "source": "draft"
+        },
+        {
+          "term": "civil engineering",
+          "weight": 1.0,
+          "df_corpus": 15,
+          "source": "draft"
+        },
+        {
+          "term": "the nees",
+          "weight": 1.0,
+          "df_corpus": 6,
+          "source": "draft"
+        },
+        {
+          "term": "structural systems",
+          "weight": 1.0,
+          "df_corpus": 8,
+          "source": "draft"
+        },
+        {
+          "term": "of structures",
+          "weight": 1.0,
+          "df_corpus": 14,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "26",
+        "legacy_topic_id": 24,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 24,
+            "concentration_score": 4.281,
+            "raw_n_docs": 137
+          },
+          {
+            "topic_id": 20,
+            "concentration_score": 0.676,
+            "raw_n_docs": 25
+          },
+          {
+            "topic_id": 3,
+            "concentration_score": 0.125,
+            "raw_n_docs": 16
+          },
+          {
+            "topic_id": 16,
+            "concentration_score": 0.062,
+            "raw_n_docs": 3
+          },
+          {
+            "topic_id": 0,
+            "concentration_score": 0.03,
+            "raw_n_docs": 8
+          }
+        ],
+        "n_terms": 30
+      }
+    },
+    "27": {
+      "label": "fire, flame, pd",
+      "status": "draft",
+      "parent": "P7",
+      "notes": "AUTO-FLAG: only 3 term(s) in this cluster \u2014 likely PI-idiolect noise rather than a real theme. Verify before accepting; consider moving to dropped_leaves instead.",
+      "keywords": [
+        {
+          "term": "fire",
+          "weight": 1.0,
+          "df_corpus": 13,
+          "source": "draft"
+        },
+        {
+          "term": "flame",
+          "weight": 1.0,
+          "df_corpus": 7,
+          "source": "draft"
+        },
+        {
+          "term": "pd",
+          "weight": 1.0,
+          "df_corpus": 6,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "27",
+        "legacy_topic_id": 13,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 13,
+            "concentration_score": 0.059,
+            "raw_n_docs": 3
+          },
+          {
+            "topic_id": 16,
+            "concentration_score": 0.042,
+            "raw_n_docs": 2
+          },
+          {
+            "topic_id": 0,
+            "concentration_score": 0.004,
+            "raw_n_docs": 1
+          }
+        ],
+        "n_terms": 3
+      }
+    },
+    "28": {
+      "label": "environmental, coastal, environmental science",
+      "status": "draft",
+      "parent": "P7",
+      "notes": "",
+      "keywords": [
+        {
+          "term": "environmental",
+          "weight": 1.0,
+          "df_corpus": 270,
+          "source": "draft"
+        },
+        {
+          "term": "coastal",
+          "weight": 1.0,
+          "df_corpus": 57,
+          "source": "draft"
+        },
+        {
+          "term": "environmental science",
+          "weight": 1.0,
+          "df_corpus": 14,
+          "source": "draft"
+        },
+        {
+          "term": "and environmental",
+          "weight": 1.0,
+          "df_corpus": 83,
+          "source": "draft"
+        },
+        {
+          "term": "river",
+          "weight": 1.0,
+          "df_corpus": 29,
+          "source": "draft"
+        },
+        {
+          "term": "sediment",
+          "weight": 1.0,
+          "df_corpus": 20,
+          "source": "draft"
+        },
+        {
+          "term": "of coastal",
+          "weight": 1.0,
+          "df_corpus": 15,
+          "source": "draft"
+        },
+        {
+          "term": "water",
+          "weight": 1.0,
+          "df_corpus": 133,
+          "source": "draft"
+        },
+        {
+          "term": "land",
+          "weight": 1.0,
+          "df_corpus": 37,
+          "source": "draft"
+        },
+        {
+          "term": "ecology",
+          "weight": 1.0,
+          "df_corpus": 54,
+          "source": "draft"
+        },
+        {
+          "term": "climate",
+          "weight": 1.0,
+          "df_corpus": 77,
+          "source": "draft"
+        },
+        {
+          "term": "and water",
+          "weight": 1.0,
+          "df_corpus": 21,
+          "source": "draft"
+        },
+        {
+          "term": "of environmental",
+          "weight": 1.0,
+          "df_corpus": 56,
+          "source": "draft"
+        },
+        {
+          "term": "in environmental",
+          "weight": 1.0,
+          "df_corpus": 18,
+          "source": "draft"
+        },
+        {
+          "term": "climate change",
+          "weight": 1.0,
+          "df_corpus": 34,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "28",
+        "legacy_topic_id": 4,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 4,
+            "concentration_score": 10.786,
+            "raw_n_docs": 1111
+          },
+          {
+            "topic_id": 13,
+            "concentration_score": 7.706,
+            "raw_n_docs": 393
+          },
+          {
+            "topic_id": 16,
+            "concentration_score": 5.792,
+            "raw_n_docs": 278
+          },
+          {
+            "topic_id": 19,
+            "concentration_score": 0.585,
+            "raw_n_docs": 24
+          },
+          {
+            "topic_id": 24,
+            "concentration_score": 0.344,
+            "raw_n_docs": 11
+          },
+          {
+            "topic_id": 0,
+            "concentration_score": 0.227,
+            "raw_n_docs": 61
+          },
+          {
+            "topic_id": 31,
+            "concentration_score": 0.095,
+            "raw_n_docs": 2
+          },
+          {
+            "topic_id": 30,
+            "concentration_score": 0.095,
+            "raw_n_docs": 2
+          },
+          {
+            "topic_id": 5,
+            "concentration_score": 0.04,
+            "raw_n_docs": 4
+          },
+          {
+            "topic_id": 14,
+            "concentration_score": 0.02,
+            "raw_n_docs": 1
+          }
+        ],
+        "n_terms": 167
+      }
+    },
+    "29": {
+      "label": "and active",
+      "status": "draft",
+      "parent": "P7",
+      "notes": "AUTO-FLAG: only 1 term(s) in this cluster \u2014 likely PI-idiolect noise rather than a real theme. Verify before accepting; consider moving to dropped_leaves instead.",
+      "keywords": [
+        {
+          "term": "and active",
+          "weight": 1.0,
+          "df_corpus": 17,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "29",
+        "legacy_topic_id": 19,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 19,
+            "concentration_score": 0.073,
+            "raw_n_docs": 3
+          }
+        ],
+        "n_terms": 1
+      }
+    },
+    "30": {
+      "label": "nsf, student, opportunities",
+      "status": "draft",
+      "parent": "P8",
+      "notes": "",
+      "keywords": [
+        {
+          "term": "nsf",
+          "weight": 1.0,
+          "df_corpus": 184,
+          "source": "draft"
+        },
+        {
+          "term": "student",
+          "weight": 1.0,
+          "df_corpus": 225,
+          "source": "draft"
+        },
+        {
+          "term": "opportunities",
+          "weight": 1.0,
+          "df_corpus": 288,
+          "source": "draft"
+        },
+        {
+          "term": "faculty",
+          "weight": 1.0,
+          "df_corpus": 181,
+          "source": "draft"
+        },
+        {
+          "term": "institutions",
+          "weight": 1.0,
+          "df_corpus": 180,
+          "source": "draft"
+        },
+        {
+          "term": "universities",
+          "weight": 1.0,
+          "df_corpus": 81,
+          "source": "draft"
+        },
+        {
+          "term": "professional",
+          "weight": 1.0,
+          "df_corpus": 110,
+          "source": "draft"
+        },
+        {
+          "term": "diverse",
+          "weight": 1.0,
+          "df_corpus": 316,
+          "source": "draft"
+        },
+        {
+          "term": "students to",
+          "weight": 1.0,
+          "df_corpus": 150,
+          "source": "draft"
+        },
+        {
+          "term": "college",
+          "weight": 1.0,
+          "df_corpus": 105,
+          "source": "draft"
+        },
+        {
+          "term": "science and",
+          "weight": 1.0,
+          "df_corpus": 268,
+          "source": "draft"
+        },
+        {
+          "term": "university of",
+          "weight": 1.0,
+          "df_corpus": 168,
+          "source": "draft"
+        },
+        {
+          "term": "academic",
+          "weight": 1.0,
+          "df_corpus": 154,
+          "source": "draft"
+        },
+        {
+          "term": "students who",
+          "weight": 1.0,
+          "df_corpus": 55,
+          "source": "draft"
+        },
+        {
+          "term": "national",
+          "weight": 1.0,
+          "df_corpus": 306,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "30",
+        "legacy_topic_id": 10,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 10,
+            "concentration_score": 9.581,
+            "raw_n_docs": 709
+          },
+          {
+            "topic_id": 0,
+            "concentration_score": 5.543,
+            "raw_n_docs": 1491
+          },
+          {
+            "topic_id": 26,
+            "concentration_score": 4.034,
+            "raw_n_docs": 117
+          },
+          {
+            "topic_id": 13,
+            "concentration_score": 0.941,
+            "raw_n_docs": 48
+          },
+          {
+            "topic_id": 2,
+            "concentration_score": 0.876,
+            "raw_n_docs": 113
+          },
+          {
+            "topic_id": 4,
+            "concentration_score": 0.845,
+            "raw_n_docs": 87
+          },
+          {
+            "topic_id": 30,
+            "concentration_score": 0.333,
+            "raw_n_docs": 7
+          },
+          {
+            "topic_id": 11,
+            "concentration_score": 0.069,
+            "raw_n_docs": 4
+          },
+          {
+            "topic_id": 6,
+            "concentration_score": 0.056,
+            "raw_n_docs": 5
+          }
+        ],
+        "n_terms": 141
+      }
+    },
+    "31": {
+      "label": "to attend, conference on, attend",
+      "status": "draft",
+      "parent": "P8",
+      "notes": "",
+      "keywords": [
+        {
+          "term": "to attend",
+          "weight": 1.0,
+          "df_corpus": 35,
+          "source": "draft"
+        },
+        {
+          "term": "conference on",
+          "weight": 1.0,
+          "df_corpus": 48,
+          "source": "draft"
+        },
+        {
+          "term": "attend",
+          "weight": 1.0,
+          "df_corpus": 44,
+          "source": "draft"
+        },
+        {
+          "term": "student travel",
+          "weight": 1.0,
+          "df_corpus": 31,
+          "source": "draft"
+        },
+        {
+          "term": "to present their",
+          "weight": 1.0,
+          "df_corpus": 15,
+          "source": "draft"
+        },
+        {
+          "term": "travel",
+          "weight": 1.0,
+          "df_corpus": 67,
+          "source": "draft"
+        },
+        {
+          "term": "conference the",
+          "weight": 1.0,
+          "df_corpus": 24,
+          "source": "draft"
+        },
+        {
+          "term": "present their",
+          "weight": 1.0,
+          "df_corpus": 26,
+          "source": "draft"
+        },
+        {
+          "term": "the travel",
+          "weight": 1.0,
+          "df_corpus": 17,
+          "source": "draft"
+        },
+        {
+          "term": "international conference on",
+          "weight": 1.0,
+          "df_corpus": 29,
+          "source": "draft"
+        },
+        {
+          "term": "to present",
+          "weight": 1.0,
+          "df_corpus": 40,
+          "source": "draft"
+        },
+        {
+          "term": "students to attend",
+          "weight": 1.0,
+          "df_corpus": 13,
+          "source": "draft"
+        },
+        {
+          "term": "acm",
+          "weight": 1.0,
+          "df_corpus": 19,
+          "source": "draft"
+        },
+        {
+          "term": "travel support for",
+          "weight": 1.0,
+          "df_corpus": 12,
+          "source": "draft"
+        },
+        {
+          "term": "present their work",
+          "weight": 1.0,
+          "df_corpus": 13,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "31",
+        "legacy_topic_id": 26,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 26,
+            "concentration_score": 29.31,
+            "raw_n_docs": 850
+          },
+          {
+            "topic_id": 2,
+            "concentration_score": 0.791,
+            "raw_n_docs": 102
+          },
+          {
+            "topic_id": 0,
+            "concentration_score": 0.42,
+            "raw_n_docs": 113
+          },
+          {
+            "topic_id": 29,
+            "concentration_score": 0.318,
+            "raw_n_docs": 7
+          },
+          {
+            "topic_id": 13,
+            "concentration_score": 0.059,
+            "raw_n_docs": 3
+          },
+          {
+            "topic_id": 7,
+            "concentration_score": 0.046,
+            "raw_n_docs": 4
+          },
+          {
+            "topic_id": 4,
+            "concentration_score": 0.039,
+            "raw_n_docs": 4
+          }
+        ],
+        "n_terms": 133
+      }
+    },
+    "32": {
+      "label": "proximity, minutes",
+      "status": "draft",
+      "parent": "P8",
+      "notes": "AUTO-FLAG: only 2 term(s) in this cluster \u2014 likely PI-idiolect noise rather than a real theme. Verify before accepting; consider moving to dropped_leaves instead.",
+      "keywords": [
+        {
+          "term": "proximity",
+          "weight": 1.0,
+          "df_corpus": 12,
+          "source": "draft"
+        },
+        {
+          "term": "minutes",
+          "weight": 1.0,
+          "df_corpus": 17,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "32",
+        "legacy_topic_id": 10,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 10,
+            "concentration_score": 0.027,
+            "raw_n_docs": 2
+          },
+          {
+            "topic_id": 1,
+            "concentration_score": 0.022,
+            "raw_n_docs": 3
+          }
+        ],
+        "n_terms": 2
+      }
+    },
+    "33": {
+      "label": "will have, that will, with an",
+      "status": "draft",
+      "parent": "P8",
+      "notes": "",
+      "keywords": [
+        {
+          "term": "will have",
+          "weight": 1.0,
+          "df_corpus": 209,
+          "source": "draft"
+        },
+        {
+          "term": "that will",
+          "weight": 1.0,
+          "df_corpus": 391,
+          "source": "draft"
+        },
+        {
+          "term": "with an",
+          "weight": 1.0,
+          "df_corpus": 154,
+          "source": "draft"
+        },
+        {
+          "term": "and a",
+          "weight": 1.0,
+          "df_corpus": 311,
+          "source": "draft"
+        },
+        {
+          "term": "have the",
+          "weight": 1.0,
+          "df_corpus": 114,
+          "source": "draft"
+        },
+        {
+          "term": "environment",
+          "weight": 1.0,
+          "df_corpus": 347,
+          "source": "draft"
+        },
+        {
+          "term": "to a",
+          "weight": 1.0,
+          "df_corpus": 445,
+          "source": "draft"
+        },
+        {
+          "term": "than",
+          "weight": 1.0,
+          "df_corpus": 379,
+          "source": "draft"
+        },
+        {
+          "term": "of an",
+          "weight": 1.0,
+          "df_corpus": 192,
+          "source": "draft"
+        },
+        {
+          "term": "higher",
+          "weight": 1.0,
+          "df_corpus": 157,
+          "source": "draft"
+        }
+      ],
+      "negative_keywords": [],
+      "rejected_terms": [],
+      "provenance": {
+        "source_leaf_id": "33",
+        "legacy_topic_id": 0,
+        "contributing_legacy_topics": [
+          {
+            "topic_id": 0,
+            "concentration_score": 0.777,
+            "raw_n_docs": 209
+          },
+          {
+            "topic_id": 3,
+            "concentration_score": 0.25,
+            "raw_n_docs": 32
+          },
+          {
+            "topic_id": 2,
+            "concentration_score": 0.124,
+            "raw_n_docs": 16
+          }
+        ],
+        "n_terms": 10
+      }
+    }
+  },
+  "dropped_leaves": [
+    {
+      "id": "1",
+      "reason": "candidate for drop: cluster below 5-term floor, not yet reviewed",
+      "n_terms": 2,
+      "top_terms": [
+        "burden on",
+        "should"
+      ]
+    },
+    {
+      "id": "9",
+      "reason": "candidate for drop: cluster below 5-term floor, not yet reviewed",
+      "n_terms": 2,
+      "top_terms": [
+        "of coupled",
+        "scale in"
+      ]
+    },
+    {
+      "id": "14",
+      "reason": "candidate for drop: cluster below 5-term floor, not yet reviewed",
+      "n_terms": 2,
+      "top_terms": [
+        "anomalous",
+        "in such"
+      ]
+    },
+    {
+      "id": "15",
+      "reason": "candidate for drop: cluster below 5-term floor, not yet reviewed",
+      "n_terms": 1,
+      "top_terms": [
+        "tracing"
+      ]
+    },
+    {
+      "id": "22",
+      "reason": "candidate for drop: cluster below 5-term floor, not yet reviewed",
+      "n_terms": 1,
+      "top_terms": [
+        "from low"
+      ]
+    },
+    {
+      "id": "23",
+      "reason": "candidate for drop: cluster below 5-term floor, not yet reviewed",
+      "n_terms": 2,
+      "top_terms": [
+        "alternative",
+        "cas"
+      ]
+    },
+    {
+      "id": "25",
+      "reason": "candidate for drop: cluster below 5-term floor, not yet reviewed",
+      "n_terms": 1,
+      "top_terms": [
+        "yielding"
+      ]
+    },
+    {
+      "id": "27",
+      "reason": "candidate for drop: cluster below 5-term floor, not yet reviewed",
+      "n_terms": 3,
+      "top_terms": [
+        "fire",
+        "flame",
+        "pd"
+      ]
+    },
+    {
+      "id": "29",
+      "reason": "candidate for drop: cluster below 5-term floor, not yet reviewed",
+      "n_terms": 1,
+      "top_terms": [
+        "and active"
+      ]
+    },
+    {
+      "id": "32",
+      "reason": "candidate for drop: cluster below 5-term floor, not yet reviewed",
+      "n_terms": 2,
+      "top_terms": [
+        "proximity",
+        "minutes"
+      ]
+    }
+  ]
+}

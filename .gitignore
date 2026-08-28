@@ -228,6 +228,25 @@ outputs/*
 # prevented that). See docs/TOPIC_MODEL_REFIT_CHECKLIST.md.
 !outputs/topic_labels.json
 
+# Exception: the keyword-mediated topic redesign's Phase 4a curation trail
+# (the topic-model-redo plan; see CLAUDE.md's "Topic modeling — state of
+# play"). topic_keywords.json is the curated single source of truth for the
+# Plan B keyword classifier, same treatment as topic_labels.json above.
+# keyword_topics.draft.json (the pre-curation editing surface) and
+# KEYWORD_REVIEW.md (the human-readable review sheet, src/kw_review_sheet.py)
+# are kept alongside it as the human-facing curation record. The larger
+# upstream discovery/comparison artifacts (kw_candidates.json,
+# kw_vocab_candidates.json, kw_term_groups_planA.json, kw_term_groups_planB.json,
+# kw_stability_planA.json, kw_leaf_assignments_planA.csv) are deliberately
+# NOT included here — regenerable via src/kw_discover.py, src/kw_vocab_discover.py,
+# src/kw_term_groups.py, src/kw_term_cluster.py, src/kw_stability.py, and not
+# worth the repo weight (this project has previously had one large committed
+# file account for 25% of .git's pack size — see CLAUDE.md's structure-refactor
+# note on docs/TopicVizPrototypes/what_we_can_see.html).
+!outputs/topic_keywords.json
+!outputs/keyword_topics.draft.json
+!outputs/KEYWORD_REVIEW.md
+
 # CI-only publish copies of docs/TopicVizPrototypes/ siblings, created by
 # .github/workflows/deploy-notebooks.yml so the prototype pages can fetch()
 # their data on GitHub Pages. The real sources are tracked under
