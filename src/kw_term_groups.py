@@ -49,7 +49,7 @@ from sklearn.metrics import adjusted_rand_score
 
 from src.kw_cluster_utils import cosine_normalize as _cosine_normalize
 from src.kw_cluster_utils import linkage_and_silhouette_sweep as _silhouette_sweep
-from src.kw_harvest import drop_stopword_only_terms, harvest_vectorizer, subsume_terms
+from src.kw_harvest import full_harvest
 from src.model_docs import load_docs_and_embeddings
 
 OUTPUTS = Path(__file__).resolve().parent.parent / "outputs"
@@ -72,12 +72,13 @@ def main() -> None:
 
     # Recompute the SAME deterministic harvest kw_discover.py used, so term
     # strings map back onto the same corpus term-doc matrix without needing
-    # to persist a 2741x35640 sparse matrix to disk.
-    vec, X = harvest_vectorizer(docs)
-    terms, X, _dropped = drop_stopword_only_terms(vec, X)
-    kept_idx, _log = subsume_terms(terms, X)
-    terms = terms[kept_idx]
-    X = X[:, kept_idx]
+    # to persist a 2741x35640 sparse matrix to disk. NOTE: this now includes
+    # the boundary-fragment filter (kw_harvest.full_harvest) — if
+    # outputs/kw_candidates.json was generated before that filter existed,
+    # many of its candidate_terms will show up as "missing from recomputed
+    # vocab" below (harmless — they're dropped) rather than crash. Re-run
+    # kw_discover.py first if you want a fully consistent Plan A artifact.
+    terms, X, _dropped = full_harvest(docs)
     term_to_col = {t: j for j, t in enumerate(terms)}
     Xc = X.tocsc()
 

@@ -32,7 +32,7 @@ import numpy as np
 from bertopic.vectorizers import ClassTfidfTransformer
 from scipy import sparse
 
-from src.kw_harvest import drop_stopword_only_terms, harvest_vectorizer, subsume_terms
+from src.kw_harvest import full_harvest
 from src.topics_bertopic import OUTPUTS, _load_docs_aligned_to_cache, fit
 
 SIZES = [15, 20]
@@ -90,11 +90,7 @@ def main() -> None:
           f"{sum(len(v) for v in primary_leaves.values())} term-slots to score")
 
     docs, ids, embeddings = _load_docs_aligned_to_cache()
-    vec, X = harvest_vectorizer(docs)
-    terms, X, _dropped = drop_stopword_only_terms(vec, X)
-    kept_idx, _log = subsume_terms(terms, X)
-    terms = terms[kept_idx]
-    X = X[:, kept_idx]
+    terms, X, _dropped = full_harvest(docs)
 
     # present[leaf_id][term] = number of fits (out of 6) where `term` appears
     # in the top-N list of whichever cluster maps onto that primary leaf.

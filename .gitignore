@@ -234,8 +234,12 @@ outputs/*
 # Plan B keyword classifier, same treatment as topic_labels.json above.
 # keyword_topics.draft.json (the pre-curation editing surface) and
 # KEYWORD_REVIEW.md (the human-readable review sheet, src/kw_review_sheet.py)
-# are kept alongside it as the human-facing curation record. The larger
-# upstream discovery/comparison artifacts (kw_candidates.json,
+# are kept alongside it as the human-facing curation record.
+# keyword_topics.suggested.json (src/kw_suggest_curation.py) is an assistant
+# first-pass review — proposed labels + accept/reject/review calls per
+# parent/leaf — kept separate from topic_keywords.json so it's clear which
+# file is the human-authored final curation vs. a suggestion to review. The
+# larger upstream discovery/comparison artifacts (kw_candidates.json,
 # kw_vocab_candidates.json, kw_term_groups_planA.json, kw_term_groups_planB.json,
 # kw_stability_planA.json, kw_leaf_assignments_planA.csv) are deliberately
 # NOT included here — regenerable via src/kw_discover.py, src/kw_vocab_discover.py,
@@ -245,6 +249,7 @@ outputs/*
 # note on docs/TopicVizPrototypes/what_we_can_see.html).
 !outputs/topic_keywords.json
 !outputs/keyword_topics.draft.json
+!outputs/keyword_topics.suggested.json
 !outputs/KEYWORD_REVIEW.md
 
 # CI-only publish copies of docs/TopicVizPrototypes/ siblings, created by

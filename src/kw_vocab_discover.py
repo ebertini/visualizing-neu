@@ -3,11 +3,11 @@ kw_vocab_discover.py — PLAN B, Phase 1+2: corpus-wide candidate keyword
 extraction, NO document pre-clustering of any kind.
 
 Shares the exact same vocabulary harvest as Plan A's Phase 2
-(kw_harvest.harvest_vectorizer / drop_stopword_only_terms / subsume_terms — same
-CountVectorizer config, same stopword-only + dedup policy) since the plan
-document specifies both plans use "the same vocabulary policy... applied as
-ONE CountVectorizer over all 2,741 docs at once" — Plan B just never groups
-that harvest by a document partition afterward.
+(kw_harvest.full_harvest — same CountVectorizer config, same stopword-only +
+boundary-fragment + dedup policy) since the plan document specifies both
+plans use "the same vocabulary policy... applied as ONE CountVectorizer over
+all 2,741 docs at once" — Plan B just never groups that harvest by a document
+partition afterward.
 
 SELECTION (fixed after measurement): candidates are ranked by c-TF-IDF
 against the CANONICAL, already-committed BERTopic partition
@@ -44,7 +44,7 @@ from pathlib import Path
 import numpy as np
 
 from src.kw_class_stats import class_ctfidf, load_canonical_partition, max_class_precision
-from src.kw_harvest import drop_stopword_only_terms, harvest_vectorizer, subsume_terms
+from src.kw_harvest import full_harvest
 from src.model_docs import load_docs_and_embeddings
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -67,15 +67,13 @@ def main() -> None:
     print(f"[Plan B] {n} docs / embeddings {embeddings.shape} (no BERTopic import needed)")
 
     print("[Plan B] harvesting corpus-level keyword candidates (same policy as Plan A Phase 2) ...")
-    vec, X = harvest_vectorizer(docs)
-    terms, X, dropped_stop = drop_stopword_only_terms(vec, X)
-    kept_idx, dedup_log = subsume_terms(terms, X)
-    terms = terms[kept_idx]
-    X = X[:, kept_idx]
+    terms, X, dropped = full_harvest(docs)
     Xc = X.tocsc()
     df_corpus = np.diff(Xc.indptr)
     print(f"[Plan B] vocabulary: {len(terms)} terms after stopword-only drop "
-          f"({len(dropped_stop)} dropped) and dedup ({len(dedup_log)} merged/subsumed)")
+          f"({len(dropped['stopword_only'])} dropped), boundary-fragment drop "
+          f"({len(dropped['boundary_polluted'])} dropped), and dedup "
+          f"({len(dropped['dedup_log'])} merged/subsumed)")
 
     # Coverage BEFORE anything else — the number that says this is on track.
     doc_has_term = np.asarray((X > 0).sum(axis=1)).ravel() > 0
@@ -208,8 +206,10 @@ def main() -> None:
         "coverage_full_vocab": coverage_full,
         "coverage_pruned": coverage_pruned,
         "dropped": {
-            "stopword_only_n": len(dropped_stop),
-            "dedup_n": len(dedup_log),
+            "stopword_only_n": len(dropped["stopword_only"]),
+            "boundary_polluted_n": len(dropped["boundary_polluted"]),
+            "boundary_polluted_sample": dropped["boundary_polluted"][:100],
+            "dedup_n": len(dropped["dedup_log"]),
             "pruned_by_rank_sample": dropped_by_pruning,
         },
         "terms": kept_terms,

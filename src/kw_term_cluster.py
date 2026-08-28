@@ -56,7 +56,7 @@ from sklearn.metrics import adjusted_rand_score
 
 from src.kw_class_stats import class_ctfidf, load_canonical_partition
 from src.kw_cluster_utils import cosine_normalize, linkage_and_silhouette_sweep
-from src.kw_harvest import drop_stopword_only_terms, harvest_vectorizer, subsume_terms
+from src.kw_harvest import full_harvest
 from src.model_docs import load_docs_and_embeddings
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -93,11 +93,7 @@ def main() -> None:
 
     # Recompute the SAME deterministic harvest, to map term strings back onto
     # the corpus term-doc matrix without persisting it to disk.
-    vec, X = harvest_vectorizer(docs)
-    terms, X, _dropped = drop_stopword_only_terms(vec, X)
-    kept_idx, _log = subsume_terms(terms, X)
-    terms = terms[kept_idx]
-    X = X[:, kept_idx]
+    terms, X, _dropped = full_harvest(docs)
     term_to_col = {t: j for j, t in enumerate(terms)}
     Xc = X.tocsc()
 

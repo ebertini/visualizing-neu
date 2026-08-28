@@ -1,10 +1,10 @@
 {
   "_meta": {
     "schema_version": 1,
-    "provenance": "draft",
+    "provenance": "suggested",
     "curation": {
-      "status": "draft",
-      "curated_by": "",
+      "status": "suggested",
+      "curated_by": "assistant (unconfirmed \u2014 human must review)",
       "curated_at": ""
     },
     "source_fit": {
@@ -18,9 +18,9 @@
   },
   "parents": {
     "P1": {
-      "label": "biochemical, molecular, in vivo",
-      "status": "draft",
-      "notes": "",
+      "label": "Biomedical Sciences",
+      "status": "suggest_accept",
+      "notes": "Molecular/cellular biology (leaf 3) + neuroscience (leaf 2) form a coherent biomedical parent. Leaf 1 is degenerate noise \u2014 reject it, not the parent.",
       "leaf_ids": [
         "1",
         "2",
@@ -176,9 +176,9 @@
       }
     },
     "P2": {
-      "label": "evidence, age, findings",
-      "status": "draft",
-      "notes": "",
+      "label": "Public & Behavioral Health",
+      "status": "suggest_accept",
+      "notes": "Dominated by leaf 7 (300 terms, clean). 5 of its 6 leaves are degenerate 1-3 term noise clusters \u2014 reject those, keep the parent for leaf 7.",
       "leaf_ids": [
         "4",
         "5",
@@ -337,9 +337,9 @@
       }
     },
     "P3": {
-      "label": "coastal, sediment, coast",
-      "status": "draft",
-      "notes": "",
+      "label": "Coastal & Environmental Ecology",
+      "status": "suggest_accept",
+      "notes": "Leaf 11 is clean and large; leaf 10 is a small incoherent grab-bag (fire/flame mixed with cross-disciplinary/multidisciplinary) \u2014 reject leaf 10, not the parent.",
       "leaf_ids": [
         "10",
         "11"
@@ -494,9 +494,9 @@
       }
     },
     "P4": {
-      "label": "academic, national, institutions",
-      "status": "draft",
-      "notes": "",
+      "label": "Workforce Development, Policy & Broadening Participation",
+      "status": "suggest_accept",
+      "notes": "All 3 leaves (conference travel, social science/policy, faculty diversity/mentoring) are real, distinct, and coherent \u2014 a genuine 'human capital' parent theme.",
       "leaf_ids": [
         "12",
         "13",
@@ -652,9 +652,9 @@
       }
     },
     "P5": {
-      "label": "materials, temperature, thermal",
-      "status": "draft",
-      "notes": "",
+      "label": "Materials Science & Structural/Civil Engineering",
+      "status": "suggest_review",
+      "notes": "Both leaves (materials/nanotech, earthquake/civil engineering) are individually clean and acceptable, but the PARENT pairing is heterogeneous \u2014 they're only embedding-adjacent because both involve physical structures/materials under stress. Consider whether this should stay one parent or whether a future curation round should relabel/split it once more parents are available.",
       "leaf_ids": [
         "15",
         "16"
@@ -809,9 +809,9 @@
       }
     },
     "P6": {
-      "label": "string theory, representation theory, algebraic",
-      "status": "draft",
-      "notes": "",
+      "label": "Algebra, Geometry & Mathematical Physics",
+      "status": "suggest_accept",
+      "notes": "Single clean leaf, no changes needed.",
       "leaf_ids": [
         "17"
       ],
@@ -961,8 +961,8 @@
     },
     "P7": {
       "label": "higher, ap",
-      "status": "draft",
-      "notes": "",
+      "status": "suggest_reject",
+      "notes": "Only leaf is 2 terms ('higher', 'ap') \u2014 no coherent theme, reject the whole parent.",
       "leaf_ids": [
         "18"
       ],
@@ -998,9 +998,9 @@
       }
     },
     "P8": {
-      "label": "solutions, deployment, deployed",
-      "status": "draft",
-      "notes": "",
+      "label": "Computing Systems, Networking & Cybersecurity",
+      "status": "suggest_accept",
+      "notes": "3 of 5 leaves are clean, coherent, and substantial (control/CPS/ML, software/security, wireless networking, detection/sensing \u2014 note detection is actually a 4th accepted leaf). 2 leaves (alternative/cas; and none others) are degenerate \u2014 reject those only.",
       "leaf_ids": [
         "19",
         "20",
@@ -1159,8 +1159,8 @@
     },
     "P9": {
       "label": "timing, disruption, tracing",
-      "status": "draft",
-      "notes": "",
+      "status": "suggest_reject",
+      "notes": "Both leaves are 1-2 term noise ('disruption'/'timing'; 'tracing') \u2014 reject the whole parent.",
       "leaf_ids": [
         "24",
         "25"
@@ -1211,9 +1211,9 @@
   "leaves": {
     "1": {
       "label": "should, radical, precisely",
-      "status": "draft",
+      "status": "suggest_reject",
       "parent": "P1",
-      "notes": "AUTO-FLAG: only 3 term(s) in this cluster \u2014 likely PI-idiolect noise rather than a real theme. Verify before accepting; consider moving to dropped_leaves instead.",
+      "notes": "3 terms ('should','radical','precisely') \u2014 no theme.",
       "keywords": [
         {
           "term": "should",
@@ -1260,10 +1260,10 @@
       }
     },
     "2": {
-      "label": "neurons, neuronal, neural circuits",
-      "status": "draft",
+      "label": "Neuroscience & Neural Circuits",
+      "status": "suggest_accept",
       "parent": "P1",
-      "notes": "",
+      "notes": "Genuinely coherent: neurons, neural circuits, synaptic, optogenetic, c. elegans (model organism) all fit. 'image'/'reconstruction'/'mr' read as neuroimaging-adjacent, consistent with the theme.",
       "keywords": [
         {
           "term": "neurons",
@@ -1402,10 +1402,10 @@
       }
     },
     "3": {
-      "label": "biochemical, molecular, cellular",
-      "status": "draft",
+      "label": "Molecular & Cellular Biomedicine",
+      "status": "suggest_accept",
       "parent": "P1",
-      "notes": "",
+      "notes": "641 terms, dominant biomedical cluster \u2014 clean, no boundary-fragment pollution remaining.",
       "keywords": [
         {
           "term": "biochemical",
@@ -1560,9 +1560,9 @@
     },
     "4": {
       "label": "interpretation, mine",
-      "status": "draft",
+      "status": "suggest_reject",
       "parent": "P2",
-      "notes": "AUTO-FLAG: only 2 term(s) in this cluster \u2014 likely PI-idiolect noise rather than a real theme. Verify before accepting; consider moving to dropped_leaves instead.",
+      "notes": "2 terms ('interpretation','mine') \u2014 no theme.",
       "keywords": [
         {
           "term": "interpretation",
@@ -1599,9 +1599,9 @@
     },
     "5": {
       "label": "become",
-      "status": "draft",
+      "status": "suggest_reject",
       "parent": "P2",
-      "notes": "AUTO-FLAG: only 1 term(s) in this cluster \u2014 likely PI-idiolect noise rather than a real theme. Verify before accepting; consider moving to dropped_leaves instead.",
+      "notes": "1 term ('become') \u2014 tokenization noise, not content.",
       "keywords": [
         {
           "term": "become",
@@ -1627,9 +1627,9 @@
     },
     "6": {
       "label": "growing, favor, yielding",
-      "status": "draft",
+      "status": "suggest_reject",
       "parent": "P2",
-      "notes": "AUTO-FLAG: only 3 term(s) in this cluster \u2014 likely PI-idiolect noise rather than a real theme. Verify before accepting; consider moving to dropped_leaves instead.",
+      "notes": "3 terms ('growing','favor','yielding') \u2014 no theme.",
       "keywords": [
         {
           "term": "growing",
@@ -1671,10 +1671,10 @@
       }
     },
     "7": {
-      "label": "evidence, age, findings",
-      "status": "draft",
+      "label": "Public & Behavioral Health",
+      "status": "suggest_accept",
       "parent": "P2",
-      "notes": "",
+      "notes": "300 terms, matches the original canonical BERTopic label for this theme almost exactly \u2014 high confidence.",
       "keywords": [
         {
           "term": "evidence",
@@ -1829,9 +1829,9 @@
     },
     "8": {
       "label": "proximity, minutes, matching",
-      "status": "draft",
+      "status": "suggest_reject",
       "parent": "P2",
-      "notes": "AUTO-FLAG: only 3 term(s) in this cluster \u2014 likely PI-idiolect noise rather than a real theme. Verify before accepting; consider moving to dropped_leaves instead.",
+      "notes": "3 terms ('proximity','minutes','matching') \u2014 no theme.",
       "keywords": [
         {
           "term": "proximity",
@@ -1879,9 +1879,9 @@
     },
     "9": {
       "label": "ve",
-      "status": "draft",
+      "status": "suggest_reject",
       "parent": "P2",
-      "notes": "AUTO-FLAG: only 1 term(s) in this cluster \u2014 likely PI-idiolect noise rather than a real theme. Verify before accepting; consider moving to dropped_leaves instead.",
+      "notes": "1 term ('ve') \u2014 a tokenization artifact from a contraction (we've/they've), not content. Same family as the possessive-'s' bug fixed in kw_harvest.py, too small-impact (1 term) to warrant another systematic filter pass.",
       "keywords": [
         {
           "term": "ve",
@@ -1907,9 +1907,9 @@
     },
     "10": {
       "label": "environment, cross-disciplinary, flame",
-      "status": "draft",
+      "status": "suggest_review",
       "parent": "P3",
-      "notes": "",
+      "notes": "6 terms, incoherent mix (fire/flame vs. cross-disciplinary/multidisciplinary vs. 'pd' \u2014 ambiguous acronym). Likely reject, but small enough a human should eyeball the actual grants before dropping in case 'fire' hazard research is a real, if thin, theme here.",
       "keywords": [
         {
           "term": "environment",
@@ -1979,10 +1979,10 @@
       }
     },
     "11": {
-      "label": "coastal, sediment, coast",
-      "status": "draft",
+      "label": "Coastal & Environmental Ecology",
+      "status": "suggest_accept",
       "parent": "P3",
-      "notes": "",
+      "notes": "129 terms, clean coastal/ecological/climate vocabulary.",
       "keywords": [
         {
           "term": "coastal",
@@ -2136,10 +2136,10 @@
       }
     },
     "12": {
-      "label": "attend, student travel, travel",
-      "status": "draft",
+      "label": "Conference & Student Travel Awards",
+      "status": "suggest_accept",
       "parent": "P4",
-      "notes": "",
+      "notes": "93 terms, the NSF conference/travel-funding-instrument theme found independently by both Plan A and Plan B during discovery \u2014 a real, distinct funding-mechanism cluster, not noise.",
       "keywords": [
         {
           "term": "attend",
@@ -2268,10 +2268,10 @@
       }
     },
     "13": {
-      "label": "economic, build, organizations",
-      "status": "draft",
+      "label": "Social Science & Public Policy",
+      "status": "suggest_accept",
       "parent": "P4",
-      "notes": "",
+      "notes": "189 terms. Some generic words ('build','best','issues') dilute precision but the core policy/stakeholder/social-science vocabulary is real and coherent.",
       "keywords": [
         {
           "term": "economic",
@@ -2425,10 +2425,10 @@
       }
     },
     "14": {
-      "label": "faculty, professional development, professional",
-      "status": "draft",
+      "label": "Faculty Development, Diversity & Institutional Partnerships",
+      "status": "suggest_accept",
       "parent": "P4",
-      "notes": "",
+      "notes": "172 terms, clean broadening-participation/mentoring vocabulary. One stray term, 'environmental health', looks like an outlier from a specific grant's title rather than this leaf's real theme \u2014 consider rejecting just that one term during your pass.",
       "keywords": [
         {
           "term": "faculty",
@@ -2582,10 +2582,10 @@
       }
     },
     "15": {
-      "label": "steel, earthquake, collapse",
-      "status": "draft",
+      "label": "Civil & Earthquake Engineering",
+      "status": "suggest_accept",
       "parent": "P5",
-      "notes": "",
+      "notes": "46 terms, very clean (NEES/NEESR are legitimate NSF earthquake-engineering program acronyms, not noise).",
       "keywords": [
         {
           "term": "steel",
@@ -2719,10 +2719,10 @@
       }
     },
     "16": {
-      "label": "materials, temperature, optical",
-      "status": "draft",
+      "label": "Materials Science & Nanotechnology",
+      "status": "suggest_accept",
       "parent": "P5",
-      "notes": "",
+      "notes": "132 terms, clean materials/nanotech vocabulary; 'high school'/'outreach' reflect broader-impacts language in these grants, consistent with the theme rather than noise.",
       "keywords": [
         {
           "term": "materials",
@@ -2876,10 +2876,10 @@
       }
     },
     "17": {
-      "label": "string theory, representation theory, algebraic",
-      "status": "draft",
+      "label": "Algebra, Geometry & Mathematical Physics",
+      "status": "suggest_accept",
       "parent": "P6",
-      "notes": "",
+      "notes": "125 terms, very clean pure-math + math-physics vocabulary.",
       "keywords": [
         {
           "term": "string theory",
@@ -3029,9 +3029,9 @@
     },
     "18": {
       "label": "higher, ap",
-      "status": "draft",
+      "status": "suggest_reject",
       "parent": "P7",
-      "notes": "AUTO-FLAG: only 2 term(s) in this cluster \u2014 likely PI-idiolect noise rather than a real theme. Verify before accepting; consider moving to dropped_leaves instead.",
+      "notes": "2 terms ('higher','ap') \u2014 no theme.",
       "keywords": [
         {
           "term": "higher",
@@ -3067,10 +3067,10 @@
       }
     },
     "19": {
-      "label": "robust, framework, tasks",
-      "status": "draft",
+      "label": "Control Systems, Cyber-Physical Systems & Machine Learning",
+      "status": "suggest_accept",
       "parent": "P8",
-      "notes": "",
+      "notes": "114 terms, coherent CPS/control-theory/ML vocabulary.",
       "keywords": [
         {
           "term": "robust",
@@ -3224,10 +3224,10 @@
       }
     },
     "20": {
-      "label": "software, code, project develops",
-      "status": "draft",
+      "label": "Software Systems & Cybersecurity",
+      "status": "suggest_accept",
       "parent": "P8",
-      "notes": "",
+      "notes": "284 terms, coherent. A few residual grant-boilerplate phrases survived the mechanical filters because they don't start/end with a function word ('project develops', 'significance and importance', 'twc' \u2014 an NSF Trustworthy Computing program acronym) \u2014 reject these individually during your pass; they're exactly the class of thing the mechanical filter can't catch.",
       "keywords": [
         {
           "term": "software",
@@ -3381,10 +3381,10 @@
       }
     },
     "21": {
-      "label": "testbed, wireless, deployment",
-      "status": "draft",
+      "label": "Wireless Networking & Embedded Systems",
+      "status": "suggest_accept",
       "parent": "P8",
-      "notes": "",
+      "notes": "211 terms, clean wireless/networking/embedded-systems vocabulary.",
       "keywords": [
         {
           "term": "testbed",
@@ -3539,9 +3539,9 @@
     },
     "22": {
       "label": "alternative, cas",
-      "status": "draft",
+      "status": "suggest_reject",
       "parent": "P8",
-      "notes": "AUTO-FLAG: only 2 term(s) in this cluster \u2014 likely PI-idiolect noise rather than a real theme. Verify before accepting; consider moving to dropped_leaves instead.",
+      "notes": "2 terms ('alternative','cas') \u2014 no theme.",
       "keywords": [
         {
           "term": "alternative",
@@ -3577,10 +3577,10 @@
       }
     },
     "23": {
-      "label": "detect, detection, detecting",
-      "status": "draft",
+      "label": "Detection & Sensing Systems",
+      "status": "suggest_accept",
       "parent": "P8",
-      "notes": "",
+      "notes": "20 terms, coherent detection/sensing/identification vocabulary.",
       "keywords": [
         {
           "term": "detect",
@@ -3735,9 +3735,9 @@
     },
     "24": {
       "label": "disruption, timing",
-      "status": "draft",
+      "status": "suggest_reject",
       "parent": "P9",
-      "notes": "AUTO-FLAG: only 2 term(s) in this cluster \u2014 likely PI-idiolect noise rather than a real theme. Verify before accepting; consider moving to dropped_leaves instead.",
+      "notes": "2 terms ('disruption','timing') \u2014 no theme.",
       "keywords": [
         {
           "term": "disruption",
@@ -3774,9 +3774,9 @@
     },
     "25": {
       "label": "tracing",
-      "status": "draft",
+      "status": "suggest_reject",
       "parent": "P9",
-      "notes": "AUTO-FLAG: only 1 term(s) in this cluster \u2014 likely PI-idiolect noise rather than a real theme. Verify before accepting; consider moving to dropped_leaves instead.",
+      "notes": "1 term ('tracing') \u2014 no theme.",
       "keywords": [
         {
           "term": "tracing",

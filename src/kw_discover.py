@@ -39,7 +39,7 @@ import pandas as pd
 from bertopic.vectorizers import ClassTfidfTransformer
 from scipy import sparse
 
-from src.kw_harvest import drop_stopword_only_terms, harvest_vectorizer, subsume_terms
+from src.kw_harvest import full_harvest
 from src.topics_bertopic import OUTPUTS, PROC, _load_docs_aligned_to_cache, fit
 
 PRIMARY_MCS = 15
@@ -55,13 +55,10 @@ TOP_N_PER_LEAF = 40
 MIN_DF = 5
 MAX_DF = 0.25
 
-# Harvest/dedup logic lives in src/kw_harvest.py (numpy/scipy/sklearn only —
-# no bertopic/umap/hdbscan) so Plan B's kw_vocab_discover.py can reuse the
-# identical vocabulary policy without importing the heavy stack this module
-# needs for its own document-clustering half.
-_harvest_vectorizer = harvest_vectorizer
-_drop_stopword_only_terms = drop_stopword_only_terms
-_subsume = subsume_terms
+# Harvest/dedup/boundary-filter logic lives in src/kw_harvest.py (numpy/scipy/
+# sklearn only — no bertopic/umap/hdbscan) so Plan B's kw_vocab_discover.py
+# can reuse the identical vocabulary policy without importing the heavy stack
+# this module needs for its own document-clustering half.
 
 
 def _leaf_keyword_table(leaf_docs_idx: list[int], terms: np.ndarray, X: sparse.csr_matrix,
@@ -127,14 +124,12 @@ def main() -> None:
 
     # Harvest keyword candidates OUTSIDE BERTopic.
     print("[Plan A] harvesting corpus-level keyword candidates ...")
-    vec, X = _harvest_vectorizer(docs)
-    terms, X, dropped_stop = _drop_stopword_only_terms(vec, X)
-    kept_idx, dedup_log = _subsume(terms, X)
-    terms = terms[kept_idx]
-    X = X[:, kept_idx]
+    terms, X, dropped = full_harvest(docs)
     df_corpus = np.asarray((X > 0).sum(axis=0)).ravel()
     print(f"[Plan A] vocabulary: {len(terms)} terms after stopword-only drop "
-          f"({len(dropped_stop)} dropped) and dedup ({len(dedup_log)} merged/subsumed)")
+          f"({len(dropped['stopword_only'])} dropped), boundary-fragment drop "
+          f"({len(dropped['boundary_polluted'])} dropped), and dedup "
+          f"({len(dropped['dedup_log'])} merged/subsumed)")
 
     # Coverage block FIRST — the number that says whether this is on track.
     doc_has_term = np.asarray((X > 0).sum(axis=1)).ravel() > 0
@@ -223,10 +218,12 @@ def main() -> None:
         },
         "coverage": coverage,
         "dropped": {
-            "stopword_only": dropped_stop[:200],
-            "n_stopword_only_dropped": len(dropped_stop),
-            "dedup_log_sample": dedup_log[:200],
-            "n_dedup_dropped": len(dedup_log),
+            "stopword_only": dropped["stopword_only"][:200],
+            "n_stopword_only_dropped": len(dropped["stopword_only"]),
+            "boundary_polluted_sample": dropped["boundary_polluted"][:200],
+            "n_boundary_polluted_dropped": len(dropped["boundary_polluted"]),
+            "dedup_log_sample": dropped["dedup_log"][:200],
+            "n_dedup_dropped": len(dropped["dedup_log"]),
         },
         "leaves": leaves_out,
     }
