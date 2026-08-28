@@ -21,6 +21,24 @@ This is a real decision, not just a restatement of the Slack message — it reso
 
 "Which student, which prior work" (the person Enrico wants looped in) — no update; still unresolved as far as this record shows.
 
+## What we can see notes - open questions 2026-08-21
+
+* add a very faint grid line for every grant and every pi tab
+* remove the default grey line that goes in empty cells for every grant and every pi tab
+* add dollars earned from grants PI's earned at northeastern University
+* clicking anywhere outside of the option dial should close it
+* filter/remove out certain attributes from the grid display available right now (stretch)
+* academic rank is an interesting example of nested labels - all the teaching professors should be grouped together, associate professors together, and full professors together - which is working correctly in the current grid display but not for coloring (stretch)
+* move the page hosting to its own unique github pages - Enrico will invite me to a project to set this up. 
+* Send Paolo an email - to meet sometime next week - check if he is in Boston and then schedule a meeting accordingly.
+
+* Add PI information in grant tooltip for every grant tab - and grant number is inconsequential to audience
+* Add dollar band to the column/row overview info for quicker reference. 
+* What is the label that states the dollar total for cells (grant buckets)
+* Have entry point questions that set up the options in a certain pattern to answer those questions - potential drivers - have a need suggestion? tab at the top that gives a list of questions that you can select from that will automatically configure the options to help answer those questions.
+* make sort by and color by more intuitive and user-friendly, potentially adding tooltips or explanations for each option - for sort by - size of dollar and size of what - need clarification. 
+* For each grant how many different colleges does it involve?
+
 ## What we can see notes — addressed 2026-08-17
 
 All six items below are implemented in `docs/TopicVizPrototypes/what_we_can_see.html`

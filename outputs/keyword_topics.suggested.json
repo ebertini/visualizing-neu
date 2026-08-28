@@ -1302,12 +1302,6 @@
           "source": "draft"
         },
         {
-          "term": "image",
-          "weight": 1.0,
-          "df_corpus": 66,
-          "source": "draft"
-        },
-        {
           "term": "reconstruction",
           "weight": 1.0,
           "df_corpus": 26,
@@ -1317,12 +1311,6 @@
           "term": "optogenetic",
           "weight": 1.0,
           "df_corpus": 6,
-          "source": "draft"
-        },
-        {
-          "term": "acquired",
-          "weight": 1.0,
-          "df_corpus": 38,
           "source": "draft"
         },
         {
@@ -1357,7 +1345,15 @@
         }
       ],
       "negative_keywords": [],
-      "rejected_terms": [],
+      "rejected_terms": [        
+        {
+          "term": "image",
+          "reason": "not related to the topic neuroscience"
+        },
+        {
+          "term": "acquired",
+          "reason": "not related to the topic neuroscience"
+        }],
       "provenance": {
         "source_leaf_id": "2",
         "legacy_topic_id": 18,
