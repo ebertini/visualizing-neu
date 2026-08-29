@@ -429,6 +429,154 @@ class _BalanceChecker(HTMLParser):
             self.stack.pop()
 
 
+# ---------------------------------------------------------------- parent/palette/caveat consistency
+
+def _extract_string_list(text: str, marker: str) -> list[str]:
+    """Pull the quoted-string VALUES out of a `NAME = [...]`-style array
+    literal (Python or JS, both use the same `"..."` list-of-strings shape).
+    Value-only (not raw text) is deliberate: the two copies this feeds into
+    (src/build_viz_aggregates.py, shared/enrico.js) format the same list with
+    different indentation/line-wrapping, which is fine — only a VALUE
+    mismatch (a missing entry, a reordering, a typo) is a real drift."""
+    i = text.find(marker)
+    if i == -1:
+        return []
+    start = text.index("[", i)
+    end = text.index("]", start)
+    return re.findall(r'"([^"]*)"', text[start:end])
+
+
+def _extract_caveat_ids(build_viz_aggregates_text: str) -> set[str]:
+    """Every `"id": "..."` inside the CAVEATS = [...] list specifically (not
+    the many other `"id"` keys build_viz_aggregates.py's other dicts use) —
+    scoped to the slice between `CAVEATS = [` and the matching top-level `]`
+    ending the CAVEATS list (found via bracket depth, since the list itself
+    contains nested `{...}` dicts and `re.search` alone can't tell where the
+    outer list ends)."""
+    i = build_viz_aggregates_text.find("CAVEATS = [")
+    if i == -1:
+        return set()
+    start = build_viz_aggregates_text.index("[", i)
+    depth = 0
+    end = start
+    for j in range(start, len(build_viz_aggregates_text)):
+        c = build_viz_aggregates_text[j]
+        if c == "[":
+            depth += 1
+        elif c == "]":
+            depth -= 1
+            if depth == 0:
+                end = j
+                break
+    body = build_viz_aggregates_text[start:end]
+    return set(re.findall(r'"id":\s*"([^"]+)"', body))
+
+
+def _extract_caveat_whitelist(text: str) -> list[str]:
+    """Pull the whitelist array out of one `E.renderCaveats(el, VIZ_META.caveats, [...])`
+    call — the 3rd argument, wherever the call appears in the file."""
+    m = re.search(r"renderCaveats\([^,]+,\s*VIZ_META\.caveats\s*,\s*\[([^\]]*)\]\s*\)", text)
+    if not m:
+        return []
+    return re.findall(r'"([^"]+)"', m.group(1))
+
+
+def check_parent_taxonomy(root: Path) -> bool:
+    print("\nparent taxonomy / palette / caveat consistency")
+    all_ok = True
+
+    aggregates_py = REPO_ROOT / "src" / "build_viz_aggregates.py"
+    enrico_js = root / "shared" / "enrico.js"
+    if not aggregates_py.exists() or not enrico_js.exists():
+        warn("skipping parent/palette/caveat checks — build_viz_aggregates.py or shared/enrico.js not found")
+        return True
+
+    py_text = aggregates_py.read_text(encoding="utf-8")
+    js_text = enrico_js.read_text(encoding="utf-8")
+
+    # 1. PARENT_NAMES / PARENT_COLORS must be value-identical between the two
+    # hand-synced copies — this is the exact check that would have caught the
+    # 8->7 parent-count swap silently drifting between the two files.
+    py_names = _extract_string_list(py_text, "PARENT_NAMES = [")
+    js_names = _extract_string_list(js_text, "const PARENT_NAMES = [")
+    if py_names and py_names == js_names:
+        ok(f"PARENT_NAMES value-identical ({len(py_names)} entries) between "
+           "build_viz_aggregates.py and shared/enrico.js")
+    else:
+        fail(f"PARENT_NAMES differ — build_viz_aggregates.py has {py_names}, "
+             f"shared/enrico.js has {js_names}")
+        all_ok = False
+
+    py_colors = _extract_string_list(py_text, "PARENT_COLORS = [")
+    js_colors = _extract_string_list(js_text, "const PARENT_COLORS = [")
+    if py_colors and py_colors == js_colors:
+        ok(f"PARENT_COLORS value-identical ({len(py_colors)} entries)")
+    else:
+        fail(f"PARENT_COLORS differ — build_viz_aggregates.py has {py_colors}, "
+             f"shared/enrico.js has {js_colors}")
+        all_ok = False
+
+    # 2. Palette-capacity: the curated leaf count must not exceed
+    # shared/enrico.js's TOPIC_COLORS length (topicColor() wraps via modulo
+    # rather than crashing, so this degrades to silently-repeated colors, not
+    # an error — worth a loud FAIL here regardless, since it's exactly the
+    # kind of drift nothing else would catch).
+    js_topic_colors = _extract_string_list(js_text, "const TOPIC_COLORS = [")
+    n_topic_colors = len(js_topic_colors)
+    n_leaves = None
+    viz_meta_path = root / "data" / "viz_meta.json"
+    curated_path = REPO_ROOT / "outputs" / "topic_keywords.json"
+    if viz_meta_path.exists():
+        try:
+            n_leaves = json.loads(viz_meta_path.read_text(encoding="utf-8"))["frozen_inputs"]["n_topics"]
+        except (json.JSONDecodeError, KeyError):
+            pass
+    if n_leaves is None and curated_path.exists():
+        try:
+            n_leaves = len(json.loads(curated_path.read_text(encoding="utf-8")).get("leaves", {}))
+        except json.JSONDecodeError:
+            pass
+    if n_leaves is None:
+        warn("palette-capacity check skipped — neither data/viz_meta.json nor "
+             "outputs/topic_keywords.json is available to read the leaf count from")
+    elif n_leaves > n_topic_colors:
+        fail(f"{n_leaves} curated leaves exceeds shared/enrico.js's TOPIC_COLORS "
+             f"capacity ({n_topic_colors}) — leaf colors will start silently repeating")
+        all_ok = False
+    else:
+        ok(f"leaf count ({n_leaves}) within TOPIC_COLORS capacity ({n_topic_colors})")
+
+    # 3. Every caveat id a page's renderCaveats() whitelist references must
+    # actually exist in CAVEATS — the exact mechanical check that would have
+    # caught a rename (e.g. t14_artifact -> placeholder_titles) landing in
+    # one file but not the other, instead of relying on "same commit" discipline.
+    caveat_ids = _extract_caveat_ids(py_text)
+    if not caveat_ids:
+        warn("could not find/parse CAVEATS in build_viz_aggregates.py — skipping whitelist cross-check")
+        return all_ok
+
+    whitelist_sources = [
+        ("topic_flow.html", root / "topic_flow.html"),
+        ("what_we_can_see/missing.js", root / "what_we_can_see" / "missing.js"),
+    ]
+    for label, path in whitelist_sources:
+        if not path.exists():
+            continue
+        whitelist = _extract_caveat_whitelist(path.read_text(encoding="utf-8"))
+        if not whitelist:
+            warn(f"{label}: no renderCaveats(...) whitelist found (page may render all caveats directly)")
+            continue
+        unknown = [cid for cid in whitelist if cid not in caveat_ids]
+        if unknown:
+            fail(f"{label}: renderCaveats() whitelist references unknown caveat id(s) {unknown} "
+                 "— not present in build_viz_aggregates.py's CAVEATS")
+            all_ok = False
+        else:
+            ok(f"{label}: all {len(whitelist)} whitelisted caveat ids exist in CAVEATS")
+
+    return all_ok
+
+
 def check_html(root: Path) -> bool:
     print("\nHTML structural checks")
     all_ok = True
@@ -477,6 +625,7 @@ def main() -> None:
 
     root = args.root.resolve()
     all_ok = check_datasets(root)
+    all_ok &= check_parent_taxonomy(root)
 
     if not args.data_only:
         all_ok &= check_html(root)

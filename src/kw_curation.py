@@ -18,7 +18,7 @@ Fails (exit 1) on:
   - a non-empty `rejected_terms` entry with no `reason`
 
 Warns (exit 0) on:
-  - accepted parent count != 8 (names the files to sync, see §7 of the review sheet)
+  - accepted parent count != 7 (names the files to sync, see §7 of the review sheet)
   - accepted parent count > 12 (palette headroom exhausted)
   - a term appearing in >1 accepted group (allowed, reported)
 """
@@ -33,7 +33,8 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 OUTPUTS = REPO_ROOT / "outputs"
 CURATED_PATH = OUTPUTS / "topic_keywords.json"
 
-EXPECTED_PARENT_COUNT = 8
+EXPECTED_PARENT_COUNT = 7  # accepted 2026-08-29: P7/P9 were genuine noise (no
+# coherent theme, not a structural loss), not manufactured back up to 8.
 PARENT_COUNT_WARN_ABOVE = 12
 
 
@@ -54,6 +55,44 @@ def check(data: dict) -> tuple[list[str], list[str]]:
     if not accepted_leaves:
         errors.append("no leaves have been moved off 'draft' status — nothing has been curated.")
 
+    # A "rejected" status alone does NOT exclude a leaf/parent from validation
+    # or downstream consumption — `accepted_*` above only excludes literal
+    # "draft". A leaf/parent meant to be dropped must be DELETED from
+    # leaves{}/parents{} (and, for leaves, recorded in dropped_leaves[]
+    # instead) — marking status="rejected" while leaving the entry in place
+    # is a real, silent mistake, not a valid alternative formatting.
+    for lid, leaf in accepted_leaves.items():
+        if "reject" in str(leaf.get("status", "")).lower():
+            errors.append(f"leaf {lid}: status is '{leaf['status']}' but the entry is still "
+                           "present in leaves{} — a 'rejected' status does not exclude it from "
+                           "validation or downstream use. DELETE this leaf from leaves{} and "
+                           "record it in dropped_leaves[] instead.")
+    for pid, parent in accepted_parents.items():
+        if "reject" in str(parent.get("status", "")).lower():
+            errors.append(f"parent {pid}: status is '{parent['status']}' but the entry is still "
+                           "present in parents{} — a 'rejected' status does not exclude it. "
+                           "DELETE this parent from parents{} instead (and remove it from any "
+                           "leaf's 'parent' field).")
+
+    dropped_ids = {str(d.get("id")) for d in data.get("dropped_leaves", [])}
+    contradictory = dropped_ids & set(accepted_leaves.keys())
+    if contradictory:
+        errors.append(f"leaf id(s) {sorted(contradictory)} appear in BOTH leaves{{}} (non-draft) "
+                       "AND dropped_leaves[] — pick one. If it's dropped, delete it from leaves{}; "
+                       "if it's kept, remove it from dropped_leaves[].")
+
+    dropped_parent_ids = {str(d.get("id")) for d in data.get("dropped_parents", [])}
+    contradictory_p = dropped_parent_ids & set(accepted_parents.keys())
+    if contradictory_p:
+        errors.append(f"parent id(s) {sorted(contradictory_p)} appear in BOTH parents{{}} "
+                       "(non-draft) AND dropped_parents[] — pick one.")
+    for pid in dropped_parent_ids:
+        referencing = [lid for lid, leaf in accepted_leaves.items() if leaf.get("parent") == pid]
+        if referencing:
+            errors.append(f"parent {pid} is recorded in dropped_parents[] but is still referenced "
+                           f"as 'parent' by accepted leaf(s) {referencing} — reject/reassign those "
+                           "leaves first, a parent can't be dropped while leaves still point to it.")
+
     # Dense leaf-id space check (over ACCEPTED leaves only — downstream
     # indexing needs a contiguous range(n) once curation drops/merges leaves).
     try:
@@ -70,6 +109,10 @@ def check(data: dict) -> tuple[list[str], list[str]]:
         parent_id = leaf.get("parent")
         if parent_id is not None and parent_id not in parents:
             errors.append(f"leaf {lid}: parent '{parent_id}' does not exist in parents{{}}.")
+        elif parent_id is not None and lid not in parents[parent_id].get("leaf_ids", []):
+            errors.append(f"leaf {lid}: says parent='{parent_id}', but {parent_id}.leaf_ids does "
+                           f"not list '{lid}' back — the reference is one-directional. Add '{lid}' "
+                           f"to {parent_id}'s leaf_ids (or fix whichever side is stale).")
         if not leaf.get("notes", "").strip():
             errors.append(f"leaf {lid}: accepted but 'notes' is empty — the transparency "
                            "requirement needs a reason recorded for every accepted group.")
@@ -91,6 +134,15 @@ def check(data: dict) -> tuple[list[str], list[str]]:
     for pid, parent in accepted_parents.items():
         if not parent.get("notes", "").strip():
             errors.append(f"parent {pid}: accepted but 'notes' is empty.")
+        for child_lid in parent.get("leaf_ids", []):
+            if child_lid not in accepted_leaves:
+                errors.append(f"parent {pid}: leaf_ids lists '{child_lid}', but that leaf is not "
+                               "an accepted entry in leaves{} (missing, or still draft/rejected) — "
+                               f"remove '{child_lid}' from {pid}.leaf_ids.")
+            elif accepted_leaves[child_lid].get("parent") != pid:
+                errors.append(f"parent {pid}: leaf_ids lists '{child_lid}', but that leaf's own "
+                               f"'parent' field says '{accepted_leaves[child_lid].get('parent')}' — "
+                               "the reference disagrees in the other direction.")
         for kw in parent.get("keywords", []):
             df = kw.get("df_corpus")
             if df is None or df == 0:

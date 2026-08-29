@@ -114,8 +114,8 @@
     </section>
 
     <section id="smallwrap">
-      <h2>The 32 leaf topics</h2>
-      <div class="sub2">Free y-axis per cell (peak labeled) — a 32-band stack is unreadable, 32 sparklines are fine. Dashed border = flagged artifact bucket.</div>
+      <h2 id="smallwrapHeading">The leaf topics</h2>
+      <div class="sub2" id="smallwrapSub">Free y-axis per cell (peak labeled) — a many-band stack is unreadable, sparklines are fine.</div>
       <div id="smallmults"></div>
     </section>
   </main>
@@ -145,6 +145,12 @@ const bandName  = k => E.parentName(+k);
 
 const years = TOPIC_TIME.years;                 // 2005..2025
 document.getElementById("count").textContent = VIZ_META.frozen_inputs.n_points.toLocaleString();
+{
+  const nTopics = VIZ_META.frozen_inputs.n_topics;
+  document.getElementById("smallwrapHeading").textContent = `The ${nTopics} leaf topics`;
+  document.getElementById("smallwrapSub").textContent =
+    `Free y-axis per cell (peak labeled) — a ${nTopics}-band stack is unreadable, ${nTopics} sparklines are fine.`;
+}
 
 /* corpus-wide abstract coverage per year, derived from topic_time's
    title_only breakdown (sum across all 9 parent buckets) — no separate
@@ -433,7 +439,7 @@ E.setupSegmented({
 });
 E.setupDock({dock:document.getElementById("dock"),fold:document.getElementById("fold"),opener:document.getElementById("opener")});
 E.renderCaveats(document.getElementById("caveats"), VIZ_META.caveats,
-  ["neu_status","nih_cliff","unassigned","t14_artifact","sparse_prelude","partial_recent"]);
+  ["neu_status","nih_cliff","unassigned","placeholder_titles","keyword_classifier","sparse_prelude","partial_recent"]);
 
 buildLegend();
 buildSmallMultiples();

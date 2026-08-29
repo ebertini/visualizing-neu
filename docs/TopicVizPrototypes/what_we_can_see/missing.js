@@ -65,13 +65,27 @@ function renderCoverageByYear(){
 }
 
 // The mosaic panel that used to hold this finding as a two-column stacked
-// chart is gone — the finding itself (this is the reassuring one: losing
-// the abstract barely moves the unassigned rate) survives as one line.
+// chart is gone — the finding itself survives as one line. Reads the
+// classifier's own confidence_by_text block (not the old crosstab, which
+// only ever asked "assigned vs not" — the classifier assigns nearly
+// everything, so that question stopped being the interesting one). States
+// whatever the numbers actually show — under the curated keyword classifier
+// this is NOT the same reassuring "titles carry most of the signal" claim
+// BERTopic supported; a real gap here is a genuine, currently-uncalibrated
+// limitation (see the "low_confidence" / "keyword_classifier" caveats), not
+// something to soften.
 function mosaicFindingText(){
-  const ct = COVERAGE.crosstab;
-  const absRate = ct.abs_unassigned / (ct.abs_assigned + ct.abs_unassigned);
-  const titleRate = ct.title_unassigned / (ct.title_assigned + ct.title_unassigned);
-  return `Unassigned rate: ${E.fmtPct(absRate)} with an abstract vs ${E.fmtPct(titleRate)} title-only — titles carry most of the signal.`;
+  const cb = COVERAGE.confidence_by_text;
+  if (!cb) return "Confidence-by-text breakdown unavailable.";
+  const lowNoneRate = (blk) => blk && blk.n ? (blk.low + blk.none) / blk.n : null;
+  const absRate = lowNoneRate(cb.abs);
+  const titleRate = lowNoneRate(cb.title);
+  if (absRate === null || titleRate === null) return "Confidence-by-text breakdown unavailable.";
+  const gapPp = Math.abs(titleRate - absRate) * 100;
+  const verdict = gapPp <= 10
+    ? "close enough that text availability isn't driving confidence"
+    : "a real gap — text availability still moves classifier confidence more than it should";
+  return `Low/no-confidence rate: ${E.fmtPct(absRate)} with an abstract vs ${E.fmtPct(titleRate)} title-only (${verdict}).`;
 }
 
 /* ---------- NIH vs NSF coverage line, 2005-2025 (kept from the
@@ -329,7 +343,7 @@ function renderFunnel(){
 // the module comment above.
 export function initMissingTab(){
   document.getElementById("mosaicFinding").textContent = mosaicFindingText();
-  E.renderCaveats(document.getElementById("coverageCaveats"), VIZ_META.caveats, ["nih_cliff", "unassigned", "t14_artifact"]);
+  E.renderCaveats(document.getElementById("coverageCaveats"), VIZ_META.caveats, ["nih_cliff", "unassigned", "placeholder_titles", "keyword_classifier", "low_confidence"]);
 
   updateMissingSub();
   E.setupSegmented({

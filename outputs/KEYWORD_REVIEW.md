@@ -1,4 +1,4 @@
-# Keyword-Topic Review Sheet (source: draft)
+# Keyword-Topic Review Sheet (source: curated)
 
 
 ## 0. Commands + time estimate
@@ -84,92 +84,142 @@ Sorted so terms sitting inside a large (>=50-term, likely-accepted) leaf come fi
 
 — review these; everything else can be skimmed —
 
-- `researchers` — low precision (0.25); high df (484) — in: leaf 13 (189 terms)
-- `fundamental` — low precision (0.2362); high df (453) — in: leaf 16 (132 terms)
-- `materials` — high df (353) — in: leaf 16 (132 terms)
-- `outreach` — low precision (0.243); high df (321) — in: leaf 16 (132 terms)
-- `social` — low precision (0.2866); high df (321) — in: leaf 13 (189 terms)
-- `diverse` — low precision (0.2437); high df (316) — in: leaf 14 (172 terms)
-- `framework` — low precision (0.273); high df (315) — in: leaf 19 (114 terms)
-- `cell` — low precision (0.3137); high df (306) — in: leaf 3 (641 terms)
-- `algorithms` — low precision (0.3115); high df (305) — in: leaf 19 (114 terms)
-- `molecular` — low precision (0.3108); high df (296) — in: leaf 3 (641 terms)
-- `software` — low precision (0.2576); high df (295) — in: leaf 20 (284 terms)
-- `highly` — low precision (0.2572); high df (276) — in: leaf 16 (132 terms)
-- `environmental` — low precision (0.2074); high df (270) — in: leaf 11 (129 terms)
-- `factors` — low precision (0.2638); high df (254) — in: leaf 7 (300 terms)
-- `build` — low precision (0.251); high df (251) — in: leaf 13 (189 terms)
-- `life` — low precision (0.2438); high df (242) — in: leaf 7 (300 terms)
-- `building` — low precision (0.3195); high df (241) — in: leaf 13 (189 terms)
-- `security` — low precision (0.3288); high df (219) — in: leaf 20 (284 terms)
-- `examine` — low precision (0.1806); high df (216) — in: leaf 7 (300 terms)
-- `findings` — low precision (0.2105); high df (209) — in: leaf 7 (300 terms)
-- `issues` — low precision (0.2885); high df (208) — in: leaf 13 (189 terms)
-- `whether` — low precision (0.1942); high df (206) — in: leaf 7 (300 terms)
-- `career` — low precision (0.2); high df (205) — in: leaf 14 (172 terms)
-- `power` — low precision (0.2414); high df (203) — in: leaf 21 (211 terms)
-- `robust` — low precision (0.2525); high df (202) — in: leaf 19 (114 terms)
-- `society` — low precision (0.2871); high df (202) — in: leaf 13 (189 terms)
-- `needs` — low precision (0.2714); high df (199) — in: leaf 13 (189 terms)
-- `population` — low precision (0.2576); high df (198) — in: leaf 7 (300 terms)
-- `cellular` — low precision (0.2708); high df (192) — in: leaf 3 (641 terms)
-- `proteins` — high df (183) — in: leaf 3 (641 terms)
-- `faculty` — low precision (0.2818); high df (181) — in: leaf 14 (172 terms)
-- `high school` — low precision (0.2597); high df (181) — in: leaf 16 (132 terms)
-- `institutions` — low precision (0.2222); high df (180) — in: leaf 14 (172 terms)
-- `tasks` — low precision (0.3218); high df (174) — in: leaf 19 (114 terms)
-- `behavioral` — low precision (0.2738); high df (168) — in: leaf 7 (300 terms)
-- `in vivo` — low precision (0.2848); high df (165) — in: leaf 3 (641 terms)
-- `best` — low precision (0.2532); high df (158) — in: leaf 13 (189 terms)
-- `academic` — low precision (0.2532); high df (154) — in: leaf 14 (172 terms)
-- `therapeutic` — low precision (0.2697); high df (152) — in: leaf 3 (641 terms)
-- `economic` — low precision (0.2533) — in: leaf 13 (189 terms)
-- `interventions` — low precision (0.2819) — in: leaf 7 (300 terms)
-- `members` — low precision (0.2517) — in: leaf 14 (172 terms)
-- `evidence` — low precision (0.2553) — in: leaf 7 (300 terms)
-- `conference` — low precision (0.1929) — in: leaf 12 (93 terms)
-- `surface` — low precision (0.2878) — in: leaf 16 (132 terms)
-- `in vitro` — low precision (0.2464) — in: leaf 3 (641 terms)
-- `policy` — low precision (0.2713) — in: leaf 13 (189 terms)
-- `scalable` — low precision (0.3023) — in: leaf 20 (284 terms)
-- `differences` — low precision (0.216) — in: leaf 7 (300 terms)
-- `signaling` — low precision (0.2114) — in: leaf 3 (641 terms)
-- `professional` — low precision (0.2545) — in: leaf 14 (172 terms)
-- `optical` — low precision (0.3178) — in: leaf 16 (132 terms)
-- `college` — low precision (0.2857) — in: leaf 14 (172 terms)
-- `age` — low precision (0.24) — in: leaf 7 (300 terms)
-- `expression` — low precision (0.2784) — in: leaf 3 (641 terms)
-- `binding` — low precision (0.3125) — in: leaf 3 (641 terms)
-- `deployment` — low precision (0.2021) — in: leaf 21 (211 terms)
-- `organizations` — low precision (0.2418) — in: leaf 13 (189 terms)
-- `adults` — low precision (0.3444) — in: leaf 7 (300 terms)
-- `secure` — low precision (0.2667) — in: leaf 20 (284 terms)
-- `stakeholders` — low precision (0.2874) — in: leaf 13 (189 terms)
-- `code` — low precision (0.3452) — in: leaf 20 (284 terms)
-- `climate` — low precision (0.3377) — in: leaf 11 (129 terms)
-- `partnership` — low precision (0.25) — in: leaf 14 (172 terms)
-- `operating` — low precision (0.2329) — in: leaf 21 (211 terms)
-- `urban` — low precision (0.2877) — in: leaf 13 (189 terms)
-- `open-source` — low precision (0.3056) — in: leaf 20 (284 terms)
-- `uncertainty` — low precision (0.3194) — in: leaf 19 (114 terms)
-- `inference` — low precision (0.2985) — in: leaf 19 (114 terms)
-- `travel` — low precision (0.3433) — in: leaf 12 (93 terms)
-- `attacks` — low precision (0.3125) — in: leaf 20 (284 terms)
-- `leadership` — low precision (0.2881) — in: leaf 14 (172 terms)
-- `professional development` — low precision (0.2778) — in: leaf 14 (172 terms)
-- `recruitment` — low precision (0.2308) — in: leaf 14 (172 terms)
-- `inhibition` — low precision (0.22) — in: leaf 3 (641 terms)
-- `mental` — low precision (0.2667) — in: leaf 7 (300 terms)
-- `acid` — low precision (0.2955) — in: leaf 3 (641 terms)
-- `mentor` — low precision (0.2821) — in: leaf 14 (172 terms)
-- `social science` — low precision (0.2353) — in: leaf 13 (189 terms)
-- `power consumption` — low precision (0.3438) — in: leaf 21 (211 terms)
-- `bayesian` — low precision (0.3214) — in: leaf 19 (114 terms)
-- `sensor networks` — low precision (0.2963) — in: leaf 21 (211 terms)
-- `probabilistic` — low precision (0.2308) — in: leaf 19 (114 terms)
-- `open-source software` — low precision (0.2609) — in: leaf 20 (284 terms)
-- `venue` — low precision (0.2941) — in: leaf 12 (93 terms)
-- `computer systems` — low precision (0.25) — in: leaf 20 (284 terms)
+- `researchers` — low precision (0.25); high df (484) — in: leaf 12 (189 terms)
+- `public` — low precision (0.2794); high df (451) — in: leaf 12 (189 terms)
+- `materials` — high df (353) — in: leaf 17 (132 terms)
+- `social` — low precision (0.2866); high df (321) — in: leaf 12 (189 terms)
+- `diverse` — low precision (0.2437); high df (316) — in: leaf 13 (172 terms)
+- `cell` — low precision (0.3137); high df (306) — in: leaf 1 (641 terms)
+- `algorithms` — low precision (0.3115); high df (305) — in: leaf 21 (114 terms)
+- `molecular` — low precision (0.3108); high df (296) — in: leaf 1 (641 terms)
+- `software` — low precision (0.2576); high df (295) — in: leaf 22 (284 terms)
+- `energy` — low precision (0.3034); high df (267) — in: leaf 17 (132 terms)
+- `stem` — low precision (0.278); high df (223) — in: leaf 13 (172 terms)
+- `management` — low precision (0.2627); high df (217) — in: leaf 12 (189 terms)
+- `clinical` — low precision (0.2972); high df (212) — in: leaf 3 (300 terms)
+- `career` — low precision (0.2); high df (205) — in: leaf 13 (172 terms)
+- `society` — low precision (0.2871); high df (202) — in: leaf 12 (189 terms)
+- `needs` — low precision (0.2714); high df (199) — in: leaf 12 (189 terms)
+- `risk` — low precision (0.2475); high df (198) — in: leaf 3 (300 terms)
+- `cellular` — low precision (0.2708); high df (192) — in: leaf 1 (641 terms)
+- `imaging` — low precision (0.2593); high df (189) — in: leaf 1 (641 terms)
+- `proteins` — high df (183) — in: leaf 1 (641 terms)
+- `machine learning` — low precision (0.3022); high df (182) — in: leaf 21 (114 terms)
+- `faculty` — low precision (0.2818); high df (181) — in: leaf 13 (172 terms)
+- `institutions` — low precision (0.2222); high df (180) — in: leaf 13 (172 terms)
+- `in vivo` — low precision (0.2848); high df (165) — in: leaf 1 (641 terms)
+- `women` — low precision (0.2236); high df (161) — in: leaf 13 (172 terms)
+- `patients` — low precision (0.2803); high df (157) — in: leaf 3 (300 terms)
+- `therapeutic` — low precision (0.2697); high df (152) — in: leaf 1 (641 terms)
+- `economic` — low precision (0.2533) — in: leaf 12 (189 terms)
+- `optimization` — low precision (0.2808) — in: leaf 21 (114 terms)
+- `public health` — low precision (0.2727) — in: leaf 3 (300 terms)
+- `conference` — low precision (0.1929) — in: leaf 11 (93 terms)
+- `diversity` — low precision (0.2571) — in: leaf 13 (172 terms)
+- `in vitro` — low precision (0.2464) — in: leaf 1 (641 terms)
+- `characterization` — low precision (0.2721) — in: leaf 1 (641 terms)
+- `policy` — low precision (0.2713) — in: leaf 12 (189 terms)
+- `biomedical` — low precision (0.3095) — in: leaf 1 (641 terms)
+- `signaling` — low precision (0.2114) — in: leaf 1 (641 terms)
+- `mentoring` — low precision (0.1653) — in: leaf 13 (172 terms)
+- `exposure` — low precision (0.3478) — in: leaf 6 (129 terms)
+- `networking` — low precision (0.2566) — in: leaf 23 (164 terms)
+- `mobile` — low precision (0.2545) — in: leaf 23 (164 terms)
+- `professional` — low precision (0.2545) — in: leaf 13 (172 terms)
+- `minority` — low precision (0.1667) — in: leaf 13 (172 terms)
+- `optical` — low precision (0.3178) — in: leaf 1 (641 terms)
+- `college` — low precision (0.2857) — in: leaf 13 (172 terms)
+- `sensitivity` — low precision (0.2745) — in: leaf 1 (641 terms)
+- `resolution` — low precision (0.2772) — in: leaf 1 (641 terms)
+- `expression` — low precision (0.2784) — in: leaf 1 (641 terms)
+- `spectrum` — low precision (0.3158) — in: leaf 23 (164 terms)
+- `stress` — low precision (0.2581) — in: leaf 3 (300 terms)
+- `organizations` — low precision (0.2418) — in: leaf 12 (189 terms)
+- `programming` — low precision (0.3034) — in: leaf 22 (284 terms)
+- `stakeholders` — low precision (0.2874) — in: leaf 12 (189 terms)
+- `code` — low precision (0.3452) — in: leaf 22 (284 terms)
+- `formal` — low precision (0.3452) — in: leaf 22 (284 terms)
+- `electrical` — low precision (0.3293) — in: leaf 17 (132 terms)
+- `universities` — low precision (0.2222) — in: leaf 13 (172 terms)
+- `partnership` — low precision (0.25) — in: leaf 13 (172 terms)
+- `urban` — low precision (0.2877) — in: leaf 12 (189 terms)
+- `open-source` — low precision (0.3056) — in: leaf 22 (284 terms)
+- `uncertainty` — low precision (0.3194) — in: leaf 21 (114 terms)
+- `chronic` — low precision (0.2676) — in: leaf 3 (300 terms)
+- `connectivity` — low precision (0.2609) — in: leaf 23 (164 terms)
+- `microscopy` — low precision (0.2754) — in: leaf 1 (641 terms)
+- `contrast` — low precision (0.2353) — in: leaf 1 (641 terms)
+- `inference` — low precision (0.2985) — in: leaf 21 (114 terms)
+- `travel` — low precision (0.3433) — in: leaf 11 (93 terms)
+- `channel` — low precision (0.303) — in: leaf 23 (164 terms)
+- `research experiences` — low precision (0.2769) — in: leaf 13 (172 terms)
+- `status` — low precision (0.2769) — in: leaf 3 (300 terms)
+- `transmission` — low precision (0.2615) — in: leaf 23 (164 terms)
+- `agencies` — low precision (0.2951) — in: leaf 12 (189 terms)
+- `law` — low precision (0.2333) — in: leaf 12 (189 terms)
+- `stem education` — low precision (0.3167) — in: leaf 13 (172 terms)
+- `leadership` — low precision (0.2881) — in: leaf 13 (172 terms)
+- `layer` — low precision (0.2281) — in: leaf 23 (164 terms)
+- `differential` — low precision (0.2679) — in: leaf 18 (125 terms)
+- `mobility` — low precision (0.2364) — in: leaf 23 (164 terms)
+- `classification` — low precision (0.1481) — in: leaf 21 (114 terms)
+- `professional development` — low precision (0.2778) — in: leaf 13 (172 terms)
+- `recruitment` — low precision (0.2308) — in: leaf 13 (172 terms)
+- `scholars` — low precision (0.25) — in: leaf 13 (172 terms)
+- `female` — low precision (0.28) — in: leaf 13 (172 terms)
+- `inhibition` — low precision (0.22) — in: leaf 1 (641 terms)
+- `burden` — low precision (0.2653) — in: leaf 3 (300 terms)
+- `deep learning` — low precision (0.3061) — in: leaf 21 (114 terms)
+- `stochastic` — low precision (0.1875) — in: leaf 21 (114 terms)
+- `errors` — low precision (0.2766) — in: leaf 22 (284 terms)
+- `black` — low precision (0.3043) — in: leaf 13 (172 terms)
+- `acid` — low precision (0.2955) — in: leaf 1 (641 terms)
+- `bandwidth` — low precision (0.3182) — in: leaf 23 (164 terms)
+- `death` — low precision (0.2727) — in: leaf 3 (300 terms)
+- `nodes` — low precision (0.2273) — in: leaf 23 (164 terms)
+- `neural networks` — low precision (0.3023) — in: leaf 21 (114 terms)
+- `demonstration` — low precision (0.3095) — in: leaf 17 (132 terms)
+- `doctoral` — low precision (0.2381) — in: leaf 13 (172 terms)
+- `retention` — low precision (0.2857) — in: leaf 13 (172 terms)
+- `networked` — low precision (0.25) — in: leaf 23 (164 terms)
+- `mentor` — low precision (0.2821) — in: leaf 13 (172 terms)
+- `trainees` — low precision (0.3077) — in: leaf 13 (172 terms)
+- `experimentation` — low precision (0.2432) — in: leaf 23 (164 terms)
+- `static` — low precision (0.3243) — in: leaf 22 (284 terms)
+- `high-level` — low precision (0.3056) — in: leaf 22 (284 terms)
+- `acute` — low precision (0.3235) — in: leaf 3 (300 terms)
+- `allocation` — low precision (0.2353) — in: leaf 23 (164 terms)
+- `social science` — low precision (0.2353) — in: leaf 12 (189 terms)
+- `dynamical systems` — low precision (0.303) — in: leaf 21 (114 terms)
+- `graduate education` — low precision (0.2727) — in: leaf 13 (172 terms)
+- `gender` — low precision (0.2188) — in: leaf 13 (172 terms)
+- `mobile devices` — low precision (0.3103) — in: leaf 23 (164 terms)
+- `bayesian` — low precision (0.3214) — in: leaf 21 (114 terms)
+- `iron` — low precision (0.3333) — in: leaf 1 (641 terms)
+- `youth` — low precision (0.2963) — in: leaf 12 (189 terms)
+- `absorption` — low precision (0.3077) — in: leaf 1 (641 terms)
+- `labor` — low precision (0.3077) — in: leaf 12 (189 terms)
+- `probabilistic` — low precision (0.2308) — in: leaf 21 (114 terms)
+- `cns` — low precision (0.24) — in: leaf 23 (164 terms)
+- `multi-scale` — low precision (0.28) — in: leaf 17 (132 terms)
+- `restoration` — low precision (0.32) — in: leaf 6 (129 terms)
+- `open-source software` — low precision (0.2609) — in: leaf 22 (284 terms)
+- `abstraction` — low precision (0.3333) — in: leaf 22 (284 terms)
+- `decentralized` — low precision (0.25) — in: leaf 21 (114 terms)
+- `delay` — low precision (0.3) — in: leaf 23 (164 terms)
+- `scheduling` — low precision (0.2105) — in: leaf 23 (164 terms)
+- `drinking water` — low precision (0.3333) — in: leaf 6 (129 terms)
+- `venue` — low precision (0.2941) — in: leaf 11 (93 terms)
+- `control theory` — low precision (0.3125) — in: leaf 21 (114 terms)
+- `software engineering` — low precision (0.3125) — in: leaf 22 (284 terms)
+- `classify` — low precision (0.2857) — in: leaf 21 (114 terms)
+- `run-time` — low precision (0.2857) — in: leaf 22 (284 terms)
+- `asynchronous` — low precision (0.25) — in: leaf 21 (114 terms)
+- `scatter` — low precision (0.3) — in: leaf 1 (641 terms)
+- `distributed algorithms` — low precision (0.2222) — in: leaf 21 (114 terms)
+- `disturbance` — low precision (0.3333) — in: leaf 6 (129 terms)
+- `on-demand` — low precision (0.2222) — in: leaf 23 (164 terms)
+- `gaming` — low precision (0.3333) — in: leaf 14 (43 terms), leaf 22 (284 terms)
 - `3` — low precision (0.2566); high df (678) — in: (not in any accepted-length leaf)
 - `methods` — low precision (0.3037); high df (675) — in: (not in any accepted-length leaf)
 - `system` — low precision (0.2478); high df (674) — in: (not in any accepted-length leaf)
@@ -189,7 +239,7 @@ Sorted so terms sitting inside a large (>=50-term, likely-accepted) leaf come fi
 - `engineering` — low precision (0.2575); high df (536) — in: (not in any accepted-length leaf)
 - `first` — low precision (0.2642); high df (530) — in: (not in any accepted-length leaf)
 - `different` — low precision (0.3071); high df (521) — in: (not in any accepted-length leaf)
-- `education` — low precision (0.2297); high df (518) — in: (not in any accepted-length leaf)
+- `education` — low precision (0.2297); high df (518) — in: leaf 14 (43 terms)
 - `training` — low precision (0.2816); high df (515) — in: (not in any accepted-length leaf)
 - `technology` — low precision (0.2959); high df (507) — in: (not in any accepted-length leaf)
 - `human` — low precision (0.3088); high df (502) — in: (not in any accepted-length leaf)
@@ -209,7 +259,7 @@ Sorted so terms sitting inside a large (>=50-term, likely-accepted) leaf come fi
 - `community` — low precision (0.2446); high df (462) — in: (not in any accepted-length leaf)
 - `there` — low precision (0.269); high df (461) — in: (not in any accepted-length leaf)
 - `enable` — low precision (0.2725); high df (455) — in: (not in any accepted-length leaf)
-- `public` — low precision (0.2794); high df (451) — in: (not in any accepted-length leaf)
+- `fundamental` — low precision (0.2362); high df (453) — in: (not in any accepted-length leaf)
 - `key` — low precision (0.2606); high df (449) — in: (not in any accepted-length leaf)
 - `field` — low precision (0.1745); high df (447) — in: (not in any accepted-length leaf)
 - `approaches` — low precision (0.2466); high df (446) — in: (not in any accepted-length leaf)
@@ -253,7 +303,7 @@ Sorted so terms sitting inside a large (>=50-term, likely-accepted) leaf come fi
 - `available` — low precision (0.2663); high df (353) — in: (not in any accepted-length leaf)
 - `integrated` — low precision (0.2557); high df (352) — in: (not in any accepted-length leaf)
 - `allow` — low precision (0.3037); high df (349) — in: (not in any accepted-length leaf)
-- `environment` — low precision (0.2219); high df (347) — in: leaf 10 (6 terms)
+- `environment` — low precision (0.2219); high df (347) — in: (not in any accepted-length leaf)
 - `major` — low precision (0.2457); high df (346) — in: (not in any accepted-length leaf)
 - `educational` — low precision (0.2362); high df (343) — in: (not in any accepted-length leaf)
 - `make` — low precision (0.2449); high df (343) — in: (not in any accepted-length leaf)
@@ -270,12 +320,14 @@ Sorted so terms sitting inside a large (>=50-term, likely-accepted) leaf come fi
 - `function` — low precision (0.2591); high df (328) — in: (not in any accepted-length leaf)
 - `unique` — low precision (0.2431); high df (325) — in: (not in any accepted-length leaf)
 - `problems` — low precision (0.2601); high df (323) — in: (not in any accepted-length leaf)
+- `outreach` — low precision (0.243); high df (321) — in: (not in any accepted-length leaf)
 - `investigate` — low precision (0.2351); high df (319) — in: (not in any accepted-length leaf)
+- `framework` — low precision (0.273); high df (315) — in: (not in any accepted-length leaf)
 - `outcomes` — low precision (0.2571); high df (315) — in: (not in any accepted-length leaf)
 - `recent` — low precision (0.2166); high df (314) — in: (not in any accepted-length leaf)
 - `because` — low precision (0.2492); high df (313) — in: (not in any accepted-length leaf)
 - `experiments` — low precision (0.2276); high df (312) — in: (not in any accepted-length leaf)
-- `behavior` — low precision (0.2508); high df (311) — in: (not in any accepted-length leaf)
+- `behavior` — low precision (0.2508); high df (311) — in: leaf 5 (17 terms)
 - `communication` — low precision (0.2476); high df (311) — in: (not in any accepted-length leaf)
 - `advanced` — low precision (0.2977); high df (309) — in: (not in any accepted-length leaf)
 - `physical` — low precision (0.2215); high df (307) — in: (not in any accepted-length leaf)
@@ -294,7 +346,7 @@ Sorted so terms sitting inside a large (>=50-term, likely-accepted) leaf come fi
 - `biological` — high df (293) — in: (not in any accepted-length leaf)
 - `changes` — low precision (0.2655); high df (290) — in: (not in any accepted-length leaf)
 - `devices` — low precision (0.3); high df (290) — in: (not in any accepted-length leaf)
-- `graduate students` — low precision (0.2241); high df (290) — in: (not in any accepted-length leaf)
+- `graduate students` — low precision (0.2241); high df (290) — in: leaf 14 (43 terms)
 - `interdisciplinary` — low precision (0.3056); high df (288) — in: (not in any accepted-length leaf)
 - `opportunities` — low precision (0.2292); high df (288) — in: (not in any accepted-length leaf)
 - `successful` — low precision (0.2021); high df (287) — in: (not in any accepted-length leaf)
@@ -309,14 +361,15 @@ Sorted so terms sitting inside a large (>=50-term, likely-accepted) leaf come fi
 - `projects` — low precision (0.2302); high df (278) — in: (not in any accepted-length leaf)
 - `known` — low precision (0.2274); high df (277) — in: (not in any accepted-length leaf)
 - `broad` — low precision (0.2319); high df (276) — in: (not in any accepted-length leaf)
+- `highly` — low precision (0.2572); high df (276) — in: (not in any accepted-length leaf)
 - `often` — low precision (0.25); high df (276) — in: (not in any accepted-length leaf)
 - `collaboration` — low precision (0.2255); high df (275) — in: (not in any accepted-length leaf)
 - `limited` — low precision (0.2945); high df (275) — in: (not in any accepted-length leaf)
 - `includes` — low precision (0.3004); high df (273) — in: (not in any accepted-length leaf)
 - `dynamics` — low precision (0.2296); high df (270) — in: (not in any accepted-length leaf)
+- `environmental` — low precision (0.2074); high df (270) — in: (not in any accepted-length leaf)
 - `efforts` — low precision (0.2714); high df (269) — in: (not in any accepted-length leaf)
 - `years` — low precision (0.1866); high df (268) — in: (not in any accepted-length leaf)
-- `energy` — low precision (0.3034); high df (267) — in: (not in any accepted-length leaf)
 - `increase` — low precision (0.2547); high df (267) — in: (not in any accepted-length leaf)
 - `disease` — high df (266) — in: (not in any accepted-length leaf)
 - `programs` — low precision (0.2218); high df (266) — in: (not in any accepted-length leaf)
@@ -331,59 +384,6 @@ Sorted so terms sitting inside a large (>=50-term, likely-accepted) leaf come fi
 - `center` — low precision (0.2412); high df (257) — in: (not in any accepted-length leaf)
 - `provided by applicant` — low precision (0.2023); high df (257) — in: (not in any accepted-length leaf)
 - `resources` — low precision (0.2257); high df (257) — in: (not in any accepted-length leaf)
-- `innovative` — low precision (0.2812); high df (256) — in: (not in any accepted-length leaf)
-- `then` — low precision (0.3083); high df (253) — in: (not in any accepted-length leaf)
-- `natural` — low precision (0.2738); high df (252) — in: (not in any accepted-length leaf)
-- `so` — low precision (0.2738); high df (252) — in: (not in any accepted-length leaf)
-- `some` — low precision (0.2072); high df (251) — in: (not in any accepted-length leaf)
-- `individual` — low precision (0.2651); high df (249) — in: (not in any accepted-length leaf)
-- `technical` — low precision (0.2731); high df (249) — in: (not in any accepted-length leaf)
-- `underrepresented` — low precision (0.2169); high df (249) — in: (not in any accepted-length leaf)
-- `functional` — low precision (0.254); high df (248) — in: (not in any accepted-length leaf)
-- `primary` — low precision (0.2419); high df (248) — in: (not in any accepted-length leaf)
-- `processing` — low precision (0.2632); high df (247) — in: (not in any accepted-length leaf)
-- `components` — low precision (0.2787); high df (244) — in: (not in any accepted-length leaf)
-- `infrastructure` — low precision (0.2992); high df (244) — in: (not in any accepted-length leaf)
-- `achieve` — low precision (0.2881); high df (243) — in: (not in any accepted-length leaf)
-- `nature` — low precision (0.2263); high df (243) — in: (not in any accepted-length leaf)
-- `access` — low precision (0.314); high df (242) — in: (not in any accepted-length leaf)
-- `wide` — low precision (0.2282); high df (241) — in: (not in any accepted-length leaf)
-- `local` — low precision (0.2218); high df (239) — in: (not in any accepted-length leaf)
-- `participation` — low precision (0.2552); high df (239) — in: (not in any accepted-length leaf)
-- `expected` — low precision (0.2542); high df (236) — in: (not in any accepted-length leaf)
-- `evaluate` — low precision (0.2766); high df (235) — in: (not in any accepted-length leaf)
-- `i` — low precision (0.2766); high df (235) — in: (not in any accepted-length leaf)
-- `platform` — high df (235) — in: (not in any accepted-length leaf)
-- `even` — low precision (0.2692); high df (234) — in: (not in any accepted-length leaf)
-- `facilitate` — low precision (0.2436); high df (234) — in: (not in any accepted-length leaf)
-- `industry` — low precision (0.2876); high df (233) — in: (not in any accepted-length leaf)
-- `quality` — low precision (0.2629); high df (232) — in: (not in any accepted-length leaf)
-- `biology` — high df (230) — in: (not in any accepted-length leaf)
-- `core` — low precision (0.2739); high df (230) — in: (not in any accepted-length leaf)
-- `currently` — low precision (0.2402); high df (229) — in: (not in any accepted-length leaf)
-- `chemical` — high df (227) — in: (not in any accepted-length leaf)
-- `questions` — low precision (0.2687); high df (227) — in: (not in any accepted-length leaf)
-- `student` — low precision (0.1911); high df (225) — in: (not in any accepted-length leaf)
-- `interest` — low precision (0.287); high df (223) — in: (not in any accepted-length leaf)
-- `stem` — low precision (0.278); high df (223) — in: (not in any accepted-length leaf)
-- `variety` — low precision (0.287); high df (223) — in: (not in any accepted-length leaf)
-- `out` — low precision (0.2036); high df (221) — in: (not in any accepted-length leaf)
-- `what` — low precision (0.2579); high df (221) — in: (not in any accepted-length leaf)
-- `would` — low precision (0.25); high df (220) — in: (not in any accepted-length leaf)
-- `people` — low precision (0.3379); high df (219) — in: (not in any accepted-length leaf)
-- `structural` — low precision (0.2511); high df (219) — in: (not in any accepted-length leaf)
-- `treatment` — low precision (0.2831); high df (219) — in: (not in any accepted-length leaf)
-- `management` — low precision (0.2627); high df (217) — in: (not in any accepted-length leaf)
-- `computing` — low precision (0.2546); high df (216) — in: (not in any accepted-length leaf)
-- `no` — low precision (0.2419); high df (215) — in: (not in any accepted-length leaf)
-- `leading` — low precision (0.2477); high df (214) — in: (not in any accepted-length leaf)
-- `possible` — low precision (0.3084); high df (214) — in: (not in any accepted-length leaf)
-- `scale` — low precision (0.2477); high df (214) — in: (not in any accepted-length leaf)
-- `yet` — low precision (0.2664); high df (214) — in: (not in any accepted-length leaf)
-- `features` — low precision (0.2488); high df (213) — in: (not in any accepted-length leaf)
-- `clinical` — low precision (0.2972); high df (212) — in: (not in any accepted-length leaf)
-- `expertise` — high df (211) — in: (not in any accepted-length leaf)
-- `next` — low precision (0.2227); high df (211) — in: (not in any accepted-length leaf)
 
 ... and 1026 more, all in smaller/less-consequential leaves (see outputs/kw_vocab_candidates.json for the full list).
 
@@ -394,113 +394,155 @@ Sorted so terms sitting inside a large (>=50-term, likely-accepted) leaf come fi
 
 Nothing vanishes silently — every candidate for dropping is listed here with its reason and its terms, so you can override the auto-flag.
 
-- Leaf 1 (3 terms): candidate for drop: cluster below 5-term floor, not yet reviewed
+- Leaf pre_renumber_1 (3 terms): candidate for drop: cluster below 5-term floor, not yet reviewed
   - terms: should, radical, precisely
-- Leaf 4 (2 terms): candidate for drop: cluster below 5-term floor, not yet reviewed
+- Leaf pre_renumber_4 (2 terms): candidate for drop: cluster below 5-term floor, not yet reviewed
   - terms: interpretation, mine
-- Leaf 5 (1 terms): candidate for drop: cluster below 5-term floor, not yet reviewed
+- Leaf pre_renumber_5 (1 terms): candidate for drop: cluster below 5-term floor, not yet reviewed
   - terms: become
-- Leaf 6 (3 terms): candidate for drop: cluster below 5-term floor, not yet reviewed
+- Leaf pre_renumber_6 (3 terms): candidate for drop: cluster below 5-term floor, not yet reviewed
   - terms: growing, favor, yielding
-- Leaf 8 (3 terms): candidate for drop: cluster below 5-term floor, not yet reviewed
+- Leaf pre_renumber_8 (3 terms): candidate for drop: cluster below 5-term floor, not yet reviewed
   - terms: proximity, minutes, matching
-- Leaf 9 (1 terms): candidate for drop: cluster below 5-term floor, not yet reviewed
+- Leaf pre_renumber_9 (1 terms): candidate for drop: cluster below 5-term floor, not yet reviewed
   - terms: ve
-- Leaf 18 (2 terms): candidate for drop: cluster below 5-term floor, not yet reviewed
+- Leaf pre_renumber_10 (6 terms): candidate for drop: overlaps with leave 11
+  - terms: environment, cross-disciplinary, flame, multidisciplinary, fire, pd
+- Leaf pre_renumber_18 (2 terms): candidate for drop: cluster below 5-term floor, not yet reviewed
   - terms: higher, ap
-- Leaf 22 (2 terms): candidate for drop: cluster below 5-term floor, not yet reviewed
+- Leaf pre_renumber_22 (2 terms): candidate for drop: cluster below 5-term floor, not yet reviewed
   - terms: alternative, cas
-- Leaf 24 (2 terms): candidate for drop: cluster below 5-term floor, not yet reviewed
+- Leaf pre_renumber_24 (2 terms): candidate for drop: cluster below 5-term floor, not yet reviewed
   - terms: disruption, timing
-- Leaf 25 (1 terms): candidate for drop: cluster below 5-term floor, not yet reviewed
+- Leaf pre_renumber_25 (1 terms): candidate for drop: cluster below 5-term floor, not yet reviewed
   - terms: tracing
+- Leaf pre_renumber_23 (Detection & Sensing Systems): Reviewed and rejected: all 20 terms had max_topic_precision <= 0.5 (weakest of any leaf reviewed this session) and their dominant canonical BERTopic classes were scattered across 10+ unrelated domains (Privacy/Cryptography, Cardiac/Neuronal Physiology, Earthquake Engineering, Speech/Autism Communication, Protein Science, Network Science, Conference Travel, Hardware Security, Antimicrobial Ecology, Robotics). This is generic cross-cutting 'detection/accuracy/monitoring' methodology vocabulary (detect, accuracy, identification, comprehensive, characteristics, against, allow, units) that appears across nearly every domain's abstracts, not a coherent topic. The one partial exception, 'sensor technology' (df=7, precision 0.43), leaned toward the Sensor Networks & Energy-Harvesting canonical class already covered by leaf 42 more precisely via 'sensors'/'sensor networks'/'sensing'/'wireless sensor' — not salvaged since it would be a weaker duplicate.
 
 ## 5. Leaf keyword lists
 
-### Leaf 1 — should, radical, precisely  (parent: P1)
-- keywords: should, radical, precisely
-- ⚠ AUTO-FLAG: only 3 term(s) in this cluster — likely PI-idiolect noise rather than a real theme. Verify before accepting; consider moving to dropped_leaves instead.
+### Leaf 0 — Neuroscience & Neural Circuits  (parent: P0)
+- keywords: neurons, neuronal, neural circuits, nervous system, synaptic, individual neurons, reconstruction, optogenetic, synapses, dendritic, worm, c elegans, magnetic resonance
+- ⚠ Genuinely coherent: neurons, neural circuits, synaptic, optogenetic, c. elegans (model organism) all fit. 'image'/'reconstruction'/'mr' read as neuroimaging-adjacent, consistent with the theme.
 
-### Leaf 2 — neurons, neuronal, neural circuits  (parent: P1)
-- keywords: neurons, neuronal, neural circuits, nervous system, synaptic, individual neurons, image, reconstruction, optogenetic, acquired, synapses, dendritic, worm, c elegans, mr
+### Leaf 1 — Molecular & Cellular Biomedicine  (parent: P0)
+- keywords: magnetic resonance, worm, c elegans, biochemical, molecular, cellular, therapeutic, in vivo, proteins, in vitro, signaling, cell, expression, diseases, acid, molecules, inhibition, biomedical imaging, biomedical, charge, fluorescence, iron, absorption, imaging, contrast, optical, resolution, microscopy, sensitivity, characterization, scatter, parp inhibitor, nanoparticle, drug delivery, bone, skeletal, skeleton, fracture
+- ⚠ 641 terms, dominant biomedical cluster — clean, no boundary-fragment pollution remaining. Later enriched with an optical/biomedical-imaging vocabulary set (biomedical imaging, fluorescence, microscopy, contrast, etc.) found while reviewing leaf 16 (Materials Science) — verified via canonical-topic association that these terms genuinely lean biomedical (Cancer & Drug Delivery, Cardiac & Neuronal Physiology, Neuropharmacology) rather than materials/physics, despite superficially reading as optics/physics terms. ADDENDUM (2026-08-29): added 'parp inhibitor', 'nanoparticle', 'drug delivery' (cancer nanoparticle-delivery cluster, e.g. grant 1162069 'PARP Inhibitor Nanotherapy for Ovarian Cancer') and 'bone', 'skeletal' (bone/skeletal-health cluster, e.g. grant 868967 'Kick-starting mechanoadaptation in aged bones') after reviewing Unassigned grants with real text that matched zero curated terms. Also added 'skeleton' and 'fracture' (2026-08-29) after finding 2 bone/skeletal-cluster grants used those words instead of 'bone'/'skeletal' literally (grant 871035 '...appendicular skeleton...', grant 860068 '...fracture healing').
 
-### Leaf 3 — biochemical, molecular, cellular  (parent: P1)
-- keywords: biochemical, molecular, cellular, therapeutic, in vivo, proteins, in vitro, signaling, cell, binding, expression, diseases, acid, molecules, inhibition
+### Leaf 2 — Speech, Hearing & Cognitive Neuroscience  (parent: P0)
+- keywords: behavioral, adults, age, older, cochlear implants, dysarthria, phonological, working memory, listening, neurocognitive, auditory, fmri, hearing, asd, alzheimer, neuroimaging, eeg, cognition, brain, attention, individual differences, depth perception
+- ⚠ Split out of the original 300-term 'Public & Behavioral Health' leaf (source_leaf_id 7). Coherent speech/hearing/auditory-processing and cognitive-neuroscience vocabulary, including 'worm'/'c elegans' style model-organism and neuroimaging terms consistent with leaf 2's theme (Neuroscience & Neural Circuits) but distinct enough (aging, hearing, speech pathology) to warrant its own leaf. ADDENDUM (2026-08-29): added 'depth perception' after reviewing grant 912670 'Visual Depth Perception from Motion through Texture Accretion and Deletion'.
 
-### Leaf 4 — interpretation, mine  (parent: P2)
-- keywords: interpretation, mine
-- ⚠ AUTO-FLAG: only 2 term(s) in this cluster — likely PI-idiolect noise rather than a real theme. Verify before accepting; consider moving to dropped_leaves instead.
+### Leaf 3 — Public Health Services & Clinical Outcomes  (parent: P1)
+- keywords: medicare, cvd, hospital, clinical, patients, public health, chronic, stress, risk, acute, status, burden, death
+- ⚠ Slimmed down from the original 300-term 'Public & Behavioral Health' leaf after splitting out three more coherent sub-themes (leaves 27, 28, 29) — see their notes for the split rationale. This residual covers general health-services/clinical-outcomes vocabulary that didn't fit any of the more specific sub-themes; every one of the original top-15 terms was redistributed into the new leaves or rejected as generic, none actually belonged in this residual bucket.
 
-### Leaf 5 — become  (parent: P2)
-- keywords: become
-- ⚠ AUTO-FLAG: only 1 term(s) in this cluster — likely PI-idiolect noise rather than a real theme. Verify before accepting; consider moving to dropped_leaves instead.
+### Leaf 4 — Psychosocial Stress, Trauma & Health Disparities  (parent: P1)
+- keywords: immigrants, mpfc, sex-specific, amygdala, ses, fear, ptsd, aggression, victimization, adherence, neonatal, disparities, adolescence, racial, childhood, race, alcohol, child, obesity
+- ⚠ Split out of the original 300-term 'Public & Behavioral Health' leaf (source_leaf_id 7) via a recursive sub-clustering pass (k=4 on that leaf's own terms). Coherent grouping of trauma/stress-response vocabulary, its neuroscience substrate (amygdala, mpfc), and social determinants (SES, race, disparities, immigrants).
 
-### Leaf 6 — growing, favor, yielding  (parent: P2)
-- keywords: growing, favor, yielding
-- ⚠ AUTO-FLAG: only 3 term(s) in this cluster — likely PI-idiolect noise rather than a real theme. Verify before accepting; consider moving to dropped_leaves instead.
+### Leaf 5 — Digital/Mobile Health & Behavioral Interventions  (parent: P1)
+- keywords: health behavior, pa, physical activity, sleep, phone, mental health, just-in-time, app, healthcare, primary care, care, exercise, behavior, interventions, mental, longitudinal, population
+- ⚠ Split out of the original 300-term 'Public & Behavioral Health' leaf (source_leaf_id 7). Coherent modern mHealth/behavioral-intervention theme (physical activity, sleep, phone/app-based just-in-time interventions, mental health).
 
-### Leaf 7 — evidence, age, findings  (parent: P2)
-- keywords: evidence, age, findings, population, behavioral, adults, interventions, whether, examine, mental, differences, longitudinal, life, factors, older
+### Leaf 6 — Environmental Health & Ecological Restoration  (parent: P2)
+- keywords: natural environment, disturbance, restoration, environmental health, biomonitoring, community engagement core, emerging contaminants, health and justice, srp, srp centers, training core, research translation, core project summary, environmental health sciences, superfund, preterm birth, epa, community engagement, niehs, puerto rico, contaminated, pollution, contaminants, contamination, remediation, exposure, drinking water, administrative core, aerosol, conservation biotechnology
+- ⚠ Slimmed down from the original 129-term 'Coastal & Environmental Ecology' leaf after splitting out four more specific sub-themes (leaves 30-33) via recursive sub-clustering (k=6). Was a thin 4-term residual holding general restoration/disturbance-monitoring vocabulary plus 'environmental health' (manually moved here from leaf 14). Later strengthened by merging in a genuine 44-term Environmental Health Sciences & Superfund Research Program cluster discovered while reviewing leaf 14 (EPA/NIEHS-funded Superfund center vocabulary — biomonitoring, contamination, remediation, exposure) — this connects naturally: 'environmental health' was already the anchor term here, and Superfund remediation/contamination-monitoring concepts are a direct match for restoration/ecological-monitoring. Relabeled from 'Environmental Restoration & Ecological Monitoring' to reflect the merged scope. ADDENDUM (2026-08-29): added 'aerosol' after reviewing 2 NOAA atmospheric-chemistry grants (1498542, 1512141, both 'Towards Optimal Configurations of NAQFC Chemistry and Aerosol Representations'). ADDENDUM (2026-08-29): added 'conservation biotechnology' after reviewing grant 1732146 'The Ethics of Conservation Biotechnology: A Conceptual Engineering Approach' — an ethics/humanities grant about biotech tools for ecological conservation, placed here for its conservation/restoration framing rather than Leaf 12 (Social Science).
 
-### Leaf 8 — proximity, minutes, matching  (parent: P2)
-- keywords: proximity, minutes, matching
-- ⚠ AUTO-FLAG: only 3 term(s) in this cluster — likely PI-idiolect noise rather than a real theme. Verify before accepting; consider moving to dropped_leaves instead.
+### Leaf 7 — Predator-Prey & Rocky Intertidal Ecology  (parent: P2)
+- keywords: intertidal, predator effects, prey, rocky, predators, predation, reefs, trophic, environmental change, gulf of maine, traits, ecology, gulf, maine, ecological, biodiversity, evolutionary, species, ecosystem, organisms, food, indirect, mathematical models, linkages, productivity, new england, evolution, lobster, estuarine, fisheries
+- ⚠ Split out of the original 129-term 'Coastal & Environmental Ecology' leaf (source_leaf_id 11) via recursive sub-clustering (k=6). Coherent food-web/predator-prey ecology theme with a strong Gulf of Maine / New England regional focus. ADDENDUM (2026-08-29): added 'lobster', 'estuarine', 'fisheries' after reviewing Unassigned NOAA fisheries/estuarine grants (e.g. grant 1697213 'The American Lobster Industry...', grant 1697424 'Waquoit Bay National Estuarine Research Reserve') that fit this leaf's existing Gulf of Maine/New England regional-ecology focus but matched zero curated terms.
 
-### Leaf 9 — ve  (parent: P2)
-- keywords: ve
-- ⚠ AUTO-FLAG: only 1 term(s) in this cluster — likely PI-idiolect noise rather than a real theme. Verify before accepting; consider moving to dropped_leaves instead.
+### Leaf 8 — Ocean Biogeochemistry & Carbonate Chemistry  (parent: P2)
+- keywords: calcification, dom, ecosystem services, genetic diversity, marsh, ocean acidification, organic carbon, salt marshes, tide, dissolved organic, organic matter, coral, seawater, dissolved, cycling, marine science, salt, wetlands, nutrient, marine, coastal, coast, seafloor, ocean, nitrogen, sea, earth
+- ⚠ Split out of the original 129-term 'Coastal & Environmental Ecology' leaf (source_leaf_id 11) via recursive sub-clustering (k=6). Coherent ocean/marsh biogeochemistry theme (carbonate chemistry, ocean acidification, dissolved organic matter).
 
-### Leaf 10 — environment, cross-disciplinary, flame  (parent: P3)
-- keywords: environment, cross-disciplinary, flame, multidisciplinary, fire, pd
+### Leaf 9 — Hydrology, Flooding & Watershed Science  (parent: P2)
+- keywords: flood risk, floodplain, mississippi river, sedimentary, hydrologic, flood, geomorphic, flooding, earth system, precipitation, hydrology, land use, coastal communities, drainage, streamflow, mississippi, river, hurricane, delta, erosion, sediment, sea level, sedimentation, storm, land, discharge, landscape, environmental engineering, climate change, agricultural
+- ⚠ Split out of the original 129-term 'Coastal & Environmental Ecology' leaf (source_leaf_id 11) via recursive sub-clustering (k=6). Coherent surface-hydrology/flood-risk/watershed theme. Also folded in 'environmental engineering', 'climate change', and 'agricultural' from a separate small, mostly-generic sub-cluster (group 5) that fit this theme better than standing alone.
 
-### Leaf 11 — coastal, sediment, coast  (parent: P3)
-- keywords: coastal, sediment, coast, ecology, river, environmental, ecological, nutrient, ecosystem services, wetlands, climate change, climate, land, tide, sea
+### Leaf 10 — Groundwater/Soil Chemistry & Water Quality  (parent: P2)
+- keywords: electrolysis, sodium, coal, north carolina, water quality, soil
+- ⚠ Split out of the original 129-term 'Coastal & Environmental Ecology' leaf (source_leaf_id 11) via recursive sub-clustering (k=6). Distinct from surface hydrology (leaf 32) — groundwater/soil geochemistry and water-quality vocabulary. CORRECTION (2026-08-29, found during a negative-centroid-margin review): removed 'wells' — its plural-fold stem match ('wells'->'well') was colliding with the common English adverb 'well' ('as well', 'well-known'), matching ~42 of this leaf's 86 assigned grants purely via that collision (e.g. an Osteoarthritis study, a Fermi-level condensed-matter physics grant, a satellite-servicing SBIR — none groundwater-related). Also removed 'water', 'oxygen', 'carbon', 'gas', 'ph', 'bubbles', 'saturation', 'saturated' — all individually too generic (common across biology/chemistry/materials science broadly), confirmed by inspecting this leaf's actual member grants: the real, on-theme matches (well-water contamination, soil remediation, liquefaction/geotechnical engineering, coal-ash groundwater impact) cluster at high confidence via 'water quality', 'north carolina', 'coal', 'sodium', 'electrolysis', 'soil' instead — those 6 terms are the leaf's real signal, kept. 'saturation'/'saturated' specifically also collide with an unrelated sense (color saturation in vision science).
 
-### Leaf 12 — attend, student travel, travel  (parent: P4)
+### Leaf 11 — Conference & Student Travel Awards  (parent: P3)
 - keywords: attend, student travel, travel, students to attend, acm, attending, present their work, travel support, provides travel, travel funds, opportunity to present, leading-edge research, student travel grant, venue, conference
+- ⚠ 93 terms, the NSF conference/travel-funding-instrument theme found independently by both Plan A and Plan B during discovery — a real, distinct funding-mechanism cluster, not noise. Checked for sub-themes via recursive sub-clustering (k=2 best silhouette, 0.19): the split found is just 'student-travel-specific phrasing' vs. 'general conference logistics + noise', not two genuinely distinct subjects — kept as one leaf. Scanning the full 93-term candidate pool (beyond the current top-15) turned up bare calendar years/months as candidate terms — pure scheduling noise, never present in the active keyword list but recorded in rejected_terms for the audit trail since we specifically found and considered them.
 
-### Leaf 13 — economic, build, organizations  (parent: P4)
-- keywords: economic, build, organizations, issues, stakeholders, best, policy, social, social science, urban, building, society, researchers, needs, government
+### Leaf 12 — Social Science & Public Policy  (parent: P3)
+- keywords: stakeholders, policy, government, organizations, economic, urban, society, researchers, needs, social science, public, law, agencies, social, labor, political, management, oral history, digital humanities, humanities, manuscripts, youth
+- ⚠ Slimmed down from the original 189-term leaf after splitting out two genuinely distinct sub-themes: leaf 34 (Security, Trafficking, Public Health Crisis & Disaster Resilience) and a corrected leaf 26 (Education, Games & Informal STEM Learning — leaf 26 had previously been mistakenly populated with leaf-14's terms instead of its own real content). At k=2 the original 189 terms split entirely between those two groups with no natural third residual, so this leaf keeps the generic-but-real policy/stakeholder/governance vocabulary salvaged from both groups' low-precision tails — genuine content, just not specific enough to belong to either narrower theme. ADDENDUM (2026-08-29, human-curated post-promotion): added 'oral history' (df_corpus=1) and 'digital humanities' (df_corpus=3) after reviewing an Unassigned grant with real abstract text ('Visualizing Oral Histories of Bengal using Digital Humanities Tools', grant_id 726280) that matched zero curated terms anywhere in the taxonomy. Verified against the corpus before adding: both terms are highly specific (df_corpus 1 and 3), and the 'digital humanities' addition also corrects a real misclassification found in the same review — grant 1619895 ('Re-establishing and Sustaining a Working Ecology for Digital Humanities Scholarship') was landing in the Predator-Prey & Rocky Intertidal Ecology leaf via 'ecology' used metaphorically, not literally. ADDENDUM (2026-08-29): added 'humanities' and 'manuscripts' after reviewing Unassigned NEH-funded humanities grants (e.g. grant 1148978 'Space, Place, and the Humanities', grant 1080743 'Analyzing Ojibwe and Cherokee Manuscripts') that matched zero curated terms; also strengthens the earlier 'oral history'/'digital humanities' addition's coverage of this same broad theme. ADDENDUM (2026-08-29): added 'youth' after reviewing grant 993053 'Utah Transition Youth Empowered to Succeed (UT YES)' (HHS youth-empowerment/transition services).
 
-### Leaf 14 — faculty, professional development, professional  (parent: P4)
-- keywords: faculty, professional development, professional, leadership, institutions, urm, recruitment, academic, members, diverse, mentor, partnership, career, environmental health, college
+### Leaf 13 — Faculty Development, Diversity & Institutional Partnerships  (parent: P3)
+- keywords: faculty, professional development, professional, leadership, institutions, urm, recruitment, diverse, mentor, partnership, career, college, fellowship, graduate research fellowship, fellowship program grfp, lsamp, entrepreneurship, stem, stem faculty, stem education, retention, mentoring, women, minority, gender, female, black, doctoral, scholars, research experiences, graduate education, trainees, training program, universities, diversity, traineeship
+- ⚠ 172 terms. Checked via recursive sub-clustering (k=2): split into this leaf's real 128-term content (enriched below) and a genuinely distinct 44-term Environmental Health Sciences & Superfund Research Program cluster, now merged into leaf 11 (Environmental Health & Ecological Restoration) instead — 'environmental health' was the anchor term of that real cluster, not a lone stray outlier as first thought. ADDENDUM (2026-08-29): added 'traineeship' after reviewing Unassigned graduate traineeship-award grants (e.g. grant 1546186 'Graduate Traineeship Award for Matthew Schinault') — a better fit here (alongside existing 'fellowship'/'trainees'/'training program') than Leaf 11's travel-specific scope.
 
-### Leaf 15 — steel, earthquake, collapse  (parent: P5)
-- keywords: steel, earthquake, collapse, earthquake engineering, performance-based, existing structures, full-scale, neesr, seismic, structural systems, nees, wind, civil, earthquake hazards, natural hazards
+### Leaf 14 — Education, Games & Informal STEM Learning  (parent: P3)
+- keywords: computational thinking, science learning, student learning, learners, learning tools, stem learning, systems thinking, learning activities, curricula, science education, classroom, education researchers, enable students, game design, instructors, curriculum, pedagogy, multimedia, broadening participation, learning environment, workshops, teaching, informal, modules, education, teach, workforce, virtual, thinking, gaming, mixed reality, reu, erc, education program, engineering research, hands-on, teachers, middle school, middle school students, underrepresented, graduate students, high school, foreign language
+- ⚠ CORRECTED: this leaf was previously mistakenly populated with terms copied from leaf 14 (faculty, institutions, urm, academic, diverse, mentor, college) instead of its own real content — none of those actually relate to education/games. Re-derived from a recursive sub-clustering pass on leaf 13 (k=2), which surfaced a genuine 101-term education/learning theme. Curated down to the specific, unambiguous terms; kept 'mixed reality' from the earlier manual addition. Deliberately excludes bare 'game' (verified polysemous — game theory in economics/networking, media/labor studies of gaming, not just educational games) in favor of the safer compound 'game design'. 'gaming' is intentionally also added to leaf 20 (Software Systems) since its 6 real occurrences split genuinely between education and software-infrastructure senses. Later enriched with STEM-education/outreach-program vocabulary (reu, erc, teachers, middle school, underrepresented, graduate students, high school) found while reviewing leaf 16 (Materials Science) — this is broader-impacts/outreach-participant language distinct in kind from this leaf's original learning-science content, but folded in here rather than fragmenting into yet another education-adjacent leaf. ADDENDUM (2026-08-29): added 'foreign language' after reviewing grant 43588 'Undergraduate International Studies and Foreign Language Programs' — a thin, single-grant addition; note the leaf's label (STEM/games/informal learning) doesn't perfectly describe language-program content, kept here per human decision as the closest 'undergraduate learning' home.
 
-### Leaf 16 — materials, temperature, optical  (parent: P5)
-- keywords: materials, temperature, optical, thermal, films, nanostructures, thin, fundamental, fabrication, high school, semiconductor, nanoscale, highly, outreach, surface
+### Leaf 15 — Security, Trafficking, Public Health Crisis & Disaster Resilience  (parent: P3)
+- keywords: human trafficking, illicit supply networks, interdiction, trafficking networks, victims, illicit, covid-19, shortages, debris, illegal, law enforcement, infectious disease, pandemic, governance, disposal, trafficking, enforcement, natural disasters, distribution systems, shelter, criminal, survivors, crime, epidemic, infectious, crisis, influenza, supply chain, resilience, justice, preparedness, resilient, hazards
+- ⚠ Split out of the original 189-term 'Social Science & Public Policy' leaf (source_leaf_id 13) via recursive sub-clustering (k=2). Genuinely distinct theme spanning human trafficking/illicit networks, infectious-disease crisis response (covid-19, pandemic, epidemic), and natural-disaster resilience — nothing to do with either generic social-science policy or education.
 
-### Leaf 17 — string theory, representation theory, algebraic  (parent: P6)
-- keywords: string theory, representation theory, algebraic, symmetry, areas of mathematics, algebras, quantum groups, integrable systems, invariants, algebraic geometry, combinatorics, mathematicians, manifolds, elliptic, cluster algebras
+### Leaf 16 — Civil & Earthquake Engineering  (parent: P4)
+- keywords: steel, earthquake, collapse, earthquake engineering, performance-based, existing structures, full-scale, neesr, seismic, structural systems, nees, wind, civil, earthquake hazards, natural hazards, offshore wind energy, wind energy, turbine, offshore, structural health monitoring, renewable energy sources, energy sources, highway, power systems, infrastructure systems, civil infrastructure, grid
+- ⚠ 46 terms. Checked via recursive sub-clustering (k=3): found two small (8- and 12-term) sub-groups (offshore wind energy; infrastructure monitoring/smart grid) but both too thin to justify their own leaves at this scale, so their genuinely specific terms were folded in here instead rather than fragmenting into new leaves. Verified 'wind' (bare) via document context — genuinely splits between wind-hazards-on-structures (kept here) and wind-energy/turbines (also relevant here since offshore wind engineering was folded in) — no conflict. Verified and REJECTED bare 'health monitoring' after checking context: majority of its real occurrences are about patient/personal health monitoring (wearables, biosensing), not structural — kept the unambiguous compound 'structural health monitoring' instead.
 
-### Leaf 18 — higher, ap  (parent: P7)
-- keywords: higher, ap
-- ⚠ AUTO-FLAG: only 2 term(s) in this cluster — likely PI-idiolect noise rather than a real theme. Verify before accepting; consider moving to dropped_leaves instead.
+### Leaf 17 — Materials Science & Nanotechnology  (parent: P4)
+- keywords: materials, temperature, thermal, films, nanostructures, thin, fabrication, semiconductor, nanoscale, spin, microwave, high-efficiency, nanomanufacturing, tunable, heat, electronic, magnetic, electric, composite, conduction, nanotechnology, manufacturing, electrical, demonstration, energy, multi-scale, solidification, alloy, qubit, quantum phases
+- ⚠ Checked via recursive sub-clustering (k=5) on the full 132-term cluster. Found 4 sub-groups beyond the real materials-science core: an optical/biomedical-imaging group (moved to leaf 3 after checking canonical-topic associations confirmed it's genuinely biomedical, not materials), a very clean Gravitational Wave/LIGO instrumentation group (split to a new leaf), a STEM-education/outreach-program group (strong terms moved to leaf 26, weak ones rejected — this leaf should hold materials-science CONTENT, not broader-impacts language, so 'high school'/'outreach' were removed despite an earlier note calling them consistent), and a generic cross-cutting methodology group (mostly rejected). This leaf now holds only the genuine materials/nanotech core. ADDENDUM (2026-08-29): added 'solidification' and 'alloy' after reviewing Unassigned grants about alloy-solidification microstructure modeling (e.g. grant 1316012, 'Phase-Field Modeling of Solidification Microstructures') that matched zero curated terms despite being a clear materials-science fit. ADDENDUM (2026-08-29): added 'qubit' and 'quantum phases' after reviewing 2 Unassigned quantum-devices grants (1393768 'Design, Control and Application of Next-Generation Qubits', 544966 'Novel Quantum Phases at Interfaces') — a third candidate (1777815, 'Quantum Theory and Measured Turnover Rates...') was judged too ambiguous (really catalysis/chemistry, not quantum devices) and deliberately left Unassigned rather than force-fit.
 
-### Leaf 19 — robust, framework, tasks  (parent: P8)
-- keywords: robust, framework, tasks, cyber-physical systems, cyber-physical, vision, systems theory, reinforcement learning, uncertainty, inference, bayesian, algorithms, computationally efficient, probabilistic, control systems
+### Leaf 18 — Algebra, Geometry, Mathematical Physics & Metascience  (parent: P5)
+- keywords: categorical, cluster algebras, cohomology, commutative, elliptic, integrable systems, maurice auslander, noncommutative, noncommutative algebra, poisson, quantum groups, string theory, symplectic, algebras, representation theory, areas of mathematics, algebraic geometry, invariant theory, singularities, quiver, invariants, combinatorics, algebraic, manifolds, mathematicians, singular, gauge, lie, geometric, theorem, geometry, homology, woods hole, combinatorial, categories, topological, mathematics, topology, differential, scientific success, scientific performance
+- ⚠ MAJOR FIX: 'uncertainty', 'inference', 'bayesian', 'algorithms', 'probabilistic' were mistakenly present in this leaf's keywords — checked the original frozen discovery artifact (kw_term_groups_planB.json's L17 top_terms) and confirmed those 5 terms never belonged here at all; they're genuine leaf-19 (Control Systems/CPS/ML) content that got mixed in, the same class of bug as leaf 26's earlier copy-paste error. Also checked via recursive sub-clustering (k=2, exceptionally high silhouette 0.317 — one of the cleanest splits found this session): the remaining 125 terms split cleanly into this leaf's real algebra/geometry/mathematical-physics core (93 terms, curated below) and a completely distinct Particle & High-Energy Physics theme (32 terms, split to a new leaf) that happened to share embedding-space proximity via string-theory/symmetry vocabulary. RELABELED (2026-08-29, human decision) from 'Algebra, Geometry & Mathematical Physics' after adding 'scientific success' and 'scientific performance' to cover 2 Unassigned AFRL metascience/scientometrics grants (1571021 'The fundamentals of predictability of scientific success', 1570796 'Quantifying Scientific Performance and Success in the Physics Community') — a niche, quantitative/statistical subfield that doesn't fit any other leaf, placed here as the closest quantitative-methods home.
 
-### Leaf 20 — software, code, project develops  (parent: P8)
-- keywords: software, code, project develops, cloud, open-source, secure, scalable, security, computer systems, developers, develops, significance and importance, twc, open-source software, attacks
+### Leaf 19 — Particle Physics & High-Energy Physics  (parent: P5)
+- keywords: extra dimensions, higgs, higgs boson, new physics, quark, standard model, supersymmetry, theorynet, particle physics, lhc, large hadron collider, dark matter, cern, collider, hadron, universe, cms, extra, dark, high energy, symmetry, particle, elementary
+- ⚠ Split out of the original 125-term 'Algebra, Geometry & Mathematical Physics' leaf (source_leaf_id 17) via recursive sub-clustering (k=2, silhouette 0.317 — one of the cleanest splits found this session; several terms have perfect 1.0 precision). Genuinely distinct experimental/theoretical particle physics (CERN, LHC, Higgs boson, dark matter, standard model, supersymmetry) — shares embedding-space proximity with pure algebra/geometry only via string-theory/symmetry vocabulary, but is a completely different research community.
 
-### Leaf 21 — testbed, wireless, deployment  (parent: P8)
-- keywords: testbed, wireless, deployment, radio, rf, software-defined, cross-layer, sensor networks, receiver, interference, operating, power, stack, data rates, power consumption
+### Leaf 20 — Gravitational Wave Detection & Observational Astrophysics  (parent: P5)
+- keywords: a+, advanced ligo, astrophysics, ccr, cosmic, gravitational wave, ligo, mirror coatings, thermal noise, gravitational, amorphous, hole, astronomy, mirror, detector, dissipation, coatings, numerical simulation, xmm-newton, tidal disruption, super-eddington
+- ⚠ Split out of the original 132-term 'Materials Science & Nanotechnology' leaf (source_leaf_id 16) via recursive sub-clustering (k=5). Exceptionally clean, tight cluster — 9 of 18 kept terms have perfect 1.0 precision. Genuinely a distinct physics/astrophysics instrumentation area (LIGO mirror-coating materials research, gravitational-wave detector thermal noise), not general materials science. Parented under P5 (Materials Science & Structural/Civil Engineering) since mirror-coating research is fundamentally materials science applied to detector optics — a judgment call, revisit if a better-fitting parent becomes available. RELABELED (2026-08-29, human decision) from 'Gravitational Wave Detection & LIGO Instrumentation' after adding 'xmm-newton', 'tidal disruption', 'super-eddington' to cover a 10-grant NASA X-ray-astronomy/tidal-disruption-event research program (e.g. grant 1326694 'Understanding the Nature of XMM-Newton Serendipitous X-Ray Sources') that had no home — observational X-ray astrophysics sits naturally alongside this leaf's existing gravitational-wave/LIGO instrumentation scope.
 
-### Leaf 22 — alternative, cas  (parent: P8)
-- keywords: alternative, cas
-- ⚠ AUTO-FLAG: only 2 term(s) in this cluster — likely PI-idiolect noise rather than a real theme. Verify before accepting; consider moving to dropped_leaves instead.
+### Leaf 21 — Control Systems, Cyber-Physical Systems & Machine Learning  (parent: P6)
+- keywords: nonlinear control, dnn, robust control, computationally tractable, dnns, distributed optimization, state estimation, systems theory, reinforcement learning, control systems, analysis and design, training data, data driven, descent, cyber-physical systems, fragility, optimal control, sparse, optimization algorithms, computationally efficient, vision, cyber-physical, bayesian, uncertainty, control theory, algorithms, deep learning, dynamical systems, neural networks, machine learning, inference, classify, optimization, asynchronous, decentralized, probabilistic, distributed algorithms, stochastic, classification, facial, anomaly detection, natural language processing, transfer learning, cortical column, terrain estimation
+- ⚠ Checked via recursive sub-clustering (k=2, silhouette 0.229): found a genuinely distinct 41-term Rehabilitation Robotics & Assistive Technology theme (split to a new leaf — this echoes a very similar cluster seen once before in the original Plan A discovery data, suggesting it's a real, recurring NEU research area) and confirmed/enriched this leaf's real control-theory/CPS/ML core with the remaining 73-term group. ADDENDUM (2026-08-29): added 'anomaly detection', 'natural language processing', 'transfer learning' after reviewing a cluster of military-funded (ARO/AFRL) AI/ML Unassigned grants (e.g. grant 1789375 'Explainable Deep Anomaly Detection', grant 913696 'Sociolinguistically Informed NLP') that matched zero curated terms despite clearly belonging in this leaf's ML scope. ADDENDUM (2026-08-29): added 'cortical column' after reviewing grant 1570775 'Principles of Robust Learning Derived from the Structure and Function of the Cortical Column' — a neuroscience-inspired ML grant, judged ML-focused. ADDENDUM (2026-08-29): added 'terrain estimation' after reviewing grant 1563570 'Coordinated Multi-Robot-Chain for Terrain Estimation and Exploration' — field-robotics/multi-robot coordination, not civil/structural engineering despite the 'terrain' wording; a better fit here than Leaf 16 (Civil & Earthquake Engineering).
 
-### Leaf 23 — detect, detection, detecting  (parent: P8)
-- keywords: detect, detection, detecting, monitor, accurate, accuracy, sensor technology, false, safety, severe, extraction, against, identification, comprehensive, simultaneous
+### Leaf 22 — Programming Languages & Software Engineering  (parent: P6)
+- keywords: java, software contracts, type systems, typed, software engineers, javascript, contracts, program analysis, software developers, bugs, compiler, racket, programmers, programming languages, compilation, formal verification, compiled, formal methods, gradual, scripting, software components, software systems, low-level, concurrent, correctness, design-time, semantics, verification, verified, developers, execution, code, formal, abstraction, static, software engineering, high-level, open-source, programming, run-time, errors, open-source software, software, gaming
+- ⚠ RELABELED (was 'Software Systems & Cybersecurity'): checked via recursive sub-clustering (k=5) on the full 284-term cluster — the single biggest leaf reviewed this session. Found 4 genuinely distinct real themes: this leaf's real core (programming languages/software engineering — matches the original 'software'/'code'/'developers'/'open-source' keywords much better than 'cybersecurity' did), plus Cryptography & Hardware Security, Computer Architecture & High-Performance Computing, and Theoretical CS/Network/Data Science (all split to new leaves), plus one weak/generic bucket (mostly rejected, 'mobile devices'/'mobile' moved to leaf 21 instead). Cross-checked all 4 real groups against leaves 19/21/23's full underlying clusters and confirmed zero term-level overlap — Plan B's discovery clustering assigns each term to exactly one base cluster, so duplication only ever comes from manual curation mistakes (like the ones already found and fixed in leaves 17/26), not independent rediscovery. Also added 'gaming' here (see leaf 26's notes — its 6 real occurrences split genuinely between education and software-infrastructure senses).
 
-### Leaf 24 — disruption, timing  (parent: P9)
-- keywords: disruption, timing
-- ⚠ AUTO-FLAG: only 2 term(s) in this cluster — likely PI-idiolect noise rather than a real theme. Verify before accepting; consider moving to dropped_leaves instead.
+### Leaf 23 — Wireless Communications, Antennas & Electromagnetic Metamaterials  (parent: P6)
+- keywords: 60 ghz, cellular networks, mmwave, pawr, ultra-broadband, wireless research, 5g, thz, 6g, mimo, data rates, ghz, wireless networking, wi-fi, terahertz, wireless systems, physical layer, software-defined, radio, cross-layer, wireless networks, wireless, stack, programmable, testbed, bandwidth, spectrum, channel, transmission, connectivity, networking, experimentation, cns, layer, traffic, routing, coding, mobility, nodes, networked, allocation, delay, on-demand, scheduling, mobile devices, mobile, antenna, nanoantenna
+- ⚠ Restructured from the original 211-term 'Wireless Networking & Embedded Systems' leaf via recursive sub-clustering. Split off leaf 41 (Underwater Acoustic Communications & Marine Robotics, a fully distinct theme) and, within the remaining 164-term core, further sub-sub-clustered (k=5, silhouette 0.208) into: this leaf's 5G/mmWave/cellular core (subgroup 3, cleanest/highest-precision group), new leaf 42 (Energy Harvesting & Low-Power RF/Wireless Sensors, subgroup 1), new leaf 43 (IoT & Embedded Systems, subgroup 4), plus two mostly-generic subgroups (2: NSF tech-transfer boilerplate; 5: generic networking words) that were mostly rejected, with a handful of genuinely networking-specific terms (routing, coding, mobility, etc.) salvaged into this leaf. Retains 'mobile'/'mobile devices' salvaged earlier from leaf 20's review. RELABELED (2026-08-29, human decision) from '5G/mmWave & Cellular Wireless Communications' after adding 'antenna' and 'nanoantenna' to cover 4 Unassigned ONR/AFRL antenna/metamaterial-engineering grants (e.g. 727523 'Transformative Parameters Extreme Antennas...', 1549255 'Hybrid Graphene/Semiconductor...Nano-antenna for Terahertz-band Communication'). Some of these lean more classical-EM/materials than 5G/cellular communications specifically — kept here rather than split out, a deliberate human call given the small size of the cluster.
 
-### Leaf 25 — tracing  (parent: P9)
-- keywords: tracing
-- ⚠ AUTO-FLAG: only 1 term(s) in this cluster — likely PI-idiolect noise rather than a real theme. Verify before accepting; consider moving to dropped_leaves instead.
+### Leaf 24 — Rehabilitation Robotics & Assistive Technology  (parent: P6)
+- keywords: gait, human-robot, knee, robots, rehabilitation, locomotion, stroke, assistive, robotics, walking, intent, motor, manipulation, limb, intuitive, disabilities, assistance, neurological, movement, coordination, hand, injury, stimulation
+- ⚠ Split out of the original 114-term 'Control Systems, Cyber-Physical Systems & Machine Learning' leaf (source_leaf_id 19) via recursive sub-clustering (k=2, silhouette 0.229). Genuinely distinct biomedical/healthcare-robotics theme — gait/locomotion rehabilitation, stroke recovery, assistive devices, human-robot interaction for disability support. This echoes a very similar cluster seen once before, independently, in the original Plan A discovery data — suggesting it's a real, recurring NEU research area, not an artifact of this particular clustering run.
+
+### Leaf 25 — Cryptography & Hardware Security  (parent: P6)
+- keywords: fully homomorphic encryption, homomorphic, side-channel attacks, system security, information leakage, encryption, differential privacy, encrypted, hardware security, side-channel, sensitive data, communication protocols, reverse engineering, secure computation, cryptographic, attack surface, defenses, leakage, cryptography, privacy-preserving, security and privacy, auditing, authentication, countermeasures, defensive, attackers, trusted, twc, networking protocols, privacy, security guarantees, adversarial, assurance, cyber, cybersecurity, malware, trustworthy, compromised, confidentiality, verifiable, security, attacks, malicious, adversaries, secure
+- ⚠ Split out of the original 284-term 'Software Systems & Cybersecurity' leaf (source_leaf_id 20) via recursive sub-clustering (k=5). Very clean, high-precision crypto/hardware-security theme — homomorphic encryption, side-channel attacks, differential privacy, hardware security. Cross-checked against leaves 19/21/23's full underlying clusters: zero term-level overlap.
+
+### Leaf 26 — Computer Architecture & High-Performance Computing  (parent: P6)
+- keywords: i/o, distributed systems, ndn, virtualization, caching, computer architecture, gpus, hpc, performance and reliability, gpu, storage systems, computing infrastructure, data centers, threads, high performance computing, cpu, cache, disk, acceleration, computing resources, cloud, heterogeneous, computing platforms, computing systems, cyberinfrastructure, application-specific, storage, high performance, cloud computing, computing, computer systems, workload
+- ⚠ Split out of the original 284-term 'Software Systems & Cybersecurity' leaf (source_leaf_id 20) via recursive sub-clustering (k=5). Distributed systems, virtualization, GPUs/HPC, cloud/data-center infrastructure. Cross-checked against leaves 19/21/23's full underlying clusters: zero term-level overlap.
+
+### Leaf 27 — Theoretical CS, Network & Data Science  (parent: P6)
+- keywords: complex networks, complexity theory, group theory, randomness, bounds, lower bounds, network dynamics, network analysis, network science, databases, retrieval, queries, graph, algorithmic, data science, computer science, social networks, data analysis, data-intensive, data mining, complexity, computational complexity, collaboration networks, online collaboration
+- ⚠ Split out of the original 284-term 'Software Systems & Cybersecurity' leaf (source_leaf_id 20) via recursive sub-clustering (k=5). Real but noisier signal than the other splits (only ~22 of 85 original terms were genuinely specific — the worst signal-to-noise ratio of any leaf reviewed this session). Note: uses 'network' in the graph-theory/social-network-analysis sense (network science, network dynamics), distinct from leaf 21's 'wireless networking' (physical/radio communications) — different fields sharing a word, not a duplicate theme; cross-checked and confirmed zero term-level overlap with leaf 21's full cluster. ADDENDUM (2026-08-29): added 'collaboration networks' and 'online collaboration' after reviewing 2 Unassigned grants about online/large-scale collaboration in networks (grants 1153671, 1153510) that fit this leaf's existing network-science scope but matched zero curated terms. Both terms are currently singleton matches (df_corpus=1) — narrow, but real and unambiguous.
+
+### Leaf 28 — Underwater Acoustic Communications & Marine Robotics  (parent: P6)
+- keywords: acoustic communications, acoustic waveguide remote, autonomous underwater vehicles, marine mammal, modems, ocean acoustic, ocean acoustic waveguide, underwater acoustic, underwater communication, underwater networking, underwater networks, vehicles auvs, waveguide remote sensing, autonomous underwater, underwater vehicles, acoustic data, whoi, acoustic sensing, underwater, auv, waveguide, oceanographic, mac, mammals, vocalizations, acoustic
+- ⚠ Split out of leaf 21 (Wireless Networking) via recursive sub-clustering (k=2, silhouette 0.246) — a genuinely distinct theme (acoustic modems, AUVs, underwater networking/MAC protocols, WHOI) unrelated to terrestrial/cellular wireless. Checked against leaf 32 (Hydrology, Flooding & Watershed Science) for a possible merge given the shared 'water' surface similarity; rejected — only 19% doc overlap (11/58), driven by incidental generic terms, and this cluster split out of the wireless-networking leaf (engineering/comms) not the environmental-science leaf split that produced leaf 32 (earth-science/watershed) — different research communities despite the shared medium.
+
+### Leaf 29 — Energy Harvesting & Low-Power RF/Wireless Sensors  (parent: P6)
+- keywords: zero-power, near-zero, rfid, wireless sensor networks, rf, ultra-low power, wireless sensor, energy harvesting, harvest, harvesting, receiver, interference, power consumption, beamforming, piezoelectric, sensors, ultra-low, sensor networks, localization, sensing, signal, signal processing, frequency, passive, filtering
+- ⚠ Split out of leaf 21's 164-term wireless-networking core via sub-sub-clustering (k=5, silhouette 0.208, subgroup 1). A real, distinct research niche — RFID/backscatter, ultra-low-power sensor design, piezoelectric/RF energy harvesting — separate from the 5G/cellular core (leaf 21) and IoT/embedded systems (leaf 43).
+
+### Leaf 30 — IoT & Embedded Systems  (parent: P6)
+- keywords: safety and security, iot systems, embedded, latency, internet-of-things, embedded systems, iot devices, system-level, architecture, fpga, iot, hardware and software
+- ⚠ Split out of leaf 21's 164-term wireless-networking core via sub-sub-clustering (k=5, silhouette 0.208, subgroup 4). Smallest/weakest-precision of the three new splits but coherent (IoT devices/systems, embedded systems, FPGA, hardware-software co-design). Checked against leaf 19 (Control Systems, Cyber-Physical Systems & Machine Learning) for overlap — leaf 19's keyword list has zero embedded/IoT/hardware vocabulary, confirming this is a distinct theme, not duplicated content.
 
 
 ## 6. k-sweep (silhouette by k)
@@ -547,7 +589,7 @@ Nothing vanishes silently — every candidate for dropping is listed here with i
 
 ## 7. Downstream files to edit if the parent count changes
 
-If curation changes the accepted parent count away from 8, these need manual sync
+If curation changes the accepted parent count away from 7, these need manual sync
 (per docs/TOPIC_MODEL_REFIT_CHECKLIST.md's existing checklist for this):
 - `src/build_viz_aggregates.py` — `PARENT_NAMES` / `PARENT_COLORS`
 - `docs/TopicVizPrototypes/shared/enrico.js` — `PARENT_COLORS`, `parentName()`/`parentColor()`
@@ -555,27 +597,27 @@ If curation changes the accepted parent count away from 8, these need manual syn
 - `CLAUDE.md`'s "Topic modeling — state of play" section (parent count is stated there)
 
 
-## 8. The 20 largest currently-Unassigned grants by dollars (of 725 total, giving the $ headline faces)
+## 8. The 20 largest currently-Unassigned grants by dollars (of 66 total, source: keyword classifier)
 
 | grant_id | title | dollars |
 |---|---|---|
-| 714230 | PUERTO RICO TESTSITE FOR EXPLORING CONTAMINATION THREATS (PROTECT) | $38,591,094 |
-| 672764 | CELEST: A Center of Excellence for Learning in Education, Science, and Technolog | $19,399,383 |
-| 1356036 | Environmental Influences on Child Health Outcomes in Puerto Rico (ECHO-PRO) | $19,147,769 |
-| 1594618 | Mid-scale RI-1 (M1:IP): Observatory for Online Human and Platform Behavior | $16,217,700 |
-| 1196051 | Environmental Influences on Child Health Outcomes in Puerto Rico (ECHO-PRO) | $12,957,363 |
 | 78396 | Grant | $6,750,000 |
-| 989777 | The Integrative Genomics of Acute Asthma Control | $6,509,743 |
 | 1720106 | A prototype flight for the GRAMS project | $6,300,000 |
-| 1090545 | Administrative Core | $6,021,042 |
-| 1149950 | GuMI: New In Vitro Platforms to Parse the Human Gut Epithelial-Microbiome-Immune | $5,216,560 |
-| 823471 | Multi-Disciplinary Preparation of Next Generation Information Assurance Practiti | $4,962,084 |
-| 1723358 | CyberCorps Scholarship for Service (Renewal): Securing the Future: Scholarship f | $4,874,905 |
-| 931992 | Systems Approach to Unraveling the Genetic Basis of Heart Failure | $4,741,214 |
-| 1280898 | Renewal: SFS @ Northeastern - a multi-disciplinary approach | $4,600,000 |
-| 1280909 | NSF-SFS: Arizona Cyber Defense Scholarship | $3,997,784 |
-| 1051628 | Center for Research on Early Childhood Exposure and Development in Puerto Rico ( | $3,625,488 |
-| 1374512 | Orally Bioavailable 4(1H)-Quinolones with Multi-Stage Antimalarial Activity | $3,553,386 |
-| 1270145 | A Continuous Manufacturing Platform for Complex Dosage Forms | $3,515,319 |
-| 1786469 | SCC-LSR: From Technology to Humans: Protecting Users of Neural and Medical Impla | $3,500,000 |
-| 970483 | Hit-to-lead discovery for sleeping sickness via industry-academic partnership | $3,376,103 |
+| 78580 | Grant | $2,125,417 |
+| 77712 | Grant | $1,890,287 |
+| 574449 | Grant | $1,215,103 |
+| 625827 | TO BIOETHANOL THROUGH GENOMICS OF MICROBIAL SYNERGIES | $874,968 |
+| 77710 | Grant | $840,000 |
+| 77711 | Grant | $840,000 |
+| 1113526 | Pilot-Project-Core | $821,632 |
+| 78790 | Grant | $791,937 |
+| 1730685 | Uncovering the mechano-electro-chemo mechanism of fresh Li in sulfide based all  | $770,000 |
+| 1315237 | Interfacial Phenomena in Noble Metal-C60 Interaction | $654,962 |
+| 1497206 | Bioprospecting for industrial enzymes and drug lead compounds in an ancient subm | $647,360 |
+| 1616677 | DISCOVERY AND ENGINEERING OF PLANT BRANCHED CYCLIC PEPTIDE BIOSYNTHESIS | $638,000 |
+| 1570580 | Mechanics of Bio-Inspired CNT-Modified Hierarchical/Fractal Interfaces | $636,215 |
+| 78395 | Grant | $625,780 |
+| 77713 | Grant | $598,000 |
+| 727353 | Rare-Earth-Free Permanent Magnets | $562,556 |
+| 1161617 | Nanocoated Brachytherapy Spacers for Biological in Situ Image-Guided Radiotherap | $560,751 |
+| 1471140 | CAREER: Rigidity tuned elastomer origami tessellations for fast, reconfigurable, | $545,320 |

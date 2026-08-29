@@ -26,18 +26,10 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 PROC = REPO_ROOT / "data" / "processed"
 
 
-def load_docs_and_embeddings() -> tuple[list[str], list[str], np.ndarray]:
-    """Load cached SPECTER2 embeddings + build cleaned docs in the SAME order
-    as the cache. Returns (docs, ids, embeddings)."""
-    vec_path, ids_path = PROC / "specter2_embeddings.npy", PROC / "specter2_ids.txt"
-    if not vec_path.exists() or not ids_path.exists():
-        raise FileNotFoundError(
-            f"Missing SPECTER2 cache ({vec_path.name} / {ids_path.name}). "
-            "Run `python -m src.build_specter2_embeddings` locally first."
-        )
-    embeddings = np.load(vec_path)
-    ids = ids_path.read_text().splitlines()
-
+def _raw_text_lookup() -> dict[str, tuple[str, str, str]]:
+    """grant_id / 'orphan-<id>' -> (raw title, raw abstract, abstract_source),
+    UNcleaned — shared by every doc-text consumer below so they can't drift on
+    which raw columns/fallbacks feed the cleaner."""
     gr = pd.read_parquet(PROC / "grants.parquet")
     gr["grant_id"] = gr["grant_id"].astype(str)
     title_col = "title_from_abstract" if "title_from_abstract" in gr.columns else "grantname"
@@ -62,6 +54,36 @@ def load_docs_and_embeddings() -> tuple[list[str], list[str], np.ndarray]:
             else pd.Series([""] * len(ex), index=ex.index)
         for did, t, a, s in zip(ex["doc_id"], ex["title"], ex["abstract"], ex_src):
             by_id[str(did)] = (t, a, s)
+    return by_id
+
+
+def _doc_id_order() -> list[str]:
+    """The doc-id order every doc-aligned artifact (SPECTER2 cache,
+    topic_assignments.parquet) shares — read from the plain-text id list, NOT
+    the .npy, so a caller that only needs ids/text never pays for loading
+    embeddings."""
+    ids_path = PROC / "specter2_ids.txt"
+    if not ids_path.exists():
+        raise FileNotFoundError(
+            f"Missing {ids_path.name}. Run `python -m src.build_specter2_embeddings` "
+            "locally first (this file is a cheap byproduct of that run, even for a "
+            "caller that never touches the embeddings themselves)."
+        )
+    return ids_path.read_text().splitlines()
+
+
+def load_docs_and_embeddings() -> tuple[list[str], list[str], np.ndarray]:
+    """Load cached SPECTER2 embeddings + build cleaned docs in the SAME order
+    as the cache. Returns (docs, ids, embeddings)."""
+    vec_path = PROC / "specter2_embeddings.npy"
+    if not vec_path.exists():
+        raise FileNotFoundError(
+            f"Missing {vec_path.name}. Run `python -m src.build_specter2_embeddings` "
+            "locally first."
+        )
+    embeddings = np.load(vec_path)
+    ids = _doc_id_order()
+    by_id = _raw_text_lookup()
 
     docs, missing = [], 0
     for did in ids:
@@ -77,3 +99,27 @@ def load_docs_and_embeddings() -> tuple[list[str], list[str], np.ndarray]:
     if len(docs) != len(embeddings):
         raise ValueError(f"docs ({len(docs)}) and embeddings ({len(embeddings)}) misaligned")
     return docs, ids, embeddings
+
+
+def load_doc_fields() -> tuple[list[str], list[str], list[str]]:
+    """Cleaned (title, abstract) kept as SEPARATE fields, aligned to the same
+    doc-id order as load_docs_and_embeddings() — for BM25F-style consumers
+    (src/classify_by_keywords.py) that need title/abstract scored separately
+    and must NOT pull in the SPECTER2 .npy (a heavy, torch-regenerable
+    artifact) just to get doc text. Returns (ids, titles, abstracts)."""
+    ids = _doc_id_order()
+    by_id = _raw_text_lookup()
+
+    titles, abstracts, missing = [], [], 0
+    for did in ids:
+        if did in by_id:
+            t, a, s = by_id[did]
+            title, abstract = model_doc_halves(t, a, s)
+        else:
+            title, abstract = "", ""  # keep alignment; should not happen if cache is fresh
+            missing += 1
+        titles.append(title)
+        abstracts.append(abstract)
+    if missing:
+        print(f"WARNING: {missing} ids not found in grants/extras (cache stale?)")
+    return ids, titles, abstracts

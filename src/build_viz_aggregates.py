@@ -104,43 +104,54 @@ OUT_DIR = REPO_ROOT / "docs" / "TopicVizPrototypes" / "data"   # writable (this 
 # check too as a belt-and-suspenders safety net.
 FROZEN_STEMS = {"grants_umap", "topics", "grants_hier"}
 
-# 8-parent-theme names/colors — copied verbatim from docs/EnricoVis/topic_hierarchy.html
-# (PARENT_COLORS, the PI's file) and docs/TopicVizPrototypes/shared/enrico.js
-# (PARENT_NAMES, this project's own copy), which must in turn stay in sync
-# with this list. Do not hand-edit one without the other two.
+# 7-parent-theme names/colors — the curated keyword-classifier taxonomy
+# (outputs/topic_keywords.json, promoted 2026-08-29; see
+# docs/TOPIC_MODEL_REFIT_CHECKLIST.md's re-curate track). Names/order copied
+# verbatim from that file's parents{} (P0..P6, dense zero-based) and must stay
+# byte-identical to docs/TopicVizPrototypes/shared/enrico.js's own PARENT_NAMES
+# copy. Do not hand-edit one without the other. This REPLACES the prior
+# 8-parent BERTopic-era taxonomy ("Life Sciences & Biomedicine", "Physical
+# Sciences & Engineering", ... "Education & Learning") — those names never
+# matched the curated keyword lists (see the redo plan) and are retired, not
+# kept as unused history.
 PARENT_NAMES = [
-    "Life Sciences & Biomedicine", "Physical Sciences & Engineering", "Environment, Ocean & Climate",
-    "Computing & Cybersecurity", "Networks, Signals & Control", "AI, Robotics & Cognition",
-    "Society, Health & Mobility", "Education & Learning",
+    "Biomedical Sciences", "Public & Behavioral Health", "Environmental Science & Ecology",
+    "Social Science, Public Policy & Workforce Development",
+    "Materials Science & Structural/Civil Engineering", "Mathematics & Fundamental Physics",
+    "Computing, Networking & Robotic Systems",
 ]
-# 8 real names above + 4 SPARE colors below (indices 8-11) — pre-allocated
-# headroom so a refit that adds a 9th+ parent theme (always a human curation
-# step — BERTopic itself never produces parent groups, see
-# docs/TOPIC_MODEL_REFIT_CHECKLIST.md) gets a real, distinct color the moment
-# it's named in PARENT_NAMES, instead of silently reusing color 0
-# (`i % len(PARENT_COLORS)` wraps once `i` reaches 8). The 4 spares are hues
-# already used in shared/enrico.js's TOPIC_COLORS, kept red-free/grey-free to
-# match this palette's existing convention (grey is reserved for NOISE_GREY).
-# Every color-consuming line below already keys off len(PARENT_COLORS)/
-# len(PARENT_NAMES), not a literal 8 or 12, so this extension changes nothing
-# about today's 8-parent rendering — see the modulo-safety comments at the
-# actual usage sites further down this file.
+# 7 real names above + 5 SPARE colors below (indices 7-11) — pre-allocated
+# headroom so a re-curation that adds an 8th+ parent theme (always a human
+# curation step — the classifier's own discovery fit never produces parent
+# groups directly, see docs/TOPIC_MODEL_REFIT_CHECKLIST.md) gets a real,
+# distinct color the moment it's named in PARENT_NAMES, instead of silently
+# reusing color 0 (`i % len(PARENT_COLORS)` wraps once `i` reaches 7). Kept at
+# 12 total entries (one more spare than before, since the real count dropped
+# 8->7) rather than shrinking the array — every color-consuming line below
+# already keys off len(PARENT_COLORS)/len(PARENT_NAMES), not a literal count,
+# so extra headroom changes nothing about today's 7-parent rendering.
 PARENT_COLORS = [
     "#4E79A7", "#F28E2B", "#59A14F", "#B07AA1", "#76B7B2", "#EDC948", "#9C755F", "#D37295",
     "#6B4C9A", "#1B9E77", "#B6992D", "#7570B3",
 ]
 
-# Topic 14 is a documented artifact bucket, re-identified after the 2026-08-20
-# refit (previously topic 11, pre-backfill fit): 28 of 51 docs are placeholder
-# "Grant" title-only ONR records — the SAME 28 ONR docs as before (ONR has no
-# usable public abstract API, so the NIH RePORTER / NSF Award Search backfill
-# never touched them); the NIH-SubAward portion that used to share this bucket
-# shrank since most of those grants now have real text (see
-# data/nih_nsf_backfill/). It has no parent theme and is folded into
-# "Unassigned" everywhere in the hierarchy app — we do the same here for the
-# parent-level series. Re-derive this id after any future refit rather than
-# assuming it stays 14 — see docs/TOPIC_MODEL_REFIT_CHECKLIST.md §3.
-ARTIFACT_TOPIC_ID = 14
+# The BERTopic-era artifact-topic concept is RETIRED — the curated keyword
+# taxonomy has no single "flagged low-coherence cluster" the way HDBSCAN's
+# topic 14 was; every leaf here is a deliberate human curation decision. The
+# 28 ONR placeholder-title "Grant" records that used to define topic 14 are
+# now individually tagged `unassignedReason == "placeholder_title_only"` on
+# each point (see src.classify_by_keywords) rather than living in one
+# hardcoded topic id. Kept as a named sentinel (rather than deleted) so every
+# use site below stays visibly None-safe instead of silently vanishing —
+# `== ARTIFACT_TOPIC_ID` / `in (-1, ARTIFACT_TOPIC_ID)` comparisons against
+# `None` are safe by construction (a point's `dom`/`bertopicDom` is always an
+# int or None, never equal to the sentinel None via `==`).
+ARTIFACT_TOPIC_ID = None
+
+# Must match len(TOPIC_COLORS) in docs/TopicVizPrototypes/shared/enrico.js —
+# only used for validate()'s palette-headroom warning below, never to index
+# anything here.
+TOPIC_COLOR_CAPACITY = 32
 
 DENSE_FROM, DENSE_TO = 2005, 2025
 
@@ -166,21 +177,53 @@ CAVEATS = [
     },
     {
         "id": "unassigned",
-        "severity": "med",
+        "severity": "low",
         "text": (
-            "697 grants (26.0% of grants, 26.7% of dollars) carry no confident topic — "
-            "646 HDBSCAN noise + 51 in a flagged artifact bucket (topic 14). Shown as a "
-            "grey ‘Unassigned’ band, never dropped."
+            "UPDATE (2026-08-29): 66 grants (2.5% of grants, 1.9% of dollars) carry no "
+            "confident topic under the curated keyword classifier — down from 697 grants "
+            "/ 26.7% of dollars under the prior BERTopic/HDBSCAN fit. 38 have real text "
+            "but zero curated-keyword evidence (a real curation-coverage gap, worth a "
+            "future curation pass, not a modeling failure); 28 are the ONR placeholder-"
+            "title records described in 'placeholder_titles' below. Shown as a grey "
+            "'Unassigned' band, never dropped."
         ),
     },
     {
-        "id": "t14_artifact",
-        "severity": "med",
+        "id": "placeholder_titles",
+        "severity": "low",
         "text": (
-            "Topic 14 (“Mixed / low-coherence”) is a flagged artifact: 28 of its "
-            "51 grants carry the placeholder title “Grant” (all Office of Naval "
-            "Research — ONR has no public abstract API, so this backfill couldn't "
-            "reach them). It has no parent theme."
+            "28 grants carry the placeholder title “Grant” (all Office of Naval "
+            "Research — ONR has no public abstract API, so no backfill could ever "
+            "recover real text for them). Unclassifiable by any text-based method, "
+            "keyword or embedding; they have no parent theme. Formerly BERTopic's "
+            "flagged 'topic 14' artifact bucket — now tracked per-grant "
+            "(unassignedReason == 'placeholder_title_only') rather than as one hardcoded "
+            "topic id."
+        ),
+    },
+    {
+        "id": "keyword_classifier",
+        "severity": "low",
+        "text": (
+            "As of 2026-08-29, topic labels come from a deterministic, human-curated "
+            "keyword classifier (BM25F scoring over 31 leaves / 7 parent themes), not "
+            "the prior BERTopic/HDBSCAN fit — chosen for inspectability (every "
+            "assignment records which curated terms actually fired) and full offline "
+            "reproducibility. BERTopic's own assignment is kept as a comparison field "
+            "(bertopicDom/bertopicNoise), not deleted. See "
+            "docs/TOPIC_MODEL_REFIT_CHECKLIST.md."
+        ),
+    },
+    {
+        "id": "low_confidence",
+        "severity": "low",
+        "text": (
+            "501 grants (18.7%) land in the classifier's 'low' confidence tier — a "
+            "curated term matched, but weakly (a thin margin over the runner-up topic, "
+            "or few matched terms). The confidence thresholds themselves are a "
+            "provisional placeholder pending calibration against a human-labeled gold "
+            "set (not yet collected) — treat 'low' as 'worth a second look', not as "
+            "a precise probability."
         ),
     },
     {
@@ -261,6 +304,11 @@ DOLLAR_BANDS = [
     (1_000_000, 5_000_000, "$1M–$5M"),
     (5_000_000, float("inf"), "≥ $5M"),
 ]
+
+# Ordinal, low-to-high — the classifier's own conf_tier vocabulary
+# (src.classify_by_keywords), a facet the old BERTopic one-hot assignment
+# couldn't support at all (it had no per-grant confidence signal).
+CONF_LEVELS = ["none", "low", "medium", "high"]
 
 # The one cliff this round documents — verified: NIH+NIH-SUB coverage falls
 # from 64% (2019) to 3% (2020) to 0% (2021-2025). A module-level constant
@@ -459,7 +507,8 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
     # column rather than replacing "amt" so existing band-based arrangements
     # are untouched.
     cols: dict[str, list[float]] = {k: [] for k in
-                                     ("ag", "yr", "col", "st", "ab", "asrc", "tp", "tid", "pi", "amt", "amt_raw")}
+                                     ("ag", "yr", "col", "st", "ab", "asrc", "tp", "tid", "pi", "amt", "amt_raw", "conf")}
+    conf_index = {name: i for i, name in enumerate(CONF_LEVELS)}
 
     for p in points:
         gid = str(p["id"]).strip()
@@ -480,6 +529,7 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
         cols["asrc"].append(asrc_index.get(abs_src.get(gid, "none"), asrc_index["none"]))
         cols["amt"].append(_dollar_band(p["amount"]))
         cols["amt_raw"].append(p["amount"])
+        cols["conf"].append(conf_index.get(p.get("confTier", "none"), 0))
 
         attrs = pi_attrs.get(gid)
         if attrs is None:
@@ -496,7 +546,8 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
         "ids": ids,
         "titles": titles,
         "abstracts": abstracts,
-        "levels": {"ag": ag_levels, "col": col_levels, "st": st_levels, "asrc": asrc_levels, "amt": amt_levels},
+        "levels": {"ag": ag_levels, "col": col_levels, "st": st_levels, "asrc": asrc_levels,
+                   "amt": amt_levels, "conf": CONF_LEVELS},
         "cols": cols,
         "provenance": {"abstract_source": abs_source, "pi_attrs": pi_source, "abstract_text": abs_text_source},
     }
@@ -744,7 +795,7 @@ def build_missingness_grants(points: list[dict], pi_attrs: dict[str, dict], reco
         extra={"recoverable": abs_recoverable} if recoverable else None)
 
     row("topic", "Topic label", sum(1 for p in points if p["dom"] not in (-1, ARTIFACT_TOPIC_ID)),
-        "No confident cluster was found for this grant, or it fell into a flagged low-quality group.")
+        "No curated keyword term matched this grant's text (or it has no usable text at all).")
 
     def has(gid: str, pred) -> bool:
         attrs = pi_attrs.get(gid)
@@ -1030,8 +1081,15 @@ def build_viz_meta(points: list[dict], topics: list[dict]) -> dict:
             "parent": _parent_index(t.get("parent")),
             "terms": t.get("terms", []),
             "share": t.get("share", 0.0),
+            # Always False now that ARTIFACT_TOPIC_ID is retired (None) — no
+            # leaf in the curated taxonomy is a definitional artifact the way
+            # BERTopic's topic 14 was; kept as a field (not dropped) so
+            # existing frontend code that branches on `t.artifact` (e.g.
+            # topic_flow.html's dashed-border small-multiple) degrades to
+            # "never dashed" instead of needing its own edit.
             "artifact": tid == ARTIFACT_TOPIC_ID,
             "noise": tid == -1,
+            "conf_mean": t.get("conf_mean", 0.0),
         })
 
     years_present = sorted({p["year"] for p in points if p["year"] is not None})
@@ -1046,7 +1104,11 @@ def build_viz_meta(points: list[dict], topics: list[dict]) -> dict:
 
     return {
         "frozen_inputs": {
-            "projection": "SPECTER2 + UMAP + HDBSCAN",
+            # Coordinates are still SPECTER2 + UMAP; the LABELS are now the
+            # curated keyword classifier (BM25F), not HDBSCAN — stating only
+            # one half would misrepresent the method (see
+            # docs/TOPIC_MODEL_REFIT_CHECKLIST.md's re-curate track).
+            "projection": "Curated keyword scoring (BM25F) · layout: SPECTER2 + UMAP",
             "n_points": len(points),
             # len(...), not a literal 25 — about.html renders this verbatim
             # ("N topics + an explicit Unassigned noise cluster"); a hardcoded
@@ -1181,13 +1243,25 @@ def build_coverage(points: list[dict]) -> dict:
     provenance["source"] = src_path
 
     unassigned_n = sum(1 for p in points if p["dom"] == -1)
-    t11_n = sum(1 for p in points if p["dom"] == ARTIFACT_TOPIC_ID)
 
-    # abstract-presence x assignment crosstab — the reassuring finding this
-    # view should lead with: losing the abstract barely moves the unassigned
-    # rate (titles carry most of the signal for BERTopic's HDBSCAN step).
-    # This is a MODELING question (did the fit actually see abstract text),
-    # so it must use modelTitleOnly, not titleOnly (data availability) — they
+    # by_reason: the classifier's own honest breakdown of WHY a point is
+    # Unassigned (src.classify_by_keywords), replacing the old noise_n/t11_n
+    # split (which was HDBSCAN-noise-vs-one-hardcoded-artifact-topic — a
+    # distinction that no longer exists under the keyword classifier).
+    # unassignedReason is only set on points the classifier itself marked
+    # dom==-1, so this always partitions unassigned_n exactly (asserted in
+    # validate() below, not just assumed here).
+    by_reason: dict[str, int] = {}
+    for p in points:
+        if p["dom"] == -1:
+            reason = p.get("unassignedReason") or "no_usable_text"
+            by_reason[reason] = by_reason.get(reason, 0) + 1
+
+    # abstract-presence x assignment crosstab — is losing the abstract still
+    # a barely-moves-the-needle effect under the keyword classifier the way
+    # titles-carry-most-of-the-signal was for BERTopic's HDBSCAN step? This is
+    # a MODELING question (did the fit actually see abstract text), so it
+    # must use modelTitleOnly, not titleOnly (data availability) — they
     # differ for grants tagged with a LOW_TRUST_ABSTRACT_SOURCES value.
     # .get() fallback: a frozen grants_umap.json from before this field
     # existed has no modelTitleOnly key at all, so fall back to titleOnly
@@ -1201,6 +1275,27 @@ def build_coverage(points: list[dict]) -> dict:
         "abs_unassigned": sum(1 for p in points if not _model_title_only(p) and p["dom"] == -1),
         "title_assigned": sum(1 for p in points if _model_title_only(p) and p["dom"] != -1),
         "title_unassigned": sum(1 for p in points if _model_title_only(p) and p["dom"] == -1),
+    }
+
+    # confidence_by_text: the title-only-normalization check the redo plan
+    # calls its single most important automatic test, made into a real,
+    # checkable number instead of an assertion — split classifier confidence
+    # by whether the model actually saw abstract text (modelTitleOnly, NOT
+    # titleOnly — see the crosstab comment above for why). If title-only
+    # docs' none/low rate is much worse than abstract-bearing docs', or their
+    # mean_margin is HIGHER (the title weight over-boosting), that's a real
+    # calibration problem, not a rendering detail.
+    def _confidence_block(subset: list[dict]) -> dict:
+        n = len(subset)
+        tiers = {"high": 0, "medium": 0, "low": 0, "none": 0}
+        for p in subset:
+            tiers[p.get("confTier", "none")] = tiers.get(p.get("confTier", "none"), 0) + 1
+        mean_margin = round(sum(p.get("conf", 0.0) for p in subset) / n, 4) if n else 0.0
+        return {"n": n, **tiers, "mean_margin": mean_margin}
+
+    confidence_by_text = {
+        "abs": _confidence_block([p for p in points if not _model_title_only(p)]),
+        "title": _confidence_block([p for p in points if _model_title_only(p)]),
     }
 
     return {
@@ -1219,13 +1314,14 @@ def build_coverage(points: list[dict]) -> dict:
         },
         "provenance": provenance,
         "unassigned": {
-            "n": unassigned_n + t11_n,
-            "noise_n": unassigned_n,
-            "t11_n": t11_n,
+            "n": unassigned_n,
+            "by_reason": by_reason,
+            "artifact_n": 0,  # ARTIFACT_TOPIC_ID is retired — see its own comment above
             # count share, NOT dollar share — see viz_meta.json's totals.unassigned_share_d
             # for the dollar-share sibling.
-            "share_n": round((unassigned_n + t11_n) / len(points), 4),
+            "share_n": round(unassigned_n / len(points), 4),
         },
+        "confidence_by_text": confidence_by_text,
         "crosstab": crosstab,
         "cliffs": CLIFFS,
     }
@@ -1276,21 +1372,45 @@ def validate(points: list[dict], topics: list[dict], viz_meta: dict, topic_time:
     else:
         lines.append(f"parent count = {len(seen_parents)} (matches PARENT_NAMES/PARENT_COLORS) ✓")
 
-    # ARTIFACT_TOPIC_ID can't be derived automatically — parent: null alone
-    # doesn't distinguish a real artifact bucket from the noise topic or any
-    # other unparented one — but it CAN be checked for staleness: after a
-    # refit it should still point at some real, unparented topic (or be unset
-    # if this fit doesn't have an equivalent artifact bucket).
-    artifact_topic = next((t for t in topics if t["id"] == ARTIFACT_TOPIC_ID), None)
-    if artifact_topic is None or artifact_topic.get("parent") is not None:
+    # Leaf-topic palette headroom — shared/enrico.js's TOPIC_COLORS has 32
+    # entries (verified by counting there); a curated leaf count past that
+    # would silently start reusing colors (topicColor() wraps via modulo,
+    # never crashes) rather than erroring. Informational, not asserted — a
+    # re-curation genuinely can grow past 32, and the fix is extending that
+    # array, not failing the build.
+    n_leaves_here = len([t for t in topics if t["id"] >= 0])
+    if n_leaves_here > TOPIC_COLOR_CAPACITY:
         lines.append(
-            f"⚠ ARTIFACT_TOPIC_ID={ARTIFACT_TOPIC_ID} no longer names a real, unparented topic — "
-            f"re-check which topic (if any) is this refit's artifact bucket and update the "
-            f"constant (or set it to a sentinel with no matching id if there isn't one this time)."
+            f"⚠ {n_leaves_here} curated leaves exceeds shared/enrico.js's TOPIC_COLORS "
+            f"capacity ({TOPIC_COLOR_CAPACITY}) — extend that array or leaf colors will "
+            "start silently repeating."
         )
     else:
-        lines.append(f"ARTIFACT_TOPIC_ID={ARTIFACT_TOPIC_ID} still names "
-                      f"'{artifact_topic['name']}', unparented ✓")
+        lines.append(f"leaf count = {n_leaves_here} (within TOPIC_COLORS capacity "
+                      f"of {TOPIC_COLOR_CAPACITY}) ✓")
+
+    # ARTIFACT_TOPIC_ID is deliberately retired (None) under the curated
+    # keyword taxonomy — every leaf is a human curation decision, not an
+    # HDBSCAN byproduct, so there's no single "flagged artifact bucket" to
+    # re-derive after a re-curation the way there was after a BERTopic refit.
+    # Only warn if it's ever set back to a real id AND that id doesn't
+    # actually name an unparented topic (the old staleness check, now scoped
+    # to only fire when the concept is back in use at all).
+    if ARTIFACT_TOPIC_ID is None:
+        lines.append("ARTIFACT_TOPIC_ID retired (None) — curated keyword taxonomy has no "
+                      "single artifact bucket; placeholder-title grants are tracked "
+                      "per-point via unassignedReason instead ✓")
+    else:
+        artifact_topic = next((t for t in topics if t["id"] == ARTIFACT_TOPIC_ID), None)
+        if artifact_topic is None or artifact_topic.get("parent") is not None:
+            lines.append(
+                f"⚠ ARTIFACT_TOPIC_ID={ARTIFACT_TOPIC_ID} no longer names a real, unparented topic — "
+                f"re-check which topic (if any) is this refit's artifact bucket and update the "
+                f"constant (or set it back to None if there isn't one this time)."
+            )
+        else:
+            lines.append(f"ARTIFACT_TOPIC_ID={ARTIFACT_TOPIC_ID} still names "
+                          f"'{artifact_topic['name']}', unparented ✓")
 
     # topic_time reconciliation: dense-window totals + prelude must equal the corpus.
     dense_n = sum(topic_time["totals_by_year"]["n"])
@@ -1329,6 +1449,45 @@ def validate(points: list[dict], topics: list[dict], viz_meta: dict, topic_time:
     lines.append(f"Unassigned = {coverage['unassigned']['n']} grants, "
                  f"${viz_meta['totals']['unassigned_dollars']:,.0f} "
                  f"({viz_meta['totals']['unassigned_share_d']:.1%})")
+
+    # by_reason must exactly partition unassigned.n — each Unassigned point
+    # contributes to exactly one reason bucket (see build_coverage()).
+    by_reason_sum = sum(coverage["unassigned"]["by_reason"].values())
+    assert by_reason_sum == coverage["unassigned"]["n"], \
+        f"unassigned.by_reason sums to {by_reason_sum}, expected {coverage['unassigned']['n']}"
+    lines.append(f"unassigned.by_reason = {coverage['unassigned']['by_reason']} "
+                 f"(sums to {by_reason_sum}) ✓")
+
+    # parent_id == parent_of(leaf_id) for every leaf — holds BY CONSTRUCTION
+    # under the curated keyword taxonomy (kw_curation.py's own gate already
+    # enforces bidirectional leaf<->parent consistency before promotion), so
+    # this should never actually fire; kept as a cheap regression net against
+    # the topic_keywords.json -> topic_labels.json schema conversion
+    # (src.classify_by_keywords.curated_to_topic_labels) silently dropping or
+    # scrambling a parent link. Skipped gracefully if the curated source file
+    # isn't present or its leaf ids don't match this build's topics (e.g. a
+    # bootstrap taxonomy) rather than crashing on an unrelated mismatch.
+    curated_path = REPO_ROOT / "outputs" / "topic_keywords.json"
+    if curated_path.exists():
+        curated = json.loads(curated_path.read_text())
+        curated_leaves = curated.get("leaves", {})
+        topic_ids_here = {t["id"] for t in topics if t["id"] >= 0}
+        if {int(lid) for lid in curated_leaves} == topic_ids_here:
+            mismatches = [
+                t["id"] for t in topics if t["id"] >= 0
+                and t.get("parent") != curated_leaves[str(t["id"])].get("parent")
+            ]
+            assert not mismatches, (
+                f"leaf(s) {mismatches} disagree between topics.json's parent field and "
+                "outputs/topic_keywords.json's own leaf->parent mapping — the schema "
+                "conversion (curated_to_topic_labels) has drifted from its source."
+            )
+            lines.append(f"parent_id == parent_of(leaf_id) for all {len(topic_ids_here)} "
+                          "leaves (topics.json vs. outputs/topic_keywords.json) ✓")
+        else:
+            lines.append("skipped parent_id == parent_of(leaf_id) cross-check — "
+                          "topics.json's leaf ids don't match outputs/topic_keywords.json "
+                          "(bootstrap taxonomy in use?)")
 
     lines.append(f"abstract_source provenance path = {coverage['provenance']['source']}")
 

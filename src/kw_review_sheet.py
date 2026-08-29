@@ -36,7 +36,10 @@ PROC = REPO_ROOT / "data" / "processed"
 OUTPUTS = REPO_ROOT / "outputs"
 REVIEW_PATH = OUTPUTS / "KEYWORD_REVIEW.md"
 
-ARTIFACT_TOPIC_ID = 14  # kept in sync with src/build_viz_aggregates.py
+ARTIFACT_TOPIC_ID = 14  # kept in sync with src/build_viz_aggregates.py — a
+# BERTopic-legacy concept (the ONR placeholder-title artifact cluster) with no
+# meaning in the keyword taxonomy; None-safe below so retiring it elsewhere
+# (Step 4 of the redo plan) doesn't break this section.
 
 
 def _section0() -> str:
@@ -112,7 +115,10 @@ def _section3(vc: dict, draft: dict) -> str:
     # slice in an earlier version of this function).
     term_to_leaves: dict[str, list[tuple[str, int]]] = {}
     for lid, leaf in draft["leaves"].items():
-        n = leaf["provenance"]["n_terms"]
+        # Leaves produced by recursive sub-clustering during Phase 4a curation
+        # (e.g. a leaf split off another) only recorded source_leaf_id/note in
+        # provenance, not n_terms — fall back to the leaf's own keyword count.
+        n = leaf["provenance"].get("n_terms", len(leaf.get("keywords", [])))
         for kw in leaf["keywords"]:
             term_to_leaves.setdefault(kw["term"], []).append((lid, n))
 
@@ -152,8 +158,14 @@ def _section4(draft: dict) -> str:
     lines.append("Nothing vanishes silently — every candidate for dropping is listed here "
                   "with its reason and its terms, so you can override the auto-flag.\n")
     for d in draft["dropped_leaves"]:
-        lines.append(f"- Leaf {d['id']} ({d['n_terms']} terms): {d['reason']}")
-        lines.append(f"  - terms: {', '.join(d['top_terms'])}")
+        # Not every dropped-leaf record shares one schema — some (e.g. a leaf
+        # dropped by merge/relabel rather than by term-count rule) only carry
+        # id/label/reason, with no n_terms/top_terms.
+        n_terms = d.get("n_terms")
+        size = f"{n_terms} terms" if n_terms is not None else d.get("label", "no size recorded")
+        lines.append(f"- Leaf {d['id']} ({size}): {d['reason']}")
+        if d.get("top_terms"):
+            lines.append(f"  - terms: {', '.join(d['top_terms'])}")
     if not draft["dropped_leaves"]:
         lines.append("(none flagged)")
     return "\n".join(lines)
@@ -186,7 +198,7 @@ def _section6(tg: dict) -> str:
 def _section7() -> str:
     return """## 7. Downstream files to edit if the parent count changes
 
-If curation changes the accepted parent count away from 8, these need manual sync
+If curation changes the accepted parent count away from 7, these need manual sync
 (per docs/TOPIC_MODEL_REFIT_CHECKLIST.md's existing checklist for this):
 - `src/build_viz_aggregates.py` — `PARENT_NAMES` / `PARENT_COLORS`
 - `docs/TopicVizPrototypes/shared/enrico.js` — `PARENT_COLORS`, `parentName()`/`parentColor()`
@@ -198,15 +210,35 @@ If curation changes the accepted parent count away from 8, these need manual syn
 def _section8() -> str:
     gr = pd.read_parquet(PROC / "grants.parquet")
     gr["grant_id"] = gr["grant_id"].astype(str)
-    ta = pd.read_parquet(PROC / "topic_assignments.parquet")
-    ta["doc_id"] = ta["doc_id"].astype(str)
-    unassigned_ids = set(ta.loc[(ta["topic_id"] == -1) | (ta["topic_id"] == ARTIFACT_TOPIC_ID), "doc_id"])
+
+    # CANONICAL source: the keyword classifier's own output (kw_leaf_id == -1),
+    # once it exists — NOT topic_assignments.parquet's BERTopic topic_id, which
+    # would show a stale, now-wrong Unassigned set (BERTopic and the keyword
+    # classifier disagree on ~40% of docs; a grant fixed by curation this
+    # session would still show up here as "Unassigned" if this read BERTopic).
+    # Falls back to the BERTopic-based reading only in a bootstrap-only
+    # environment where classify_by_keywords hasn't been run yet.
+    kw_path = PROC / "topic_keyword_assignments.parquet"
+    if kw_path.exists():
+        kw = pd.read_parquet(kw_path)
+        kw["doc_id"] = kw["doc_id"].astype(str)
+        unassigned_ids = set(kw.loc[kw["kw_leaf_id"] == -1, "doc_id"])
+        source_note = "keyword classifier"
+    else:
+        ta = pd.read_parquet(PROC / "topic_assignments.parquet")
+        ta["doc_id"] = ta["doc_id"].astype(str)
+        mask = ta["topic_id"] == -1
+        if ARTIFACT_TOPIC_ID is not None:
+            mask = mask | (ta["topic_id"] == ARTIFACT_TOPIC_ID)
+        unassigned_ids = set(ta.loc[mask, "doc_id"])
+        source_note = "BERTopic — data/processed/topic_keyword_assignments.parquet not found"
+
     sub = gr[gr["grant_id"].isin(unassigned_ids)].copy()
     title_col = "title_from_abstract" if "title_from_abstract" in sub.columns else "grantname"
     sub["_title"] = sub[title_col].where(sub[title_col].astype(str).str.len() > 0, sub["grantname"])
     sub = sub.sort_values("totaldollars", ascending=False).head(20)
     lines = [f"## 8. The 20 largest currently-Unassigned grants by dollars "
-             f"(of {len(unassigned_ids)} total, giving the $ headline faces)\n",
+             f"(of {len(unassigned_ids)} total, source: {source_note})\n",
              "| grant_id | title | dollars |", "|---|---|---|"]
     for _, row in sub.iterrows():
         title = str(row["_title"])[:80]

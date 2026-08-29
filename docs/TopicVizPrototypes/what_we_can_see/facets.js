@@ -103,8 +103,22 @@ export const GRANT_FACET_DEFS = {
     levels: () => FACETS.levels.amt.map((name, i, arr) =>
       ({key: i, label: name, color: E.seqColor(arr.length > 1 ? i / (arr.length - 1) : 1)})),
   },
+  // Classifier confidence tier (src.classify_by_keywords) — a facet the old
+  // BERTopic one-hot assignment couldn't support at all (no per-grant
+  // confidence signal existed). Ordinal low->high; "none" (Unassigned) reads
+  // as NOISE grey, the other three as a sequential ramp so "low" and "high"
+  // are visually the two ends of one scale, not arbitrary categorical hues.
+  conf: {
+    label: "Confidence", ordinal: true, legend: "chips",
+    values: () => FACETS.cols.conf,
+    levels: () => FACETS.levels.conf.map((name, i, arr) => ({
+      key: i,
+      label: name === "none" ? "Unassigned" : name[0].toUpperCase() + name.slice(1),
+      color: name === "none" ? NOISE : E.seqColor((i - 1) / Math.max(arr.length - 2, 1)),
+    })),
+  },
 };
-export const GRANT_ARRANGE_FACETS = ["ag", "yr", "col", "st", "ab", "tp", "tid", "amt"];
+export const GRANT_ARRANGE_FACETS = ["ag", "yr", "col", "st", "ab", "tp", "tid", "amt", "conf"];
 
 // Mirrors GRANT_FACET_DEFS above, over facets_pi.json (all 2,247 roster
 // faculty) instead of facets.json (2,676 grants) — the "every PI" tab's own

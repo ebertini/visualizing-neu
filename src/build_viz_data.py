@@ -2,20 +2,37 @@
 build_viz_data.py — M4 of docs/TOPIC_WORK_FORWARD_PLAN.md.
 
 Emit the JSON the EnricoVis HTML apps fetch() at load, so the apps stop inlining
-a ~1 MB `const DATA` blob and render the real SPECTER2 + BERTopic output instead
-of the TF-IDF/t-SNE preview.
+a ~1 MB `const DATA` blob and render the real SPECTER2 + curated-keyword-classifier
+output instead of the TF-IDF/t-SNE preview.
+
+**Canonical topic source is now the keyword classifier (Phase 4b of the
+topic-model redo), not BERTopic directly.** `outputs/topic_labels.json` is no
+longer BERTopic's own seed file — it's now `src.classify_by_keywords
+--write-topic-labels`'s conversion of the curated `outputs/topic_keywords.json`
+taxonomy (31 leaves / 7 parents) into this file's schema, so the code below
+that reads `labels["topics"]`/`labels["parents"]` is unchanged; only what
+populates that file changed. BERTopic's own assignment is kept as an explicit
+`bertopicDom`/`bertopicNoise` COMPARISON pair per point — never dropped, since
+`topic_assignments.parquet` stays byte-untouched and is still worth showing
+against the new labels.
 
 Reads (all produced upstream, local-only):
   data/processed/specter2_umap_2d.npy   2-D UMAP of the SPECTER2 embeddings
   data/processed/specter2_ids.txt       parallel doc_id list (grant_id / orphan-<id>)
   data/processed/grants.parquet         grant metadata
-  data/processed/topic_assignments.parquet   doc_id -> topic_id / is_noise / is_extra
-  outputs/topic_labels.json             25 curated labels + top_terms + parents
+  data/processed/topic_keyword_assignments.parquet   doc_id -> kw_leaf_id / conf_tier /
+                                         margin_rel / n_terms_matched / unassigned_reason
+                                         (CANONICAL — src.classify_by_keywords)
+  data/processed/topic_assignments.parquet   doc_id -> topic_id / is_noise (BERTopic,
+                                         kept as a comparison column, never canonical)
+  outputs/topic_labels.json             31 curated leaf labels + top_terms + parents
+                                         (converted from outputs/topic_keywords.json)
 
 Writes docs/EnricoVis/data/:
   grants_umap.json   {meta, colors, order, points:[{id,title,agency,agencyLabel,
                       amount,year,titleOnly,modelTitleOnly,x,y,projection,
-                      t[25],dom,isNoise}]}
+                      t[31],dom,isNoise,bertopicDom,bertopicNoise,conf,confTier,
+                      nTerms,unassignedReason}]}
                       `titleOnly` = data availability (NEU has no abstract on
                       record). `modelTitleOnly` = modeling eligibility (the
                       topic-model fit saw no abstract text) — differs from
@@ -25,14 +42,16 @@ Writes docs/EnricoVis/data/:
                       EnricoVis "title only" badge) want `titleOnly`; anything
                       asking "did the model actually see text" wants
                       `modelTitleOnly`.
-  topics.json        [{id,name,terms,parent}] for the 25 topics + a noise entry
+  topics.json        [{id,name,terms,parent,share,max,conf_mean}] for the 31 leaves
+                      + a noise entry
   hier_topics.json   {parents:[{id,label,topic_ids}]} (parent grouping for the hierarchy app)
 
-The point schema matches the apps' existing `const DATA` shape (a 25-long one-hot
-`t` + dominant `dom`), so the canvas/highlight code is unchanged — only the data
-source flips from inline to fetch.
+The point schema matches the apps' existing `const DATA` shape (a one-hot `t` +
+dominant `dom`), so the canvas/highlight code is unchanged — only the data
+source flips from inline to fetch, and `t`'s length now matches the curated
+leaf count (31) rather than BERTopic's (32).
 
-Run (after build_specter2_embeddings + topics_bertopic + a 2-D UMAP):
+Run (after build_specter2_embeddings + a 2-D UMAP + src.classify_by_keywords):
     python -m src.build_viz_data
 """
 from __future__ import annotations
@@ -84,25 +103,62 @@ def build() -> dict:
 
     grants = pd.read_parquet(PROC / "grants.parquet")
     grants["grant_id"] = grants["grant_id"].astype(str)
-    ta = pd.read_parquet(PROC / "topic_assignments.parquet")
-    ta["doc_id"] = ta["doc_id"].astype(str)
-    topic_of = dict(zip(ta["doc_id"], ta["topic_id"]))
+
+    # CANONICAL topic source: the curated keyword classifier.
+    kw = pd.read_parquet(PROC / "topic_keyword_assignments.parquet")
+    kw["doc_id"] = kw["doc_id"].astype(str)
+    kw_by_id = {row.doc_id: row for row in kw.itertuples(index=False)}
+
+    # BERTopic's own assignment — kept as a comparison column only.
+    # topic_assignments.parquet stays byte-untouched; not every environment
+    # will have it (it's gitignored, local-only), so degrade to None rather
+    # than fail if it's absent.
+    bertopic_path = PROC / "topic_assignments.parquet"
+    bertopic_by_id: dict[str, tuple[int, bool]] = {}
+    if bertopic_path.exists():
+        ta = pd.read_parquet(bertopic_path)
+        ta["doc_id"] = ta["doc_id"].astype(str)
+        bertopic_by_id = {did: (int(tid), bool(noise))
+                           for did, tid, noise in zip(ta["doc_id"], ta["topic_id"], ta["is_noise"])}
 
     labels = json.load(open(OUTPUTS / "topic_labels.json", encoding="utf-8"))
     topics_meta = labels["topics"]
-    n_topics = labels["_meta"]["n_topics"]  # 25 (excludes noise)
+    n_topics = labels["_meta"]["n_topics"]  # 31 (excludes the "-1" Unassigned entry)
+
+    # The one-hot `t` vector below indexes t[tid] for tid in range(n_topics) —
+    # this only holds if the curated leaf-id space is dense (kw_curation.py's
+    # own gate already guarantees this for outputs/topic_keywords.json, but
+    # assert it again here since this script consumes topic_labels.json
+    # independently and shouldn't silently trust an intermediate file).
+    real_topic_ids = sorted(int(k) for k in topics_meta if k != "-1")
+    if real_topic_ids != list(range(n_topics)):
+        raise ValueError(
+            f"outputs/topic_labels.json's topic ids are not a dense range(0,{n_topics}) "
+            f"— got {real_topic_ids[:10]}{'...' if len(real_topic_ids) > 10 else ''}. "
+            "Re-run `python -m src.classify_by_keywords --write-topic-labels` against "
+            "a curated taxonomy that passes `kw_curation.py --check`."
+        )
 
     title_col = "title_from_abstract" if "title_from_abstract" in grants.columns else "grantname"
     points = []
+    missing_kw = 0
     for r in grants.itertuples(index=False):
         gid = r.grant_id
         if gid not in id2xy:
             continue  # grant not encoded (no title/abstract) — skip
-        tid = int(topic_of.get(gid, -1))
+        kw_row = kw_by_id.get(gid)
+        if kw_row is None:
+            missing_kw += 1
+            tid, conf, conf_tier, n_terms, unassigned_reason = -1, 0.0, "none", 0, "no_usable_text"
+        else:
+            tid = int(kw_row.kw_leaf_id)
+            conf, conf_tier, n_terms = float(kw_row.margin_rel), kw_row.conf_tier, int(kw_row.n_terms_matched)
+            unassigned_reason = kw_row.unassigned_reason
+        bt_tid, bt_noise = bertopic_by_id.get(gid, (None, None))
         title = getattr(r, title_col, "") or r.grantname
         t = [0.0] * n_topics
         if 0 <= tid < n_topics:
-            t[tid] = 1.0                      # one-hot: hard BERTopic assignment
+            t[tid] = 1.0                      # one-hot: hard keyword-classifier assignment
         x, y = id2xy[gid]
         points.append({
             "id": gid,
@@ -129,27 +185,46 @@ def build() -> dict:
             "y": round(y, 3),
             "projection": "specter2-umap",
             "t": t,
-            "dom": tid,               # -1 for noise / unassigned
+            "dom": tid,               # -1 for the classifier's own Unassigned — CANONICAL
             "isNoise": tid == -1,
+            # BERTopic's assignment, kept as a comparison column only — never
+            # read by anything that means "the current topic label" (that's
+            # dom/isNoise above). None when topic_assignments.parquet isn't
+            # available locally (it's gitignored).
+            "bertopicDom": bt_tid,
+            "bertopicNoise": bt_noise,
+            "conf": round(conf, 4),
+            "confTier": conf_tier,
+            "nTerms": n_terms,
+            "unassignedReason": unassigned_reason,
         })
+    if missing_kw:
+        print(f"WARNING: {missing_kw} grants had no row in topic_keyword_assignments.parquet "
+              f"(stale/partial classifier run?) — treated as Unassigned.")
 
-    # topics.json — 25 topics (+ a noise entry the legend can grey out).
+    # topics.json — 31 leaves (+ a noise entry the legend can grey out).
     # `share` = fraction of placed points in the topic; `max` = max one-hot weight
-    # (1.0) — both fields the apps' TOPICS entries carry.
+    # (1.0) — both fields the apps' TOPICS entries carry. `conf_mean` = mean
+    # classifier margin_rel across points landing in this leaf (0.0 for -1,
+    # which by definition has no positive margin).
     n_pts = max(len(points), 1)
     counts = {tid: 0 for tid in range(n_topics)}
+    conf_sum = {tid: 0.0 for tid in range(n_topics)}
     for p in points:
         if 0 <= p["dom"] < n_topics:
             counts[p["dom"]] += 1
+            conf_sum[p["dom"]] += p["conf"]
     topics = []
     for tid in range(n_topics):
         m = topics_meta[str(tid)]
+        n_here = counts[tid]
         topics.append({"id": tid, "name": m["label"], "terms": m["top_terms"][:10],
-                       "share": round(counts[tid] / n_pts, 4), "max": 1.0,
-                       "parent": m.get("parent")})
+                       "share": round(n_here / n_pts, 4), "max": 1.0,
+                       "parent": m.get("parent"),
+                       "conf_mean": round(conf_sum[tid] / n_here, 4) if n_here else 0.0})
     topics.append({"id": -1, "name": topics_meta["-1"]["label"], "terms": [],
                    "share": round(sum(p["isNoise"] for p in points) / n_pts, 4),
-                   "max": 1.0, "parent": None})
+                   "max": 1.0, "parent": None, "conf_mean": 0.0})
 
     # ── hierarchy data for topic_hierarchy.html ──────────────────────────────
     # Integer parent indices 0..7 (+ -1 for the "Unassigned" group: t11 artifact
@@ -174,7 +249,10 @@ def build() -> dict:
 
     grants_umap = {
         "meta": {
-            "projection": "SPECTER2 + UMAP + HDBSCAN",
+            # Coordinates are still SPECTER2 + UMAP; HDBSCAN no longer drives
+            # the topic LABEL (dom) — that's the curated keyword classifier
+            # (BM25F) now. Stating only one half would misrepresent the method.
+            "projection": "SPECTER2 + UMAP (layout) + curated keyword classifier (labels)",
             "n_points": len(points),
             "n_topics": n_topics,
             "n_title_only": int(sum(p["titleOnly"] for p in points)),

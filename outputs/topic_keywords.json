@@ -694,7 +694,7 @@
       "label": "Molecular & Cellular Biomedicine",
       "status": "accepted",
       "parent": "P0",
-      "notes": "641 terms, dominant biomedical cluster \u2014 clean, no boundary-fragment pollution remaining. Later enriched with an optical/biomedical-imaging vocabulary set (biomedical imaging, fluorescence, microscopy, contrast, etc.) found while reviewing leaf 16 (Materials Science) \u2014 verified via canonical-topic association that these terms genuinely lean biomedical (Cancer & Drug Delivery, Cardiac & Neuronal Physiology, Neuropharmacology) rather than materials/physics, despite superficially reading as optics/physics terms.",
+      "notes": "641 terms, dominant biomedical cluster \u2014 clean, no boundary-fragment pollution remaining. Later enriched with an optical/biomedical-imaging vocabulary set (biomedical imaging, fluorescence, microscopy, contrast, etc.) found while reviewing leaf 16 (Materials Science) \u2014 verified via canonical-topic association that these terms genuinely lean biomedical (Cancer & Drug Delivery, Cardiac & Neuronal Physiology, Neuropharmacology) rather than materials/physics, despite superficially reading as optics/physics terms. ADDENDUM (2026-08-29): added 'parp inhibitor', 'nanoparticle', 'drug delivery' (cancer nanoparticle-delivery cluster, e.g. grant 1162069 'PARP Inhibitor Nanotherapy for Ovarian Cancer') and 'bone', 'skeletal' (bone/skeletal-health cluster, e.g. grant 868967 'Kick-starting mechanoadaptation in aged bones') after reviewing Unassigned grants with real text that matched zero curated terms. Also added 'skeleton' and 'fracture' (2026-08-29) after finding 2 bone/skeletal-cluster grants used those words instead of 'bone'/'skeletal' literally (grant 871035 '...appendicular skeleton...', grant 860068 '...fracture healing').",
       "keywords": [
         {
           "term": "magnetic resonance",
@@ -881,6 +881,48 @@
           "weight": 1.0,
           "df_corpus": 10,
           "source": "manual"
+        },
+        {
+          "term": "parp inhibitor",
+          "weight": 1.0,
+          "df_corpus": 2,
+          "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "nanoparticle",
+          "weight": 1.0,
+          "df_corpus": 45,
+          "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "drug delivery",
+          "weight": 1.0,
+          "df_corpus": 33,
+          "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "bone",
+          "weight": 1.0,
+          "df_corpus": 22,
+          "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "skeletal",
+          "weight": 1.0,
+          "df_corpus": 13,
+          "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "skeleton",
+          "weight": 1.0,
+          "df_corpus": 9,
+          "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "fracture",
+          "weight": 1.0,
+          "df_corpus": 12,
+          "source": "human_curated_2026-08-29"
         }
       ],
       "negative_keywords": [],
@@ -1032,7 +1074,7 @@
       "label": "Speech, Hearing & Cognitive Neuroscience",
       "status": "accepted",
       "parent": "P0",
-      "notes": "Split out of the original 300-term 'Public & Behavioral Health' leaf (source_leaf_id 7). Coherent speech/hearing/auditory-processing and cognitive-neuroscience vocabulary, including 'worm'/'c elegans' style model-organism and neuroimaging terms consistent with leaf 2's theme (Neuroscience & Neural Circuits) but distinct enough (aging, hearing, speech pathology) to warrant its own leaf.",
+      "notes": "Split out of the original 300-term 'Public & Behavioral Health' leaf (source_leaf_id 7). Coherent speech/hearing/auditory-processing and cognitive-neuroscience vocabulary, including 'worm'/'c elegans' style model-organism and neuroimaging terms consistent with leaf 2's theme (Neuroscience & Neural Circuits) but distinct enough (aging, hearing, speech pathology) to warrant its own leaf. ADDENDUM (2026-08-29): added 'depth perception' after reviewing grant 912670 'Visual Depth Perception from Motion through Texture Accretion and Deletion'.",
       "keywords": [
         {
           "term": "behavioral",
@@ -1159,6 +1201,12 @@
           "weight": 1.0,
           "df_corpus": 23,
           "source": "manual"
+        },
+        {
+          "term": "depth perception",
+          "weight": 1.0,
+          "df_corpus": 1,
+          "source": "human_curated_2026-08-29"
         }
       ],
       "negative_keywords": [],
@@ -1833,7 +1881,7 @@
       "label": "Environmental Health & Ecological Restoration",
       "status": "accepted",
       "parent": "P2",
-      "notes": "Slimmed down from the original 129-term 'Coastal & Environmental Ecology' leaf after splitting out four more specific sub-themes (leaves 30-33) via recursive sub-clustering (k=6). Was a thin 4-term residual holding general restoration/disturbance-monitoring vocabulary plus 'environmental health' (manually moved here from leaf 14). Later strengthened by merging in a genuine 44-term Environmental Health Sciences & Superfund Research Program cluster discovered while reviewing leaf 14 (EPA/NIEHS-funded Superfund center vocabulary \u2014 biomonitoring, contamination, remediation, exposure) \u2014 this connects naturally: 'environmental health' was already the anchor term here, and Superfund remediation/contamination-monitoring concepts are a direct match for restoration/ecological-monitoring. Relabeled from 'Environmental Restoration & Ecological Monitoring' to reflect the merged scope.",
+      "notes": "Slimmed down from the original 129-term 'Coastal & Environmental Ecology' leaf after splitting out four more specific sub-themes (leaves 30-33) via recursive sub-clustering (k=6). Was a thin 4-term residual holding general restoration/disturbance-monitoring vocabulary plus 'environmental health' (manually moved here from leaf 14). Later strengthened by merging in a genuine 44-term Environmental Health Sciences & Superfund Research Program cluster discovered while reviewing leaf 14 (EPA/NIEHS-funded Superfund center vocabulary \u2014 biomonitoring, contamination, remediation, exposure) \u2014 this connects naturally: 'environmental health' was already the anchor term here, and Superfund remediation/contamination-monitoring concepts are a direct match for restoration/ecological-monitoring. Relabeled from 'Environmental Restoration & Ecological Monitoring' to reflect the merged scope. ADDENDUM (2026-08-29): added 'aerosol' after reviewing 2 NOAA atmospheric-chemistry grants (1498542, 1512141, both 'Towards Optimal Configurations of NAQFC Chemistry and Aerosol Representations'). ADDENDUM (2026-08-29): added 'conservation biotechnology' after reviewing grant 1732146 'The Ethics of Conservation Biotechnology: A Conceptual Engineering Approach' \u2014 an ethics/humanities grant about biotech tools for ecological conservation, placed here for its conservation/restoration framing rather than Leaf 12 (Social Science).",
       "keywords": [
         {
           "term": "natural environment",
@@ -2002,6 +2050,18 @@
           "weight": 1.0,
           "df_corpus": 21,
           "source": "manual"
+        },
+        {
+          "term": "aerosol",
+          "weight": 1.0,
+          "df_corpus": 12,
+          "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "conservation biotechnology",
+          "weight": 1.0,
+          "df_corpus": 1,
+          "source": "human_curated_2026-08-29"
         }
       ],
       "negative_keywords": [],
@@ -2185,7 +2245,7 @@
       "label": "Predator-Prey & Rocky Intertidal Ecology",
       "status": "accepted",
       "parent": "P2",
-      "notes": "Split out of the original 129-term 'Coastal & Environmental Ecology' leaf (source_leaf_id 11) via recursive sub-clustering (k=6). Coherent food-web/predator-prey ecology theme with a strong Gulf of Maine / New England regional focus.",
+      "notes": "Split out of the original 129-term 'Coastal & Environmental Ecology' leaf (source_leaf_id 11) via recursive sub-clustering (k=6). Coherent food-web/predator-prey ecology theme with a strong Gulf of Maine / New England regional focus. ADDENDUM (2026-08-29): added 'lobster', 'estuarine', 'fisheries' after reviewing Unassigned NOAA fisheries/estuarine grants (e.g. grant 1697213 'The American Lobster Industry...', grant 1697424 'Waquoit Bay National Estuarine Research Reserve') that fit this leaf's existing Gulf of Maine/New England regional-ecology focus but matched zero curated terms.",
       "keywords": [
         {
           "term": "intertidal",
@@ -2348,6 +2408,24 @@
           "weight": 1.0,
           "df_corpus": 75,
           "source": "manual"
+        },
+        {
+          "term": "lobster",
+          "weight": 1.0,
+          "df_corpus": 4,
+          "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "estuarine",
+          "weight": 1.0,
+          "df_corpus": 7,
+          "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "fisheries",
+          "weight": 1.0,
+          "df_corpus": 14,
+          "source": "human_curated_2026-08-29"
         }
       ],
       "negative_keywords": [],
@@ -2786,20 +2864,8 @@
       "label": "Groundwater/Soil Chemistry & Water Quality",
       "status": "accepted",
       "parent": "P2",
-      "notes": "Split out of the original 129-term 'Coastal & Environmental Ecology' leaf (source_leaf_id 11) via recursive sub-clustering (k=6). Distinct from surface hydrology (leaf 32) \u2014 groundwater/soil geochemistry and water-quality vocabulary.",
+      "notes": "Split out of the original 129-term 'Coastal & Environmental Ecology' leaf (source_leaf_id 11) via recursive sub-clustering (k=6). Distinct from surface hydrology (leaf 32) \u2014 groundwater/soil geochemistry and water-quality vocabulary. CORRECTION (2026-08-29, found during a negative-centroid-margin review): removed 'wells' \u2014 its plural-fold stem match ('wells'->'well') was colliding with the common English adverb 'well' ('as well', 'well-known'), matching ~42 of this leaf's 86 assigned grants purely via that collision (e.g. an Osteoarthritis study, a Fermi-level condensed-matter physics grant, a satellite-servicing SBIR \u2014 none groundwater-related). Also removed 'water', 'oxygen', 'carbon', 'gas', 'ph', 'bubbles', 'saturation', 'saturated' \u2014 all individually too generic (common across biology/chemistry/materials science broadly), confirmed by inspecting this leaf's actual member grants: the real, on-theme matches (well-water contamination, soil remediation, liquefaction/geotechnical engineering, coal-ash groundwater impact) cluster at high confidence via 'water quality', 'north carolina', 'coal', 'sodium', 'electrolysis', 'soil' instead \u2014 those 6 terms are the leaf's real signal, kept. 'saturation'/'saturated' specifically also collide with an unrelated sense (color saturation in vision science).",
       "keywords": [
-        {
-          "term": "saturated",
-          "weight": 1.0,
-          "df_corpus": 5,
-          "source": "manual"
-        },
-        {
-          "term": "bubbles",
-          "weight": 1.0,
-          "df_corpus": 5,
-          "source": "manual"
-        },
         {
           "term": "electrolysis",
           "weight": 1.0,
@@ -2810,12 +2876,6 @@
           "term": "sodium",
           "weight": 1.0,
           "df_corpus": 6,
-          "source": "manual"
-        },
-        {
-          "term": "oxygen",
-          "weight": 1.0,
-          "df_corpus": 39,
           "source": "manual"
         },
         {
@@ -2837,45 +2897,9 @@
           "source": "manual"
         },
         {
-          "term": "carbon",
-          "weight": 1.0,
-          "df_corpus": 68,
-          "source": "manual"
-        },
-        {
-          "term": "ph",
-          "weight": 1.0,
-          "df_corpus": 23,
-          "source": "manual"
-        },
-        {
-          "term": "wells",
-          "weight": 1.0,
-          "df_corpus": 9,
-          "source": "manual"
-        },
-        {
-          "term": "gas",
-          "weight": 1.0,
-          "df_corpus": 34,
-          "source": "manual"
-        },
-        {
-          "term": "saturation",
-          "weight": 1.0,
-          "df_corpus": 16,
-          "source": "manual"
-        },
-        {
           "term": "soil",
           "weight": 1.0,
           "df_corpus": 28,
-          "source": "manual"
-        },
-        {
-          "term": "water",
-          "weight": 1.0,
-          "df_corpus": 133,
           "source": "manual"
         }
       ],
@@ -3096,7 +3120,7 @@
       "label": "Social Science & Public Policy",
       "status": "accepted",
       "parent": "P3",
-      "notes": "Slimmed down from the original 189-term leaf after splitting out two genuinely distinct sub-themes: leaf 34 (Security, Trafficking, Public Health Crisis & Disaster Resilience) and a corrected leaf 26 (Education, Games & Informal STEM Learning \u2014 leaf 26 had previously been mistakenly populated with leaf-14's terms instead of its own real content). At k=2 the original 189 terms split entirely between those two groups with no natural third residual, so this leaf keeps the generic-but-real policy/stakeholder/governance vocabulary salvaged from both groups' low-precision tails \u2014 genuine content, just not specific enough to belong to either narrower theme.",
+      "notes": "Slimmed down from the original 189-term leaf after splitting out two genuinely distinct sub-themes: leaf 34 (Security, Trafficking, Public Health Crisis & Disaster Resilience) and a corrected leaf 26 (Education, Games & Informal STEM Learning \u2014 leaf 26 had previously been mistakenly populated with leaf-14's terms instead of its own real content). At k=2 the original 189 terms split entirely between those two groups with no natural third residual, so this leaf keeps the generic-but-real policy/stakeholder/governance vocabulary salvaged from both groups' low-precision tails \u2014 genuine content, just not specific enough to belong to either narrower theme. ADDENDUM (2026-08-29, human-curated post-promotion): added 'oral history' (df_corpus=1) and 'digital humanities' (df_corpus=3) after reviewing an Unassigned grant with real abstract text ('Visualizing Oral Histories of Bengal using Digital Humanities Tools', grant_id 726280) that matched zero curated terms anywhere in the taxonomy. Verified against the corpus before adding: both terms are highly specific (df_corpus 1 and 3), and the 'digital humanities' addition also corrects a real misclassification found in the same review \u2014 grant 1619895 ('Re-establishing and Sustaining a Working Ecology for Digital Humanities Scholarship') was landing in the Predator-Prey & Rocky Intertidal Ecology leaf via 'ecology' used metaphorically, not literally. ADDENDUM (2026-08-29): added 'humanities' and 'manuscripts' after reviewing Unassigned NEH-funded humanities grants (e.g. grant 1148978 'Space, Place, and the Humanities', grant 1080743 'Analyzing Ojibwe and Cherokee Manuscripts') that matched zero curated terms; also strengthens the earlier 'oral history'/'digital humanities' addition's coverage of this same broad theme. ADDENDUM (2026-08-29): added 'youth' after reviewing grant 993053 'Utah Transition Youth Empowered to Succeed (UT YES)' (HHS youth-empowerment/transition services).",
       "keywords": [
         {
           "term": "stakeholders",
@@ -3199,6 +3223,36 @@
           "weight": 1.0,
           "df_corpus": 217,
           "source": "manual"
+        },
+        {
+          "term": "oral history",
+          "weight": 1.0,
+          "df_corpus": 1,
+          "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "digital humanities",
+          "weight": 1.0,
+          "df_corpus": 3,
+          "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "humanities",
+          "weight": 1.0,
+          "df_corpus": 19,
+          "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "manuscripts",
+          "weight": 1.0,
+          "df_corpus": 8,
+          "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "youth",
+          "weight": 1.0,
+          "df_corpus": 28,
+          "source": "human_curated_2026-08-29"
         }
       ],
       "negative_keywords": [],
@@ -3282,7 +3336,7 @@
       "label": "Faculty Development, Diversity & Institutional Partnerships",
       "status": "accepted",
       "parent": "P3",
-      "notes": "172 terms. Checked via recursive sub-clustering (k=2): split into this leaf's real 128-term content (enriched below) and a genuinely distinct 44-term Environmental Health Sciences & Superfund Research Program cluster, now merged into leaf 11 (Environmental Health & Ecological Restoration) instead \u2014 'environmental health' was the anchor term of that real cluster, not a lone stray outlier as first thought.",
+      "notes": "172 terms. Checked via recursive sub-clustering (k=2): split into this leaf's real 128-term content (enriched below) and a genuinely distinct 44-term Environmental Health Sciences & Superfund Research Program cluster, now merged into leaf 11 (Environmental Health & Ecological Restoration) instead \u2014 'environmental health' was the anchor term of that real cluster, not a lone stray outlier as first thought. ADDENDUM (2026-08-29): added 'traineeship' after reviewing Unassigned graduate traineeship-award grants (e.g. grant 1546186 'Graduate Traineeship Award for Matthew Schinault') \u2014 a better fit here (alongside existing 'fellowship'/'trainees'/'training program') than Leaf 11's travel-specific scope.",
       "keywords": [
         {
           "term": "faculty",
@@ -3493,6 +3547,12 @@
           "weight": 1.0,
           "df_corpus": 140,
           "source": "manual"
+        },
+        {
+          "term": "traineeship",
+          "weight": 1.0,
+          "df_corpus": 9,
+          "source": "human_curated_2026-08-29"
         }
       ],
       "negative_keywords": [],
@@ -3664,7 +3724,7 @@
       "label": "Education, Games & Informal STEM Learning",
       "status": "accepted",
       "parent": "P3",
-      "notes": "CORRECTED: this leaf was previously mistakenly populated with terms copied from leaf 14 (faculty, institutions, urm, academic, diverse, mentor, college) instead of its own real content \u2014 none of those actually relate to education/games. Re-derived from a recursive sub-clustering pass on leaf 13 (k=2), which surfaced a genuine 101-term education/learning theme. Curated down to the specific, unambiguous terms; kept 'mixed reality' from the earlier manual addition. Deliberately excludes bare 'game' (verified polysemous \u2014 game theory in economics/networking, media/labor studies of gaming, not just educational games) in favor of the safer compound 'game design'. 'gaming' is intentionally also added to leaf 20 (Software Systems) since its 6 real occurrences split genuinely between education and software-infrastructure senses. Later enriched with STEM-education/outreach-program vocabulary (reu, erc, teachers, middle school, underrepresented, graduate students, high school) found while reviewing leaf 16 (Materials Science) \u2014 this is broader-impacts/outreach-participant language distinct in kind from this leaf's original learning-science content, but folded in here rather than fragmenting into yet another education-adjacent leaf.",
+      "notes": "CORRECTED: this leaf was previously mistakenly populated with terms copied from leaf 14 (faculty, institutions, urm, academic, diverse, mentor, college) instead of its own real content \u2014 none of those actually relate to education/games. Re-derived from a recursive sub-clustering pass on leaf 13 (k=2), which surfaced a genuine 101-term education/learning theme. Curated down to the specific, unambiguous terms; kept 'mixed reality' from the earlier manual addition. Deliberately excludes bare 'game' (verified polysemous \u2014 game theory in economics/networking, media/labor studies of gaming, not just educational games) in favor of the safer compound 'game design'. 'gaming' is intentionally also added to leaf 20 (Software Systems) since its 6 real occurrences split genuinely between education and software-infrastructure senses. Later enriched with STEM-education/outreach-program vocabulary (reu, erc, teachers, middle school, underrepresented, graduate students, high school) found while reviewing leaf 16 (Materials Science) \u2014 this is broader-impacts/outreach-participant language distinct in kind from this leaf's original learning-science content, but folded in here rather than fragmenting into yet another education-adjacent leaf. ADDENDUM (2026-08-29): added 'foreign language' after reviewing grant 43588 'Undergraduate International Studies and Foreign Language Programs' \u2014 a thin, single-grant addition; note the leaf's label (STEM/games/informal learning) doesn't perfectly describe language-program content, kept here per human decision as the closest 'undergraduate learning' home.",
       "keywords": [
         {
           "term": "computational thinking",
@@ -3917,6 +3977,12 @@
           "weight": 1.0,
           "df_corpus": 181,
           "source": "manual"
+        },
+        {
+          "term": "foreign language",
+          "weight": 1.0,
+          "df_corpus": 1,
+          "source": "human_curated_2026-08-29"
         }
       ],
       "negative_keywords": [],
@@ -4930,7 +4996,7 @@
       "label": "Materials Science & Nanotechnology",
       "status": "accepted",
       "parent": "P4",
-      "notes": "Checked via recursive sub-clustering (k=5) on the full 132-term cluster. Found 4 sub-groups beyond the real materials-science core: an optical/biomedical-imaging group (moved to leaf 3 after checking canonical-topic associations confirmed it's genuinely biomedical, not materials), a very clean Gravitational Wave/LIGO instrumentation group (split to a new leaf), a STEM-education/outreach-program group (strong terms moved to leaf 26, weak ones rejected \u2014 this leaf should hold materials-science CONTENT, not broader-impacts language, so 'high school'/'outreach' were removed despite an earlier note calling them consistent), and a generic cross-cutting methodology group (mostly rejected). This leaf now holds only the genuine materials/nanotech core.",
+      "notes": "Checked via recursive sub-clustering (k=5) on the full 132-term cluster. Found 4 sub-groups beyond the real materials-science core: an optical/biomedical-imaging group (moved to leaf 3 after checking canonical-topic associations confirmed it's genuinely biomedical, not materials), a very clean Gravitational Wave/LIGO instrumentation group (split to a new leaf), a STEM-education/outreach-program group (strong terms moved to leaf 26, weak ones rejected \u2014 this leaf should hold materials-science CONTENT, not broader-impacts language, so 'high school'/'outreach' were removed despite an earlier note calling them consistent), and a generic cross-cutting methodology group (mostly rejected). This leaf now holds only the genuine materials/nanotech core. ADDENDUM (2026-08-29): added 'solidification' and 'alloy' after reviewing Unassigned grants about alloy-solidification microstructure modeling (e.g. grant 1316012, 'Phase-Field Modeling of Solidification Microstructures') that matched zero curated terms despite being a clear materials-science fit. ADDENDUM (2026-08-29): added 'qubit' and 'quantum phases' after reviewing 2 Unassigned quantum-devices grants (1393768 'Design, Control and Application of Next-Generation Qubits', 544966 'Novel Quantum Phases at Interfaces') \u2014 a third candidate (1777815, 'Quantum Theory and Measured Turnover Rates...') was judged too ambiguous (really catalysis/chemistry, not quantum devices) and deliberately left Unassigned rather than force-fit.",
       "keywords": [
         {
           "term": "materials",
@@ -5087,6 +5153,30 @@
           "weight": 1.0,
           "df_corpus": 25,
           "source": "manual"
+        },
+        {
+          "term": "solidification",
+          "weight": 1.0,
+          "df_corpus": 10,
+          "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "alloy",
+          "weight": 1.0,
+          "df_corpus": 15,
+          "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "qubit",
+          "weight": 1.0,
+          "df_corpus": 5,
+          "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "quantum phases",
+          "weight": 1.0,
+          "df_corpus": 4,
+          "source": "human_curated_2026-08-29"
         }
       ],
       "negative_keywords": [],
@@ -5251,10 +5341,10 @@
       }
     },
     "18": {
-      "label": "Algebra, Geometry & Mathematical Physics",
+      "label": "Algebra, Geometry, Mathematical Physics & Metascience",
       "status": "accepted",
       "parent": "P5",
-      "notes": "MAJOR FIX: 'uncertainty', 'inference', 'bayesian', 'algorithms', 'probabilistic' were mistakenly present in this leaf's keywords \u2014 checked the original frozen discovery artifact (kw_term_groups_planB.json's L17 top_terms) and confirmed those 5 terms never belonged here at all; they're genuine leaf-19 (Control Systems/CPS/ML) content that got mixed in, the same class of bug as leaf 26's earlier copy-paste error. Also checked via recursive sub-clustering (k=2, exceptionally high silhouette 0.317 \u2014 one of the cleanest splits found this session): the remaining 125 terms split cleanly into this leaf's real algebra/geometry/mathematical-physics core (93 terms, curated below) and a completely distinct Particle & High-Energy Physics theme (32 terms, split to a new leaf) that happened to share embedding-space proximity via string-theory/symmetry vocabulary.",
+      "notes": "MAJOR FIX: 'uncertainty', 'inference', 'bayesian', 'algorithms', 'probabilistic' were mistakenly present in this leaf's keywords \u2014 checked the original frozen discovery artifact (kw_term_groups_planB.json's L17 top_terms) and confirmed those 5 terms never belonged here at all; they're genuine leaf-19 (Control Systems/CPS/ML) content that got mixed in, the same class of bug as leaf 26's earlier copy-paste error. Also checked via recursive sub-clustering (k=2, exceptionally high silhouette 0.317 \u2014 one of the cleanest splits found this session): the remaining 125 terms split cleanly into this leaf's real algebra/geometry/mathematical-physics core (93 terms, curated below) and a completely distinct Particle & High-Energy Physics theme (32 terms, split to a new leaf) that happened to share embedding-space proximity via string-theory/symmetry vocabulary. RELABELED (2026-08-29, human decision) from 'Algebra, Geometry & Mathematical Physics' after adding 'scientific success' and 'scientific performance' to cover 2 Unassigned AFRL metascience/scientometrics grants (1571021 'The fundamentals of predictability of scientific success', 1570796 'Quantifying Scientific Performance and Success in the Physics Community') \u2014 a niche, quantitative/statistical subfield that doesn't fit any other leaf, placed here as the closest quantitative-methods home.",
       "keywords": [
         {
           "term": "categorical",
@@ -5489,6 +5579,18 @@
           "weight": 1.0,
           "df_corpus": 56,
           "source": "manual"
+        },
+        {
+          "term": "scientific success",
+          "weight": 1.0,
+          "df_corpus": 1,
+          "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "scientific performance",
+          "weight": 1.0,
+          "df_corpus": 1,
+          "source": "human_curated_2026-08-29"
         }
       ],
       "negative_keywords": [],
@@ -5973,10 +6075,10 @@
       }
     },
     "20": {
-      "label": "Gravitational Wave Detection & LIGO Instrumentation",
+      "label": "Gravitational Wave Detection & Observational Astrophysics",
       "status": "accepted",
       "parent": "P5",
-      "notes": "Split out of the original 132-term 'Materials Science & Nanotechnology' leaf (source_leaf_id 16) via recursive sub-clustering (k=5). Exceptionally clean, tight cluster \u2014 9 of 18 kept terms have perfect 1.0 precision. Genuinely a distinct physics/astrophysics instrumentation area (LIGO mirror-coating materials research, gravitational-wave detector thermal noise), not general materials science. Parented under P5 (Materials Science & Structural/Civil Engineering) since mirror-coating research is fundamentally materials science applied to detector optics \u2014 a judgment call, revisit if a better-fitting parent becomes available.",
+      "notes": "Split out of the original 132-term 'Materials Science & Nanotechnology' leaf (source_leaf_id 16) via recursive sub-clustering (k=5). Exceptionally clean, tight cluster \u2014 9 of 18 kept terms have perfect 1.0 precision. Genuinely a distinct physics/astrophysics instrumentation area (LIGO mirror-coating materials research, gravitational-wave detector thermal noise), not general materials science. Parented under P5 (Materials Science & Structural/Civil Engineering) since mirror-coating research is fundamentally materials science applied to detector optics \u2014 a judgment call, revisit if a better-fitting parent becomes available. RELABELED (2026-08-29, human decision) from 'Gravitational Wave Detection & LIGO Instrumentation' after adding 'xmm-newton', 'tidal disruption', 'super-eddington' to cover a 10-grant NASA X-ray-astronomy/tidal-disruption-event research program (e.g. grant 1326694 'Understanding the Nature of XMM-Newton Serendipitous X-Ray Sources') that had no home \u2014 observational X-ray astrophysics sits naturally alongside this leaf's existing gravitational-wave/LIGO instrumentation scope.",
       "keywords": [
         {
           "term": "a+",
@@ -6085,6 +6187,24 @@
           "weight": 1.0,
           "df_corpus": 8,
           "source": "manual"
+        },
+        {
+          "term": "xmm-newton",
+          "weight": 1.0,
+          "df_corpus": 8,
+          "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "tidal disruption",
+          "weight": 1.0,
+          "df_corpus": 7,
+          "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "super-eddington",
+          "weight": 1.0,
+          "df_corpus": 6,
+          "source": "human_curated_2026-08-29"
         }
       ],
       "negative_keywords": [],
@@ -6123,7 +6243,7 @@
       "label": "Control Systems, Cyber-Physical Systems & Machine Learning",
       "status": "accepted",
       "parent": "P6",
-      "notes": "Checked via recursive sub-clustering (k=2, silhouette 0.229): found a genuinely distinct 41-term Rehabilitation Robotics & Assistive Technology theme (split to a new leaf \u2014 this echoes a very similar cluster seen once before in the original Plan A discovery data, suggesting it's a real, recurring NEU research area) and confirmed/enriched this leaf's real control-theory/CPS/ML core with the remaining 73-term group.",
+      "notes": "Checked via recursive sub-clustering (k=2, silhouette 0.229): found a genuinely distinct 41-term Rehabilitation Robotics & Assistive Technology theme (split to a new leaf \u2014 this echoes a very similar cluster seen once before in the original Plan A discovery data, suggesting it's a real, recurring NEU research area) and confirmed/enriched this leaf's real control-theory/CPS/ML core with the remaining 73-term group. ADDENDUM (2026-08-29): added 'anomaly detection', 'natural language processing', 'transfer learning' after reviewing a cluster of military-funded (ARO/AFRL) AI/ML Unassigned grants (e.g. grant 1789375 'Explainable Deep Anomaly Detection', grant 913696 'Sociolinguistically Informed NLP') that matched zero curated terms despite clearly belonging in this leaf's ML scope. ADDENDUM (2026-08-29): added 'cortical column' after reviewing grant 1570775 'Principles of Robust Learning Derived from the Structure and Function of the Cortical Column' \u2014 a neuroscience-inspired ML grant, judged ML-focused. ADDENDUM (2026-08-29): added 'terrain estimation' after reviewing grant 1563570 'Coordinated Multi-Robot-Chain for Terrain Estimation and Exploration' \u2014 field-robotics/multi-robot coordination, not civil/structural engineering despite the 'terrain' wording; a better fit here than Leaf 16 (Civil & Earthquake Engineering).",
       "keywords": [
         {
           "term": "nonlinear control",
@@ -6364,6 +6484,36 @@
           "weight": 1.0,
           "df_corpus": 13,
           "source": "manual"
+        },
+        {
+          "term": "anomaly detection",
+          "weight": 1.0,
+          "df_corpus": 7,
+          "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "natural language processing",
+          "weight": 1.0,
+          "df_corpus": 19,
+          "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "transfer learning",
+          "weight": 1.0,
+          "df_corpus": 5,
+          "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "cortical column",
+          "weight": 1.0,
+          "df_corpus": 2,
+          "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "terrain estimation",
+          "weight": 1.0,
+          "df_corpus": 1,
+          "source": "human_curated_2026-08-29"
         }
       ],
       "negative_keywords": [],
@@ -6980,10 +7130,10 @@
       }
     },
     "23": {
-      "label": "5G/mmWave & Cellular Wireless Communications",
+      "label": "Wireless Communications, Antennas & Electromagnetic Metamaterials",
       "status": "accepted",
       "parent": "P6",
-      "notes": "Restructured from the original 211-term 'Wireless Networking & Embedded Systems' leaf via recursive sub-clustering. Split off leaf 41 (Underwater Acoustic Communications & Marine Robotics, a fully distinct theme) and, within the remaining 164-term core, further sub-sub-clustered (k=5, silhouette 0.208) into: this leaf's 5G/mmWave/cellular core (subgroup 3, cleanest/highest-precision group), new leaf 42 (Energy Harvesting & Low-Power RF/Wireless Sensors, subgroup 1), new leaf 43 (IoT & Embedded Systems, subgroup 4), plus two mostly-generic subgroups (2: NSF tech-transfer boilerplate; 5: generic networking words) that were mostly rejected, with a handful of genuinely networking-specific terms (routing, coding, mobility, etc.) salvaged into this leaf. Retains 'mobile'/'mobile devices' salvaged earlier from leaf 20's review.",
+      "notes": "Restructured from the original 211-term 'Wireless Networking & Embedded Systems' leaf via recursive sub-clustering. Split off leaf 41 (Underwater Acoustic Communications & Marine Robotics, a fully distinct theme) and, within the remaining 164-term core, further sub-sub-clustered (k=5, silhouette 0.208) into: this leaf's 5G/mmWave/cellular core (subgroup 3, cleanest/highest-precision group), new leaf 42 (Energy Harvesting & Low-Power RF/Wireless Sensors, subgroup 1), new leaf 43 (IoT & Embedded Systems, subgroup 4), plus two mostly-generic subgroups (2: NSF tech-transfer boilerplate; 5: generic networking words) that were mostly rejected, with a handful of genuinely networking-specific terms (routing, coding, mobility, etc.) salvaged into this leaf. Retains 'mobile'/'mobile devices' salvaged earlier from leaf 20's review. RELABELED (2026-08-29, human decision) from '5G/mmWave & Cellular Wireless Communications' after adding 'antenna' and 'nanoantenna' to cover 4 Unassigned ONR/AFRL antenna/metamaterial-engineering grants (e.g. 727523 'Transformative Parameters Extreme Antennas...', 1549255 'Hybrid Graphene/Semiconductor...Nano-antenna for Terahertz-band Communication'). Some of these lean more classical-EM/materials than 5G/cellular communications specifically \u2014 kept here rather than split out, a deliberate human call given the small size of the cluster.",
       "keywords": [
         {
           "term": "60 ghz",
@@ -7260,6 +7410,18 @@
           "weight": 1.0,
           "df_corpus": 110,
           "source": "manual"
+        },
+        {
+          "term": "antenna",
+          "weight": 1.0,
+          "df_corpus": 18,
+          "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "nanoantenna",
+          "weight": 1.0,
+          "df_corpus": 3,
+          "source": "human_curated_2026-08-29"
         }
       ],
       "negative_keywords": [],
@@ -8285,7 +8447,7 @@
       "label": "Theoretical CS, Network & Data Science",
       "status": "accepted",
       "parent": "P6",
-      "notes": "Split out of the original 284-term 'Software Systems & Cybersecurity' leaf (source_leaf_id 20) via recursive sub-clustering (k=5). Real but noisier signal than the other splits (only ~22 of 85 original terms were genuinely specific \u2014 the worst signal-to-noise ratio of any leaf reviewed this session). Note: uses 'network' in the graph-theory/social-network-analysis sense (network science, network dynamics), distinct from leaf 21's 'wireless networking' (physical/radio communications) \u2014 different fields sharing a word, not a duplicate theme; cross-checked and confirmed zero term-level overlap with leaf 21's full cluster.",
+      "notes": "Split out of the original 284-term 'Software Systems & Cybersecurity' leaf (source_leaf_id 20) via recursive sub-clustering (k=5). Real but noisier signal than the other splits (only ~22 of 85 original terms were genuinely specific \u2014 the worst signal-to-noise ratio of any leaf reviewed this session). Note: uses 'network' in the graph-theory/social-network-analysis sense (network science, network dynamics), distinct from leaf 21's 'wireless networking' (physical/radio communications) \u2014 different fields sharing a word, not a duplicate theme; cross-checked and confirmed zero term-level overlap with leaf 21's full cluster. ADDENDUM (2026-08-29): added 'collaboration networks' and 'online collaboration' after reviewing 2 Unassigned grants about online/large-scale collaboration in networks (grants 1153671, 1153510) that fit this leaf's existing network-science scope but matched zero curated terms. Both terms are currently singleton matches (df_corpus=1) \u2014 narrow, but real and unambiguous.",
       "keywords": [
         {
           "term": "complex networks",
@@ -8418,6 +8580,18 @@
           "weight": 1.0,
           "df_corpus": 17,
           "source": "manual"
+        },
+        {
+          "term": "collaboration networks",
+          "weight": 1.0,
+          "df_corpus": 1,
+          "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "online collaboration",
+          "weight": 1.0,
+          "df_corpus": 1,
+          "source": "human_curated_2026-08-29"
         }
       ],
       "negative_keywords": [],

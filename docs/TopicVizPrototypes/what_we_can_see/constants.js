@@ -31,29 +31,29 @@ export const STATUS_COLOR = {earned_at_neu: "#0072B2", prior_institution: "#F28E
 // nothing here can be confused with NOISE_GREY (#c7ccd3), reserved for
 // Unassigned/no-data.
 //
-// 8 in active use + 4 SPARE colors (indices 8-11) — pre-allocated headroom,
-// same idea as shared/enrico.js's TOPIC_COLORS/PARENT_COLORS: facets.js
-// already indexes this with `% TP_COLORS.length`, so a 9th+ parent theme
-// gets a real, distinct color the moment a human curates its name, instead
-// of silently reusing color 0. The 4 spares continue the same full-saturation
-// "tab10 family" this palette is built from (tab10's own remaining non-grey
-// hue, plus 3 more from the same class of qualitative palette), not an
-// arbitrary pick.
+// 7 in active use (curated keyword-classifier taxonomy, was 8 under BERTopic)
+// + 5 SPARE colors (indices 7-11) — pre-allocated headroom, same idea as
+// shared/enrico.js's TOPIC_COLORS/PARENT_COLORS: facets.js already indexes
+// this with `% TP_COLORS.length`, so an 8th+ parent theme gets a real,
+// distinct color the moment a human curates its name, instead of silently
+// reusing color 0. The spares continue the same full-saturation "tab10
+// family" this palette is built from, not an arbitrary pick.
 export const TP_COLORS = [
   "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#17becf",
   "#bcbd22", "#66A61E", "#E6AB02", "#8DA0CB",
 ];
 
-// Hand-curated short forms for the 8 parent themes — most of the full
-// names (up to 32 chars, from build_viz_aggregates.py's PARENT_NAMES) run
-// past what fits a row/column label or a legend chip without truncating
+// Hand-curated short forms for the 7 parent themes (curated keyword-classifier
+// taxonomy, promoted 2026-08-29 — replaces the prior 8-parent BERTopic-era
+// set) — most of the full names (from build_viz_aggregates.py's PARENT_NAMES)
+// run past what fits a row/column label or a legend chip without truncating
 // mid-word. Only used for row/column headers and the color legend; the
 // per-grant hover tooltip reads the full name straight from VIZ_META.parents
 // independently of this, so it's unaffected.
 export const PARENT_SHORT = {
-  0: "Life Sci & Biomed", 1: "Physical Sci & Eng", 2: "Environment & Climate",
-  3: "Computing & Cybersec", 4: "Networks & Signals", 5: "AI & Robotics",
-  6: "Society & Health", 7: "Education & Learning",
+  0: "Biomedical Sciences", 1: "Public & Behav. Health", 2: "Environment & Ecology",
+  3: "Soc. Sci & Workforce Dev", 4: "Materials & Civil Eng",
+  5: "Math & Fundamental Physics", 6: "Computing & Robotics",
 };
 
 // Same idea, for college names — "College of Social Sciences and

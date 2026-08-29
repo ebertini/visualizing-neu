@@ -1,10 +1,30 @@
 # Topic Model Refit Checklist
 
-The runbook for redoing the BERTopic fit and getting `docs/TopicVizPrototypes/`
-(and `docs/EnricoVis/`) to reflect it. Read this once before starting a refit —
-it tells you exactly which commands to run, exactly which files constitute
-"the topic model" if you'd rather drop in new artifacts than rerun from
-scratch, and exactly what still needs a human afterward.
+The runbook for redoing the topic model and getting `docs/TopicVizPrototypes/`
+(and `docs/EnricoVis/`) to reflect it. Read this once before starting — it
+tells you exactly which commands to run, exactly which files constitute "the
+topic model" if you'd rather drop in new artifacts than rerun from scratch,
+and exactly what still needs a human afterward.
+
+**As of 2026-08-29 there are TWO independent tracks**, not one — read this
+paragraph before picking a section below:
+
+- **Track A — the REFIT track** (§1A): re-running BERTopic/SPECTER2 itself
+  (heavy deps, local-only, HuggingFace network for the embedding step). This
+  is the *original* content of this checklist and is unchanged in substance.
+- **Track B — the RE-CURATE/RE-SCORE track** (§1B): re-running the curated
+  keyword taxonomy (`outputs/topic_keywords.json`) and/or the deterministic
+  BM25F classifier (`src/classify_by_keywords.py`) that now produces the
+  **canonical** topic labels this pipeline publishes. Light deps only, fully
+  offline, no HuggingFace network, typically seconds to low minutes.
+
+**Track B's classifier output is canonical; BERTopic's own assignment is kept
+only as a comparison column** (`bertopicDom`/`bertopicNoise` on every point,
+`agrees_with_bertopic` in `data/processed/topic_keyword_assignments.parquet`).
+A pure Track A refit (no re-curation) still matters — it changes the
+`bertopicDom` comparison column and the SPECTER2/UMAP coordinates every point
+is plotted at — but it does **not**, by itself, change which leaf/parent a
+grant is labeled with anymore. Changing labels requires Track B.
 
 This is a companion to [`TOPIC_WORK_FORWARD_PLAN.md`](TOPIC_WORK_FORWARD_PLAN.md)
 / [`TOPIC_WORK_EXECUTION_REPORT.md`](TOPIC_WORK_EXECUTION_REPORT.md) (what M1–M4
@@ -12,7 +32,7 @@ built) — this doc is specifically about *doing it again*.
 
 ---
 
-## 1. The full command sequence
+## 1A. The REFIT track — full command sequence
 
 ```bash
 python -m src.build_dataset               # raw .xlsx -> canonical parquets (~30s, light deps)
@@ -23,16 +43,18 @@ python -m src.topics_bertopic             # fit BERTopic — HEAVY deps, local-o
                                            #   -> data/processed/topic_assignments.parquet
                                            #   -> data/processed/specter2_umap_2d.npy
                                            #   -> outputs/bertopic_diagnostics.json
-                                           #   -> outputs/topic_labels.json (SEED, only if absent)
+                                           #   -> outputs/topic_labels.json (SEED, only if absent —
+                                           #      see the note in §1B: this file is now normally
+                                           #      OWNED by Track B, not by this seed step)
 
-# --- optional, human, in between: curate outputs/topic_labels.json ---
-# (parent-theme grouping + nicer labels — see §3 below. Skip this and the
-# rest of the pipeline still works; you just get c-TF-IDF labels and no
-# parent groupings until you come back to it.)
+# --- Track B (below) is where labels actually come from now. A refit alone
+# only updates topic_assignments.parquet (the bertopicDom/bertopicNoise
+# comparison column) and the SPECTER2/UMAP coordinates. ---
 
-python -m src.refresh_topicviz            # build_viz_data (if stale) + build_viz_aggregates
-                                           # + _check_topicviz --data-only, in one command —
-                                           # LIGHT deps only, ~seconds
+python -m src.refresh_topicviz            # classify_by_keywords --check-only (if a curated
+                                           # taxonomy exists) + build_viz_data (if stale) +
+                                           # build_viz_aggregates + _check_topicviz --data-only —
+                                           # LIGHT deps only, ~seconds to ~30s
 ```
 
 **Heavy deps** (`requirements.txt`: torch, transformers, adapters, sentence-transformers,
@@ -41,12 +63,15 @@ bertopic, umap-learn, hdbscan) are only needed for the two `HEAVY` steps above.
 else, including the entire `refresh_topicviz` step — see `CLAUDE.md`'s Setup section
 for the `uv venv` incantation (bare `python3.11 -m venv` fails on this machine).
 
-`refresh_topicviz` only re-runs `build_viz_data` if `data/processed/topic_assignments.parquet`
-is newer than `docs/EnricoVis/data/topics.json` (an mtime check) — it prints which
-branch it took. Verify the result with:
+`refresh_topicviz` re-runs `build_viz_data` if ANY of
+`{data/processed/topic_keyword_assignments.parquet, data/processed/topic_assignments.parquet,
+outputs/topic_keywords.json, outputs/topic_labels.json}` is newer than
+`docs/EnricoVis/data/topics.json` (an mtime check over all four, not just one) — it
+prints which input triggered the rebuild. Verify the result with:
 
 ```bash
-python scripts/_check_topicviz.py          # data wiring + JS/HTML structural checks
+python scripts/_check_topicviz.py          # data wiring + parent/palette/caveat consistency
+                                            # + JS/HTML structural checks
 ```
 
 The three prototype pages `fetch()` their JSON from `data/` as ES modules, so they
@@ -60,146 +85,186 @@ python -m http.server 8000 --directory docs/TopicVizPrototypes
 
 ---
 
-## 2. What "swap out the data" means, precisely
+## 1B. The RE-CURATE/RE-SCORE track — full command sequence
+
+This is the track that actually changes which leaf/parent a grant is labeled
+with. See `docs/TOPIC_CLASSIFICATION_BRAINSTORM.md` and `/Users/uttkarshnarayan/.claude/plans/mossy-popping-pony.md`
+(outside this repo) for the full design; this section is only the mechanical
+runbook.
+
+```bash
+# --- only if re-curating the taxonomy itself (leaves/parents/keyword lists) ---
+cp outputs/keyword_topics.draft.json outputs/topic_keywords.json   # or start from
+                                                                    # keyword_topics.suggested.json
+$EDITOR outputs/topic_keywords.json          # hand curation — see src/kw_review_sheet.py's
+                                              # generated outputs/KEYWORD_REVIEW.md
+python3 -m src.kw_curation --check           # exit 1 until genuinely curated (0 errors required)
+
+# --- promote the curated taxonomy into the pipeline ---
+python3 -m src.classify_by_keywords --write-topic-labels
+                                              # writes data/processed/topic_keyword_assignments.parquet
+                                              # AND outputs/topic_labels.json (the schema build_viz_data.py
+                                              # reads) in one command — this IS the "new topic model" swap
+                                              # for this track (compare to Track A's 4-file table in §2A)
+
+python -m src.refresh_topicviz               # same command as Track A — it re-detects the
+                                              # new topic_keywords.json/topic_labels.json mtimes
+                                              # and rebuilds everything downstream
+python scripts/_check_topicviz.py            # same verification command as Track A
+```
+
+**If you only want to re-run scoring** (no taxonomy changes — e.g. after a
+corpus refresh that doesn't touch curation), skip the `kw_curation`/`$EDITOR`
+steps and just re-run `classify_by_keywords --write-topic-labels` + `refresh_topicviz`.
+
+**`outputs/topic_labels.json` changed ownership.** It used to be seeded once by
+`topics_bertopic.py` (Track A) and then hand-curated in place. It is now
+**mechanically regenerated** by `classify_by_keywords --write-topic-labels`
+from `outputs/topic_keywords.json` — do not hand-edit `topic_labels.json`
+directly anymore; edit `topic_keywords.json` (the real curated source) and
+re-run the write command. `topics_bertopic.py`'s own seeding behavior (write
+only if absent) is unchanged and still relevant for a **BERTopic-only**
+environment that hasn't adopted Track B at all.
+
+---
+
+## 2A. Track A: what "swap out the data" means, precisely
 
 If you'd rather drop in artifacts from elsewhere than rerun the pipeline locally,
-these four files are the exact, complete definition of "a new topic model":
+these four files are the exact, complete definition of "a new BERTopic fit":
 
 | File | What it is |
 |---|---|
 | `data/processed/bertopic_model/` | the fitted BERTopic model (`BERTopic.save`, pickle) |
-| `data/processed/topic_assignments.parquet` | `doc_id, topic_id, is_noise, is_extra` — every doc's assignment |
+| `data/processed/topic_assignments.parquet` | `doc_id, topic_id, is_noise, is_extra` — every doc's BERTopic assignment (comparison column only — see the intro above) |
 | `data/processed/specter2_umap_2d.npy` | the 2-D projection used for the scatterplot views |
-| `outputs/topic_labels.json` | topic labels + parent-theme grouping (committed — see §3) |
+| `outputs/topic_labels.json` | **only relevant here in a BERTopic-only environment** — see §1B, this file is normally owned by Track B now |
 
-Drop in new versions of all four (matching doc-id order/count with
+Drop in new versions of all three/four (matching doc-id order/count with
 `data/processed/specter2_ids.txt`), then run `python -m src.refresh_topicviz`.
-Nothing else needs to change by hand for the build to succeed — see §4 for what's
-still worth a human glance afterward, as distinct from what's required.
+
+## 2B. Track B: what "swap out the data" means, precisely
+
+| File | What it is |
+|---|---|
+| `outputs/topic_keywords.json` | the curated taxonomy (leaves, parents, keyword lists, weights, `df_corpus`) — committed, the real source of truth |
+| `data/processed/topic_keyword_assignments.parquet` | `doc_id, kw_leaf_id, kw_parent_id, score1, score2, conf_tier, unassigned_reason, matched_terms, ...` — every doc's canonical assignment |
+| `outputs/topic_labels.json` | mechanically derived from `topic_keywords.json` via `--write-topic-labels` — don't hand-edit |
+
+Both are produced together by one command (`classify_by_keywords --write-topic-labels`),
+so there's no multi-file drop-in step the way Track A has — just re-run it.
 
 ---
 
 ## 3. What still needs a human, and why it's not automated
 
-- **Parent-theme grouping and nicer labels in `outputs/topic_labels.json`.**
-  `topics_bertopic.py` seeds this file automatically (every topic's label defaults
-  to its c-TF-IDF top-3 terms, `parent: null`) so the pipeline is never *blocked*
-  on curation — but grouping ~25 topics into a handful of coherent parent themes,
-  and writing labels a reader will actually recognize, is real analytical
-  judgment, not something this checklist tries to automate. Edit
-  `outputs/topic_labels.json` directly: give some topics a `parent` key
-  (`"P0"`, `"P1"`, …) and add a matching entry under `"parents"` (see the
-  currently-committed file for the shape, or `scripts/_reconstruct_topic_labels.py`
-  for how it's assembled from EnricoVis's committed JSON).
-  Once curated, **the file is protected** — `topics_bertopic.py` refuses to
-  overwrite an existing `outputs/topic_labels.json` on a rerun (delete it first
-  if you deliberately want a fresh seed instead).
+### Track A (BERTopic refit)
+
+- **`ARTIFACT_TOPIC_ID` in `src/build_viz_aggregates.py` is now `None` (retired), not a BERTopic topic id.**
+  Under Track B (canonical), there is no single "flagged low-coherence cluster" —
+  every leaf is a deliberate human curation decision, and the 28 ONR
+  placeholder-title "Grant" records that used to define this bucket are now
+  tracked per-point via `unassignedReason == "placeholder_title_only"`
+  instead of one hardcoded topic id. **This constant only has meaning again
+  in a BERTopic-only environment that has never adopted Track B** — if you
+  are in that situation, set it back to a real topic id (`validate()` warns
+  if it no longer points at a real, unparented topic) rather than leaving it
+  `None`. (Historical note, corrected here: this section previously said the
+  value was "currently 11" — the code's actual value before this rewrite was
+  `14`, re-identified after the 2026-08-20 backfill; both are now moot under
+  Track B.)
+
+### Track B (re-curate/re-score)
+
+- **Curation itself** (`outputs/topic_keywords.json`'s leaves/parents/keyword
+  lists) is real analytical judgment — `src/kw_curation.py --check` only
+  validates structural well-formedness (dense ids, non-empty notes, no
+  phantom `df_corpus==0` terms, bidirectional leaf↔parent references), never
+  curation *quality*. See `docs/TOPIC_CLASSIFICATION_BRAINSTORM.md`.
+- **BM25F constants** (`K1`, `B`, `ALPHA`, `W_TITLE` in `src/classify_by_keywords.py`)
+  and the `conf_tier` thresholds are literature-standard placeholders, **not
+  calibrated against this corpus** — a stratified gold set exists as a
+  scaffold (`data/gold/topic_gold_set.csv`, built by `src/build_gold_sample.py`)
+  but has not been human-labeled. `notebooks/09_keyword_classifier_validation.ipynb`
+  found the title-only-normalization check currently **fails** (title-only
+  docs score a *higher*, not lower, mean margin — the `W_TITLE` weight
+  over-boosts short docs) — recalibrating these constants against real labels
+  is real, not-yet-done work, not a bug in the runbook.
+
+### Shared (both tracks)
 
 - **`PARENT_NAMES` / `PARENT_COLORS` in `src/build_viz_aggregates.py`**, and their
   manually-synced copy in `docs/TopicVizPrototypes/shared/enrico.js` (these two
-  must stay byte-identical — the file's own header comment says so; a plain
-  diff of the two arrays is the fastest way to check) — these are a deliberate,
+  must stay value-identical — `scripts/_check_topicviz.py`'s
+  `check_parent_taxonomy()` now asserts this mechanically on every run, and
+  `tests/test_viz_schema.py` re-asserts it under plain `pytest`; no more "a
+  plain diff is the fastest way to check") — these are a deliberate,
   hand-maintained palette, not derived from the model. `build_viz_aggregates.py`'s
   `validate()` prints a loud warning if the topic model's actual parent count
-  disagrees with `len(PARENT_NAMES)`, so you'll know exactly when this needs
-  updating (a parent count that stays at 8 needs no changes here at all).
+  disagrees with `len(PARENT_NAMES)`.
   Nothing crashes either way — an unaccounted-for parent theme falls back to
   the "Unassigned" bucket / a repeated color until you update these.
 
-  **Both `PARENT_COLORS` copies now carry 4 SPARE colors past the 8 real
-  names** (indices 8-11) — pre-picked headroom so a 9th+ parent theme, once
-  you write its name into `PARENT_NAMES` (parent themes are always a manual
-  grouping of leaf topics — BERTopic itself never produces them, see §1
-  above), immediately gets a real, distinct color instead of silently
-  reusing color 0. You still have to write the name and re-sync both copies;
-  you no longer separately have to go pick a matching color for it too,
-  as long as you're adding 4 or fewer new parents at once. A 5th+ new parent
-  in one refit exhausts the buffer and falls back to color reuse again —
-  same as today, just a higher ceiling. `docs/EnricoVis/topic_hierarchy.html`
-  (the PI's own file) was deliberately **not** extended — its palette stays
-  at 8 unless the PI extends it separately; a genuinely new parent theme
-  will render with a fresh color in this project's own pages but a reused
-  one in the PI's, until/unless that file is updated too. Same for
-  `docs/onlineoutput/topic_hierarchy.html`, which is a *published snapshot*
-  of the PI's file (regenerated by the deploy workflow whenever that source
-  changes) — not a fourth thing to hand-edit.
+  **As of the 2026-08-29 Track B promotion, `PARENT_NAMES` is 7 entries**
+  (`Biomedical Sciences`, `Public & Behavioral Health`, `Environmental Science
+  & Ecology`, `Social Science, Public Policy & Workforce Development`,
+  `Materials Science & Structural/Civil Engineering`, `Mathematics &
+  Fundamental Physics`, `Computing, Networking & Robotic Systems`) — down
+  from the prior 8-parent BERTopic-era set (`Life Sciences & Biomedicine`,
+  ... `Education & Learning`), which is retired, not kept as unused history.
+  **`PARENT_COLORS` stays at 12 entries** (7 real + 5 spare, up from 8+4) —
+  the array itself didn't need to shrink, only `PARENT_NAMES` did.
+  `docs/EnricoVis/topic_hierarchy.html` (the PI's own file) was deliberately
+  **not** touched — it still shows the old 8-parent BERTopic palette/labels,
+  since (see the correction already elsewhere in `CLAUDE.md`) his apps don't
+  fetch this project's JSON at all and are unaffected either way.
 
   **`docs/TopicVizPrototypes/what_we_can_see/constants.js`'s `TP_COLORS`**
-  (a *third*, independent 8-entry — now 12-entry — hardcoded copy, used only
-  by the "Every grant"/"Every PI" facet grids' small-mark color scale, not
-  the same list as `PARENT_COLORS` above) was previously undocumented here.
-  Same deal: already safe (`facets.js` indexes it with `% TP_COLORS.length`),
-  now also carries 4 spare colors for the same reason. `PARENT_SHORT` in the
-  same file (the hand-abbreviated parent-theme labels for that grid's row/
-  column headers) is NOT similarly buffered — abbreviations are curated text,
-  which can't be pre-invented the way a color can; a parent id past index 7
-  falls back to its full, un-abbreviated name (`facets.js`'s `PARENT_SHORT[i]
-  || name`), which is safe but may run long in a narrow label.
-
-- **`ARTIFACT_TOPIC_ID` in `src/build_viz_aggregates.py`** (currently `11` — a
-  flagged low-coherence/placeholder-title cluster from this fit). Whether *this*
-  refit has an equivalent artifact bucket, and which topic id it is, is a
-  judgment call — `validate()` warns if the constant no longer points at a real,
-  unparented topic, but deciding the right new value (or that there isn't one
-  this time) is manual.
+  (a *third*, independent 12-entry hardcoded copy, used only by the "Every
+  grant"/"Every PI" facet grids' small-mark color scale, not the same list as
+  `PARENT_COLORS` above) is unaffected by the 8→7 change (already safely
+  modulo-indexed, still has spare headroom). **`PARENT_SHORT`** in the same
+  file WAS updated for the new 7 names (keys `0`-`6`, was `0`-`7`) — this one
+  isn't buffered the way colors are (abbreviations are curated text, can't be
+  pre-invented), so it needed a real edit, already done.
 
 - **The `CAVEATS` prose in `src/build_viz_aggregates.py`** (rendered on
-  `about.html`). Sentences like *"The $2.18B headline…"*, *"808 grants (27.8%
-  of dollars) carry no confident topic…"* are hand-written, not computed —
-  `validate()`'s checks don't verify they still describe the data correctly.
-  Re-read and update this list by hand after a refit; it's expected work, not
-  a bug in the pipeline.
+  `about.html`, and filtered subsets on `topic_flow.html`/`what_we_can_see.html`
+  via a per-page id whitelist). Sentences are hand-written, not computed —
+  `validate()`'s checks don't verify they still describe the data correctly
+  (only that `by_reason` sums correctly, etc. — the *numbers cited in prose*
+  are not cross-checked against real numbers by any assert). Re-read and
+  update this list by hand after either track changes what it describes.
+  As of 2026-08-29 (Track B promotion): `"unassigned"` was rewritten with the
+  real current numbers (100 grants / 3.7% of grants / $53.7M / 2.5% of
+  dollars — down from BERTopic's 697 grants / 26.7% of dollars; this doc
+  previously and incorrectly cited "808 grants (27.8%)" here, which never
+  matched the actually-committed `viz_meta.json` either); `"t14_artifact"`
+  was renamed `"placeholder_titles"` (same underlying 28 ONR records, no
+  longer framed as an HDBSCAN artifact); two new caveats were added,
+  `"keyword_classifier"` (states the method change plainly) and
+  `"low_confidence"` (712 grants / 26.6% in the `low` confidence tier, with
+  the thresholds' calibration status noted).
+  **The caveat-id whitelists** in `topic_flow.html`'s and
+  `what_we_can_see/missing.js`'s `renderCaveats(...)` calls are now
+  mechanically cross-checked against `CAVEATS` by both
+  `scripts/_check_topicviz.py` and `tests/test_viz_schema.py` — a renamed or
+  removed id that isn't updated in both places now **fails loudly** instead
+  of silently dropping the caveat, closing the gap this checklist used to
+  just warn about manually.
 
-- **Frontend limitations — documented here, deliberately not touched by any of
-  the above except where noted.** (Line numbers below point into
-  `docs/TopicVizPrototypes/topic_flow.html` and
-  `docs/TopicVizPrototypes/what_we_can_see/missing.js` — the latter was split
-  out of `what_we_can_see.html`'s single inline script; re-point these after
-  any further restructuring. Also re-check these numbers if the file changes
-  again — they've already drifted once, from an earlier `file://` guard
-  added to the page's `<head>`.)
-
-  - **`topic_flow.html`'s parent-theme axis is now data-driven — no manual
-    step needed here after a refit.** `PARENT_KEYS` (`:137`) used to be a
-    hardcoded 9-entry literal; it's now built from `VIZ_META.parents` at
-    load time, so it can never list a parent id the aggregator's own output
-    doesn't have. This mattered in both directions, not just one: a parent
-    count *increase* used to silently drop the 9th+ theme from the chart;
-    a *decrease* used to be a hard crash (`TOPIC_TIME.series.parent[k]` was
-    `undefined` for a `k` the old literal still listed — verified with a
-    throwaway Node repro during the fix). `bandColor`/`bandName` (`:143-144`)
-    and the small-multiples fill/stroke (`:413`, `:416`) now delegate to
-    `enrico.js`'s own `parentColor()`/`parentName()` instead of reimplementing
-    the same lookup without their modulo/fallback safety. Residual, expected
-    behavior once the palette buffer above is exhausted: a name renders as a
-    raw `"P8"`-style fallback and a color repeats, until you re-curate — no
-    crash, no silent drop.
-  - The caveat-id whitelists in `topic_flow.html` (`:435-436`) and
-    `what_we_can_see/missing.js` (`:332`) will silently stop showing a caveat
-    if its `id` is renamed or removed from `CAVEATS`. Still a manual check —
-    not fixed, since there's no safe default here (a caveat's `id` is content,
-    not a count).
-  - **Leaf topic count (25 → N) was separately audited and is already fully
-    safe everywhere** — `enrico.js`'s `topicColor()`, `facets.js`'s `tid`
-    facet, `topic_flow.html`'s small-multiples loop, `build_viz_data.py`'s
-    `n_topics`-derived sizing, and even the PI's own `topic_islands.html` all
-    either derive the count dynamically or wrap their color index with
-    `% length`. `enrico.js`'s `TOPIC_COLORS` (25 in active use) also carries
-    5 SPARE colors past the current 25 (indices 25-29), same buffer idea as
-    `PARENT_COLORS` above — a 26th-30th leaf topic gets a real, distinct
-    color automatically, with no human step at all (unlike a new parent
-    theme, a new leaf topic count is a direct, automatic output of the
-    refit itself). The one loose end is **cosmetic prose**, not logic:
-    `topic_flow.html`'s `<h2>The 25 leaf topics</h2>` heading and its "a
-    25-band stack is unreadable, 25 sparklines are fine" caption will read
-    wrong after a count change. Worth a manual glance and hand-edit if you
-    want the copy to match — not fixed here, since (unlike the crash above)
-    this is a wording/content choice, not a safety issue.
-
-  Worth a manual glance after a refit that changes the parent count or renames
-  a caveat id. The crash/silent-drop risk above is now fixed; what's left here
-  is genuinely optional polish — the visualization's own HTML/JS is otherwise
-  frozen as the final prototype; see the rest of this repo's history for why.
+- **Leaf topic count is fully safe everywhere** (unchanged conclusion from
+  before this rewrite) — `enrico.js`'s `topicColor()`, `facets.js`'s `tid`
+  facet, `topic_flow.html`'s small-multiples loop (now also its heading text,
+  made data-driven off `VIZ_META.frozen_inputs.n_topics` as of 2026-08-29 —
+  previously hardcoded "The 32 leaf topics" and now correctly reads "The 31
+  leaf topics"), `build_viz_data.py`'s `n_topics`-derived sizing, and the
+  PI's own `topic_islands.html` all either derive the count dynamically or
+  wrap their color index with `% length`. `enrico.js`'s `TOPIC_COLORS` has 32
+  entries — the current 31 curated leaves fit with exactly 1 spare; a 32nd+
+  leaf in a future re-curation would need this array extended (checked
+  automatically now — see `check_parent_taxonomy()`/`test_topic_colors_capacity_covers_leaf_count`
+  above, which fail loudly rather than silently repeating colors).
 
 ---
 
@@ -207,15 +272,19 @@ still worth a human glance afterward, as distinct from what's required.
 
 1. `python -m src.build_viz_aggregates --check-only` — read the printed report.
    Every ⚠ line names something from §3 above that needs your attention; every
-   other line is informational (the numbers are *expected* to move after a
-   refit) except the handful of internal-reconciliation asserts, which fail
-   loudly (not silently wrong) if something is actually broken.
+   other line is informational (the numbers are *expected* to move after either
+   track) except the internal-reconciliation asserts (including the newer
+   `by_reason` / `parent_id == parent_of(leaf_id)` / palette-capacity checks),
+   which fail loudly (not silently wrong) if something is actually broken.
 2. `python scripts/_check_topicviz.py` — confirms every dataset the three pages
-   `fetch()` exists in `data/` and parses, and that the aggregator emits nothing
-   no page reads. The old "ran the aggregator but forgot to re-inline" failure
-   mode no longer exists: `data/*.json` is what the pages load, there's no
-   second copy to fall out of sync.
-3. Serve the directory and open all three pages — they `fetch()` their data as
+   `fetch()` exists in `data/` and parses, that `PARENT_NAMES`/`PARENT_COLORS`
+   stay value-identical between `build_viz_aggregates.py` and `enrico.js`,
+   that every caveat-id whitelist entry exists in `CAVEATS`, and that the
+   aggregator emits nothing no page reads.
+3. `python -m pytest tests/test_viz_schema.py` — the same three checks as #2,
+   re-asserted as plain pytest so a bare `pytest -q` run catches a regression
+   without a separate script invocation.
+4. Serve the directory and open all three pages — they `fetch()` their data as
    ES modules and will **not** load over `file://`:
    ```bash
    python -m http.server 8000 --directory docs/TopicVizPrototypes
@@ -223,4 +292,7 @@ still worth a human glance afterward, as distinct from what's required.
    ```
    Eyeball them with DevTools open — the automated checks catch structural
    drift, not "does this still read sensibly," and only the Network tab will
-   tell you a dataset 404'd.
+   tell you a dataset 404'd. **No browser is available in this working
+   environment as of 2026-08-29** — this step is still outstanding for the
+   Track B promotion described throughout this rewrite; say so plainly rather
+   than implying it happened.

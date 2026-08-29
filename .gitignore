@@ -284,6 +284,15 @@ data/processed/
 !data/nih_nsf_backfill/
 !data/nih_nsf_backfill/*.parquet
 
+# src/adjudicate_low_confidence.py's raw LLM response cache (Phase 4c,
+# optional/off by default) — UNLIKE data/nih_nsf_backfill/ above, deliberately
+# NOT tracked: LLM output is cheap to regenerate on demand, and treating it as
+# frozen ground truth would work against the reproducibility the keyword-
+# classifier redo is built around. Only the derived
+# data/processed/llm_adjudication.parquet (already covered by the
+# data/processed/ rule above) + a summary are meant to be shared.
+data/llm_adjudication/
+
 # OS / editor
 .DS_Store
 .vscode/

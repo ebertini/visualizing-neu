@@ -2,6 +2,62 @@
 
 Record of two conversations with Enrico on the keyword→classifier topic method, and what's still open going into the next design pass. No longer pre-meeting prep — the meeting happened; this is what came out of it plus the narrowed set of questions that remain.
 
+## RESOLVED (2026-08-29) — supersedes the "hybrid: curation + LLM" framing below
+
+**Both of the two mechanisms this doc's "Where things landed" section left open
+are now resolved in actually-built, actually-running code — not by the path
+this doc originally recorded.** This has **not yet been communicated back to
+Enrico** — say so plainly if this doc, or its resolution, comes up with him.
+
+1. **Keyword-list extraction/curation** did NOT end up being a light
+   proofreading pass on BERTopic's existing 25-topic c-TF-IDF lists (the
+   "second exchange" resolution below). It became a full, independent
+   discovery-and-curation pipeline (Plan A vs. Plan B, compared head-to-head;
+   Plan B — cluster candidate keywords directly, not documents first — won on
+   every measured axis) followed by a genuine leaf-by-leaf human curation
+   pass (recursive sub-clustering + real-document polysemy checks for
+   ambiguous terms, catching two real content-population bugs and several
+   genuinely polysemous terms a label-only review would have missed). Result:
+   **31 leaves / 7 parents**, 831 curated keyword terms, 661 documented
+   rejections, held in `outputs/topic_keywords.json` (`src/kw_curation.py
+   --check` passing 0 errors). This directly answers most of the "Open
+   questions — curation" section below (still genuinely open: "which
+   student/prior work" — unnamed).
+2. **The topic-to-document link is a deterministic BM25F scorer**
+   (`src/classify_by_keywords.py`), **not an LLM** as the "second exchange"
+   below concluded. Chosen specifically for the properties an LLM can't
+   offer: fully offline, zero marginal cost per re-run, exactly reproducible,
+   and every assignment's evidence is inspectable (which curated terms
+   fired, in which field, at what weight — see `matched_detail_json` in
+   `data/processed/topic_keyword_assignments.parquet`). This resolves nearly
+   every question in "Open questions — the LLM classification step" below by
+   making them moot (no LLM = no prompt design, no per-call cost, no
+   reproducibility concern) rather than by answering them as asked.
+   The **abstain rule** question (can the classifier say "none of these fit")
+   is answered concretely: `conf_tier == "none"` with a named
+   `unassigned_reason` (`no_usable_text`, `placeholder_title_only`, or
+   `no_keyword_evidence`) — down to **100 grants / $53.7M / 2.5% of dollars**,
+   from BERTopic's 697 / $583M / 26.7%.
+   An LLM is **not deleted from the design** — it's demoted to an optional,
+   off-by-default Phase 4c layer (`src/adjudicate_low_confidence.py`, not yet
+   run — no `ANTHROPIC_API_KEY` in this environment), scoped ONLY to the
+   `conf_tier ∈ {low, none}` tail (a few hundred docs, not the corpus), given
+   the BM25F scorer's own top-5 candidate leaves rather than "all 31" or "the
+   raw text with no structure" — closer to the *"a very constrained
+   candidate list"* framing than "the LLM freelances a topic," genuinely
+   addressing the multi-label/prompt-design/single-call-vs-many questions
+   below, just not as the primary mechanism.
+
+**The "How we'll know it worked" section's plan is also now substantially
+executed, not just proposed**: a stratified gold set exists
+(`data/gold/topic_gold_set.csv`, n=180, built by `src/build_gold_sample.py`)
+but has **not been human-labeled yet** — real accuracy/calibration numbers
+don't exist. What DOES exist: parent-level agreement with BERTopic (67.9%,
+borderline per the redo plan's own stated bands) and a title-only-
+normalization check that currently **fails** (the `W_TITLE` BM25F constant
+over-boosts short docs — a real, uncalibrated limitation, not swept under
+the rug) — see `notebooks/09_keyword_classifier_validation.ipynb`.
+
 (UI feedback from the same conversation — removing PI-matched/abstract facets, a new parent-theme palette, a "none" color option, label abbreviation, grant title on hover — has been implemented separately in `what_we_can_see.html` and isn't covered here.)
 
 ---

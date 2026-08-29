@@ -13,14 +13,28 @@ heavy steps that come before this one):
     python -m src.refresh_topicviz
 
 Runs, in order:
-  1. python -m src.build_viz_data           — ONLY if data/processed/topic_
-                                               assignments.parquet is newer
-                                               than docs/EnricoVis/data/
+  0. python -m src.classify_by_keywords     — --check-only (never writes the
+     --check-only                             parquet itself here — this just
+                                               re-validates outputs/topic_
+                                               keywords.json against
+                                               kw_curation.py's gate and prints
+                                               the current coverage/conf_tier
+                                               summary before anything below
+                                               reads its output). Skipped if
+                                               outputs/topic_keywords.json is
+                                               absent (a bootstrap/BERTopic-only
+                                               environment).
+  1. python -m src.build_viz_data           — ONLY if any of the topic-model
+                                               inputs (topic_keyword_assignments.
+                                               parquet, topic_assignments.parquet,
+                                               outputs/topic_keywords.json,
+                                               outputs/topic_labels.json) is
+                                               newer than docs/EnricoVis/data/
                                                topics.json (see _needs_rebuild
                                                below); skipped otherwise, since
-                                               its own inputs (the SPECTER2/
-                                               BERTopic artifacts) usually
-                                               aren't even present locally.
+                                               its own heavy inputs (the SPECTER2
+                                               cache) usually aren't even present
+                                               locally.
   2. python -m src.build_viz_aggregates     — always (cheap, and its OTHER
                                                inputs — data/processed/
                                                faculty*.parquet etc. — can
@@ -71,30 +85,57 @@ def _run(args: list[str]) -> None:
     subprocess.run(args, check=True)
 
 
+OUTPUTS = REPO_ROOT / "outputs"
+
+# Every input build_viz_data.py's topic source actually depends on — the
+# CANONICAL keyword-classifier output, the BERTopic comparison column, and
+# the two JSON files that name/group them. Re-running only the classifier (or
+# only re-promoting a curated taxonomy) must still trigger a rebuild; a bare
+# mtime check against just one of these (the old behavior, topic_assignments.
+# parquet only) would silently publish stale JSON after any of the others changed.
+TOPIC_MODEL_INPUTS = [
+    PROC / "topic_keyword_assignments.parquet",
+    PROC / "topic_assignments.parquet",
+    OUTPUTS / "topic_keywords.json",
+    OUTPUTS / "topic_labels.json",
+]
+
+
 def _needs_rebuild() -> bool:
-    """Is data/processed/topic_assignments.parquet newer than the EnricoVis
-    JSON it feeds? Compares mtimes, not content — cheap and sufficient here
-    since both sides are always written in one shot by their own script.
+    """Is any topic-model input newer than the EnricoVis JSON it feeds?
+    Compares mtimes, not content — cheap and sufficient here since all of
+    build_viz_data.py's output is always written in one shot.
     """
-    assignments = PROC / "topic_assignments.parquet"
     topics_json = ENRICOVIS_DATA / "topics.json"
-    if not assignments.exists():
+    existing_inputs = [p for p in TOPIC_MODEL_INPUTS if p.exists()]
+    if not existing_inputs:
         return False  # nothing to rebuild from — build_viz_data would just fail loudly
     if not topics_json.exists():
         return True  # EnricoVis JSON missing entirely — needs a first build
-    return assignments.stat().st_mtime > topics_json.stat().st_mtime
+    newest_input_mtime = max(p.stat().st_mtime for p in existing_inputs)
+    triggered_by = max(existing_inputs, key=lambda p: p.stat().st_mtime)
+    needs_it = newest_input_mtime > topics_json.stat().st_mtime
+    if needs_it:
+        print(f"  (triggered by {triggered_by.relative_to(REPO_ROOT)})")
+    return needs_it
 
 
 def main() -> None:
     python = sys.executable
 
+    if (OUTPUTS / "topic_keywords.json").exists():
+        _run([python, "-m", "src.classify_by_keywords", "--check-only"])
+    else:
+        print("outputs/topic_keywords.json absent — skipping the keyword-classifier "
+              "re-validation step (BERTopic-only environment?).")
+
     if _needs_rebuild():
-        print("data/processed/topic_assignments.parquet is newer than "
-              "docs/EnricoVis/data/topics.json — rebuilding it first.")
+        print("a topic-model input is newer than docs/EnricoVis/data/topics.json "
+              "— rebuilding it first.")
         _run([python, "-m", "src.build_viz_data"])
     else:
-        print("docs/EnricoVis/data/*.json is up to date with "
-              "topic_assignments.parquet — skipping src.build_viz_data.")
+        print("docs/EnricoVis/data/*.json is up to date with all topic-model "
+              "inputs — skipping src.build_viz_data.")
 
     _run([python, "-m", "src.build_viz_aggregates"])
     _run([python, str(REPO_ROOT / "scripts" / "_check_topicviz.py"), "--data-only"])

@@ -192,8 +192,31 @@ def build_suggested(draft: dict) -> dict:
     return out
 
 
+def _refuse_if_would_clobber_curation(draft: dict) -> None:
+    if not SUGGESTED_PATH.exists():
+        return
+    existing = json.loads(SUGGESTED_PATH.read_text())
+    if existing.get("_meta", {}).get("curation", {}).get("status") == "accepted":
+        raise SystemExit(
+            f"{SUGGESTED_PATH} is already accepted (a completed Phase 4a curation "
+            "pass) — refusing to overwrite it with this script's hardcoded, stale "
+            "25-draft-leaf suggestions. If the draft was genuinely regenerated and "
+            "a fresh assisted first pass is wanted, move the accepted file aside "
+            "first (it is the real, hand-curated taxonomy)."
+        )
+    try:
+        _check_ids_match(draft)
+    except ValueError as exc:
+        raise SystemExit(
+            f"{SUGGESTED_PATH} exists and this script's hardcoded suggestions no "
+            f"longer match the current draft's ids — refusing to overwrite without "
+            f"a human re-reviewing the new draft first.\n{exc}"
+        ) from exc
+
+
 def main() -> None:
     draft = json.loads(DRAFT_PATH.read_text())
+    _refuse_if_would_clobber_curation(draft)
     suggested = build_suggested(draft)
     SUGGESTED_PATH.write_text(json.dumps(suggested, indent=2))
     n_accept_leaf = sum(1 for _, s, _ in SUGGESTED_LEAVES.values() if s == "suggest_accept")
