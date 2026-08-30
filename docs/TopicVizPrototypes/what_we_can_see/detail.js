@@ -7,21 +7,34 @@ import { FACETS, FACETS_PI, VIZ_META } from "./data.js";
 const E = window.ENRICO;
 
 export function grantTooltip(i) {
-  const gid = FACETS.ids[i];
   const title = FACETS.titles[i];
   const agency = VIZ_META.agencies[FACETS.cols.ag[i]];
   const yr = FACETS.cols.yr[i];
   const college = FACETS.levels.col[FACETS.cols.col[i]];
   const hasAbs = FACETS.cols.ab[i] === 1;
   const parent = VIZ_META.parents.find(p => p.id === FACETS.cols.tp[i]);
+  // PI feedback: "grant number is inconsequential to audience" (dropped, was
+  // "Grant {gid} · amount") — "add PI information in grant tooltip" (added
+  // below, in its place). piNames[i] is "" when no PI matched this grant.
+  const piName = FACETS.piNames && FACETS.piNames[i];
+  // PI feedback: "for each grant how many different colleges does it
+  // involve?" — only shown when it's actually more than one, so the common
+  // single-college case doesn't grow the tooltip for no reason.
+  const nColleges = FACETS.nColleges ? FACETS.nColleges[i] : 0;
+  const collegesNote = nColleges > 1 ? ` (${nColleges} colleges involved)` : "";
   // What the grant actually IS leads the tooltip (PI feedback: "grant what
   // is it should show when you hover") — the id/amount/agency/etc. that
   // used to lead it are still there, just demoted to supporting .meta lines.
+  const secondary = FACETS.hasSecondaryTheme[i]
+    ? `<div class="meta">Also relevant to: ${E.esc(FACETS.secondaryParentLabel[i])} / ` +
+      `${E.esc(FACETS.secondaryLeafLabel[i])} (${(FACETS.secondaryMargin[i] * 100).toFixed(0)}% margin)</div>`
+    : "";
   return `<div class="t">${E.esc(title || "(no title on record)")}</div>` +
-    `<div class="meta">Grant ${E.esc(gid)} · ${E.fmtAmt(FACETS.cols.amt_raw[i])}</div>` +
+    `<div class="meta">${E.esc(piName || "PI not on record")} · ${E.fmtAmt(FACETS.cols.amt_raw[i])}</div>` +
     `<div class="meta">${E.esc(agency.key)} · ${yr === -1 ? "year unknown" : yr}</div>` +
-    `<div class="meta">${E.esc(college)}</div>` +
-    `<div class="meta">${hasAbs ? "Has abstract" : "Title only"} · ${E.esc(parent ? parent.name : "Unassigned")}</div>`;
+    `<div class="meta">${E.esc(college)}${collegesNote}</div>` +
+    `<div class="meta">${hasAbs ? "Has abstract" : "Title only"} · ${E.esc(parent ? parent.name : "Unassigned")}</div>` +
+    secondary;
 }
 
 // Honest three-way "no abstract" message rather than one vague fallback: a
@@ -30,9 +43,47 @@ export function grantTooltip(i) {
 // grants.parquet-not-built degraded path, FACETS.provenance.abstract_text
 // === "derived") — collapsing those into one message would misrepresent
 // which case actually applies.
+// Topic-keyword "fingerprint": highlights, within the grant's OWN abstract
+// text, the curated terms the classifier itself recorded as having matched
+// (FACETS.matchedTerms[i] — from topic_keyword_assignments.parquet's own
+// matched_terms column, not a client-side re-score). Deliberately a plain
+// case-insensitive SUBSTRING highlight, not a reimplementation of
+// keyword_match.py's exact/collapsed/stem tiers — a term matched here via
+// its stem (e.g. "neuron" matching "neurons") still highlights via substring
+// overlap in the common case, but this is a display approximation of the
+// classifier's decision, not a faithful second scorer; if it ever visibly
+// disagrees with the classifier, trust the classifier's matched-term LIST,
+// not this highlighting.
+function highlightMatches(text, terms) {
+  const escaped = E.esc(text);
+  if (!terms || !terms.length) return escaped;
+  // ONE combined regex, ONE replace pass — not one .replace() call per term.
+  // A per-term sequential loop (tried first, caught by a standalone test
+  // before this ever reached a real page) re-scans the growing HTML output
+  // on each iteration, so a later, SHORTER term (e.g. "learning") matches
+  // again INSIDE a mark a longer term (e.g. "machine learning") already
+  // produced, nesting <mark><mark>...</mark></mark> — invalid and visually
+  // wrong. A single alternation, longest-term-first (so "machine learning"
+  // still wins the same overlapping span "learning" would also match),
+  // consumes each character at most once, which a single pass over the
+  // ORIGINAL text structurally guarantees.
+  const sorted = terms.slice().sort((a, b) => b.length - a.length);
+  const escapedTerms = sorted.map(t => E.esc(t).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  const combined = new RegExp(escapedTerms.join("|"), "gi");
+  return escaped.replace(combined, m => `<mark>${m}</mark>`);
+}
+
 export function grantDetail(i) {
   const text = FACETS.abstracts[i];
-  if (text) return `<div class="abstract">${E.esc(text)}</div>`;
+  if (text) {
+    const terms = FACETS.matchedTerms ? FACETS.matchedTerms[i] : [];
+    const fingerprint = (terms && terms.length)
+      ? `<div class="meta fingerprint-note">Highlighted: the curated topic terms the classifier ` +
+        `found in this text (${terms.length} of them). <span class="fingerprint-terms">` +
+        `${terms.map(t => E.esc(t)).join(", ")}</span></div>`
+      : "";
+    return `<div class="abstract">${highlightMatches(text, terms)}</div>${fingerprint}`;
+  }
   const reason = FACETS.cols.ab[i] === 0
     ? "this grant is title-only in the source data"
     : FACETS.provenance.abstract_text === "derived"

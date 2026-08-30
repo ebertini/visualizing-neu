@@ -29,12 +29,20 @@ What this DOES compute, from already-existing artifacts:
     docs land and whether their centroid margins look like real signal or
     like noise, per the plan's own two named failure signatures.
 
-What this does NOT compute — and says so, rather than skipping silently:
-  - Accuracy by conf_tier (the plan's actual calibration test) needs the
-    human-labeled gold set (data/gold/topic_gold_set.csv), which has NOT
-    been labeled yet (see src/build_gold_sample.py). `gold_set_report()`
-    below reads that file and reports "0 labeled rows" honestly if so,
-    rather than fabricating a number.
+Gold-set accuracy (the plan's actual calibration test): once
+data/gold/topic_gold_set.csv is fully labeled, `gold_set_report()` computes
+real accuracy — overall, BY conf_tier, and BERTopic's own accuracy on the
+same 180 rows for the "is this better?" comparison. BERTopic's raw
+predictions live in a DIFFERENT parent-name vocabulary (8 old parents) than
+the gold labels (7 new parents) — there is no hand-authored mapping between
+them (a subjective judgment call this module avoids everywhere else), so
+BERTopic's prediction is translated into the new vocabulary via the SAME
+majority-vote-per-BERTopic-topic crosswalk `parent_level_bertopic_agreement`
+already uses, computed over the full corpus (not just the 180 gold rows) so
+it isn't circular. A gold label of "unassigned" is scored as correct only
+if the classifier being scored (keyword or BERTopic-equivalent) also
+produced no confident parent. Before labeling: reports "0 labeled rows"
+honestly rather than fabricating a number.
 
 Run:
     python3 -m src.validate_keyword_classifier
@@ -42,6 +50,7 @@ Run:
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 
 import numpy as np
@@ -49,16 +58,24 @@ import pandas as pd
 
 try:
     from src.classify_by_keywords import (
-        ARTIFACT_TOPIC_ID, TOPIC_LABELS_PATH, classify, load_curated_taxonomy,
+        ARTIFACT_TOPIC_ID, classify, load_curated_taxonomy,
     )
     from src.clean_text import usable_abstract
 except ImportError:  # run from within src/
-    from classify_by_keywords import ARTIFACT_TOPIC_ID, TOPIC_LABELS_PATH, classify, load_curated_taxonomy
+    from classify_by_keywords import ARTIFACT_TOPIC_ID, classify, load_curated_taxonomy
     from clean_text import usable_abstract
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PROC = REPO_ROOT / "data" / "processed"
 GOLD_PATH = REPO_ROOT / "data" / "gold" / "topic_gold_set.csv"
+OUTPUTS = REPO_ROOT / "outputs"
+# The ORIGINAL 8-parent/32-topic BERTopic seed (frozen from commit ab6782d) —
+# NOT classify_by_keywords.TOPIC_LABELS_PATH (outputs/topic_labels.json),
+# which the 2026-08-29 redo repurposed to hold the keyword taxonomy's own
+# conversion instead. A crosswalk that needs the TRUE old BERTopic parent
+# scheme (below) would silently compute garbage against the live file — see
+# CLAUDE.md's own "redefining an existing field's meaning" lesson.
+BERTOPIC_FROZEN_LABELS_PATH = OUTPUTS / "bertopic_topic_labels_frozen.json"
 
 # Bands from the plan's own Validation section — written down before
 # looking at the number, not fitted to it afterward.
@@ -112,7 +129,7 @@ def title_only_normalization_report(kw_df: pd.DataFrame) -> dict:
 
 
 def _old_topic_to_parent() -> dict[int, str]:
-    labels = json.loads(TOPIC_LABELS_PATH.read_text())
+    labels = json.loads(BERTOPIC_FROZEN_LABELS_PATH.read_text())
     crosswalk = {}
     for pid, p in labels["parents"].items():
         for tid in p.get("topic_ids", []):
@@ -120,7 +137,15 @@ def _old_topic_to_parent() -> dict[int, str]:
     return crosswalk
 
 
-def parent_level_bertopic_agreement(kw_df: pd.DataFrame) -> dict:
+def _bertopic_topic_majority_kw_parent(kw_df: pd.DataFrame) -> tuple[pd.DataFrame, "pd.Series[str]"]:
+    """(comparable_df, majority_by_topic): for each real (non-noise) BERTopic
+    topic_id, the majority kw_parent_id among docs the keyword classifier
+    confidently placed that BERTopic put in that topic — computed over the
+    FULL corpus, not just any specific subset, so callers scoring a subset
+    (e.g. the 180 gold-set rows) aren't circularly voting on themselves.
+    Shared by `parent_level_bertopic_agreement` (agreement rate) and
+    `gold_set_report` (translating BERTopic's own prediction into the new
+    taxonomy's vocabulary for an apples-to-apples gold-set comparison)."""
     ta = pd.read_parquet(PROC / "topic_assignments.parquet")[["doc_id", "topic_id"]].copy()
     ta["doc_id"] = ta["doc_id"].astype(str)
     df = kw_df.merge(ta, on="doc_id", how="left")
@@ -129,12 +154,13 @@ def parent_level_bertopic_agreement(kw_df: pd.DataFrame) -> dict:
     old_parent_of = _old_topic_to_parent()
     comparable = df[~df["topic_id"].isin(noise_like) & df["topic_id"].notna() & (df["kw_leaf_id"] != -1)].copy()
     comparable["old_parent"] = comparable["topic_id"].map(old_parent_of)
-
-    # Majority-vote crosswalk PER OLD TOPIC (not per old-parent-label) — see
-    # module docstring for why: this needs no hand-authored semantic mapping
-    # between the two taxonomies' differently-named parents.
     majority_by_topic = (comparable.groupby("topic_id")["kw_parent_id"]
                           .agg(lambda s: s.value_counts().idxmax()))
+    return comparable, majority_by_topic
+
+
+def parent_level_bertopic_agreement(kw_df: pd.DataFrame) -> dict:
+    comparable, majority_by_topic = _bertopic_topic_majority_kw_parent(kw_df)
     comparable["majority_kw_parent_for_topic"] = comparable["topic_id"].map(majority_by_topic)
     comparable["agrees"] = comparable["kw_parent_id"] == comparable["majority_kw_parent_for_topic"]
 
@@ -206,22 +232,109 @@ def embedding_centroid_report(leaves: dict, parents: dict) -> dict:
     }
 
 
-def gold_set_report() -> dict:
+UNASSIGNED_LABEL = "unassigned"  # the literal string a human labeler writes
+# when no curated parent fits — see src/build_gold_sample.py's docstring.
+
+
+def _wilson_ci95(p: float, n: int) -> tuple[float, float]:
+    """95% Wilson score interval (more honest than the naive normal
+    approximation at small n or p near 0/1, both of which apply here at
+    n=180 split into per-conf_tier strata that can be quite small)."""
+    if n == 0:
+        return (float("nan"), float("nan"))
+    z = 1.96
+    denom = 1 + z**2 / n
+    center = (p + z**2 / (2 * n)) / denom
+    half = (z * math.sqrt(p * (1 - p) / n + z**2 / (4 * n**2))) / denom
+    return (max(0.0, center - half), min(1.0, center + half))
+
+
+def gold_set_report(kw_df: pd.DataFrame) -> dict:
     if not GOLD_PATH.exists():
         return {"status": "NOT BUILT — run `python3 -m src.build_gold_sample` first"}
     gold = pd.read_csv(GOLD_PATH, dtype=str).fillna("")
-    n_labeled = int((gold["human_parent_label"].str.strip() != "").sum())
-    if n_labeled == 0:
+    gold["human_parent_label"] = gold["human_parent_label"].str.strip()
+    n_labeled = int((gold["human_parent_label"] != "").sum())
+    if n_labeled < len(gold):
         return {
-            "status": f"scaffold exists ({len(gold)} rows) but 0 ROWS ARE LABELED — "
-                      "human_parent_label is empty for every row. No accuracy or "
-                      "calibration number exists yet; see src/build_gold_sample.py's "
-                      "docstring for how to label it.",
-            "n_rows": len(gold), "n_labeled": 0,
+            "status": f"{n_labeled}/{len(gold)} rows labeled — scoring withheld until "
+                      "every row has a label (a partial gold set is not a representative "
+                      "sample of its own stratification).",
+            "n_rows": len(gold), "n_labeled": n_labeled,
         }
-    return {"status": f"{n_labeled}/{len(gold)} rows labeled — scoring not yet implemented "
-                       "here (accuracy-by-conf_tier is future work once labeling is complete)",
-            "n_rows": len(gold), "n_labeled": n_labeled}
+
+    gold = gold.merge(
+        kw_df[["doc_id", "kw_parent_label", "kw_leaf_id", "conf_tier"]],
+        left_on="grant_id", right_on="doc_id", how="left",
+    )
+    missing = gold["kw_parent_label"].isna() & gold["kw_leaf_id"].isna()
+    if missing.any():
+        raise ValueError(
+            f"{missing.sum()} gold-set grant_id(s) not found in topic_keyword_assignments.parquet "
+            "— the gold sample and the classifier output have drifted apart (re-run "
+            "src.classify_by_keywords, or re-check the gold sample's grant_ids)."
+        )
+
+    # kw_leaf_id == -1 means the classifier itself found no confident parent —
+    # kw_parent_label is null in that case (see classify_by_keywords.classify).
+    gold["kw_parent_label"] = gold["kw_parent_label"].fillna(UNASSIGNED_LABEL)
+    gold["kw_correct"] = gold["kw_parent_label"] == gold["human_parent_label"]
+
+    # BERTopic's own prediction, translated into the SAME (new) parent
+    # vocabulary via the majority-vote-per-topic crosswalk (see
+    # _bertopic_topic_majority_kw_parent) — computed over the full corpus so
+    # this isn't circular. A BERTopic topic with no confident-kw-classifier
+    # docs at all (majority_by_topic has no entry) or noise/artifact topic_id
+    # both translate to "unassigned".
+    _, majority_by_topic = _bertopic_topic_majority_kw_parent(kw_df)
+    id_to_label = dict(zip(kw_df["kw_parent_id"].dropna(), kw_df["kw_parent_label"].dropna()))
+    ta = pd.read_parquet(PROC / "topic_assignments.parquet")[["doc_id", "topic_id"]].copy()
+    ta["doc_id"] = ta["doc_id"].astype(str)
+    gold = gold.merge(ta, on="doc_id", how="left")
+    noise_like = {-1, ARTIFACT_TOPIC_ID}
+
+    def _bertopic_equivalent_label(topic_id) -> str:
+        if pd.isna(topic_id) or topic_id in noise_like:
+            return UNASSIGNED_LABEL
+        parent_id = majority_by_topic.get(topic_id)
+        return id_to_label.get(parent_id, UNASSIGNED_LABEL) if parent_id is not None else UNASSIGNED_LABEL
+
+    gold["bertopic_equivalent_label"] = gold["topic_id"].map(_bertopic_equivalent_label)
+    gold["bertopic_correct"] = gold["bertopic_equivalent_label"] == gold["human_parent_label"]
+
+    n = len(gold)
+    kw_acc = float(gold["kw_correct"].mean())
+    bertopic_acc = float(gold["bertopic_correct"].mean())
+    kw_ci = _wilson_ci95(kw_acc, n)
+
+    by_tier = {}
+    for tier in ["high", "medium", "low", "none"]:
+        sub = gold[gold["conf_tier"] == tier]
+        if len(sub) == 0:
+            by_tier[tier] = {"n": 0, "accuracy": float("nan"), "ci95": (float("nan"), float("nan"))}
+            continue
+        acc = float(sub["kw_correct"].mean())
+        by_tier[tier] = {"n": len(sub), "accuracy": round(acc, 3), "ci95": tuple(round(x, 3) for x in _wilson_ci95(acc, len(sub)))}
+
+    calibration_ok = None
+    if by_tier["high"]["n"] and by_tier["low"]["n"]:
+        calibration_ok = by_tier["high"]["accuracy"] > by_tier["low"]["accuracy"] + 0.05
+
+    return {
+        "n_rows": n, "n_labeled": n_labeled,
+        "keyword_classifier_accuracy": round(kw_acc, 3),
+        "keyword_classifier_ci95": tuple(round(x, 3) for x in kw_ci),
+        "bertopic_equivalent_accuracy": round(bertopic_acc, 3),
+        "accuracy_by_conf_tier": by_tier,
+        "calibration_check": (
+            "high-conf accuracy meaningfully above low-conf (>5pp) — the confidence signal "
+            "is doing real work" if calibration_ok else
+            "high-conf accuracy NOT meaningfully above low-conf — the confidence signal may "
+            "be decorative" if calibration_ok is False else
+            "insufficient high/low-tier rows to check"
+        ),
+        "human_label_distribution": gold["human_parent_label"].value_counts().to_dict(),
+    }
 
 
 def main() -> None:
@@ -270,8 +383,24 @@ def main() -> None:
     print("\n" + "=" * 70)
     print("4. GOLD SET (accuracy-by-conf_tier — the actual calibration test)")
     print("=" * 70)
-    gold = gold_set_report()
-    print(f"  {gold['status']}")
+    gold = gold_set_report(kw_df)
+    if "status" in gold:
+        print(f"  {gold['status']}")
+    else:
+        print(f"  n={gold['n_rows']} (all labeled)")
+        print(f"  keyword classifier accuracy: {gold['keyword_classifier_accuracy']:.1%}  "
+              f"(95% CI {gold['keyword_classifier_ci95'][0]:.1%}-{gold['keyword_classifier_ci95'][1]:.1%})")
+        print(f"  BERTopic-equivalent accuracy (same rows, same new-parent vocabulary): "
+              f"{gold['bertopic_equivalent_accuracy']:.1%}")
+        print("  accuracy by conf_tier:")
+        for tier, r in gold["accuracy_by_conf_tier"].items():
+            if r["n"] == 0:
+                print(f"    {tier:<8} n=0")
+            else:
+                print(f"    {tier:<8} n={r['n']:<4} accuracy={r['accuracy']:.1%}  "
+                      f"(95% CI {r['ci95'][0]:.1%}-{r['ci95'][1]:.1%})")
+        print(f"  calibration check: {gold['calibration_check']}")
+        print(f"  human label distribution: {gold['human_label_distribution']}")
 
 
 if __name__ == "__main__":

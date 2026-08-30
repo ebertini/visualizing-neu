@@ -17,15 +17,26 @@ the *curated* keyword lists, deciding or abstaining — finally applicable now
 that a curated artifact and a real confidence signal both exist.
 
 Scope, precisely: docs from `data/processed/topic_keyword_assignments.parquet`
-with `conf_tier in {"low", "none"}` AND `unassigned_reason != "no_usable_text"`
-(a doc with literally no text can't be helped by an LLM either — same reason
-`no_usable_text` docs are excluded from `src.classify_by_keywords`'s own
-`--tiebreak=embedding` diagnostic). As of 2026-08-29 this is 836 docs (736
-`low` + 100 `none`, of which 28 are `placeholder_title_only` ONR "Grant"
-records — included per the letter of the scope rule above, but expected to
-mostly `abstain`, since there is no real content for an LLM to adjudicate
-either; this is a feature of the honest abstain design, not a bug in the
-scoping).
+with EITHER of two independent triggers, AND `unassigned_reason !=
+"no_usable_text"` (a doc with literally no text can't be helped by an LLM
+either — same reason `no_usable_text` docs are excluded from
+`src.classify_by_keywords`'s own `--tiebreak=embedding` diagnostic):
+  1. `conf_tier in {"low", "none"}` (the original design).
+  2. A PEDAGOGY_SIGNAL_TERMS phrase match in title+abstract, REGARDLESS of
+     conf_tier (widened 2026-08-29) — targets the "deceptive framing" failure
+     mode found during manual curation review: a grant whose surface
+     vocabulary points to one domain but whose true purpose is TEACHING that
+     domain (e.g. an undergraduate materials-science lab course scored
+     confidently as materials-science research). Keyword matching can't
+     distinguish "grant ABOUT X" from "grant that TEACHES X" — this can
+     happen at HIGH confidence, which trigger #1 alone would never catch
+     (confirmed: grant 1171382, currently `high` confidence, flagged by #2).
+As of 2026-08-29 this is 641 docs (594 via trigger #1, 47 via #2 only) —
+still a few hundred docs, not the full ~2,700-doc corpus. Some trigger-#2
+hits will be broader-impacts boilerplate on genuine research grants, not
+actual teaching grants — an acceptable false-positive rate for a REVIEW
+trigger (costs one LLM call that confirms "no change needed") that would be
+unacceptable in a curated MATCHING term (would silently mislabel).
 
 Per-doc prompt sends only the DETERMINISTIC SCORER'S OWN top-K=5 candidate
 leaves (recomputed here via the same BM25F machinery `classify_by_keywords`
@@ -53,14 +64,38 @@ the module-level `main()` docstring below for the exact invocation).
 Output: `data/processed/llm_adjudication.parquet`
 (`doc_id, llm_leaf_id, llm_parent_id, llm_confidence, llm_abstain,
 llm_rationale, llm_terms_considered, llm_model, llm_run_at`) — never merged
-into or redefining `topic_keyword_assignments.parquet`'s own columns (the
-`titleOnly`/`modelTitleOnly` lesson: add a field, don't reinterpret one). A
-separate, explicit resolution step (not built here — future work, see the
-plan) would add `final_leaf_id`/`final_source` columns:
-`final_leaf_id = leaf_id` when `conf_tier` is `high`/`medium`, else
-`llm_leaf_id` when present and not abstained, else `-1`.
+into or redefining `topic_keyword_assignments.parquet`'s own EXISTING columns
+(the `titleOnly`/`modelTitleOnly` lesson: add a field, don't reinterpret one).
+
+**Merge-back (built 2026-08-30, previously unwritten — see `merge_adjudication()`
+below):** `--merge` reads `llm_adjudication.parquet` + `topic_keyword_assignments
+.parquet` and adds FOUR NEW columns to the latter (in place, alongside the
+existing ones — nothing existing is touched or redefined):
+`final_leaf_id` (= `kw_leaf_id` when `conf_tier` in {high, medium}, else
+`llm_leaf_id` when present and not abstained, else `-1`), `final_parent_id`
+(looked up from `final_leaf_id` via the curated taxonomy), `final_source`
+(`"keyword_classifier"` / `"llm_adjudication"` / `"unassigned"`), and
+`llm_reviewed` (bool — was this doc even sent to the LLM at all, so a
+consumer can tell "the LLM looked and abstained" apart from "the LLM never
+saw this doc"). Downstream consumers (`src/build_viz_data.py`) should prefer
+`final_leaf_id`/`final_parent_id` over `kw_leaf_id`/`kw_parent_id` once this
+has been run — and should show `final_source` in the grant detail card so an
+LLM-assigned label is never silently indistinguishable from a deterministic
+keyword match, preserving this whole method's inspectability claim. Wiring
+that preference into `build_viz_data.py` itself is a separate, later
+integration step, not part of `--merge`.
 
 Run:
+    python -m src.adjudicate_low_confidence --dry-run                # build +
+                                                                     # print the
+                                                                     # first few
+                                                                     # prompts,
+                                                                     # no network,
+                                                                     # no cache
+                                                                     # needed —
+                                                                     # review
+                                                                     # before
+                                                                     # spending
     python -m src.adjudicate_low_confidence --limit 10 --offline   # smoke test
                                                                      # (needs a
                                                                      # cache from
@@ -70,10 +105,27 @@ Run:
     python -m src.adjudicate_low_confidence --limit 10             # smoke test,
                                                                      # live, cheap
     python -m src.adjudicate_low_confidence                        # full run,
-                                                                     # ~836 docs,
                                                                      # via the
                                                                      # Batches API
+                                                                     # (see
+                                                                     # module
+                                                                     # docstring
+                                                                     # for the
+                                                                     # current
+                                                                     # target
+                                                                     # doc count
+                                                                     # — recomputed
+                                                                     # live, not
+                                                                     # hardcoded
+                                                                     # here)
     python -m src.adjudicate_low_confidence --model claude-sonnet-5  # cheaper
+    python -m src.adjudicate_low_confidence --merge                 # after a live
+                                                                     # run: add
+                                                                     # final_leaf_id
+                                                                     # /final_source
+                                                                     # to the
+                                                                     # assignments
+                                                                     # parquet
 """
 from __future__ import annotations
 
@@ -118,6 +170,25 @@ TOP_K = 5
 TARGET_CONF_TIERS = {"low", "none"}
 EXCLUDED_UNASSIGNED_REASON = "no_usable_text"
 
+# Widened 2026-08-29: a SECOND, independent trigger alongside conf_tier, for
+# the "deceptive framing" failure mode found during manual curation review —
+# a grant whose surface vocabulary points to one research domain but whose
+# true purpose is TEACHING that domain's content (e.g. an undergraduate
+# materials-science lab course, scored confidently as materials-science
+# RESEARCH because both use the same domain jargon). Keyword matching
+# fundamentally can't distinguish "grant ABOUT X" from "grant that TEACHES X"
+# — this can happen at HIGH confidence too, which conf_tier-based triggering
+# alone would never catch. Each phrase verified against the real corpus
+# before inclusion (some hits are broader-impacts boilerplate on genuine
+# research grants, not actual teaching grants — an acceptable false-positive
+# rate here, unlike in a curated MATCHING term, since a false trigger just
+# costs one LLM call that confirms "no change needed," not a wrong label).
+PEDAGOGY_SIGNAL_TERMS = [
+    "undergraduate course", "curriculum development", "laboratory course",
+    "classroom activities", "students will learn", "teaching materials",
+    "undergraduate laboratory", "course materials", "hands-on activities",
+]
+
 DEFAULT_MODEL = "claude-opus-5"
 
 RESPONSE_SCHEMA = {
@@ -133,16 +204,38 @@ RESPONSE_SCHEMA = {
 }
 
 
+def _pedagogy_signal_doc_ids() -> set[str]:
+    """doc_ids whose title+abstract contain >=1 PEDAGOGY_SIGNAL_TERMS phrase —
+    computed regardless of conf_tier, so a HIGH-confidence-but-actually-about-
+    teaching grant gets flagged too (conf_tier alone would never catch it)."""
+    ids, titles, abstracts = load_doc_fields()
+    flagged = set()
+    for did, title, abstract in zip(ids, titles, abstracts):
+        if match_text(title, PEDAGOGY_SIGNAL_TERMS) or match_text(abstract, PEDAGOGY_SIGNAL_TERMS):
+            flagged.add(did)
+    return flagged
+
+
 def _target_docs() -> pd.DataFrame:
     if not ASSIGNMENTS_PATH.exists():
         raise FileNotFoundError(
             f"{ASSIGNMENTS_PATH} does not exist — run `python -m src.classify_by_keywords` first."
         )
     df = pd.read_parquet(ASSIGNMENTS_PATH)
-    return df[
+    low_conf = (
         df["conf_tier"].isin(TARGET_CONF_TIERS)
         & (df["unassigned_reason"] != EXCLUDED_UNASSIGNED_REASON)
-    ].copy()
+    )
+    pedagogy_flagged = df["doc_id"].astype(str).isin(_pedagogy_signal_doc_ids())
+    # Same no_usable_text exclusion applies to the pedagogy trigger too — a
+    # doc with no text can't be reviewed by an LLM regardless of why it was
+    # selected.
+    target = df[(low_conf | pedagogy_flagged) & (df["unassigned_reason"] != EXCLUDED_UNASSIGNED_REASON)].copy()
+    target["trigger_reason"] = [
+        "low_confidence" if lc else "pedagogy_signal"
+        for lc in low_conf[target.index]
+    ]
+    return target
 
 
 def _top_k_candidates(leaves: dict, target_ids: set[str], k: int = TOP_K) -> dict[str, list[str]]:
@@ -272,6 +365,13 @@ def _run_batch_live(prompts: dict[str, str], model: str) -> dict[str, dict]:
                     "input_schema": RESPONSE_SCHEMA,
                 }],
                 "tool_choice": {"type": "tool", "name": "adjudicate"},
+                # This is a short classification task, not a hard reasoning
+                # problem — the default "high" effort buys little here and
+                # (since thinking tokens count against the 512-token cap)
+                # risks occasionally spending the whole budget on reasoning
+                # before ever emitting the tool call. "medium" is cheaper and
+                # leaves more of the 512-token budget for the actual answer.
+                "output_config": {"effort": "medium"},
             },
         )
         for doc_id, prompt in prompts.items()
@@ -303,22 +403,105 @@ def _run_batch_live(prompts: dict[str, str], model: str) -> dict[str, dict]:
     return results
 
 
+def merge_adjudication() -> pd.DataFrame:
+    """Merge-back step (previously unwritten — see module docstring). Adds
+    `final_leaf_id`/`final_parent_id`/`final_source`/`llm_reviewed` as NEW
+    columns onto `topic_keyword_assignments.parquet`, leaving every existing
+    column untouched, then writes the result back to the same file.
+
+    Resolution rule: trust the deterministic scorer when it was confident
+    (`conf_tier` high/medium); otherwise defer to the LLM's pick IF it didn't
+    abstain; otherwise the doc stays unassigned (-1) — an LLM is never asked
+    to override a confident deterministic match, only to adjudicate the tail
+    the scorer itself flagged as uncertain.
+    """
+    if not OUTPUT_PATH.exists():
+        raise FileNotFoundError(
+            f"{OUTPUT_PATH} does not exist — run a live adjudication pass first "
+            "(see this module's Run: examples)."
+        )
+    if not ASSIGNMENTS_PATH.exists():
+        raise FileNotFoundError(f"{ASSIGNMENTS_PATH} does not exist — run `python -m "
+                                 "src.classify_by_keywords` first.")
+
+    leaves, _parents = load_curated_taxonomy()
+    kw = pd.read_parquet(ASSIGNMENTS_PATH)
+    kw["doc_id"] = kw["doc_id"].astype(str)
+    llm = pd.read_parquet(OUTPUT_PATH)
+    llm["doc_id"] = llm["doc_id"].astype(str)
+    llm = llm.set_index("doc_id")
+
+    # Drop any stale final_* / llm_reviewed columns from a prior --merge run
+    # before re-adding them, so re-running --merge after a re-adjudication
+    # pass doesn't silently duplicate or shadow columns.
+    stale = [c for c in ("final_leaf_id", "final_parent_id", "final_source", "llm_reviewed") if c in kw.columns]
+    kw = kw.drop(columns=stale)
+
+    final_leaf_ids, final_parent_ids, final_sources, llm_reviewed = [], [], [], []
+    for row in kw.itertuples():
+        reviewed = row.doc_id in llm.index
+        llm_reviewed.append(reviewed)
+        if row.conf_tier in ("high", "medium"):
+            final_leaf_ids.append(row.kw_leaf_id)
+            final_parent_ids.append(row.kw_parent_id)
+            final_sources.append("keyword_classifier")
+            continue
+        if reviewed:
+            llm_row = llm.loc[row.doc_id]
+            llm_leaf_id = llm_row["llm_leaf_id"]
+            if not bool(llm_row["llm_abstain"]) and pd.notna(llm_leaf_id):
+                lid = str(int(llm_leaf_id))
+                final_leaf_ids.append(int(llm_leaf_id))
+                final_parent_ids.append(leaves.get(lid, {}).get("parent"))
+                final_sources.append("llm_adjudication")
+                continue
+        final_leaf_ids.append(-1)
+        final_parent_ids.append(None)
+        final_sources.append("unassigned")
+
+    kw["final_leaf_id"] = final_leaf_ids
+    kw["final_parent_id"] = final_parent_ids
+    kw["final_source"] = final_sources
+    kw["llm_reviewed"] = llm_reviewed
+
+    kw.to_parquet(ASSIGNMENTS_PATH, index=False)
+    n_from_llm = sum(1 for s in final_sources if s == "llm_adjudication")
+    n_still_unassigned = sum(1 for s in final_sources if s == "unassigned")
+    print(f"merged: {n_from_llm} docs now resolved via llm_adjudication, "
+          f"{n_still_unassigned} still unassigned after adjudication, "
+          f"wrote {ASSIGNMENTS_PATH}")
+    return kw
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--offline", action="store_true",
                      help="replay cached responses only — no network call")
+    ap.add_argument("--dry-run", action="store_true",
+                     help="build and print the target-doc count + first few prompts, "
+                          "make NO network call and require NO cache — review the prompt "
+                          "before spending anything on a live run")
+    ap.add_argument("--merge", action="store_true",
+                     help="skip adjudication; merge an existing llm_adjudication.parquet "
+                          "into topic_keyword_assignments.parquet as final_leaf_id/"
+                          "final_parent_id/final_source/llm_reviewed (new columns only)")
     ap.add_argument("--limit", type=int, default=None, help="adjudicate only the first N target docs")
     ap.add_argument("--model", default=DEFAULT_MODEL,
                      choices=["claude-opus-5", "claude-sonnet-5"])
     args = ap.parse_args()
+
+    if args.merge:
+        merge_adjudication()
+        return
 
     leaves, parents = load_curated_taxonomy()
     target = _target_docs()
     if args.limit:
         target = target.head(args.limit)
     target_ids = set(target["doc_id"])
-    print(f"{len(target_ids)} target docs (conf_tier in {TARGET_CONF_TIERS}, "
-          f"unassigned_reason != '{EXCLUDED_UNASSIGNED_REASON}')")
+    by_reason = target["trigger_reason"].value_counts().to_dict()
+    print(f"{len(target_ids)} target docs (conf_tier in {TARGET_CONF_TIERS} OR pedagogy-signal "
+          f"phrase matched, unassigned_reason != '{EXCLUDED_UNASSIGNED_REASON}') — {by_reason}")
 
     candidates_by_doc = _top_k_candidates(leaves, target_ids)
 
@@ -336,6 +519,17 @@ def main() -> None:
             for lid in cand_leaf_ids if lid in leaves
         ]
         prompts[doc_id] = build_prompt(title, abstract, cands)
+
+    if args.dry_run:
+        total_chars = sum(len(p) for p in prompts.values())
+        print(f"\n--dry-run: {len(prompts)} prompts built, NO network call made, "
+              f"total prompt chars: {total_chars:,} (~{total_chars // 4:,} tokens, rough estimate)")
+        print("\n--- first 3 prompts (of", len(prompts), ") ---\n")
+        for doc_id, prompt in list(prompts.items())[:3]:
+            print(f"=== doc_id {doc_id} ===")
+            print(prompt)
+            print()
+        return
 
     if args.offline:
         responses = _load_cache(args.model)

@@ -172,9 +172,28 @@ main{display:block}
   border:1px solid var(--hair);border-radius:0;padding:6px 8px;background:#fff;cursor:pointer;
 }
 .facetselect:focus-visible{outline:2px solid var(--c-nsf);outline-offset:1px}
+/* Grant search box (title/PI/agency) — sits in the toolbar's left group,
+   after the title, so it reads as "search WITHIN this grid" rather than a
+   global site search. Matching marks stay full-opacity; non-matches dim
+   (see grid.js's applySearchOpacity) rather than being removed from the
+   grid, so "every grant is present" still holds while searching. */
+.searchbox{display:flex;align-items:center;gap:6px;min-width:0}
+.searchbox input{
+  width:220px;font-family:var(--mono);font-size:11.5px;color:var(--ink);
+  border:1px solid var(--hair);border-radius:0;padding:6px 8px;background:#fff;
+}
+.searchbox input:focus-visible{outline:2px solid var(--c-nsf);outline-offset:1px}
+.searchcount{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap}
+.suggestselect{width:auto;max-width:220px}
 .markrect{cursor:pointer}
 .binhit{fill:transparent}
-.cellempty{fill:#f0f1f3}
+/* Faint per-cell boundary line (PI feedback) — replaces the old fixed grey
+   bar that only appeared in empty cells; this draws for every cell so an
+   empty bin still reads as "exists, just empty" via its own outline rather
+   than a special-cased marker, and every occupied cell also gets a subtle
+   sense of where its own boundary is. fill:none so it never competes with
+   .binhit's own hit-testing beneath it. */
+.cellgrid{fill:none;stroke:#e5e7eb;stroke-width:1px;pointer-events:none}
 /* Selection ring — a gap around the mark rather than a stroke on it, see
    grid.js's comment on rect.selectring for why. */
 .selectring{fill:none;stroke:#0072B2;stroke-width:2.5;pointer-events:none}
@@ -227,6 +246,14 @@ main{display:block}
 .detailblock .abstract-empty{color:var(--muted);font-style:italic}
 .detailblock .abstract .grantlist{margin:0;padding-left:18px}
 .detailblock .abstract .grantlist li{margin-bottom:4px}
+
+/* Topic-keyword "fingerprint" — the curated terms the classifier itself
+   recorded as matched, highlighted in place within the abstract text
+   (detail.js's highlightMatches). A warm, low-contrast highlight rather than
+   a loud yellow: this is explanatory, not a call to action. */
+.detailblock .abstract mark{background:#fff2b8;color:inherit;padding:0 1px;border-radius:2px}
+.detailblock .fingerprint-note{margin-top:6px;padding-top:6px;border-top:1px dashed var(--hair)}
+.detailblock .fingerprint-terms{font-family:var(--mono)}
 /* "Show N more" — same native <details>/<summary> disclosure + ▸/▾ marker
    convention as .drawer ("How this is computed"), sized down to sit inline
    with the grant list rather than that drawer's own boxed/mono treatment,

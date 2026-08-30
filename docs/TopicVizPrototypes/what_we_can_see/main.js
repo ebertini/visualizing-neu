@@ -9,9 +9,10 @@
 // the missing-tab init, then tabs + resize. Everything it needs to build
 // that sequence is imported below; nothing here does its own data or DOM
 // wiring beyond that sequence.
-import { FACETS, FACETS_PI, COVERAGE } from "./data.js";
+import { FACETS, FACETS_PI, COVERAGE, VIZ_META } from "./data.js";
 import { AGENCIES } from "./constants.js";
-import { GRANT_FACET_DEFS, PI_FACET_DEFS, GRANT_ARRANGE_FACETS, PI_ARRANGE_FACETS } from "./facets.js";
+import { GRANT_FACET_DEFS, PI_FACET_DEFS, GRANT_ARRANGE_FACETS, PI_ARRANGE_FACETS,
+         GRANT_SUGGESTIONS, PI_SUGGESTIONS } from "./facets.js";
 import { createGrid } from "./grid.js";
 import { grantTooltip, grantDetail, piTooltip, piDetail } from "./detail.js";
 import { initMissingTab } from "./missing.js";
@@ -33,8 +34,22 @@ const grantGrid = createGrid({
     chartwrap: "facetchartwrap", labelsSvg: "facetlabels", scrollDiv: "facetscroll",
     chartSvg: "facetchart", tip: "facettip", dock: "facetdock", dial: "facetDial",
     selectedPanel: "selectedGrantPanel", selectedBody: "selectedBody", selectedClose: "selectedGrantClose",
+    // Optional — only the grants grid has a search box; createGrid wires
+    // these only when both ids resolve, so omitting them (as piGrid does
+    // below) cleanly opts a grid out of search entirely.
+    searchInput: "facetSearch", searchCount: "facetSearchCount",
   },
   buildTooltip: grantTooltip, buildDetail: grantDetail,
+  // Grant search box (PI feedback's "Round 2"/next-direction item): filter
+  // by title, PI name, or agency — the same three fields already shown in
+  // grantTooltip, so a match always corresponds to something visible on
+  // hover. Title/PI name are per-grant arrays in FACETS; agency is looked up
+  // through VIZ_META.agencies the same way grantTooltip does.
+  searchFields: (data, i) => [
+    data.titles[i] || "",
+    data.piNames ? (data.piNames[i] || "") : "",
+    (VIZ_META.agencies[data.cols.ag[i]] || {}).key || "",
+  ],
 });
 
 const piGrid = createGrid({
@@ -49,6 +64,26 @@ const piGrid = createGrid({
   },
   buildTooltip: piTooltip, buildDetail: piDetail,
 });
+
+// "Need a suggestion?" — populate each grid's own preset dropdown and wire
+// it to grid.applyPreset (see grid.js). Reset back to the placeholder
+// option after applying, so picking the SAME suggestion twice in a row
+// still fires a change event.
+function wireSuggestions(selectId, grid, presets) {
+  const sel = document.getElementById(selectId);
+  presets.forEach((p, i) => {
+    const o = document.createElement("option");
+    o.value = String(i); o.textContent = p.label;
+    sel.appendChild(o);
+  });
+  sel.addEventListener("change", () => {
+    if (sel.value === "") return;
+    grid.applyPreset(presets[Number(sel.value)]);
+    sel.value = "";
+  });
+}
+wireSuggestions("facetSuggest", grantGrid, GRANT_SUGGESTIONS);
+wireSuggestions("piSuggest", piGrid, PI_SUGGESTIONS);
 
 // Every grant/Every PI carry no caveat text of their own now (PI feedback:
 // clean grids, no explanatory copy) — every caveat, including neu_status

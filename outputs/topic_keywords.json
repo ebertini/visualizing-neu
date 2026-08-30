@@ -14,7 +14,7 @@
       "candidate_vocab_size": 12776,
       "prune_target": 2500,
       "curated_result": {
-        "n_parents": 7,
+        "n_parents": 8,
         "n_leaves": 31,
         "note": "k_parent/k_leaf above are the pre-curation DISCOVERY fit (Plan B dendrogram cut), kept for provenance. They are not the curated counts \u2014 see this block for those."
       }
@@ -279,72 +279,14 @@
       }
     },
     "P3": {
-      "label": "Social Science, Public Policy & Workforce Development",
+      "label": "Social Science, Public Policy & Education Research",
       "status": "accepted",
-      "notes": "Relabeled from 'Workforce Development, Policy & Broadening Participation' during the final parent-structure review \u2014 leaves 13 (Social Science & Public Policy) and 34 (Security, Trafficking, Public Health Crisis & Disaster Resilience) are general social-science/policy themes, not workforce-development/broadening-participation framing, so 'Social Science' and 'Public Policy' were moved to the front of the label. 5 leaves: conference/student travel awards (12), social science & public policy (13, slimmed residual), faculty development/diversity/institutional partnerships (14), education/games/informal STEM learning (26, corrected from a content-population bug), and security/trafficking/public-health-crisis/disaster-resilience (34, split out of leaf 13). Parent-level keyword list removed during Phase 4a promotion (Step 1a): under Plan B every leaf nests inside exactly one parent by construction (one dendrogram, two cuts), so the parent's own keyword list only ever fed `parent_score_direct`, a diagnostic the redo plan itself says can never be a curation-quality signal under Plan B. The list was draft-only (source: draft, zero rejected_terms) and, on inspection, actively wrong for several parents (boilerplate terms, coastal-only bias predating the hydrology relabel, broader-impacts contamination) \u2014 dropped rather than curated.",
       "leaf_ids": [
-        "11",
         "12",
-        "13",
         "14",
         "15"
       ],
-      "provenance": {
-        "group_id": "P4",
-        "n_terms": 454,
-        "contributing_legacy_topics": [
-          {
-            "topic_id": 26,
-            "concentration_score": 19.517,
-            "raw_n_docs": 566
-          },
-          {
-            "topic_id": 13,
-            "concentration_score": 10.784,
-            "raw_n_docs": 550
-          },
-          {
-            "topic_id": 10,
-            "concentration_score": 9.838,
-            "raw_n_docs": 728
-          },
-          {
-            "topic_id": 1,
-            "concentration_score": 5.858,
-            "raw_n_docs": 785
-          },
-          {
-            "topic_id": 0,
-            "concentration_score": 5.632,
-            "raw_n_docs": 1515
-          },
-          {
-            "topic_id": 20,
-            "concentration_score": 4.486,
-            "raw_n_docs": 166
-          },
-          {
-            "topic_id": 30,
-            "concentration_score": 3.619,
-            "raw_n_docs": 76
-          },
-          {
-            "topic_id": 3,
-            "concentration_score": 1.5,
-            "raw_n_docs": 192
-          },
-          {
-            "topic_id": 4,
-            "concentration_score": 1.485,
-            "raw_n_docs": 153
-          },
-          {
-            "topic_id": 2,
-            "concentration_score": 1.403,
-            "raw_n_docs": 181
-          }
-        ]
-      }
+      "notes": "SPLIT (2026-08-29, human decision) from the combined 'Social Science, Public Policy & Workforce Development' \u2014 data showed Leaf 13 (Faculty Development, Diversity & Institutional Partnerships) was the parent's largest leaf by both count (201) and dollars ($234.7M), bigger than Leaf 12 (Social Science & Public Policy itself: 179/$123.3M), diluting the parent's identity. Split by what the grants actually DO, not surface STEM-adjacency: this parent keeps Leaf 12 (social science/policy research), Leaf 14 (Education, Games & Informal STEM Learning \u2014 genuine learning-science RESEARCH, methodologically closer to social science than to career-pipeline administration, verified against its actual keyword content: 'science learning', 'learners', 'curricula', 'pedagogy', 'classroom', 'learning environment'), and Leaf 15 (Security, Trafficking, Public Health Crisis & Disaster Resilience \u2014 policy/social-science adjacent). Leaf 13's career-pipeline/institutional-support content moved to new parent P7 (Workforce Development & Institutional Partnerships) instead. n=289 grants, $187.0M."
     },
     "P4": {
       "label": "Materials Science & Structural/Civil Engineering",
@@ -544,6 +486,15 @@
           }
         ]
       }
+    },
+    "P7": {
+      "label": "Workforce Development & Institutional Partnerships",
+      "status": "accepted",
+      "leaf_ids": [
+        "11",
+        "13"
+      ],
+      "notes": "NEW (2026-08-29, human decision), split off from the combined 'Social Science, Public Policy & Workforce Development' parent (P3) \u2014 see P3's own notes for the full rationale. Groups Leaf 13 (Faculty Development, Diversity & Institutional Partnerships \u2014 genuine career-pipeline/institutional-support programs: 'faculty', 'mentor', 'career', 'fellowship', 'retention', 'trainees', 'traineeship') with Leaf 11 (Conference & Student Travel Awards \u2014 another professional-development-support funding mechanism, fitting alongside fellowships/traineeships rather than with social-science research). n=250 grants, $237.5M. (This id was previously used in the original Phase 4a draft for a dropped, 2-term noise-only parent, unrelated to this content \u2014 reused here since parent ids must stay dense zero-based for build_viz_aggregates.py's PARENT_NAMES array indexing; see dropped_leaves[] history if the old P7 needs tracing.)"
     }
   },
   "leaves": {
@@ -551,7 +502,7 @@
       "label": "Neuroscience & Neural Circuits",
       "status": "accepted",
       "parent": "P0",
-      "notes": "Genuinely coherent: neurons, neural circuits, synaptic, optogenetic, c. elegans (model organism) all fit. 'image'/'reconstruction'/'mr' read as neuroimaging-adjacent, consistent with the theme.",
+      "notes": "Genuinely coherent: neurons, neural circuits, synaptic, optogenetic, c. elegans (model organism) all fit. 'image'/'reconstruction'/'mr' read as neuroimaging-adjacent, consistent with the theme.\n\nADDED (2026-08-30, curation pass closing the no_keyword_evidence unassigned gap): \"fragile x\", \"macular\", \"oxytocin\", \"autism\" \u2014 grant 1163276 (serotonin 5-HT7 agonists in Fragile X syndrome rodent models); grant 523615 (perceptual reorganisation in macular disease); grant 1089127 (Animal Core: oxytocin/birth/epigenetic neural mechanisms); grant 1499383 (Autism Field-Initiated Innovative Research Studies Program). Each df_corpus verified against the real corpus via scripts/_kw_term_df.py (same match_text semantics the classifier itself uses), not guessed.",
       "keywords": [
         {
           "term": "neurons",
@@ -630,6 +581,30 @@
           "weight": 1.0,
           "df_corpus": 34,
           "source": "manual"
+        },
+        {
+          "term": "fragile x",
+          "weight": 1.0,
+          "df_corpus": 1,
+          "source": "manual"
+        },
+        {
+          "term": "macular",
+          "weight": 1.0,
+          "df_corpus": 7,
+          "source": "manual"
+        },
+        {
+          "term": "oxytocin",
+          "weight": 1.0,
+          "df_corpus": 3,
+          "source": "manual"
+        },
+        {
+          "term": "autism",
+          "weight": 1.0,
+          "df_corpus": 15,
+          "source": "manual"
         }
       ],
       "negative_keywords": [],
@@ -691,10 +666,10 @@
       }
     },
     "1": {
-      "label": "Molecular & Cellular Biomedicine",
+      "label": "Molecular & Cellular Biomedicine & Biotechnology",
       "status": "accepted",
       "parent": "P0",
-      "notes": "641 terms, dominant biomedical cluster \u2014 clean, no boundary-fragment pollution remaining. Later enriched with an optical/biomedical-imaging vocabulary set (biomedical imaging, fluorescence, microscopy, contrast, etc.) found while reviewing leaf 16 (Materials Science) \u2014 verified via canonical-topic association that these terms genuinely lean biomedical (Cancer & Drug Delivery, Cardiac & Neuronal Physiology, Neuropharmacology) rather than materials/physics, despite superficially reading as optics/physics terms. ADDENDUM (2026-08-29): added 'parp inhibitor', 'nanoparticle', 'drug delivery' (cancer nanoparticle-delivery cluster, e.g. grant 1162069 'PARP Inhibitor Nanotherapy for Ovarian Cancer') and 'bone', 'skeletal' (bone/skeletal-health cluster, e.g. grant 868967 'Kick-starting mechanoadaptation in aged bones') after reviewing Unassigned grants with real text that matched zero curated terms. Also added 'skeleton' and 'fracture' (2026-08-29) after finding 2 bone/skeletal-cluster grants used those words instead of 'bone'/'skeletal' literally (grant 871035 '...appendicular skeleton...', grant 860068 '...fracture healing').",
+      "notes": "641 terms, dominant biomedical cluster \u2014 clean, no boundary-fragment pollution remaining. Later enriched with an optical/biomedical-imaging vocabulary set (biomedical imaging, fluorescence, microscopy, contrast, etc.) found while reviewing leaf 16 (Materials Science) \u2014 verified via canonical-topic association that these terms genuinely lean biomedical (Cancer & Drug Delivery, Cardiac & Neuronal Physiology, Neuropharmacology) rather than materials/physics, despite superficially reading as optics/physics terms. ADDENDUM (2026-08-29): added 'parp inhibitor', 'nanoparticle', 'drug delivery' (cancer nanoparticle-delivery cluster, e.g. grant 1162069 'PARP Inhibitor Nanotherapy for Ovarian Cancer') and 'bone', 'skeletal' (bone/skeletal-health cluster, e.g. grant 868967 'Kick-starting mechanoadaptation in aged bones') after reviewing Unassigned grants with real text that matched zero curated terms. Also added 'skeleton' and 'fracture' (2026-08-29) after finding 2 bone/skeletal-cluster grants used those words instead of 'bone'/'skeletal' literally (grant 871035 '...appendicular skeleton...', grant 860068 '...fracture healing'). RELABELED (2026-08-29, human decision) from 'Molecular & Cellular Biomedicine' \u2014 while reviewing gold-set grant 1035009 ('EFRI 2-DARE: Two-dimensional nanopores with electro-optical control for next generation biotechnological applications'), the friction was that this leaf's existing keyword scope already spans device/application-adjacent content ('nanoparticle', 'drug delivery', 'biomedical imaging', 'parp inhibitor'), not just basic molecular/cellular research \u2014 the label just hadn't caught up to that scope. Renamed to make the existing content's real breadth explicit; the keyword list itself is unchanged, so this has zero effect on classification, only on how the leaf reads.\n\nADDED (2026-08-30, curation pass closing the no_keyword_evidence unassigned gap): \"bioethanol\", \"bioprospecting\", \"peptide biosynthesis\", \"osteoblast\", \"persister\", \"pseudomonas aeruginosa\", \"radiotherapy\" \u2014 grant 625827 (bioethanol via genomics of microbial synergies); grant 1497206 (bioprospecting for industrial enzymes/drug leads); grant 1616677 (plant branched cyclic peptide biosynthesis); grant 1464173 (polyester platform for osteoblast differentiation); grant 684013 (genetics of persister formation in P. aeruginosa); grant 684013 (genetics of persister formation in P. aeruginosa); grant 1161617 (nanocoated brachytherapy spacers for image-guided radiotherapy). Each df_corpus verified against the real corpus via scripts/_kw_term_df.py (same match_text semantics the classifier itself uses), not guessed.",
       "keywords": [
         {
           "term": "magnetic resonance",
@@ -923,6 +898,48 @@
           "weight": 1.0,
           "df_corpus": 12,
           "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "bioethanol",
+          "weight": 1.0,
+          "df_corpus": 1,
+          "source": "manual"
+        },
+        {
+          "term": "bioprospecting",
+          "weight": 1.0,
+          "df_corpus": 2,
+          "source": "manual"
+        },
+        {
+          "term": "peptide biosynthesis",
+          "weight": 1.0,
+          "df_corpus": 2,
+          "source": "manual"
+        },
+        {
+          "term": "osteoblast",
+          "weight": 1.0,
+          "df_corpus": 2,
+          "source": "manual"
+        },
+        {
+          "term": "persister",
+          "weight": 1.0,
+          "df_corpus": 9,
+          "source": "manual"
+        },
+        {
+          "term": "pseudomonas aeruginosa",
+          "weight": 1.0,
+          "df_corpus": 4,
+          "source": "manual"
+        },
+        {
+          "term": "radiotherapy",
+          "weight": 1.0,
+          "df_corpus": 5,
+          "source": "manual"
         }
       ],
       "negative_keywords": [],
@@ -2645,7 +2662,7 @@
       "label": "Hydrology, Flooding & Watershed Science",
       "status": "accepted",
       "parent": "P2",
-      "notes": "Split out of the original 129-term 'Coastal & Environmental Ecology' leaf (source_leaf_id 11) via recursive sub-clustering (k=6). Coherent surface-hydrology/flood-risk/watershed theme. Also folded in 'environmental engineering', 'climate change', and 'agricultural' from a separate small, mostly-generic sub-cluster (group 5) that fit this theme better than standing alone.",
+      "notes": "Split out of the original 129-term 'Coastal & Environmental Ecology' leaf (source_leaf_id 11) via recursive sub-clustering (k=6). Coherent surface-hydrology/flood-risk/watershed theme. Also folded in 'environmental engineering', 'climate change', and 'agricultural' from a separate small, mostly-generic sub-cluster (group 5) that fit this theme better than standing alone.\n\nADDED (2026-08-30, curation pass closing the no_keyword_evidence unassigned gap): \"swot\" \u2014 grant 1758129 (harnessing SWOT satellite observations for well-water disaster surveillance). Each df_corpus verified against the real corpus via scripts/_kw_term_df.py (same match_text semantics the classifier itself uses), not guessed.",
       "keywords": [
         {
           "term": "flood risk",
@@ -2826,6 +2843,12 @@
           "weight": 1.0,
           "df_corpus": 15,
           "source": "manual"
+        },
+        {
+          "term": "swot",
+          "weight": 1.0,
+          "df_corpus": 3,
+          "source": "manual"
         }
       ],
       "negative_keywords": [],
@@ -2926,8 +2949,8 @@
     "11": {
       "label": "Conference & Student Travel Awards",
       "status": "accepted",
-      "parent": "P3",
-      "notes": "93 terms, the NSF conference/travel-funding-instrument theme found independently by both Plan A and Plan B during discovery \u2014 a real, distinct funding-mechanism cluster, not noise. Checked for sub-themes via recursive sub-clustering (k=2 best silhouette, 0.19): the split found is just 'student-travel-specific phrasing' vs. 'general conference logistics + noise', not two genuinely distinct subjects \u2014 kept as one leaf. Scanning the full 93-term candidate pool (beyond the current top-15) turned up bare calendar years/months as candidate terms \u2014 pure scheduling noise, never present in the active keyword list but recorded in rejected_terms for the audit trail since we specifically found and considered them.",
+      "parent": "P7",
+      "notes": "93 terms, the NSF conference/travel-funding-instrument theme found independently by both Plan A and Plan B during discovery \u2014 a real, distinct funding-mechanism cluster, not noise. Checked for sub-themes via recursive sub-clustering (k=2 best silhouette, 0.19): the split found is just 'student-travel-specific phrasing' vs. 'general conference logistics + noise', not two genuinely distinct subjects \u2014 kept as one leaf. Scanning the full 93-term candidate pool (beyond the current top-15) turned up bare calendar years/months as candidate terms \u2014 pure scheduling noise, never present in the active keyword list but recorded in rejected_terms for the audit trail since we specifically found and considered them.\n\nADDED (2026-08-30, curation pass closing the no_keyword_evidence unassigned gap): \"international symposium\" \u2014 grant 878888 (International Symposium for Polymer Electrolytes, Iceland). Each df_corpus verified against the real corpus via scripts/_kw_term_df.py (same match_text semantics the classifier itself uses), not guessed.",
       "keywords": [
         {
           "term": "attend",
@@ -3018,6 +3041,12 @@
           "weight": 1.0,
           "df_corpus": 140,
           "source": "draft"
+        },
+        {
+          "term": "international symposium",
+          "weight": 1.0,
+          "df_corpus": 8,
+          "source": "manual"
         }
       ],
       "negative_keywords": [],
@@ -3335,8 +3364,8 @@
     "13": {
       "label": "Faculty Development, Diversity & Institutional Partnerships",
       "status": "accepted",
-      "parent": "P3",
-      "notes": "172 terms. Checked via recursive sub-clustering (k=2): split into this leaf's real 128-term content (enriched below) and a genuinely distinct 44-term Environmental Health Sciences & Superfund Research Program cluster, now merged into leaf 11 (Environmental Health & Ecological Restoration) instead \u2014 'environmental health' was the anchor term of that real cluster, not a lone stray outlier as first thought. ADDENDUM (2026-08-29): added 'traineeship' after reviewing Unassigned graduate traineeship-award grants (e.g. grant 1546186 'Graduate Traineeship Award for Matthew Schinault') \u2014 a better fit here (alongside existing 'fellowship'/'trainees'/'training program') than Leaf 11's travel-specific scope.",
+      "parent": "P7",
+      "notes": "172 terms. Checked via recursive sub-clustering (k=2): split into this leaf's real 128-term content (enriched below) and a genuinely distinct 44-term Environmental Health Sciences & Superfund Research Program cluster, now merged into leaf 11 (Environmental Health & Ecological Restoration) instead \u2014 'environmental health' was the anchor term of that real cluster, not a lone stray outlier as first thought. ADDENDUM (2026-08-29): added 'traineeship' after reviewing Unassigned graduate traineeship-award grants (e.g. grant 1546186 'Graduate Traineeship Award for Matthew Schinault') \u2014 a better fit here (alongside existing 'fellowship'/'trainees'/'training program') than Leaf 11's travel-specific scope.\n\nADDED (2026-08-30, curation pass closing the no_keyword_evidence unassigned gap): \"inbre\" \u2014 grant 1250146 (UNM Mass Spectrometry Core Facility, an NIH IDeA/INBRE network grant). Each df_corpus verified against the real corpus via scripts/_kw_term_df.py (same match_text semantics the classifier itself uses), not guessed.",
       "keywords": [
         {
           "term": "faculty",
@@ -3553,6 +3582,12 @@
           "weight": 1.0,
           "df_corpus": 9,
           "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "inbre",
+          "weight": 1.0,
+          "df_corpus": 1,
+          "source": "manual"
         }
       ],
       "negative_keywords": [],
@@ -3724,7 +3759,7 @@
       "label": "Education, Games & Informal STEM Learning",
       "status": "accepted",
       "parent": "P3",
-      "notes": "CORRECTED: this leaf was previously mistakenly populated with terms copied from leaf 14 (faculty, institutions, urm, academic, diverse, mentor, college) instead of its own real content \u2014 none of those actually relate to education/games. Re-derived from a recursive sub-clustering pass on leaf 13 (k=2), which surfaced a genuine 101-term education/learning theme. Curated down to the specific, unambiguous terms; kept 'mixed reality' from the earlier manual addition. Deliberately excludes bare 'game' (verified polysemous \u2014 game theory in economics/networking, media/labor studies of gaming, not just educational games) in favor of the safer compound 'game design'. 'gaming' is intentionally also added to leaf 20 (Software Systems) since its 6 real occurrences split genuinely between education and software-infrastructure senses. Later enriched with STEM-education/outreach-program vocabulary (reu, erc, teachers, middle school, underrepresented, graduate students, high school) found while reviewing leaf 16 (Materials Science) \u2014 this is broader-impacts/outreach-participant language distinct in kind from this leaf's original learning-science content, but folded in here rather than fragmenting into yet another education-adjacent leaf. ADDENDUM (2026-08-29): added 'foreign language' after reviewing grant 43588 'Undergraduate International Studies and Foreign Language Programs' \u2014 a thin, single-grant addition; note the leaf's label (STEM/games/informal learning) doesn't perfectly describe language-program content, kept here per human decision as the closest 'undergraduate learning' home.",
+      "notes": "CORRECTED: this leaf was previously mistakenly populated with terms copied from leaf 14 (faculty, institutions, urm, academic, diverse, mentor, college) instead of its own real content \u2014 none of those actually relate to education/games. Re-derived from a recursive sub-clustering pass on leaf 13 (k=2), which surfaced a genuine 101-term education/learning theme. Curated down to the specific, unambiguous terms; kept 'mixed reality' from the earlier manual addition. Deliberately excludes bare 'game' (verified polysemous \u2014 game theory in economics/networking, media/labor studies of gaming, not just educational games) in favor of the safer compound 'game design'. 'gaming' is intentionally also added to leaf 20 (Software Systems) since its 6 real occurrences split genuinely between education and software-infrastructure senses. Later enriched with STEM-education/outreach-program vocabulary (reu, erc, teachers, middle school, underrepresented, graduate students, high school) found while reviewing leaf 16 (Materials Science) \u2014 this is broader-impacts/outreach-participant language distinct in kind from this leaf's original learning-science content, but folded in here rather than fragmenting into yet another education-adjacent leaf. ADDENDUM (2026-08-29): added 'foreign language' after reviewing grant 43588 'Undergraduate International Studies and Foreign Language Programs' \u2014 a thin, single-grant addition; note the leaf's label (STEM/games/informal learning) doesn't perfectly describe language-program content, kept here per human decision as the closest 'undergraduate learning' home.\n\nADDED (2026-08-30, curation pass closing the no_keyword_evidence unassigned gap): \"online laboratory\" \u2014 grant 791101 (creating an online laboratory). Each df_corpus verified against the real corpus via scripts/_kw_term_df.py (same match_text semantics the classifier itself uses), not guessed.",
       "keywords": [
         {
           "term": "computational thinking",
@@ -3983,6 +4018,12 @@
           "weight": 1.0,
           "df_corpus": 1,
           "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "online laboratory",
+          "weight": 1.0,
+          "df_corpus": 1,
+          "source": "manual"
         }
       ],
       "negative_keywords": [],
@@ -4996,7 +5037,7 @@
       "label": "Materials Science & Nanotechnology",
       "status": "accepted",
       "parent": "P4",
-      "notes": "Checked via recursive sub-clustering (k=5) on the full 132-term cluster. Found 4 sub-groups beyond the real materials-science core: an optical/biomedical-imaging group (moved to leaf 3 after checking canonical-topic associations confirmed it's genuinely biomedical, not materials), a very clean Gravitational Wave/LIGO instrumentation group (split to a new leaf), a STEM-education/outreach-program group (strong terms moved to leaf 26, weak ones rejected \u2014 this leaf should hold materials-science CONTENT, not broader-impacts language, so 'high school'/'outreach' were removed despite an earlier note calling them consistent), and a generic cross-cutting methodology group (mostly rejected). This leaf now holds only the genuine materials/nanotech core. ADDENDUM (2026-08-29): added 'solidification' and 'alloy' after reviewing Unassigned grants about alloy-solidification microstructure modeling (e.g. grant 1316012, 'Phase-Field Modeling of Solidification Microstructures') that matched zero curated terms despite being a clear materials-science fit. ADDENDUM (2026-08-29): added 'qubit' and 'quantum phases' after reviewing 2 Unassigned quantum-devices grants (1393768 'Design, Control and Application of Next-Generation Qubits', 544966 'Novel Quantum Phases at Interfaces') \u2014 a third candidate (1777815, 'Quantum Theory and Measured Turnover Rates...') was judged too ambiguous (really catalysis/chemistry, not quantum devices) and deliberately left Unassigned rather than force-fit.",
+      "notes": "Checked via recursive sub-clustering (k=5) on the full 132-term cluster. Found 4 sub-groups beyond the real materials-science core: an optical/biomedical-imaging group (moved to leaf 3 after checking canonical-topic associations confirmed it's genuinely biomedical, not materials), a very clean Gravitational Wave/LIGO instrumentation group (split to a new leaf), a STEM-education/outreach-program group (strong terms moved to leaf 26, weak ones rejected \u2014 this leaf should hold materials-science CONTENT, not broader-impacts language, so 'high school'/'outreach' were removed despite an earlier note calling them consistent), and a generic cross-cutting methodology group (mostly rejected). This leaf now holds only the genuine materials/nanotech core. ADDENDUM (2026-08-29): added 'solidification' and 'alloy' after reviewing Unassigned grants about alloy-solidification microstructure modeling (e.g. grant 1316012, 'Phase-Field Modeling of Solidification Microstructures') that matched zero curated terms despite being a clear materials-science fit. ADDENDUM (2026-08-29): added 'qubit' and 'quantum phases' after reviewing 2 Unassigned quantum-devices grants (1393768 'Design, Control and Application of Next-Generation Qubits', 544966 'Novel Quantum Phases at Interfaces') \u2014 a third candidate (1777815, 'Quantum Theory and Measured Turnover Rates...') was judged too ambiguous (really catalysis/chemistry, not quantum devices) and deliberately left Unassigned rather than force-fit.\n\nADDED (2026-08-30, curation pass closing the no_keyword_evidence unassigned gap): \"solid-state batteries\", \"fullerene\", \"permanent magnets\", \"origami\", \"ionomer\", \"neutron reflectivity\", \"raman spectroscopy\", \"nexafs\" \u2014 grant 1730685 (Li-ion sulfide-based all-solid-state batteries); grant 1315237 (interfacial phenomena, noble metal-C60 interaction); grant 727353 (rare-earth-free permanent magnets); grant 1471140 (rigidity-tuned elastomer origami tessellations); grant 878820 (ionomer-metal interfacial structure); grant 878820 (ionomer-metal interfacial structure); grant 1778141 (tip-enhanced AFM-Raman spectroscopy); grant 544819 (electrochemical/NEXAFS analysis of adsorbates). Each df_corpus verified against the real corpus via scripts/_kw_term_df.py (same match_text semantics the classifier itself uses), not guessed.\n\nFIXUP (2026-08-30): added \"metal-c60\" \u2014 grant 1315237 (noble metal-C60 interaction) \u2014 'fullerene' was an external-knowledge synonym not literally in the title (and 'c60' alone can't match either, since the hyphen bridges it into one token 'metal-c60'); using the actual literal token.\n\nFIXUP (2026-08-30): added \"cnt-modified\" \u2014 grant 1570580 (bio-inspired CNT-modified hierarchical/fractal interfaces) \u2014 no term was added for this grant in the first curation pass; using the literal hyphen-bridged token.\n\nFIXUP (2026-08-30): added \"afm-raman\" \u2014 grant 1778141 (tip-enhanced AFM-Raman spectroscopy) \u2014 'raman spectroscopy' can't match because the hyphen bridges 'afm' and 'raman' into one token 'afm-raman', so bare 'raman' never appears as its own token; using the literal token.",
       "keywords": [
         {
           "term": "materials",
@@ -5177,6 +5218,72 @@
           "weight": 1.0,
           "df_corpus": 4,
           "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "solid-state batteries",
+          "weight": 1.0,
+          "df_corpus": 3,
+          "source": "manual"
+        },
+        {
+          "term": "fullerene",
+          "weight": 1.0,
+          "df_corpus": 1,
+          "source": "manual"
+        },
+        {
+          "term": "permanent magnets",
+          "weight": 1.0,
+          "df_corpus": 5,
+          "source": "manual"
+        },
+        {
+          "term": "origami",
+          "weight": 1.0,
+          "df_corpus": 3,
+          "source": "manual"
+        },
+        {
+          "term": "ionomer",
+          "weight": 1.0,
+          "df_corpus": 1,
+          "source": "manual"
+        },
+        {
+          "term": "neutron reflectivity",
+          "weight": 1.0,
+          "df_corpus": 1,
+          "source": "manual"
+        },
+        {
+          "term": "raman spectroscopy",
+          "weight": 1.0,
+          "df_corpus": 2,
+          "source": "manual"
+        },
+        {
+          "term": "nexafs",
+          "weight": 1.0,
+          "df_corpus": 1,
+          "source": "manual"
+        },
+        {
+          "term": "metal-c60",
+          "weight": 1.0,
+          "df_corpus": 1,
+          "source": "manual"
+        },
+        {
+          "term": "cnt-modified",
+          "weight": 1.0,
+          "df_corpus": 1,
+          "source": "manual"
+        },
+        {
+          "term": "afm-raman",
+          "weight": 1.0,
+          "df_corpus": 1,
+          "source": "manual"
         }
       ],
       "negative_keywords": [],
@@ -5889,7 +5996,7 @@
       "label": "Particle Physics & High-Energy Physics",
       "status": "accepted",
       "parent": "P5",
-      "notes": "Split out of the original 125-term 'Algebra, Geometry & Mathematical Physics' leaf (source_leaf_id 17) via recursive sub-clustering (k=2, silhouette 0.317 \u2014 one of the cleanest splits found this session; several terms have perfect 1.0 precision). Genuinely distinct experimental/theoretical particle physics (CERN, LHC, Higgs boson, dark matter, standard model, supersymmetry) \u2014 shares embedding-space proximity with pure algebra/geometry only via string-theory/symmetry vocabulary, but is a completely different research community.",
+      "notes": "Split out of the original 125-term 'Algebra, Geometry & Mathematical Physics' leaf (source_leaf_id 17) via recursive sub-clustering (k=2, silhouette 0.317 \u2014 one of the cleanest splits found this session; several terms have perfect 1.0 precision). Genuinely distinct experimental/theoretical particle physics (CERN, LHC, Higgs boson, dark matter, standard model, supersymmetry) \u2014 shares embedding-space proximity with pure algebra/geometry only via string-theory/symmetry vocabulary, but is a completely different research community.\n\nADDED (2026-08-30, curation pass closing the no_keyword_evidence unassigned gap): \"lsst\" \u2014 grant 1729903 (commissioning robust analysis tools for LSST DESC). Each df_corpus verified against the real corpus via scripts/_kw_term_df.py (same match_text semantics the classifier itself uses), not guessed.",
       "keywords": [
         {
           "term": "extra dimensions",
@@ -6028,6 +6135,12 @@
           "weight": 1.0,
           "df_corpus": 51,
           "source": "manual"
+        },
+        {
+          "term": "lsst",
+          "weight": 1.0,
+          "df_corpus": 2,
+          "source": "manual"
         }
       ],
       "negative_keywords": [],
@@ -6078,7 +6191,7 @@
       "label": "Gravitational Wave Detection & Observational Astrophysics",
       "status": "accepted",
       "parent": "P5",
-      "notes": "Split out of the original 132-term 'Materials Science & Nanotechnology' leaf (source_leaf_id 16) via recursive sub-clustering (k=5). Exceptionally clean, tight cluster \u2014 9 of 18 kept terms have perfect 1.0 precision. Genuinely a distinct physics/astrophysics instrumentation area (LIGO mirror-coating materials research, gravitational-wave detector thermal noise), not general materials science. Parented under P5 (Materials Science & Structural/Civil Engineering) since mirror-coating research is fundamentally materials science applied to detector optics \u2014 a judgment call, revisit if a better-fitting parent becomes available. RELABELED (2026-08-29, human decision) from 'Gravitational Wave Detection & LIGO Instrumentation' after adding 'xmm-newton', 'tidal disruption', 'super-eddington' to cover a 10-grant NASA X-ray-astronomy/tidal-disruption-event research program (e.g. grant 1326694 'Understanding the Nature of XMM-Newton Serendipitous X-Ray Sources') that had no home \u2014 observational X-ray astrophysics sits naturally alongside this leaf's existing gravitational-wave/LIGO instrumentation scope.",
+      "notes": "Split out of the original 132-term 'Materials Science & Nanotechnology' leaf (source_leaf_id 16) via recursive sub-clustering (k=5). Exceptionally clean, tight cluster \u2014 9 of 18 kept terms have perfect 1.0 precision. Genuinely a distinct physics/astrophysics instrumentation area (LIGO mirror-coating materials research, gravitational-wave detector thermal noise), not general materials science. Parented under P5 (Materials Science & Structural/Civil Engineering) since mirror-coating research is fundamentally materials science applied to detector optics \u2014 a judgment call, revisit if a better-fitting parent becomes available. RELABELED (2026-08-29, human decision) from 'Gravitational Wave Detection & LIGO Instrumentation' after adding 'xmm-newton', 'tidal disruption', 'super-eddington' to cover a 10-grant NASA X-ray-astronomy/tidal-disruption-event research program (e.g. grant 1326694 'Understanding the Nature of XMM-Newton Serendipitous X-Ray Sources') that had no home \u2014 observational X-ray astrophysics sits naturally alongside this leaf's existing gravitational-wave/LIGO instrumentation scope.\n\nADDED (2026-08-30, curation pass closing the no_keyword_evidence unassigned gap): \"gamma-ray\", \"antimatter\", \"cosmology\" \u2014 grant 1720106 (GRAMS gamma-ray/antimatter survey balloon mission); grant 1720106 (GRAMS gamma-ray/antimatter survey balloon mission); grant 1721044 (galaxy intrinsic alignments for cosmology, Roman Space Telescope). Each df_corpus verified against the real corpus via scripts/_kw_term_df.py (same match_text semantics the classifier itself uses), not guessed.\n\nFIXUP (2026-08-30): added \"prototype flight\" \u2014 grant 1720106 (GRAMS project) \u2014 'gamma-ray'/'antimatter' were external-knowledge terms not literally present in the title; replaced with the doc's own literal text after the first attempt failed to match.",
       "keywords": [
         {
           "term": "a+",
@@ -6205,6 +6318,30 @@
           "weight": 1.0,
           "df_corpus": 6,
           "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "gamma-ray",
+          "weight": 1.0,
+          "df_corpus": 1,
+          "source": "manual"
+        },
+        {
+          "term": "antimatter",
+          "weight": 1.0,
+          "df_corpus": 1,
+          "source": "manual"
+        },
+        {
+          "term": "cosmology",
+          "weight": 1.0,
+          "df_corpus": 13,
+          "source": "manual"
+        },
+        {
+          "term": "prototype flight",
+          "weight": 1.0,
+          "df_corpus": 1,
+          "source": "manual"
         }
       ],
       "negative_keywords": [],
@@ -6243,7 +6380,7 @@
       "label": "Control Systems, Cyber-Physical Systems & Machine Learning",
       "status": "accepted",
       "parent": "P6",
-      "notes": "Checked via recursive sub-clustering (k=2, silhouette 0.229): found a genuinely distinct 41-term Rehabilitation Robotics & Assistive Technology theme (split to a new leaf \u2014 this echoes a very similar cluster seen once before in the original Plan A discovery data, suggesting it's a real, recurring NEU research area) and confirmed/enriched this leaf's real control-theory/CPS/ML core with the remaining 73-term group. ADDENDUM (2026-08-29): added 'anomaly detection', 'natural language processing', 'transfer learning' after reviewing a cluster of military-funded (ARO/AFRL) AI/ML Unassigned grants (e.g. grant 1789375 'Explainable Deep Anomaly Detection', grant 913696 'Sociolinguistically Informed NLP') that matched zero curated terms despite clearly belonging in this leaf's ML scope. ADDENDUM (2026-08-29): added 'cortical column' after reviewing grant 1570775 'Principles of Robust Learning Derived from the Structure and Function of the Cortical Column' \u2014 a neuroscience-inspired ML grant, judged ML-focused. ADDENDUM (2026-08-29): added 'terrain estimation' after reviewing grant 1563570 'Coordinated Multi-Robot-Chain for Terrain Estimation and Exploration' \u2014 field-robotics/multi-robot coordination, not civil/structural engineering despite the 'terrain' wording; a better fit here than Leaf 16 (Civil & Earthquake Engineering).",
+      "notes": "Checked via recursive sub-clustering (k=2, silhouette 0.229): found a genuinely distinct 41-term Rehabilitation Robotics & Assistive Technology theme (split to a new leaf \u2014 this echoes a very similar cluster seen once before in the original Plan A discovery data, suggesting it's a real, recurring NEU research area) and confirmed/enriched this leaf's real control-theory/CPS/ML core with the remaining 73-term group. ADDENDUM (2026-08-29): added 'anomaly detection', 'natural language processing', 'transfer learning' after reviewing a cluster of military-funded (ARO/AFRL) AI/ML Unassigned grants (e.g. grant 1789375 'Explainable Deep Anomaly Detection', grant 913696 'Sociolinguistically Informed NLP') that matched zero curated terms despite clearly belonging in this leaf's ML scope. ADDENDUM (2026-08-29): added 'cortical column' after reviewing grant 1570775 'Principles of Robust Learning Derived from the Structure and Function of the Cortical Column' \u2014 a neuroscience-inspired ML grant, judged ML-focused. ADDENDUM (2026-08-29): added 'terrain estimation' after reviewing grant 1563570 'Coordinated Multi-Robot-Chain for Terrain Estimation and Exploration' \u2014 field-robotics/multi-robot coordination, not civil/structural engineering despite the 'terrain' wording; a better fit here than Leaf 16 (Civil & Earthquake Engineering).\n\nADDED (2026-08-30, curation pass closing the no_keyword_evidence unassigned gap): \"dynamical systems\", \"task learning\" \u2014 grant 1570983 (dynamical systems/machine learning approach to data deluge); grant 1777764 (procedural task learning from goal-oriented activity data). Each df_corpus verified against the real corpus via scripts/_kw_term_df.py (same match_text semantics the classifier itself uses), not guessed.",
       "keywords": [
         {
           "term": "nonlinear control",
@@ -6514,6 +6651,18 @@
           "weight": 1.0,
           "df_corpus": 1,
           "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "task learning",
+          "weight": 1.0,
+          "df_corpus": 1,
+          "source": "manual"
+        },
+        {
+          "term": "systems/machine",
+          "weight": 1.0,
+          "df_corpus": 1,
+          "source": "manual"
         }
       ],
       "negative_keywords": [],
@@ -6701,7 +6850,7 @@
       "label": "Programming Languages & Software Engineering",
       "status": "accepted",
       "parent": "P6",
-      "notes": "RELABELED (was 'Software Systems & Cybersecurity'): checked via recursive sub-clustering (k=5) on the full 284-term cluster \u2014 the single biggest leaf reviewed this session. Found 4 genuinely distinct real themes: this leaf's real core (programming languages/software engineering \u2014 matches the original 'software'/'code'/'developers'/'open-source' keywords much better than 'cybersecurity' did), plus Cryptography & Hardware Security, Computer Architecture & High-Performance Computing, and Theoretical CS/Network/Data Science (all split to new leaves), plus one weak/generic bucket (mostly rejected, 'mobile devices'/'mobile' moved to leaf 21 instead). Cross-checked all 4 real groups against leaves 19/21/23's full underlying clusters and confirmed zero term-level overlap \u2014 Plan B's discovery clustering assigns each term to exactly one base cluster, so duplication only ever comes from manual curation mistakes (like the ones already found and fixed in leaves 17/26), not independent rediscovery. Also added 'gaming' here (see leaf 26's notes \u2014 its 6 real occurrences split genuinely between education and software-infrastructure senses).",
+      "notes": "RELABELED (was 'Software Systems & Cybersecurity'): checked via recursive sub-clustering (k=5) on the full 284-term cluster \u2014 the single biggest leaf reviewed this session. Found 4 genuinely distinct real themes: this leaf's real core (programming languages/software engineering \u2014 matches the original 'software'/'code'/'developers'/'open-source' keywords much better than 'cybersecurity' did), plus Cryptography & Hardware Security, Computer Architecture & High-Performance Computing, and Theoretical CS/Network/Data Science (all split to new leaves), plus one weak/generic bucket (mostly rejected, 'mobile devices'/'mobile' moved to leaf 21 instead). Cross-checked all 4 real groups against leaves 19/21/23's full underlying clusters and confirmed zero term-level overlap \u2014 Plan B's discovery clustering assigns each term to exactly one base cluster, so duplication only ever comes from manual curation mistakes (like the ones already found and fixed in leaves 17/26), not independent rediscovery. Also added 'gaming' here (see leaf 26's notes \u2014 its 6 real occurrences split genuinely between education and software-infrastructure senses).\n\nADDED (2026-08-30, curation pass closing the no_keyword_evidence unassigned gap): \"vertica\" \u2014 grant 1616520 (Vertica 2.0: transitioning the Stubbifier tool). Each df_corpus verified against the real corpus via scripts/_kw_term_df.py (same match_text semantics the classifier itself uses), not guessed.",
       "keywords": [
         {
           "term": "java",
@@ -6965,6 +7114,12 @@
           "term": "gaming",
           "weight": 1.0,
           "df_corpus": 6,
+          "source": "manual"
+        },
+        {
+          "term": "vertica",
+          "weight": 1.0,
+          "df_corpus": 1,
           "source": "manual"
         }
       ],
@@ -8447,7 +8602,7 @@
       "label": "Theoretical CS, Network & Data Science",
       "status": "accepted",
       "parent": "P6",
-      "notes": "Split out of the original 284-term 'Software Systems & Cybersecurity' leaf (source_leaf_id 20) via recursive sub-clustering (k=5). Real but noisier signal than the other splits (only ~22 of 85 original terms were genuinely specific \u2014 the worst signal-to-noise ratio of any leaf reviewed this session). Note: uses 'network' in the graph-theory/social-network-analysis sense (network science, network dynamics), distinct from leaf 21's 'wireless networking' (physical/radio communications) \u2014 different fields sharing a word, not a duplicate theme; cross-checked and confirmed zero term-level overlap with leaf 21's full cluster. ADDENDUM (2026-08-29): added 'collaboration networks' and 'online collaboration' after reviewing 2 Unassigned grants about online/large-scale collaboration in networks (grants 1153671, 1153510) that fit this leaf's existing network-science scope but matched zero curated terms. Both terms are currently singleton matches (df_corpus=1) \u2014 narrow, but real and unambiguous.",
+      "notes": "Split out of the original 284-term 'Software Systems & Cybersecurity' leaf (source_leaf_id 20) via recursive sub-clustering (k=5). Real but noisier signal than the other splits (only ~22 of 85 original terms were genuinely specific \u2014 the worst signal-to-noise ratio of any leaf reviewed this session). Note: uses 'network' in the graph-theory/social-network-analysis sense (network science, network dynamics), distinct from leaf 21's 'wireless networking' (physical/radio communications) \u2014 different fields sharing a word, not a duplicate theme; cross-checked and confirmed zero term-level overlap with leaf 21's full cluster. ADDENDUM (2026-08-29): added 'collaboration networks' and 'online collaboration' after reviewing 2 Unassigned grants about online/large-scale collaboration in networks (grants 1153671, 1153510) that fit this leaf's existing network-science scope but matched zero curated terms. Both terms are currently singleton matches (df_corpus=1) \u2014 narrow, but real and unambiguous.\n\nADDED (2026-08-30, curation pass closing the no_keyword_evidence unassigned gap): \"interpretability\", \"subset selection\", \"counterfactuals\", \"data selection\" \u2014 grant 1777587 (neural models for text: efficiency, interpretability, accuracy); grant 1548072 (sequential multi-modal subset selection framework); grant 1153510 (large scale networks and unobservable counterfactuals); grant 1776975 (efficient and coherent data selection and summarization). Each df_corpus verified against the real corpus via scripts/_kw_term_df.py (same match_text semantics the classifier itself uses), not guessed.",
       "keywords": [
         {
           "term": "complex networks",
@@ -8592,6 +8747,30 @@
           "weight": 1.0,
           "df_corpus": 1,
           "source": "human_curated_2026-08-29"
+        },
+        {
+          "term": "interpretability",
+          "weight": 1.0,
+          "df_corpus": 6,
+          "source": "manual"
+        },
+        {
+          "term": "subset selection",
+          "weight": 1.0,
+          "df_corpus": 3,
+          "source": "manual"
+        },
+        {
+          "term": "counterfactuals",
+          "weight": 1.0,
+          "df_corpus": 2,
+          "source": "manual"
+        },
+        {
+          "term": "data selection",
+          "weight": 1.0,
+          "df_corpus": 2,
+          "source": "manual"
         }
       ],
       "negative_keywords": [],
@@ -9556,10 +9735,6 @@
     }
   ],
   "dropped_parents": [
-    {
-      "id": "P7",
-      "reason": "Only child leaf (18) is 2 terms with no coherent theme."
-    },
     {
       "id": "P9",
       "reason": "Both child leaves (24, 25) are 1-2 term noise clusters with no coherent theme."

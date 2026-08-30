@@ -29,12 +29,24 @@ from pathlib import Path
 
 import pandas as pd
 
+from src.clean_text import LOW_TRUST_ABSTRACT_SOURCES
+from src.kw_vocab import tokenize
 from src.topic_keywords import CURATED_PATH, DRAFT_PATH
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PROC = REPO_ROOT / "data" / "processed"
 OUTPUTS = REPO_ROOT / "outputs"
 REVIEW_PATH = OUTPUTS / "KEYWORD_REVIEW.md"
+UNASSIGNED_REVIEW_PATH = OUTPUTS / "KEYWORD_REVIEW_UNASSIGNED.md"
+
+# Curated terms + a small closed stopword class filtered out of the "content
+# tokens" shown per grant below — the point is to surface words a curator
+# might plausibly add as a new keyword, not every "the"/"and"/"of" in the text.
+_TRIVIAL_STOPWORDS = frozenset({
+    "the", "a", "an", "and", "or", "of", "in", "to", "for", "with", "on", "at",
+    "by", "from", "is", "are", "be", "will", "this", "that", "these", "those",
+    "as", "into", "over", "our", "we", "its", "it", "their", "which", "such",
+})
 
 ARTIFACT_TOPIC_ID = 14  # kept in sync with src/build_viz_aggregates.py — a
 # BERTopic-legacy concept (the ONR placeholder-title artifact cluster) with no
@@ -198,7 +210,7 @@ def _section6(tg: dict) -> str:
 def _section7() -> str:
     return """## 7. Downstream files to edit if the parent count changes
 
-If curation changes the accepted parent count away from 7, these need manual sync
+If curation changes the accepted parent count away from 8, these need manual sync
 (per docs/TOPIC_MODEL_REFIT_CHECKLIST.md's existing checklist for this):
 - `src/build_viz_aggregates.py` — `PARENT_NAMES` / `PARENT_COLORS`
 - `docs/TopicVizPrototypes/shared/enrico.js` — `PARENT_COLORS`, `parentName()`/`parentColor()`
@@ -264,10 +276,119 @@ def render(source: str) -> str:
     return "\n\n".join(parts)
 
 
+def _content_tokens(title: str, abstract: str, curated_terms: set[str], limit: int = 40) -> list[str]:
+    """Content-bearing tokens from a grant's own text, for a curator scanning
+    for plausible new keyword candidates — deliberately NOT the full
+    discovery/scoring machinery (df_corpus, precision, etc.): the point here
+    is "what does this doc actually say", not a re-run of vocabulary
+    discovery. Excludes tokens already in the curated vocabulary (those, by
+    definition, are not why the doc scored zero — a term IS in the vocab but
+    didn't match; see the docstring note in render_unassigned) and bare
+    trivial stopwords/very short tokens."""
+    toks = tokenize(f"{title} {abstract}")
+    seen: dict[str, int] = {}
+    for t in toks:
+        if len(t) <= 2 or t in _TRIVIAL_STOPWORDS or t in curated_terms:
+            continue
+        seen[t] = seen.get(t, 0) + 1
+    ranked = sorted(seen.items(), key=lambda kv: -kv[1])
+    return [t for t, _ in ranked[:limit]]
+
+
+def render_unassigned(reason: str) -> str:
+    """Per-doc review sheet for the classifier's own Unassigned bucket —
+    unlike §8 above (dollar-sorted top-20 across BOTH unassigned_reason
+    values), this is uncapped and filterable by reason, with full title +
+    abstract + agency + dollars + a scan of the doc's own content tokens, so
+    a curator can actually read every no_keyword_evidence grant (the only
+    reason a curation pass can move) rather than the handful that happen to
+    be dollar-sorted top-20.
+
+    "Near-miss terms" here means content tokens from the doc's own text that
+    are NOT already in the curated vocabulary — i.e. candidate NEW terms a
+    curator might add — not a re-scoring against existing terms: a
+    no_keyword_evidence grant scored score1<=0 because literally zero
+    curated terms matched via match_text's exact/collapsed/stem tiers, so
+    there is nothing "near" to show among terms that already exist.
+    """
+    kw_path = PROC / "topic_keyword_assignments.parquet"
+    if not kw_path.exists():
+        raise FileNotFoundError(f"{kw_path} does not exist — run `python3 -m src.classify_by_keywords` first")
+    kw = pd.read_parquet(kw_path)
+    kw["doc_id"] = kw["doc_id"].astype(str)
+    kw = kw[~kw["is_extra"]]
+
+    sub = kw[kw["kw_leaf_id"] == -1].copy()
+    if reason != "all":
+        sub = sub[sub["unassigned_reason"] == reason]
+
+    gr = pd.read_parquet(PROC / "grants.parquet")
+    gr["grant_id"] = gr["grant_id"].astype(str)
+    title_col = "title_from_abstract" if "title_from_abstract" in gr.columns else "grantname"
+    gr["_title"] = gr[title_col].where(gr[title_col].astype(str).str.len() > 0, gr["grantname"]).fillna("")
+    gr["_abstract"] = gr["abstract"].fillna("") if "abstract" in gr.columns else ""
+    gr["_low_trust"] = (gr["abstract_source"].astype(str).isin(LOW_TRUST_ABSTRACT_SOURCES)
+                         if "abstract_source" in gr.columns else False)
+    gr_idx = gr.set_index("grant_id")
+
+    curated = json.loads(CURATED_PATH.read_text())
+    curated_terms = {kwd["term"] for leaf in curated["leaves"].values() for kwd in leaf.get("keywords", [])}
+
+    sub = sub.merge(gr_idx[["_title", "_abstract", "_low_trust", "agencyname", "totaldollars"]],
+                     left_on="doc_id", right_index=True, how="left")
+    sub = sub.rename(columns={"_title": "title_", "_abstract": "abstract_", "_low_trust": "low_trust_"})
+    sub = sub.sort_values("totaldollars", ascending=False, na_position="last")
+
+    lines = [f"# Unassigned grants — reason: {reason} ({len(sub)} rows)\n"]
+    lines.append(
+        "Per-doc review sheet: full title + abstract + agency + dollars + a scan of the doc's "
+        "own content tokens NOT already in the curated vocabulary (candidate new keyword terms, "
+        "not a re-score of existing ones — see this function's docstring in kw_review_sheet.py). "
+        "`placeholder_title_only` grants have no real text (titles like \"Grant\"/\"Research\") and "
+        "are not fixable by curation; `no_keyword_evidence` grants are the ones worth reading.\n"
+    )
+    for row in sub.itertuples():
+        title = str(row.title_).strip() or "(no title)"
+        # A low-trust-source abstract (see clean_text.LOW_TRUST_ABSTRACT_SOURCES) is DISPLAYED
+        # on the dashboard but MASKED to "" for the model/classifier — treat it as if it were
+        # title-only for content-token purposes, or a curated term added from its visible text
+        # will never actually fire (confirmed the hard way: grants 1089127/1250146 both looked
+        # curatable from their displayed abstracts but stayed unassigned after curation, because
+        # both are `abstract_source == "nih_reporter_parent"`).
+        low_trust = bool(getattr(row, "low_trust_", False))
+        abstract = "" if low_trust else str(row.abstract_).strip()
+        tokens = _content_tokens(title, abstract, curated_terms)
+        lines.append(f"## {row.doc_id} — {title}")
+        lines.append(f"- reason: `{row.unassigned_reason}` · agency: {row.agencyname} · "
+                      f"dollars: ${row.totaldollars:,.0f}" if pd.notna(row.totaldollars)
+                      else f"- reason: `{row.unassigned_reason}` · agency: {row.agencyname} · dollars: (unknown)")
+        lines.append(f"- content tokens (candidate new-term material): {', '.join(tokens) or '(none found)'}")
+        if low_trust:
+            lines.append("- abstract: ⚠ MODEL CANNOT SEE THIS TEXT (low-trust `abstract_source`, "
+                          "e.g. a borrowed NIH-parent-center abstract) — do not curate a term from "
+                          f"it; treat this grant as title-only. Raw text for reference: "
+                          f"{str(row.abstract_).strip()[:300]}...")
+        elif abstract:
+            lines.append(f"- abstract: {abstract}")
+        else:
+            lines.append("- abstract: (none — title-only)")
+        lines.append("")
+    return "\n".join(lines)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--from", dest="source", choices=["draft", "curated"], default="draft")
+    ap.add_argument("--unassigned", dest="unassigned_reason",
+                     choices=["no_keyword_evidence", "placeholder_title_only", "all"],
+                     help="instead of the full curation sheet, write an uncapped per-doc review "
+                          "of the classifier's own Unassigned bucket, filtered by unassigned_reason")
     args = ap.parse_args()
+    if args.unassigned_reason:
+        text = render_unassigned(args.unassigned_reason)
+        UNASSIGNED_REVIEW_PATH.write_text(text)
+        print(f"wrote {UNASSIGNED_REVIEW_PATH}  (reason: {args.unassigned_reason})")
+        return
     text = render(args.source)
     REVIEW_PATH.write_text(text)
     print(f"wrote {REVIEW_PATH}  (source: {args.source})")

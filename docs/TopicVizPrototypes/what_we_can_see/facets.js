@@ -3,7 +3,7 @@
 // Split out of what_we_can_see.html's single inline script; behavior is
 // unchanged, only the module boundary is new.
 import { FACETS, FACETS_PI, VIZ_META } from "./data.js";
-import { NOISE, ST_LABEL, STATUS_COLOR, TP_COLORS, PARENT_SHORT, COLLEGE_SHORT } from "./constants.js";
+import { NOISE, ST_LABEL, STATUS_COLOR, TP_COLORS, PARENT_SHORT, COLLEGE_SHORT, RANK_COLOR } from "./constants.js";
 
 const E = window.ENRICO;
 
@@ -117,8 +117,18 @@ export const GRANT_FACET_DEFS = {
       color: name === "none" ? NOISE : E.seqColor((i - 1) / Math.max(arr.length - 2, 1)),
     })),
   },
+  // How many distinct roster colleges a grant involves (PI + co-PIs) — a new
+  // facet (PI feedback: "for each grant how many different colleges does it
+  // involve?"). Banded small (0/1/2/3+) since 4+ is a rarity; ordinal since
+  // "more colleges" is a real order, not an arbitrary category.
+  ncol: {
+    label: "Colleges involved", ordinal: true, legend: "chips",
+    values: () => FACETS.cols.ncol,
+    levels: () => FACETS.levels.ncol.map((name, i, arr) =>
+      ({key: i, label: name, color: i === 0 ? NOISE : E.seqColor((i - 1) / Math.max(arr.length - 2, 1))})),
+  },
 };
-export const GRANT_ARRANGE_FACETS = ["ag", "yr", "col", "st", "ab", "tp", "tid", "amt", "conf"];
+export const GRANT_ARRANGE_FACETS = ["ag", "yr", "col", "st", "ab", "tp", "tid", "amt", "conf", "ncol"];
 
 // Mirrors GRANT_FACET_DEFS above, over facets_pi.json (all 2,247 roster
 // faculty) instead of facets.json (2,676 grants) — the "every PI" tab's own
@@ -141,9 +151,15 @@ export const PI_FACET_DEFS = {
       ({key: i, label: COLLEGE_SHORT[name] || name, full: name, color: i === 0 ? NOISE : E.topicColor(i - 1)})),
   },
   rank: {
+    // PI feedback: rank is nested — Teaching Professor and its two seniority
+    // variants are one family, Professor and its two are a second family —
+    // the row/column LABELING already groups these correctly (it's just an
+    // ordinal string list), but coloring by bare level index broke that
+    // grouping visually. RANK_COLOR (constants.js) fixes this: one hue per
+    // family, darker = more senior, so a legend reader sees the ladder.
     label: "Academic rank", ordinal: false, legend: "chips",
     values: () => FACETS_PI.cols.rank,
-    levels: () => FACETS_PI.levels.rank.map((name, i) => ({key: i, label: name, color: i === 0 ? NOISE : E.topicColor(i - 1)})),
+    levels: () => FACETS_PI.levels.rank.map((name, i) => ({key: i, label: name, color: RANK_COLOR[name] || NOISE})),
   },
   track: {
     label: "Appointment track", ordinal: false, legend: "chips",
@@ -189,6 +205,16 @@ export const PI_FACET_DEFS = {
     levels: () => FACETS_PI.levels.amt.map((name, i, arr) =>
       ({key: i, label: name, color: i === 0 ? NOISE : E.seqColor((i - 1) / (arr.length - 2))})),
   },
+  // "Dollars earned from grants a PI earned AT Northeastern" (PI feedback) —
+  // the same PI-only credit model as "amt" above, further filtered to
+  // neu_status == "earned_at_neu" per the funding-credit-model caveat. A
+  // separate facet, not a redefinition of "amt".
+  amt_neu: {
+    label: "Dollars earned at NEU (as PI)", ordinal: true, legend: "chips",
+    values: () => FACETS_PI.cols.amt_neu,
+    levels: () => FACETS_PI.levels.amt_neu.map((name, i, arr) =>
+      ({key: i, label: name, color: i === 0 ? NOISE : E.seqColor((i - 1) / Math.max(arr.length - 2, 1))})),
+  },
   tp: {
     label: "Parent theme (as PI)", ordinal: false, legend: "chips",
     values: () => FACETS_PI.cols.tp,
@@ -203,7 +229,7 @@ export const PI_FACET_DEFS = {
       color: i === 0 ? NOISE : i === 1 ? "#9AA0A6" : TP_COLORS[(i - 2) % TP_COLORS.length]})),
   },
 };
-export const PI_ARRANGE_FACETS = ["col", "dept", "rank", "track", "tenure", "hire_yr", "status", "hasgrants", "ngrants", "amt", "tp"];
+export const PI_ARRANGE_FACETS = ["col", "dept", "rank", "track", "tenure", "hire_yr", "status", "hasgrants", "ngrants", "amt", "amt_neu", "tp"];
 
 // Every function below is shared by both unit-visualization grids ("Every
 // grant" over facetDefs=GRANT_FACET_DEFS/data=FACETS, "Every PI" over
@@ -240,4 +266,29 @@ export function populateOptions(sel, opts, current) {
   sel.value = opts.some(([v]) => v === current) ? current : opts[0][0];
 }
 
-export const SORT_OPTIONS = [["natural", "Natural order"], ["size", "Size"], ["dollars", "Size ($)"]];
+// PI feedback: "sort by... size of dollar and size of what — need
+// clarification" — "Size" was ambiguous between grant COUNT and dollar
+// amount; both options now spell out which.
+// "Need a suggestion?" (PI feedback: entry-point questions that configure
+// Rows/Columns/Color/Sort for you) — each preset is handed to
+// grid.js's applyPreset(). Deliberately a small, curated set of genuinely
+// common questions, not exhaustive — the controls dock still covers
+// everything else. Keys must exist in the matching facetDefs table.
+export const GRANT_SUGGESTIONS = [
+  {label: "Which agencies fund the most?", arrange: "ag", split: "", color: "amt", sort: "dollars"},
+  {label: "How has funding changed over time?", arrange: "yr", split: "", color: "tp", sort: "natural"},
+  {label: "Which colleges get the most funding?", arrange: "col", split: "", color: "amt", sort: "dollars"},
+  {label: "Where is topic confidence weakest?", arrange: "conf", split: "ab", color: "tp", sort: "natural"},
+  {label: "What's still unassigned, and why?", arrange: "tid", split: "", color: "ab", sort: "size"},
+];
+export const PI_SUGGESTIONS = [
+  {label: "Which colleges have the most funded PIs?", arrange: "col", split: "", color: "amt", sort: "dollars"},
+  {label: "How does funding differ by rank?", arrange: "rank", split: "", color: "amt", sort: "dollars"},
+  {label: "Who hasn't been funded at all?", arrange: "hasgrants", split: "", color: "col", sort: "size"},
+];
+
+export const SORT_OPTIONS = [
+  ["natural", "Natural order"],
+  ["size", "Bin size (grant count)"],
+  ["dollars", "Bin size (total dollars)"],
+];

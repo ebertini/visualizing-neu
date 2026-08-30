@@ -35,21 +35,23 @@
     "#66A61E", "#E6AB02", "#A6761D", "#8DA0CB", "#66C2A5", "#FC8D62", "#E78AC3",
   ];
 
-  // ---- 7-parent-theme palette, + 5 SPARE colors (indices 7-11) — the
+  // ---- 8-parent-theme palette, + 4 SPARE colors (indices 8-11) — the
   // curated keyword-classifier taxonomy (outputs/topic_keywords.json,
-  // promoted 2026-08-29), replacing the prior 8-parent BERTopic-era names.
-  // Must stay byte-identical to src/build_viz_aggregates.py's own
-  // PARENT_NAMES/PARENT_COLORS copy. Red-free/grey-free, matching this
-  // palette's existing convention (grey is reserved for NOISE_GREY).
+  // promoted 2026-08-29, revised same day to split the original P3 into a
+  // redefined P3 + new P7), replacing the prior 8-parent BERTopic-era names
+  // (a coincidental same count, different parents entirely). Must stay
+  // byte-identical to src/build_viz_aggregates.py's own PARENT_NAMES/
+  // PARENT_COLORS copy. Red-free/grey-free, matching this palette's existing
+  // convention (grey is reserved for NOISE_GREY).
   const PARENT_COLORS = [
     "#4E79A7", "#F28E2B", "#59A14F", "#B07AA1", "#76B7B2", "#EDC948", "#9C755F", "#D37295",
     "#6B4C9A", "#1B9E77", "#B6992D", "#7570B3",
   ];
   const PARENT_NAMES = [
     "Biomedical Sciences", "Public & Behavioral Health", "Environmental Science & Ecology",
-    "Social Science, Public Policy & Workforce Development",
+    "Social Science, Public Policy & Education Research",
     "Materials Science & Structural/Civil Engineering", "Mathematics & Fundamental Physics",
-    "Computing, Networking & Robotic Systems",
+    "Computing, Networking & Robotic Systems", "Workforce Development & Institutional Partnerships",
   ];
 
   // Hard convention: HDBSCAN "Unassigned" / no-data is ALWAYS this grey,

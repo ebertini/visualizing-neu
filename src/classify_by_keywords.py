@@ -270,42 +270,71 @@ def _leaf_norm(leaf: dict, idf: dict[str, float]) -> float:
     return total ** ALPHA if total > 0 else 1.0
 
 
-def classify(leaves: dict, parents: dict, limit: int | None = None,
-             tiebreak: str = "none") -> pd.DataFrame:
-    ids, titles, abstracts = load_doc_fields()
-    n_docs_full = len(ids)  # the BM25 N — MUST be the corpus df_corpus was
-    # computed against, never shrunk by --limit (a smoke-test convenience for
-    # which docs get SCORED, not a redefinition of the corpus those fixed
-    # per-term document-frequency stats describe).
+def match_corpus(leaves: dict, ids: list[str], titles: list[str], abstracts: list[str]) -> list[dict]:
+    """The expensive, CONSTANT-INVARIANT half of `classify()`: run `match_text`
+    for every doc against every curated term once. Nothing here depends on
+    K1/B/ALPHA/W_TITLE or the conf_tier thresholds — only on the taxonomy's
+    term list and the corpus text — so a sweep over those constants (see
+    `src/tune_bm25f.py`) should call this ONCE and reuse the result, rather
+    than re-running match_text (the ~30s-per-run cost) per grid point.
 
-    # Doc lengths + their corpus average are likewise corpus-wide constants —
-    # computed over the FULL doc set before any --limit slicing, so a
-    # smoke-test subset can't silently change L_avg (or N above) out from
-    # under the curated terms' fixed df_corpus values. Tokenizing is cheap;
-    # only the expensive per-doc match_text() pass below is actually limited.
-    tok_titles_full = [tokenize(t) for t in titles]
-    tok_abstracts_full = [tokenize(a) for a in abstracts]
-    doc_lens_full = [W_TITLE * len(tt) + len(ta) for tt, ta in zip(tok_titles_full, tok_abstracts_full)]
-    avg_len = (sum(doc_lens_full) / n_docs_full) if n_docs_full else 0.0
-
-    if limit:
-        ids, titles, abstracts = ids[:limit], titles[:limit], abstracts[:limit]
-        tok_titles, tok_abstracts = tok_titles_full[:limit], tok_abstracts_full[:limit]
-        doc_lens = doc_lens_full[:limit]
-    else:
-        tok_titles, tok_abstracts, doc_lens = tok_titles_full, tok_abstracts_full, doc_lens_full
-
+    Returns one dict per doc, in `ids` order: `{doc_id, title, abstract,
+    tf_title, tf_abstract, how_seen, tok_title_len, tok_abstract_len,
+    has_text}` — everything `score_corpus` below needs, and nothing more.
+    """
     all_terms = sorted({kw["term"] for leaf in leaves.values()
                          for kw in list(leaf.get("keywords", [])) + list(leaf.get("negative_keywords", []))})
+    out = []
+    for did, title, abstract in zip(ids, titles, abstracts):
+        tok_title = tokenize(title)
+        tok_abstract = tokenize(abstract)
+        matches_title = match_text(title, all_terms) if all_terms and title else []
+        matches_abstract = match_text(abstract, all_terms) if all_terms and abstract else []
+        tf_title = Counter(m.term for m in matches_title)
+        tf_abstract = Counter(m.term for m in matches_abstract)
+        how_seen: dict[str, set[str]] = {}
+        for m in matches_title + matches_abstract:
+            how_seen.setdefault(m.term, set()).add(m.how)
+        out.append({
+            "doc_id": did, "title": title, "abstract": abstract,
+            "tf_title": tf_title, "tf_abstract": tf_abstract, "how_seen": how_seen,
+            "tok_title_len": len(tok_title), "tok_abstract_len": len(tok_abstract),
+            "has_text": bool(tok_title) or bool(tok_abstract),
+        })
+    return out
+
+
+def score_corpus(match_results: list[dict], leaves: dict, parents: dict,
+                  n_docs_full: int, match_results_full: list[dict] | None = None) -> pd.DataFrame:
+    """The cheap, CONSTANT-DEPENDENT half of `classify()`: given `match_corpus`'s
+    cached per-doc matches, compute doc lengths/idf/leaf scores/conf_tier
+    using the CURRENT values of the module-level K1/B/ALPHA/W_TITLE and
+    HIGH_MARGIN_REL/HIGH_MIN_TERMS/MEDIUM_MARGIN_REL/MEDIUM_MIN_TERMS — so a
+    sweep can vary those (module globals, same pattern the test suite already
+    uses via monkeypatch) and re-call this function cheaply, without
+    re-matching. `classify()` itself is unchanged behaviorally; it now just
+    calls `match_corpus` then this.
+
+    `match_results_full` (defaulting to `match_results` itself) is the FULL,
+    unlimited corpus's match results, used ONLY to compute L_avg — mirrors
+    `classify()`'s original contract that a `--limit` smoke-test subset must
+    not change the corpus-wide average length (or N) the curated terms' fixed
+    df_corpus values were computed against; see
+    test_limit_does_not_change_idf_or_length_normalization.
+    """
+    full = match_results_full if match_results_full is not None else match_results
+    doc_lens_full = [W_TITLE * m["tok_title_len"] + m["tok_abstract_len"] for m in full]
+    avg_len = (sum(doc_lens_full) / n_docs_full) if n_docs_full else 0.0
+
     idf = _term_idf_table(leaves, n_docs_full)
     leaf_norms = {lid: _leaf_norm(leaf, idf) for lid, leaf in leaves.items()}
     leaf_ids_sorted = sorted(leaves.keys(), key=int)
 
     rows = []
-    for i, did in enumerate(ids):
-        title, abstract = titles[i], abstracts[i]
-        doc_len = doc_lens[i]
-        has_text = bool(tok_titles[i]) or bool(tok_abstracts[i])
+    for m in match_results:
+        doc_len = W_TITLE * m["tok_title_len"] + m["tok_abstract_len"]
+        did, title = m["doc_id"], m["title"]
+        tf_title, tf_abstract, how_seen = m["tf_title"], m["tf_abstract"], m["how_seen"]
 
         # no_usable_text is the only reason decided up front — everything
         # else (placeholder_title_only, no_keyword_evidence) is decided
@@ -314,15 +343,7 @@ def classify(leaves: dict, parents: dict, limit: int | None = None,
         # ultra-common word) carries zero real evidence, and should be
         # treated the same as no match at all, not spuriously hand a doc to
         # whichever leaf happens to own that now-worthless term.
-        unassigned_reason = "no_usable_text" if not has_text else None
-
-        matches_title = match_text(title, all_terms) if all_terms and title else []
-        matches_abstract = match_text(abstract, all_terms) if all_terms and abstract else []
-        tf_title = Counter(m.term for m in matches_title)
-        tf_abstract = Counter(m.term for m in matches_abstract)
-        how_seen: dict[str, set[str]] = {}
-        for m in matches_title + matches_abstract:
-            how_seen.setdefault(m.term, set()).add(m.how)
+        unassigned_reason = "no_usable_text" if not m["has_text"] else None
 
         total_matched_terms = set(tf_title) | set(tf_abstract)
 
@@ -344,7 +365,7 @@ def classify(leaves: dict, parents: dict, limit: int | None = None,
         score1, score2 = scores[lid1], scores[lid2]
 
         if unassigned_reason is None:
-            if not tok_abstracts[i] and _clean_placeholder_title(title) in PLACEHOLDER_TITLES:
+            if not m["tok_abstract_len"] and _clean_placeholder_title(title) in PLACEHOLDER_TITLES:
                 unassigned_reason = "placeholder_title_only"
             elif score1 <= 0:
                 unassigned_reason = "no_keyword_evidence"
@@ -411,7 +432,25 @@ def classify(leaves: dict, parents: dict, limit: int | None = None,
             "tie_broken_by": None,
         })
 
-    df = pd.DataFrame(rows)
+    return pd.DataFrame(rows)
+
+
+def classify(leaves: dict, parents: dict, limit: int | None = None,
+             tiebreak: str = "none") -> pd.DataFrame:
+    ids, titles, abstracts = load_doc_fields()
+    n_docs_full = len(ids)  # the BM25 N — MUST be the corpus df_corpus was
+    # computed against, never shrunk by --limit (a smoke-test convenience for
+    # which docs get SCORED, not a redefinition of the corpus those fixed
+    # per-term document-frequency stats describe).
+
+    # match_corpus tokenizes + matches over the FULL doc set before any
+    # --limit slicing, so a smoke-test subset can't silently change L_avg (or
+    # N above) out from under the curated terms' fixed df_corpus values.
+    match_results_full = match_corpus(leaves, ids, titles, abstracts)
+    match_results = match_results_full[:limit] if limit else match_results_full
+
+    df = score_corpus(match_results, leaves, parents, n_docs_full, match_results_full=match_results_full)
+    ids = df["doc_id"].tolist()
     _attach_bertopic_columns(df)
     if tiebreak == "embedding":
         _attach_embedding_tiebreak(df, ids)

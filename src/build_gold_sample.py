@@ -21,7 +21,7 @@ excluded — they have no grant_id/agency to stratify by.
 
 How to actually label (do this before trusting any accuracy number):
     1. Open data/gold/topic_gold_set.csv in a spreadsheet.
-    2. For each row, read title + abstract_preview and pick ONE of the 7
+    2. For each row, read title + abstract (full text, not truncated) and pick ONE of the 7
        curated parent labels (printed by this script, also in
        outputs/topic_keywords.json's parents{}) into human_parent_label.
     3. Do NOT open data/gold/topic_gold_set_predictions.csv while labeling —
@@ -78,9 +78,11 @@ def _agency_bucket(name: str) -> str:
     return AGENCY_BUCKETS.get(name, "Other")
 
 
-def _abstract_preview(abstract: str, n: int = 400) -> str:
-    a = str(abstract or "").strip()
-    return (a[:n] + "…") if len(a) > n else a
+def _abstract_preview(abstract: str) -> str:
+    """Full abstract text, not truncated — a human labeler needs the whole
+    thing to judge parent fit reliably, not a 400-char snippet that can cut
+    off exactly the sentence that would resolve an ambiguous case."""
+    return str(abstract or "").strip()
 
 
 def build_population() -> pd.DataFrame:
@@ -144,6 +146,16 @@ def sample_gold_set(df: pd.DataFrame, n_total: int = N_TOTAL, seed: int = SEED) 
 
 def main() -> None:
     GOLD_DIR.mkdir(parents=True, exist_ok=True)
+    if GOLD_PATH.exists():
+        existing = pd.read_csv(GOLD_PATH)
+        n_labeled = existing["human_parent_label"].fillna("").astype(str).str.strip().gt("").sum()
+        if n_labeled:
+            raise SystemExit(
+                f"refusing to overwrite {GOLD_PATH}: {n_labeled}/{len(existing)} rows already "
+                "have a human_parent_label. This script always writes an EMPTY label column, so "
+                "re-running it would silently destroy real human labeling work. Delete the file "
+                "yourself first if a fresh sample is genuinely what you want."
+            )
     df = build_population()
     sample = sample_gold_set(df)
 
@@ -153,7 +165,7 @@ def main() -> None:
     gold = pd.DataFrame({
         "grant_id": sample["grant_id"],
         "title": sample["_title"],
-        "abstract_preview": sample["abstract"].map(_abstract_preview),
+        "abstract": sample["abstract"].map(_abstract_preview),
         "agency": sample["agencyname"],
         "stratum": sample["stratum"],
         "human_parent_label": "",  # <-- fill by hand, blind, one of parent_labels below

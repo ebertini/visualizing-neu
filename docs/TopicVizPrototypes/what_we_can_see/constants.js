@@ -43,17 +43,20 @@ export const TP_COLORS = [
   "#bcbd22", "#66A61E", "#E6AB02", "#8DA0CB",
 ];
 
-// Hand-curated short forms for the 7 parent themes (curated keyword-classifier
-// taxonomy, promoted 2026-08-29 — replaces the prior 8-parent BERTopic-era
-// set) — most of the full names (from build_viz_aggregates.py's PARENT_NAMES)
-// run past what fits a row/column label or a legend chip without truncating
-// mid-word. Only used for row/column headers and the color legend; the
-// per-grant hover tooltip reads the full name straight from VIZ_META.parents
-// independently of this, so it's unaffected.
+// Hand-curated short forms for the 8 parent themes (curated keyword-classifier
+// taxonomy, promoted 2026-08-29, revised same day to split P3 into a
+// redefined P3 + new P7 — a coincidental same count as the prior 8-parent
+// BERTopic-era set, different parents entirely) — most of the full names
+// (from build_viz_aggregates.py's PARENT_NAMES) run past what fits a
+// row/column label or a legend chip without truncating mid-word. Only used
+// for row/column headers and the color legend; the per-grant hover tooltip
+// reads the full name straight from VIZ_META.parents independently of this,
+// so it's unaffected.
 export const PARENT_SHORT = {
   0: "Biomedical Sciences", 1: "Public & Behav. Health", 2: "Environment & Ecology",
-  3: "Soc. Sci & Workforce Dev", 4: "Materials & Civil Eng",
+  3: "Soc. Sci & Education", 4: "Materials & Civil Eng",
   5: "Math & Fundamental Physics", 6: "Computing & Robotics",
+  7: "Workforce & Inst. Partnerships",
 };
 
 // Same idea, for college names — "College of Social Sciences and
@@ -65,6 +68,33 @@ export const PARENT_SHORT = {
 // reads FACETS.levels.col / FACETS_PI.levels.col directly (not through this
 // map) keep the full name; row/column labels carry a `full` field alongside
 // the shortened `label` so their own hover still shows it in full.
+// PI feedback: academic rank is nested (Teaching Professor / Associate
+// Teaching Professor / Assistant Teaching Professor are one FAMILY at
+// different seniority levels; Professor / Associate Professor / Assistant
+// Professor are a second family) — the row/column LABELING already groups
+// them correctly (it's just an ordinal string), but the old coloring
+// (`E.topicColor(i-1)`, a bare per-level-index lookup into an unrelated
+// 25-topic palette) gave each level its own arbitrary hue, so two levels of
+// the SAME family could end up looking totally unrelated. Fixed with an
+// explicit per-label color: one hue per family, darker = more senior, so
+// the legend itself reads as "these three are a ladder" at a glance.
+export const RANK_COLOR = {
+  "Not recorded": NOISE,
+  "Other": "#9AA0A6",
+  // Teaching-track family — blue hue, darkening with seniority.
+  "Assistant Teaching Professor": "#9ecae1",
+  "Associate Teaching Professor": "#4292c6",
+  "Teaching Professor": "#08519c",
+  // Tenure-track/tenured family — orange hue, darkening with seniority.
+  "Assistant Professor": "#fdae6b",
+  "Associate Professor": "#e6550d",
+  "Professor": "#8c2d04",
+  // Standalone ranks — each its own distinct hue, no seniority ladder to show.
+  "Research Professor": "#31a354",
+  "Lecturer": "#9467bd",
+  "Visiting / Adjunct": "#e377c2",
+};
+
 export const COLLEGE_SHORT = {
   "College of Engineering": "COE",
   "College of Science": "COS",

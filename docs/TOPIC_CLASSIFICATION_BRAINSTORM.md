@@ -77,14 +77,53 @@ This is a real decision, not just a restatement of the Slack message — it reso
 
 "Which student, which prior work" (the person Enrico wants looped in) — no update; still unresolved as far as this record shows.
 
-## What we can see notes - open questions 2026-08-21
+## What we can see notes — addressed 2026-08-30
 
-* add a very faint grid line for every grant and every pi tab
-* remove the default grey line that goes in empty cells for every grant and every pi tab
-* add dollars earned from grants PI's earned at northeastern University
-* clicking anywhere outside of the option dial should close it
-* filter/remove out certain attributes from the grid display available right now (stretch)
-* academic rank is an interesting example of nested labels - all the teaching professors should be grouped together, associate professors together, and full professors together - which is working correctly in the current grid display but not for coloring (stretch)
+Everything below except two explicitly-not-code items and one deliberately-deferred
+stretch item is implemented (`docs/TopicVizPrototypes/what_we_can_see/`):
+
+* ~~add a very faint grid line...~~ / ~~remove the default grey line in empty cells~~ —
+  one change satisfies both: every cell (empty or not) now draws a faint stroked
+  outline (`grid.js`'s `l-grid` layer, `.cellgrid` in `style.css`), replacing the old
+  fixed 2px grey bar that only appeared in empty rows.
+* ~~add dollars earned from grants PIs earned at Northeastern~~ — a new PI-grid facet,
+  "Dollars earned at NEU (as PI)" (`amt_neu`/`amt_neu_raw` in `facets_pi.json`,
+  `build_facets_pi()` in `src/build_viz_aggregates.py`), the same PI-only credit model
+  as the existing "Dollars as PI" facet, further filtered to `neu_status ==
+  "earned_at_neu"` — a separate facet, not a redefinition of the existing one.
+* ~~clicking anywhere outside the option dial should close it~~ — done
+  (`grid.js`'s `setupDial`, a document-level click listener scoped to outside both
+  the dial and its dock).
+* ~~academic rank... grouped together for coloring~~ — fixed via an explicit
+  per-label `RANK_COLOR` map (`constants.js`): one hue per rank FAMILY (teaching-track,
+  tenure-track), darker = more senior, replacing the old bare per-index palette lookup
+  that gave unrelated hues to ranks in the same family.
+* filter/remove attributes from the grid (stretch) — **deliberately deferred**, not
+  built: it cuts against the grid's own "no level is ever hidden, nobody's silently
+  dropped" invariant and needs its own explicit design decision (an explicit, labelled
+  filter that states what's hidden, not a silent drop), not a quick add.
+* ~~PI information in the grant tooltip; grant number is inconsequential~~ — done
+  (`detail.js`'s `grantTooltip`): PI name replaces the grant id line.
+* ~~dollar band on the row/column overview~~ / ~~what's the label for the cell dollar
+  total~~ — `groupDetail` (`grid.js`) now labels the total explicitly ("Total: $X")
+  and adds a dollar-band breakdown of the group's own members (same shape as the
+  existing color breakdown).
+* ~~make sort by/color by more intuitive~~ — Sort options renamed to spell out grant
+  count vs. dollars ("Bin size (grant count)" / "Bin size (total dollars)"); both
+  dock headers gained an explanatory `title` tooltip.
+* ~~how many colleges does each grant involve~~ — a new grant facet + tooltip line
+  (`nColleges`/`ncol` in `facets.json`, `load_colleges_per_grant()`), counting distinct
+  roster colleges across every person linked to a grant (not just the PI).
+* move hosting to Enrico's own GitHub Pages project — **not code, blocked on his
+  invite.**
+* email Paolo re: a meeting — **not code, a personal action item.**
+
+Also built in the same pass, beyond this list (see CLAUDE.md's "Calibration +
+visualization finalization pass" entry): the grant search box (title/PI/agency,
+highlight-in-place) and the topic-keyword "fingerprint" view (the selected grant's
+abstract with its classifier-matched curated terms highlighted in place) — both were
+the still-open "next direction" items below this section; a real-browser check is
+still required before publishing (no browser available in this working environment).
 * move the page hosting to its own unique github pages - Enrico will invite me to a project to set this up. 
 * Send Paolo an email - to meet sometime next week - check if he is in Boston and then schedule a meeting accordingly.
 

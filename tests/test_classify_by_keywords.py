@@ -11,6 +11,7 @@ real one.
 
 Run:  pytest tests/test_classify_by_keywords.py
 """
+import pandas as pd
 import pytest
 
 import src.classify_by_keywords as cbk
@@ -95,7 +96,12 @@ def test_unassigned_reasons(monkeypatch):
     assert df.loc["empty", "unassigned_reason"] == "no_usable_text"
     assert df.loc["placeholder", "unassigned_reason"] == "placeholder_title_only"
     assert df.loc["no_evidence", "unassigned_reason"] == "no_keyword_evidence"
-    assert df.loc["matched", "unassigned_reason"] is None
+    # pd.DataFrame(list_of_dicts) silently coerces a None among otherwise-
+    # string values to float NaN (confirmed pandas behavior, not a bug in
+    # classify()) — every other consumer in this repo already checks this
+    # column via pd.isna()/.notna(), not `is None`; this assertion follows
+    # the same real contract.
+    assert pd.isna(df.loc["matched", "unassigned_reason"])
     assert df.loc["matched", "kw_leaf_id"] == 0
     assert df.loc["matched", "conf_tier"] != "none"
     for doc_id in ["empty", "placeholder", "no_evidence"]:

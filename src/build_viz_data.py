@@ -9,7 +9,7 @@ output instead of the TF-IDF/t-SNE preview.
 topic-model redo), not BERTopic directly.** `outputs/topic_labels.json` is no
 longer BERTopic's own seed file — it's now `src.classify_by_keywords
 --write-topic-labels`'s conversion of the curated `outputs/topic_keywords.json`
-taxonomy (31 leaves / 7 parents) into this file's schema, so the code below
+taxonomy (31 leaves / 8 parents) into this file's schema, so the code below
 that reads `labels["topics"]`/`labels["parents"]` is unchanged; only what
 populates that file changed. BERTopic's own assignment is kept as an explicit
 `bertopicDom`/`bertopicNoise` COMPARISON pair per point — never dropped, since
@@ -32,7 +32,16 @@ Writes docs/EnricoVis/data/:
   grants_umap.json   {meta, colors, order, points:[{id,title,agency,agencyLabel,
                       amount,year,titleOnly,modelTitleOnly,x,y,projection,
                       t[31],dom,isNoise,bertopicDom,bertopicNoise,conf,confTier,
-                      nTerms,unassignedReason}]}
+                      nTerms,matchedTerms,unassignedReason,secondaryLeaf,secondaryParent,
+                      secondaryMargin,hasSecondaryTheme}]}
+                      secondaryLeaf/secondaryParent/secondaryMargin surface the
+                      classifier's own already-computed runner-up leaf (never
+                      exposed before); hasSecondaryTheme flags when that runner-up
+                      is genuinely close (margin < 0.15, verified against real
+                      grants — see the computation site) rather than a distant
+                      also-ran, so the frontend can show an "also relevant to"
+                      hint for the ~8.9% of grants that genuinely sit between
+                      two parents (e.g. HCI-flavored grants).
                       `titleOnly` = data availability (NEU has no abstract on
                       record). `modelTitleOnly` = modeling eligibility (the
                       topic-model fit saw no abstract text) — differs from
@@ -73,6 +82,9 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 PROC = REPO_ROOT / "data" / "processed"
 OUTPUTS = REPO_ROOT / "outputs"
 VIZ_DIR = REPO_ROOT / "docs" / "EnricoVis" / "data"
+
+# See the secondary-theme comment at its use site below for why this value.
+SECONDARY_THEME_MARGIN_THRESHOLD = 0.15
 
 
 def agency_bucket(name: str) -> str:
@@ -147,6 +159,8 @@ def build() -> dict:
         if gid not in id2xy:
             continue  # grant not encoded (no title/abstract) — skip
         kw_row = kw_by_id.get(gid)
+        secondary_leaf = secondary_parent = secondary_margin = None
+        has_secondary_theme = False
         if kw_row is None:
             missing_kw += 1
             tid, conf, conf_tier, n_terms, unassigned_reason = -1, 0.0, "none", 0, "no_usable_text"
@@ -154,6 +168,26 @@ def build() -> dict:
             tid = int(kw_row.kw_leaf_id)
             conf, conf_tier, n_terms = float(kw_row.margin_rel), kw_row.conf_tier, int(kw_row.n_terms_matched)
             unassigned_reason = kw_row.unassigned_reason
+            # Secondary-theme signal: the classifier already computes a
+            # runner-up leaf/score per doc (kw_leaf2_id/margin_rel) but never
+            # exposed it before — surfaces the genuinely-close, sits-between-
+            # PARENTS population (interdisciplinary grants like HCI) without
+            # any new scoring. hasSecondaryTheme is deliberately scoped to
+            # cross-parent runner-ups only (not same-parent-different-leaf,
+            # which is "which flavor of X" ambiguity, not the interdisciplinary
+            # case this was built for) — 0.15 is not an arbitrary pick:
+            # verified against the real corpus that this threshold isolates
+            # 238/2675 (8.9%) assigned grants whose runner-up leaf sits in a
+            # DIFFERENT parent from the winner — a real, sizeable population.
+            if tid >= 0 and kw_row.kw_leaf2_id is not None and int(kw_row.kw_leaf2_id) != tid:
+                secondary_leaf = int(kw_row.kw_leaf2_id)
+                secondary_parent = topics_meta.get(str(secondary_leaf), {}).get("parent")
+                secondary_margin = round(float(kw_row.margin_rel), 4)
+                primary_parent = topics_meta.get(str(tid), {}).get("parent")
+                has_secondary_theme = (
+                    secondary_margin < SECONDARY_THEME_MARGIN_THRESHOLD
+                    and secondary_parent != primary_parent
+                )
         bt_tid, bt_noise = bertopic_by_id.get(gid, (None, None))
         title = getattr(r, title_col, "") or r.grantname
         t = [0.0] * n_topics
@@ -196,7 +230,27 @@ def build() -> dict:
             "conf": round(conf, 4),
             "confTier": conf_tier,
             "nTerms": n_terms,
+            # The classifier's OWN recorded matched terms for the winning leaf
+            # (topic_keyword_assignments.parquet's matched_terms column) — was
+            # computed all along but never shipped past the aggregate nTerms
+            # count. Powers the topic-keyword "fingerprint" view (highlighting
+            # which curated terms actually fired in this grant's own text,
+            # from the classifier's own recorded matches — NOT a client-side
+            # re-implementation of keyword_match.py's tiers, which could
+            # silently disagree with the classifier it's meant to explain).
+            "matchedTerms": (list(kw_row.matched_terms) if kw_row is not None
+                              and kw_row.matched_terms is not None else []),
             "unassignedReason": unassigned_reason,
+            # Secondary-theme signal — see the comment where these are
+            # computed above. secondaryLeaf/secondaryParent/secondaryMargin
+            # are always the runner-up leaf's own data when one exists (even
+            # for a large margin); hasSecondaryTheme is the one flag the
+            # frontend should actually branch on ("worth showing as a hint"),
+            # so a page doesn't need to duplicate the threshold logic.
+            "secondaryLeaf": secondary_leaf,
+            "secondaryParent": secondary_parent,
+            "secondaryMargin": secondary_margin,
+            "hasSecondaryTheme": has_secondary_theme,
         })
     if missing_kw:
         print(f"WARNING: {missing_kw} grants had no row in topic_keyword_assignments.parquet "

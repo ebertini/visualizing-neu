@@ -181,15 +181,21 @@ so there's no multi-file drop-in step the way Track A has — just re-run it.
   validates structural well-formedness (dense ids, non-empty notes, no
   phantom `df_corpus==0` terms, bidirectional leaf↔parent references), never
   curation *quality*. See `docs/TOPIC_CLASSIFICATION_BRAINSTORM.md`.
-- **BM25F constants** (`K1`, `B`, `ALPHA`, `W_TITLE` in `src/classify_by_keywords.py`)
-  and the `conf_tier` thresholds are literature-standard placeholders, **not
-  calibrated against this corpus** — a stratified gold set exists as a
-  scaffold (`data/gold/topic_gold_set.csv`, built by `src/build_gold_sample.py`)
-  but has not been human-labeled. `notebooks/09_keyword_classifier_validation.ipynb`
-  found the title-only-normalization check currently **fails** (title-only
-  docs score a *higher*, not lower, mean margin — the `W_TITLE` weight
-  over-boosts short docs) — recalibrating these constants against real labels
-  is real, not-yet-done work, not a bug in the runbook.
+- **BM25F constants (`K1`, `B`, `ALPHA`, `W_TITLE`) and the `conf_tier`
+  thresholds — CALIBRATION DONE (2026-08-30), keep the literature defaults.**
+  The 180-row gold set (`data/gold/topic_gold_set.csv`) is now fully labeled.
+  A bounded sweep (`src/tune_bm25f.py`, match-once/rescore-many over 108
+  configurations, guarded against overfitting an n=180 set) found NONE beat
+  baseline gold accuracy by more than its own 95% CI half-width — the
+  constants stay exactly as written. The title-only-normalization check's
+  earlier failure (title-only docs scoring a *higher* mean margin) turned out
+  to be caused almost entirely by 65 unassigned title-only grants (a
+  curation-coverage gap, not a `W_TITLE` over-boost) plus a structural
+  `HIGH_MIN_TERMS=3` term-count gate title-only docs can rarely clear — a
+  curation pass (not a constants change) closed most of the coverage gap and
+  brought the gap from 12.1pp to 1.0pp. See CLAUDE.md's "Title-only
+  calibration — RESOLVED" entry for the full account, including why no
+  constant value could have fixed this on its own.
 
 ### Shared (both tracks)
 
@@ -205,15 +211,31 @@ so there's no multi-file drop-in step the way Track A has — just re-run it.
   Nothing crashes either way — an unaccounted-for parent theme falls back to
   the "Unassigned" bucket / a repeated color until you update these.
 
-  **As of the 2026-08-29 Track B promotion, `PARENT_NAMES` is 7 entries**
+  **SUPERSEDED (2026-08-29, same day, later in the session) — `PARENT_NAMES`
+  is 8 entries, not 7.** The paragraph immediately below this note originally
+  described a 7-parent state (the initial Track B promotion, which merged
+  workforce/career-pipeline content into one combined social-science parent).
+  A same-day follow-up review found that combined parent's largest leaf by
+  both count and dollars was actually career-pipeline/institutional content,
+  not social science — so it was split into a redefined P3 ("Social Science,
+  Public Policy & Education Research") plus a new P7 ("Workforce Development
+  & Institutional Partnerships"), landing back at 8 parents (a coincidental
+  same count as the retired BERTopic-era 8, entirely different parents — see
+  CLAUDE.md's "Parent-theme count is now 8" entry for the full account). The
+  historical 7-parent paragraph is left below for the record of what Track B
+  actually did in sequence, not as current state:
+
+  **As of the 2026-08-29 Track B promotion's FIRST pass, `PARENT_NAMES` was
+  briefly 7 entries**
   (`Biomedical Sciences`, `Public & Behavioral Health`, `Environmental Science
   & Ecology`, `Social Science, Public Policy & Workforce Development`,
   `Materials Science & Structural/Civil Engineering`, `Mathematics &
   Fundamental Physics`, `Computing, Networking & Robotic Systems`) — down
   from the prior 8-parent BERTopic-era set (`Life Sciences & Biomedicine`,
   ... `Education & Learning`), which is retired, not kept as unused history.
-  **`PARENT_COLORS` stays at 12 entries** (7 real + 5 spare, up from 8+4) —
-  the array itself didn't need to shrink, only `PARENT_NAMES` did.
+  **`PARENT_COLORS` stays at 12 entries** (8 real + 4 spare, after the
+  follow-up split above) — the array itself never needed to shrink, only
+  `PARENT_NAMES`'s content did.
   `docs/EnricoVis/topic_hierarchy.html` (the PI's own file) was deliberately
   **not** touched — it still shows the old 8-parent BERTopic palette/labels,
   since (see the correction already elsewhere in `CLAUDE.md`) his apps don't
@@ -222,10 +244,10 @@ so there's no multi-file drop-in step the way Track A has — just re-run it.
   **`docs/TopicVizPrototypes/what_we_can_see/constants.js`'s `TP_COLORS`**
   (a *third*, independent 12-entry hardcoded copy, used only by the "Every
   grant"/"Every PI" facet grids' small-mark color scale, not the same list as
-  `PARENT_COLORS` above) is unaffected by the 8→7 change (already safely
+  `PARENT_COLORS` above) is unaffected either way (already safely
   modulo-indexed, still has spare headroom). **`PARENT_SHORT`** in the same
-  file WAS updated for the new 7 names (keys `0`-`6`, was `0`-`7`) — this one
-  isn't buffered the way colors are (abbreviations are curated text, can't be
+  file was updated for the current 8 names (keys `0`-`7`) — this one isn't
+  buffered the way colors are (abbreviations are curated text, can't be
   pre-invented), so it needed a real edit, already done.
 
 - **The `CAVEATS` prose in `src/build_viz_aggregates.py`** (rendered on

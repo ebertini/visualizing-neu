@@ -34,6 +34,8 @@ BUILD_VIZ_AGGREGATES = REPO_ROOT / "src" / "build_viz_aggregates.py"
 
 VIZ_META = DATA_DIR / "viz_meta.json"
 COVERAGE = DATA_DIR / "coverage.json"
+FACETS = DATA_DIR / "facets.json"
+FACETS_PI = DATA_DIR / "facets_pi.json"
 
 pytestmark = pytest.mark.skipif(
     not VIZ_META.exists() or not COVERAGE.exists(),
@@ -52,6 +54,16 @@ def coverage() -> dict:
     return json.loads(COVERAGE.read_text(encoding="utf-8"))
 
 
+@pytest.fixture(scope="module")
+def facets() -> dict:
+    return json.loads(FACETS.read_text(encoding="utf-8"))
+
+
+@pytest.fixture(scope="module")
+def facets_pi() -> dict:
+    return json.loads(FACETS_PI.read_text(encoding="utf-8"))
+
+
 # ── viz_meta.json key paths the JS modules dereference directly ────────────
 
 def test_viz_meta_frozen_inputs_n_topics(viz_meta):
@@ -66,10 +78,11 @@ def test_viz_meta_caveats_have_ids(viz_meta):
 
 
 def test_viz_meta_parents_and_topics_counts(viz_meta):
-    # 7 real parents + the synthetic id=-1 "Unassigned" entry = 8.
-    assert len(viz_meta["parents"]) == 8
+    # 8 real parents (P3 split into a redefined P3 + new P7 on 2026-08-29,
+    # same day as promotion) + the synthetic id=-1 "Unassigned" entry = 9.
+    assert len(viz_meta["parents"]) == 9
     real_parent_ids = {p["id"] for p in viz_meta["parents"] if p["id"] >= 0}
-    assert real_parent_ids == set(range(7))
+    assert real_parent_ids == set(range(8))
 
     # 31 real leaf topics + the id=-1 noise entry = 32.
     real_topics = [t for t in viz_meta["topics"] if t["id"] >= 0]
@@ -165,3 +178,45 @@ def test_caveat_whitelist_ids_exist_in_viz_meta(viz_meta, label, path):
     caveat_ids = {c["id"] for c in viz_meta["caveats"]}
     unknown = [cid for cid in whitelist if cid not in caveat_ids]
     assert not unknown, f"{label} whitelists unknown caveat id(s): {unknown}"
+
+
+# ── facets.json / facets_pi.json new-field contract (2026-08-30 additions) ──
+# Locks in the fields added for the PI-feedback items (grant search box,
+# topic-keyword fingerprint view, colleges-per-grant, PI dollars earned at
+# NEU) so a future refactor can't silently drop them without a test noticing
+# — the frontend dereferences these directly with no runtime schema check.
+
+@pytest.mark.skipif(not FACETS.exists(), reason="facets.json not built locally yet")
+def test_facets_matched_terms_and_pi_names_shape(facets):
+    n = facets["n"]
+    assert len(facets["matchedTerms"]) == n
+    assert all(isinstance(mt, list) for mt in facets["matchedTerms"])
+    assert len(facets["piNames"]) == n
+    assert len(facets["nColleges"]) == n
+    assert all(isinstance(nc, int) for nc in facets["nColleges"])
+
+
+@pytest.mark.skipif(not FACETS.exists(), reason="facets.json not built locally yet")
+def test_facets_ncol_column_and_levels(facets):
+    n = facets["n"]
+    assert "ncol" in facets["cols"], "ncol column (colleges-involved facet) missing from facets.json"
+    assert len(facets["cols"]["ncol"]) == n
+    assert "ncol" in facets["levels"]
+    n_levels = len(facets["levels"]["ncol"])
+    assert all(0 <= v < n_levels for v in facets["cols"]["ncol"])
+
+
+@pytest.mark.skipif(not FACETS_PI.exists(), reason="facets_pi.json not built locally yet")
+def test_facets_pi_amt_neu_shape(facets_pi):
+    n = facets_pi["n"]
+    assert "amt_neu" in facets_pi["cols"], "amt_neu column (PI dollars earned at NEU) missing"
+    assert len(facets_pi["cols"]["amt_neu"]) == n
+    assert "amt_neu_raw" in facets_pi["cols"]
+    assert len(facets_pi["cols"]["amt_neu_raw"]) == n
+    assert "amt_neu" in facets_pi["levels"]
+    n_levels = len(facets_pi["levels"]["amt_neu"])
+    assert all(0 <= v < n_levels for v in facets_pi["cols"]["amt_neu"])
+    # amt_neu should never exceed amt (earned_at_neu is a strict subset of
+    # all PI-credited dollars) for any PI with grants.
+    for raw_neu, raw_all in zip(facets_pi["cols"]["amt_neu_raw"], facets_pi["cols"]["amt_raw"]):
+        assert raw_neu <= raw_all + 1e-6

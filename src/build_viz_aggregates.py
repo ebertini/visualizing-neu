@@ -104,10 +104,12 @@ OUT_DIR = REPO_ROOT / "docs" / "TopicVizPrototypes" / "data"   # writable (this 
 # check too as a belt-and-suspenders safety net.
 FROZEN_STEMS = {"grants_umap", "topics", "grants_hier"}
 
-# 7-parent-theme names/colors — the curated keyword-classifier taxonomy
-# (outputs/topic_keywords.json, promoted 2026-08-29; see
-# docs/TOPIC_MODEL_REFIT_CHECKLIST.md's re-curate track). Names/order copied
-# verbatim from that file's parents{} (P0..P6, dense zero-based) and must stay
+# 8-parent-theme names/colors — the curated keyword-classifier taxonomy
+# (outputs/topic_keywords.json, promoted 2026-08-29, revised same day to split
+# the original P3 into a redefined P3 + new P7 — see their notes in that file
+# for the full rationale: workforce/career-pipeline content (Leaf 13) was
+# diluting the social-science parent's identity). Names/order copied verbatim
+# from that file's parents{} (P0..P7, dense zero-based) and must stay
 # byte-identical to docs/TopicVizPrototypes/shared/enrico.js's own PARENT_NAMES
 # copy. Do not hand-edit one without the other. This REPLACES the prior
 # 8-parent BERTopic-era taxonomy ("Life Sciences & Biomedicine", "Physical
@@ -116,20 +118,19 @@ FROZEN_STEMS = {"grants_umap", "topics", "grants_hier"}
 # kept as unused history.
 PARENT_NAMES = [
     "Biomedical Sciences", "Public & Behavioral Health", "Environmental Science & Ecology",
-    "Social Science, Public Policy & Workforce Development",
+    "Social Science, Public Policy & Education Research",
     "Materials Science & Structural/Civil Engineering", "Mathematics & Fundamental Physics",
-    "Computing, Networking & Robotic Systems",
+    "Computing, Networking & Robotic Systems", "Workforce Development & Institutional Partnerships",
 ]
-# 7 real names above + 5 SPARE colors below (indices 7-11) — pre-allocated
-# headroom so a re-curation that adds an 8th+ parent theme (always a human
+# 8 real names above + 4 SPARE colors below (indices 8-11) — pre-allocated
+# headroom so a re-curation that adds a 9th+ parent theme (always a human
 # curation step — the classifier's own discovery fit never produces parent
 # groups directly, see docs/TOPIC_MODEL_REFIT_CHECKLIST.md) gets a real,
 # distinct color the moment it's named in PARENT_NAMES, instead of silently
-# reusing color 0 (`i % len(PARENT_COLORS)` wraps once `i` reaches 7). Kept at
-# 12 total entries (one more spare than before, since the real count dropped
-# 8->7) rather than shrinking the array — every color-consuming line below
-# already keys off len(PARENT_COLORS)/len(PARENT_NAMES), not a literal count,
-# so extra headroom changes nothing about today's 7-parent rendering.
+# reusing color 0 (`i % len(PARENT_COLORS)` wraps once `i` reaches 8). Every
+# color-consuming line below already keys off len(PARENT_COLORS)/
+# len(PARENT_NAMES), not a literal count, so this changes nothing about
+# today's 8-parent rendering.
 PARENT_COLORS = [
     "#4E79A7", "#F28E2B", "#59A14F", "#B07AA1", "#76B7B2", "#EDC948", "#9C755F", "#D37295",
     "#6B4C9A", "#1B9E77", "#B6992D", "#7570B3",
@@ -206,7 +207,7 @@ CAVEATS = [
         "severity": "low",
         "text": (
             "As of 2026-08-29, topic labels come from a deterministic, human-curated "
-            "keyword classifier (BM25F scoring over 31 leaves / 7 parent themes), not "
+            "keyword classifier (BM25F scoring over 31 leaves / 8 parent themes), not "
             "the prior BERTopic/HDBSCAN fit — chosen for inspectability (every "
             "assignment records which curated terms actually fired) and full offline "
             "reproducibility. BERTopic's own assignment is kept as a comparison field "
@@ -220,10 +221,27 @@ CAVEATS = [
         "text": (
             "501 grants (18.7%) land in the classifier's 'low' confidence tier — a "
             "curated term matched, but weakly (a thin margin over the runner-up topic, "
-            "or few matched terms). The confidence thresholds themselves are a "
-            "provisional placeholder pending calibration against a human-labeled gold "
-            "set (not yet collected) — treat 'low' as 'worth a second look', not as "
-            "a precise probability."
+            "or few matched terms). A 180-row human-labeled gold set now exists "
+            "(68.3% overall accuracy, 95% CI 61.2-74.7%) and confirms the tiers "
+            "calibrate correctly (high 81.2% accurate vs. low 60.7%) — the underlying "
+            "BM25F constants (K1/B/W_TITLE/ALPHA) and tier thresholds were checked "
+            "against a 108-point sweep of that gold set and left unchanged (no "
+            "candidate beat the baseline by more than its own margin of error) — "
+            "treat 'low' as 'worth a second look', not as a precise probability."
+        ),
+    },
+    {
+        "id": "secondary_theme",
+        "severity": "low",
+        "text": (
+            "252 grants (9.4%) sit genuinely between two parent themes — their "
+            "second-most-relevant topic (already computed by the classifier, now "
+            "surfaced per grant) belongs to a DIFFERENT parent than their primary "
+            "one, within a close scoring margin. This reflects real interdisciplinary "
+            "work (e.g. human-computer interaction grants that could reasonably be "
+            "Computing, Public & Behavioral Health, or Social Science depending on "
+            "framing) that a single-parent taxonomy can't fully represent — shown as "
+            "a secondary-theme hint, not forced into one label."
         ),
     },
     {
@@ -406,8 +424,8 @@ def load_abstract_text(points: list[dict]) -> tuple[dict[str, str], str]:
 
 
 def load_pi_attrs(points: list[dict]) -> tuple[dict[str, dict], str]:
-    """grant_id -> {college, academic_unit, hire_date_known, neu_status, on_roster}
-    for the grant's PI row (is_pi==True) in faculty_grants.parquet, joined to
+    """grant_id -> {college, academic_unit, hire_date_known, neu_status, on_roster,
+    pi_name} for the grant's PI row (is_pi==True) in faculty_grants.parquet, joined to
     faculty_id_lookup.parquet (college/academic_unit) and faculty.parquet
     (hire_date). A grant absent from this dict has NO PI row at all — the
     caller is responsible for mapping that to NO_PI_LABEL, not this function
@@ -425,7 +443,7 @@ def load_pi_attrs(points: list[dict]) -> tuple[dict[str, dict], str]:
 
     import pandas as pd  # local import: keep this script runnable with json alone
 
-    fg = pd.read_parquet(fg_path, columns=["faculty_id", "grant_id", "is_pi", "neu_status"])
+    fg = pd.read_parquet(fg_path, columns=["faculty_id", "faculty_name", "grant_id", "is_pi", "neu_status"])
     fl = pd.read_parquet(fl_path, columns=["faculty_id", "college", "academic_unit"])
     fac = pd.read_parquet(fac_path, columns=["faculty_id", "hire_date"])
 
@@ -452,8 +470,36 @@ def load_pi_attrs(points: list[dict]) -> tuple[dict[str, dict], str]:
             "hire_date_known": bool(hire_known_by_faculty.get(row.faculty_id, False)),
             "neu_status": row.neu_status or "unknown",
             "on_roster": on_roster,
+            "pi_name": str(row.faculty_name).strip() if pd.notna(row.faculty_name) else "",
         }
     return out, "parquet"
+
+
+def load_colleges_per_grant() -> dict[str, int]:
+    """grant_id -> count of DISTINCT roster colleges among EVERY person linked
+    to that grant (PI and co-PIs alike, unlike load_pi_attrs above which is
+    PI-only) — answers "how many different colleges does this grant involve"
+    (a PI-feedback item: cross-college collaboration is otherwise invisible
+    per-grant). A person absent from the roster (no college on record)
+    doesn't count toward the total, so this is a floor, not a ceiling, same
+    spirit as every other "known so far" count in this file. Degrades to an
+    empty dict (every grant reads as 0) if the parquets aren't built locally.
+    """
+    fg_path = PROC / "faculty_grants.parquet"
+    fl_path = PROC / "faculty_id_lookup.parquet"
+    if not (fg_path.exists() and fl_path.exists()):
+        return {}
+
+    import pandas as pd  # local import: keep this script runnable with json alone
+
+    fg = pd.read_parquet(fg_path, columns=["faculty_id", "grant_id"])
+    fl = pd.read_parquet(fl_path, columns=["faculty_id", "college"])
+    college_by_faculty = dict(zip(fl["faculty_id"], fl["college"]))
+
+    fg = fg.copy()
+    fg["college"] = fg["faculty_id"].map(college_by_faculty)
+    fg = fg[fg["college"].notna() & (fg["college"].astype(str).str.strip() != "")]
+    return fg.groupby("grant_id")["college"].nunique().to_dict()
 
 
 def build_facets(points: list[dict], topics: list[dict]) -> dict:
@@ -469,6 +515,7 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
     abs_src, abs_source = load_abstract_source(points)
     abs_text, abs_text_source = load_abstract_text(points)
     pi_attrs, pi_source = load_pi_attrs(points)
+    n_colleges_by_grant = load_colleges_per_grant()
     parent_of_topic = {t["id"]: _parent_index(t.get("parent")) for t in topics}
 
     ag_levels = list(ORDER)
@@ -497,9 +544,23 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
             col_levels.append(label)
         return col_index[label]
 
+    # Secondary-theme signal (build_viz_data.py's secondaryLeaf/secondaryParent/
+    # secondaryMargin/hasSecondaryTheme, computed there from the classifier's
+    # own already-computed runner-up leaf) — plain parallel arrays like
+    # titles/abstracts below, NOT a `cols` entry: this is display-only
+    # (a detail-card hint), not an arrange/split/color facet.
+    leaf_name_by_id = {t["id"]: t["name"] for t in topics}
+
     ids: list[str] = []
     titles: list[str] = []
     abstracts: list[str] = []
+    matched_terms: list[list[str]] = []
+    pi_names: list[str] = []
+    n_colleges: list[int] = []
+    secondary_leaf_label: list[str | None] = []
+    secondary_parent_label: list[str | None] = []
+    secondary_margin: list[float | None] = []
+    has_secondary_theme: list[bool] = []
     # "amt" is the 5-level band index used for arranging/splitting (a small,
     # legible enum); "amt_raw" is the actual dollar float, added so the facet
     # grid can offer a real "sort by size ($)" — bands alone can't distinguish
@@ -507,14 +568,28 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
     # column rather than replacing "amt" so existing band-based arrangements
     # are untouched.
     cols: dict[str, list[float]] = {k: [] for k in
-                                     ("ag", "yr", "col", "st", "ab", "asrc", "tp", "tid", "pi", "amt", "amt_raw", "conf")}
+                                     ("ag", "yr", "col", "st", "ab", "asrc", "tp", "tid", "pi", "amt", "amt_raw",
+                                      "conf", "ncol")}
     conf_index = {name: i for i, name in enumerate(CONF_LEVELS)}
+    # How many distinct roster colleges a grant involves (PI + co-PIs) — a new
+    # facet (PI feedback: "for each grant how many different colleges does it
+    # involve?"), banded small since the real distribution is almost entirely
+    # 0-3 (a grant with 4+ distinct colleges is a genuine rarity worth its own
+    # top band rather than a long flat tail of near-empty bins).
+    ncol_levels = ["0 (none known)", "1", "2", "3+"]
+
+    def ncol_band(n: int) -> int:
+        return min(n, 3)
 
     for p in points:
         gid = str(p["id"]).strip()
         ids.append(gid)
         titles.append(p["title"] or "")
         abstracts.append(abs_text.get(gid, ""))
+        matched_terms.append(list(p.get("matchedTerms") or []))
+        this_n_colleges = int(n_colleges_by_grant.get(gid, 0))
+        n_colleges.append(this_n_colleges)
+        cols["ncol"].append(ncol_band(this_n_colleges))
         # .get(..., "Other") rather than a bare [] — every point SHOULD already
         # carry one of the 9 ORDER buckets (build_viz_data.py's agency_bucket()
         # already defaults to "Other"), but a defensive fallback here means an
@@ -531,23 +606,46 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
         cols["amt_raw"].append(p["amount"])
         cols["conf"].append(conf_index.get(p.get("confTier", "none"), 0))
 
+        sec_leaf = p.get("secondaryLeaf")
+        if sec_leaf is not None:
+            secondary_leaf_label.append(leaf_name_by_id.get(sec_leaf))
+            sec_parent_idx = parent_of_topic.get(sec_leaf, -1)
+            secondary_parent_label.append(
+                PARENT_NAMES[sec_parent_idx] if 0 <= sec_parent_idx < len(PARENT_NAMES) else None
+            )
+            secondary_margin.append(p.get("secondaryMargin"))
+        else:
+            secondary_leaf_label.append(None)
+            secondary_parent_label.append(None)
+            secondary_margin.append(None)
+        has_secondary_theme.append(bool(p.get("hasSecondaryTheme", False)))
+
         attrs = pi_attrs.get(gid)
         if attrs is None:
             cols["col"].append(college_idx(NO_PI_LABEL))
             cols["st"].append(st_index[NO_PI_LABEL])
             cols["pi"].append(0)
+            pi_names.append("")
         else:
             cols["col"].append(college_idx(attrs["college"]))
             cols["st"].append(st_index.get(attrs["neu_status"], st_index["unknown"]))
             cols["pi"].append(1 if attrs["on_roster"] else 0)
+            pi_names.append(attrs.get("pi_name", ""))
 
     return {
         "n": len(points),
         "ids": ids,
         "titles": titles,
         "abstracts": abstracts,
+        "matchedTerms": matched_terms,
+        "piNames": pi_names,
+        "nColleges": n_colleges,
+        "secondaryLeafLabel": secondary_leaf_label,
+        "secondaryParentLabel": secondary_parent_label,
+        "secondaryMargin": secondary_margin,
+        "hasSecondaryTheme": has_secondary_theme,
         "levels": {"ag": ag_levels, "col": col_levels, "st": st_levels, "asrc": asrc_levels,
-                   "amt": amt_levels, "conf": CONF_LEVELS},
+                   "amt": amt_levels, "conf": CONF_LEVELS, "ncol": ncol_levels},
         "cols": cols,
         "provenance": {"abstract_source": abs_source, "pi_attrs": pi_source, "abstract_text": abs_text_source},
     }
@@ -576,6 +674,10 @@ def build_facets_pi(fac, points: list[dict], topics: list[dict]) -> dict:
     Funding is credited PI-only (dollars from grants where is_pi is True),
     per CLAUDE.md's funding-credit-model caveat — the "amt"/"amt_raw" facets
     here are explicitly "dollars as PI", not full- or fractional-credit.
+    "amt_neu"/"amt_neu_raw" apply the SAME PI-only credit model further
+    filtered to `neu_status == "earned_at_neu"` (PI feedback: "dollars earned
+    from grants a PI earned AT Northeastern") — a separate facet, not a
+    redefinition of amt/amt_raw, per the titleOnly/modelTitleOnly lesson.
     """
     if fac is None:
         return {"n": 0, "ids": [], "names": [], "levels": {}, "cols": {}, "grant_titles": [], "provenance": "derived"}
@@ -585,7 +687,7 @@ def build_facets_pi(fac, points: list[dict], topics: list[dict]) -> dict:
     fg_path = PROC / "faculty_grants.parquet"
     if not fg_path.exists():
         return {"n": 0, "ids": [], "names": [], "levels": {}, "cols": {}, "grant_titles": [], "provenance": "derived"}
-    fg = pd.read_parquet(fg_path, columns=["faculty_id", "grant_id", "is_pi"])
+    fg = pd.read_parquet(fg_path, columns=["faculty_id", "grant_id", "is_pi", "neu_status"])
     fg["faculty_id"] = fg["faculty_id"].astype(str)
     fg["grant_id"] = fg["grant_id"].astype(str).str.strip()
 
@@ -596,7 +698,7 @@ def build_facets_pi(fac, points: list[dict], topics: list[dict]) -> dict:
     names: list[str] = []
     cols: dict[str, list] = {k: [] for k in
                               ("col", "dept", "rank", "track", "tenure", "hire_yr",
-                               "status", "hasgrants", "ngrants", "amt", "amt_raw", "tp")}
+                               "status", "hasgrants", "ngrants", "amt", "amt_raw", "amt_neu", "amt_neu_raw", "tp")}
     grant_titles: list[list[str]] = []
 
     col_levels: list[str] = []
@@ -689,14 +791,32 @@ def build_facets_pi(fac, points: list[dict], topics: list[dict]) -> dict:
             cols["ngrants"].append(_ngrants_band(0))
             cols["amt"].append(0)
             cols["amt_raw"].append(0.0)
+            cols["amt_neu"].append(0)
+            cols["amt_neu_raw"].append(0.0)
             cols["tp"].append(NO_PI_GRANTS_TP)
             grant_titles.append([])
             continue
 
         n_grants = their_grants["grant_id"].nunique()
-        pi_grant_ids = their_grants.loc[their_grants["is_pi"], "grant_id"].tolist()
+        pi_rows = their_grants.loc[their_grants["is_pi"]]
+        pi_grant_ids = pi_rows["grant_id"].tolist()
         pi_points = [point_by_id[g] for g in pi_grant_ids if g in point_by_id]
         pi_dollars = sum(p["amount"] for p in pi_points)
+
+        # "Dollars earned from grants a PI earned AT Northeastern" — the
+        # `neu_status` attribution caveat (CLAUDE.md: prior-institution grants
+        # get attributed to a PI's NEU record even though the work predates
+        # their hire) applied on top of the PI-only credit model above, per
+        # PI feedback ("add dollars earned from grants PIs earned at NEU").
+        # A SEPARATE facet, not a redefinition of amt/amt_raw — same lesson
+        # as titleOnly/modelTitleOnly (CLAUDE.md): a change that looks locally
+        # correct can silently break every caller that assumed the old value
+        # meant "all PI dollars, no attribution filter."
+        neu_grant_ids = pi_rows.loc[pi_rows["neu_status"] == "earned_at_neu", "grant_id"].tolist()
+        neu_points = [point_by_id[g] for g in neu_grant_ids if g in point_by_id]
+        neu_dollars = sum(p["amount"] for p in neu_points)
+        cols["amt_neu_raw"].append(neu_dollars)
+        cols["amt_neu"].append(1 + _dollar_band(neu_dollars) if neu_points else 0)
 
         cols["hasgrants"].append(1)
         cols["ngrants"].append(_ngrants_band(n_grants))
@@ -729,7 +849,9 @@ def build_facets_pi(fac, points: list[dict], topics: list[dict]) -> dict:
         "levels": {
             "col": col_levels, "dept": dept_levels, "rank": rank_levels, "track": track_levels,
             "tenure": tenure_levels, "status": status_levels, "hasgrants": hasgrants_levels,
-            "ngrants": ngrants_levels, "amt": amt_levels, "tp": tp_levels,
+            "ngrants": ngrants_levels, "amt": amt_levels,
+            "amt_neu": ["No grants earned at NEU as PI"] + [label for (_lo, _hi, label) in DOLLAR_BANDS],
+            "tp": tp_levels,
         },
         "cols": cols,
         "grant_titles": grant_titles,
@@ -1502,7 +1624,11 @@ def validate(points: list[dict], topics: list[dict], viz_meta: dict, topic_time:
         assert len(values) == n, f"facets column '{col_name}' length != {n}"
     assert len(facets["titles"]) == n, f"facets titles length != {n}"
     assert len(facets["abstracts"]) == n, f"facets abstracts length != {n}"
-    lines.append(f"facets: {len(facets['cols'])} columns, all length {n} ✓ (+ titles, abstracts)")
+    for arr_name in ("secondaryLeafLabel", "secondaryParentLabel", "secondaryMargin", "hasSecondaryTheme"):
+        assert len(facets[arr_name]) == n, f"facets {arr_name} length != {n}"
+    n_secondary = sum(facets["hasSecondaryTheme"])
+    lines.append(f"facets: {len(facets['cols'])} columns, all length {n} ✓ (+ titles, abstracts, "
+                 f"secondary-theme fields — {n_secondary} grants flagged)")
     lines.append(f"facets: pi_attrs provenance path = {facets['provenance']['pi_attrs']}")
 
     # Abstract text — when grants.parquet was available (provenance ==

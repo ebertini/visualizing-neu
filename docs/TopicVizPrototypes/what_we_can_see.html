@@ -53,15 +53,22 @@
               <select class="facetselect" id="arrangeSelect"></select>
             </div>
             <div class="card">
-              <h2>Color by</h2>
+              <h2 title="Colors each mark by the category it falls into for this facet — pick a facet below.">Color by</h2>
               <select class="facetselect" id="colorSelect"></select>
             </div>
             <div class="card">
-              <h2>Sort bins</h2>
+              <h2 title="Controls the ORDER of rows/columns: by their natural order (e.g. year), by how many grants are in each, or by their total dollars.">Sort bins</h2>
               <select class="facetselect" id="sortSelect"></select>
             </div>
           </div>
           <h2>Every grant, arranged</h2>
+          <div class="searchbox">
+            <input type="search" id="facetSearch" class="facetselect" placeholder="Search by title, PI, or agency…" aria-label="Search grants by title, PI, or agency">
+            <span class="searchcount" id="facetSearchCount"></span>
+          </div>
+          <select class="facetselect suggestselect" id="facetSuggest" aria-label="Need a suggestion?">
+            <option value="">Need a suggestion?</option>
+          </select>
         </div>
         <div class="gridtoolbar-right">
           <div class="misslegend chiprow legendpanel" id="facetColorLegend"></div>
@@ -114,15 +121,18 @@
               <select class="facetselect" id="piArrangeSelect"></select>
             </div>
             <div class="card">
-              <h2>Color by</h2>
+              <h2 title="Colors each mark by the category it falls into for this facet — pick a facet below.">Color by</h2>
               <select class="facetselect" id="piColorSelect"></select>
             </div>
             <div class="card">
-              <h2>Sort bins</h2>
+              <h2 title="Controls the ORDER of rows/columns: by their natural order (e.g. year), by how many grants are in each, or by their total dollars.">Sort bins</h2>
               <select class="facetselect" id="piSortSelect"></select>
             </div>
           </div>
           <h2>Every PI, arranged</h2>
+          <select class="facetselect suggestselect" id="piSuggest" aria-label="Need a suggestion?">
+            <option value="">Need a suggestion?</option>
+          </select>
         </div>
         <div class="gridtoolbar-right">
           <div class="misslegend chiprow legendpanel" id="piColorLegend"></div>

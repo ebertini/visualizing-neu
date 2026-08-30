@@ -18,7 +18,7 @@ Fails (exit 1) on:
   - a non-empty `rejected_terms` entry with no `reason`
 
 Warns (exit 0) on:
-  - accepted parent count != 7 (names the files to sync, see §7 of the review sheet)
+  - accepted parent count != 8 (names the files to sync, see §7 of the review sheet)
   - accepted parent count > 12 (palette headroom exhausted)
   - a term appearing in >1 accepted group (allowed, reported)
 """
@@ -33,8 +33,13 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 OUTPUTS = REPO_ROOT / "outputs"
 CURATED_PATH = OUTPUTS / "topic_keywords.json"
 
-EXPECTED_PARENT_COUNT = 7  # accepted 2026-08-29: P7/P9 were genuine noise (no
-# coherent theme, not a structural loss), not manufactured back up to 8.
+EXPECTED_PARENT_COUNT = 8  # revised 2026-08-29 (same day, later pass): P3
+# ("Social Science, Public Policy & Workforce Development") was split into a
+# redefined P3 and a new P7 after data showed the workforce/career-pipeline
+# content (Leaf 13) was diluting the parent's social-science identity — see
+# outputs/topic_keywords.json's P3/P7 notes for the full rationale. The old
+# P7 (dropped as noise, 2 terms) is unrelated; this id is reused for new,
+# real content since parent ids must stay dense zero-based.
 PARENT_COUNT_WARN_ABOVE = 12
 
 

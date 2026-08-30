@@ -20,7 +20,7 @@
       "parent": "P0"
     },
     "1": {
-      "label": "Molecular & Cellular Biomedicine",
+      "label": "Molecular & Cellular Biomedicine & Biotechnology",
       "top_terms": [
         "magnetic resonance",
         "worm",
@@ -166,16 +166,12 @@
     "10": {
       "label": "Groundwater/Soil Chemistry & Water Quality",
       "top_terms": [
-        "saturated",
-        "bubbles",
         "electrolysis",
         "sodium",
-        "oxygen",
         "coal",
         "north carolina",
         "water quality",
-        "carbon",
-        "ph"
+        "soil"
       ],
       "parent": "P2"
     },
@@ -193,7 +189,7 @@
         "provides travel",
         "travel funds"
       ],
-      "parent": "P3"
+      "parent": "P7"
     },
     "12": {
       "label": "Social Science & Public Policy",
@@ -225,7 +221,7 @@
         "mentor",
         "partnership"
       ],
-      "parent": "P3"
+      "parent": "P7"
     },
     "14": {
       "label": "Education, Games & Informal STEM Learning",
@@ -533,11 +529,9 @@
       ]
     },
     "P3": {
-      "label": "Social Science, Public Policy & Workforce Development",
+      "label": "Social Science, Public Policy & Education Research",
       "topic_ids": [
-        11,
         12,
-        13,
         14,
         15
       ]
@@ -570,6 +564,13 @@
         28,
         29,
         30
+      ]
+    },
+    "P7": {
+      "label": "Workforce Development & Institutional Partnerships",
+      "topic_ids": [
+        11,
+        13
       ]
     }
   }

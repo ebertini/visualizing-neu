@@ -251,6 +251,14 @@ outputs/*
 !outputs/keyword_topics.draft.json
 !outputs/keyword_topics.suggested.json
 !outputs/KEYWORD_REVIEW.md
+# Frozen pre-redo snapshot of outputs/topic_labels.json (the ORIGINAL 8-parent/
+# 32-topic BERTopic seed, from commit ab6782d) — outputs/topic_labels.json
+# itself was repurposed by the 2026-08-29 redo (src.classify_by_keywords
+# --write-topic-labels now writes the keyword taxonomy's conversion there
+# instead), so anything needing the true old BERTopic parent scheme (e.g.
+# src/validate_keyword_classifier.py's parent-level agreement crosswalk) needs
+# its own untouched copy rather than reading the live, now-repurposed file.
+!outputs/bertopic_topic_labels_frozen.json
 
 # CI-only publish copies of docs/TopicVizPrototypes/ siblings, created by
 # .github/workflows/deploy-notebooks.yml so the prototype pages can fetch()
