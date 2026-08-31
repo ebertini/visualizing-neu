@@ -5,12 +5,11 @@
 // boundary is new — see docs/TOPIC_MODEL_REFIT_CHECKLIST.md.
 //
 // This is the only module with page-level side effects, in the same order
-// they ran in before the split: #count, the two createGrid instantiations,
-// the missing-tab init, then tabs + resize. Everything it needs to build
-// that sequence is imported below; nothing here does its own data or DOM
-// wiring beyond that sequence.
-import { FACETS, FACETS_PI, COVERAGE, VIZ_META } from "./data.js";
-import { AGENCIES } from "./constants.js";
+// they ran in before the split: the two createGrid instantiations, the
+// missing-tab init, then tabs + resize. Everything it needs to build that
+// sequence is imported below; nothing here does its own data or DOM wiring
+// beyond that sequence.
+import { FACETS, FACETS_PI, VIZ_META } from "./data.js";
 import { GRANT_FACET_DEFS, PI_FACET_DEFS, GRANT_ARRANGE_FACETS, PI_ARRANGE_FACETS,
          GRANT_SUGGESTIONS, PI_SUGGESTIONS, fitWidthToText } from "./facets.js";
 import { createGrid } from "./grid.js";
@@ -19,12 +18,6 @@ import { initMissingTab } from "./missing.js";
 import { initAboutSection } from "./about.js";
 
 const E = window.ENRICO;
-
-const totalGrants = d3.sum(AGENCIES, a => COVERAGE.by_agency[a].n);
-document.getElementById("count").textContent = totalGrants.toLocaleString();
-// The coverage headline that used to live here ("72.3% of grants have an
-// abstract…") moved to about.html, linked from the header — see the
-// analogous block there, built from the same COVERAGE fields.
 
 const grantGrid = createGrid({
   data: FACETS, facetDefs: GRANT_FACET_DEFS, arrangeFacets: GRANT_ARRANGE_FACETS,
@@ -132,7 +125,10 @@ initAboutSection();
    (2026-08-30) — its own "missing" key is unchanged (about.html's own
    footer already linked to `#missing` before the merge, so no link needed
    updating beyond the ones that pointed at about.html itself), only the
-   label changed to reflect the new combined scope.
+   label changed to reflect the new combined scope. It's since dropped its
+   own pill in the tablist entirely (`hidden: true`, below) — reachable only
+   via the header's "About this data" link/hash, now that the tablist's
+   freed-up row holds each grid's own toolbar instead (see TOOLBAR_BY_TAB).
    Of this tab's several render functions, only grantGrid.render and
    piGrid.render actually read live container width off their own DOM node
    — every other one (about section, coverage bars, cliff, mosaic finding,
@@ -144,13 +140,24 @@ initAboutSection();
 const TAB_DEFS = [
   {key: "every", label: "Every grant", panel: document.getElementById("facetsection")},
   {key: "pis", label: "Every PI", panel: document.getElementById("pisection")},
-  {key: "missing", label: "About this data & what's missing", panel: document.getElementById("missingfunnelpanel")},
+  {key: "missing", label: "About this data & what's missing", panel: document.getElementById("missingfunnelpanel"), hidden: true},
 ];
 const WIDTH_DEPENDENT_RENDER = {every: grantGrid.render, pis: piGrid.render};
+// Each grid's own toolbar (Rows/Columns/Color/Sort dial, search, legend)
+// now lives in the tablist's own row (what_we_can_see.html's .tabbar),
+// pulled OUT of #facetsection/#pisection so it can sit inline with the tab
+// buttons instead of stacked below them — saves the vertical space a
+// second row used to cost. Since it's no longer a descendant of the
+// section setupTabs hides/shows, its own visibility has to be driven
+// explicitly here, alongside the width-dependent re-render above.
+const TOOLBAR_BY_TAB = {every: document.getElementById("facetToolbar"), pis: document.getElementById("piToolbar")};
 const tabsCtl = E.setupTabs({
   tablist: document.getElementById("tabstrip"),
   tabs: TAB_DEFS,
-  onActivate: (key) => { const fn = WIDTH_DEPENDENT_RENDER[key]; if (fn) fn(); },
+  onActivate: (key) => {
+    Object.entries(TOOLBAR_BY_TAB).forEach(([k, el]) => { el.hidden = k !== key; });
+    const fn = WIDTH_DEPENDENT_RENDER[key]; if (fn) fn();
+  },
 });
 window.addEventListener("resize", () => {
   const fn = WIDTH_DEPENDENT_RENDER[tabsCtl.current];

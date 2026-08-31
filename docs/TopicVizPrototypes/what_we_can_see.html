@@ -13,8 +13,7 @@
 <div id="app">
   <header>
     <h1>Northeastern Grants Landscape</h1>
-    <div class="sub"><b id="count">0</b> grants · a map of evidence ·
-      <a href="#missing">About this data</a></div>
+    <a href="#missing" class="aboutlink">About this data</a>
   </header>
   <div id="loaderror" hidden style="max-width:640px;margin:96px auto;padding:0 24px;font-family:system-ui,-apple-system,sans-serif;color:#333;line-height:1.5">
     <h1 style="font-size:16px">This page couldn't load its data.</h1>
@@ -30,53 +29,93 @@
       document.getElementById("loaderror").hidden = false;
     }
   </script>
-  <div class="tabs" id="tabstrip"></div>
+  <!-- Tab strip + both grids' own toolbars share one row (PI feedback:
+       save the vertical space a separate toolbar row used to cost) — only
+       the active tab's toolbar is visible at a time, driven explicitly by
+       main.js's TOOLBAR_BY_TAB (these toolbars are no longer descendants of
+       #facetsection/#pisection, so they don't inherit that section's own
+       hidden state the way the chart stage below still does). -->
+  <div class="tabbar">
+    <div class="tabs" id="tabstrip"></div>
+    <div class="gridtoolbar" id="facetToolbar">
+      <div class="gridtoolbar-left">
+        <button class="dial" id="facetDial" aria-expanded="false" aria-controls="facetdock" aria-label="Show controls" title="Controls">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="9" cy="7" r="1.8" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1.8" fill="currentColor" stroke="none"/><circle cx="11" cy="17" r="1.8" fill="currentColor" stroke="none"/></svg>
+        </button>
+        <div class="dock collapsed" id="facetdock">
+          <div class="card">
+            <h2>Columns</h2>
+            <select class="facetselect" id="splitSelect"></select>
+          </div>
+          <div class="card">
+            <h2>Rows</h2>
+            <select class="facetselect" id="arrangeSelect"></select>
+          </div>
+          <div class="card">
+            <h2 title="Colors each mark by the category it falls into for this facet — pick a facet below.">Color by</h2>
+            <select class="facetselect" id="colorSelect"></select>
+          </div>
+          <div class="card">
+            <h2 title="Controls the ORDER of rows/columns: by their natural order (e.g. year), by how many grants are in each, or by their total dollars.">Sort bins</h2>
+            <select class="facetselect" id="sortSelect"></select>
+          </div>
+        </div>
+        <div class="searchbox">
+          <input type="search" id="facetSearch" class="facetselect" placeholder="Search by title, PI, or agency…" aria-label="Search grants by title, PI, or agency">
+          <span class="searchcount" id="facetSearchCount"></span>
+        </div>
+        <select class="facetselect suggestselect" id="facetSuggest" aria-label="Need a suggestion?">
+          <option value="">Need a suggestion?</option>
+        </select>
+      </div>
+      <div class="gridtoolbar-right">
+        <div class="misslegend chiprow legendpanel" id="facetColorLegend"></div>
+        <button class="dial legendtoggle" id="facetLegendToggle" aria-expanded="true" aria-controls="facetColorLegend" aria-label="Toggle legend" title="Legend">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="gridtoolbar" id="piToolbar" hidden>
+      <div class="gridtoolbar-left">
+        <button class="dial" id="piDial" aria-expanded="false" aria-controls="pidock" aria-label="Show controls" title="Controls">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="9" cy="7" r="1.8" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1.8" fill="currentColor" stroke="none"/><circle cx="11" cy="17" r="1.8" fill="currentColor" stroke="none"/></svg>
+        </button>
+        <div class="dock collapsed" id="pidock">
+          <div class="card">
+            <h2>Columns</h2>
+            <select class="facetselect" id="piSplitSelect"></select>
+          </div>
+          <div class="card">
+            <h2>Rows</h2>
+            <select class="facetselect" id="piArrangeSelect"></select>
+          </div>
+          <div class="card">
+            <h2 title="Colors each mark by the category it falls into for this facet — pick a facet below.">Color by</h2>
+            <select class="facetselect" id="piColorSelect"></select>
+          </div>
+          <div class="card">
+            <h2 title="Controls the ORDER of rows/columns: by their natural order (e.g. year), by how many grants are in each, or by their total dollars.">Sort bins</h2>
+            <select class="facetselect" id="piSortSelect"></select>
+          </div>
+        </div>
+        <div class="searchbox">
+          <input type="search" id="piSearch" class="facetselect" placeholder="Search by name, college, or department…" aria-label="Search PIs by name, college, or department">
+          <span class="searchcount" id="piSearchCount"></span>
+        </div>
+        <select class="facetselect suggestselect" id="piSuggest" aria-label="Need a suggestion?">
+          <option value="">Need a suggestion?</option>
+        </select>
+      </div>
+      <div class="gridtoolbar-right">
+        <div class="misslegend chiprow legendpanel" id="piColorLegend"></div>
+        <button class="dial legendtoggle" id="piLegendToggle" aria-expanded="true" aria-controls="piColorLegend" aria-label="Toggle legend" title="Legend">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
   <main>
     <section id="facetsection">
-      <!-- Toolbar row, above the chart, in normal flow — dial+title flush
-           to the true left margin (dial closest to the edge), legend+its
-           own toggle flush to the true right margin (toggle closest to
-           the edge). See the .gridtoolbar CSS comment for why this
-           replaced two absolutely-positioned overlays. -->
-      <div class="gridtoolbar">
-        <div class="gridtoolbar-left">
-          <button class="dial" id="facetDial" aria-expanded="false" aria-controls="facetdock" aria-label="Show controls" title="Controls">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="9" cy="7" r="1.8" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1.8" fill="currentColor" stroke="none"/><circle cx="11" cy="17" r="1.8" fill="currentColor" stroke="none"/></svg>
-          </button>
-          <div class="dock collapsed" id="facetdock">
-            <div class="card">
-              <h2>Columns</h2>
-              <select class="facetselect" id="splitSelect"></select>
-            </div>
-            <div class="card">
-              <h2>Rows</h2>
-              <select class="facetselect" id="arrangeSelect"></select>
-            </div>
-            <div class="card">
-              <h2 title="Colors each mark by the category it falls into for this facet — pick a facet below.">Color by</h2>
-              <select class="facetselect" id="colorSelect"></select>
-            </div>
-            <div class="card">
-              <h2 title="Controls the ORDER of rows/columns: by their natural order (e.g. year), by how many grants are in each, or by their total dollars.">Sort bins</h2>
-              <select class="facetselect" id="sortSelect"></select>
-            </div>
-          </div>
-          <h2>Every grant, arranged</h2>
-          <div class="searchbox">
-            <input type="search" id="facetSearch" class="facetselect" placeholder="Search by title, PI, or agency…" aria-label="Search grants by title, PI, or agency">
-            <span class="searchcount" id="facetSearchCount"></span>
-          </div>
-          <select class="facetselect suggestselect" id="facetSuggest" aria-label="Need a suggestion?">
-            <option value="">Need a suggestion?</option>
-          </select>
-        </div>
-        <div class="gridtoolbar-right">
-          <div class="misslegend chiprow legendpanel" id="facetColorLegend"></div>
-          <button class="dial legendtoggle" id="facetLegendToggle" aria-expanded="true" aria-controls="facetColorLegend" aria-label="Toggle legend" title="Legend">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>
-          </button>
-        </div>
-      </div>
       <div id="facetstage">
         <div class="chartwrap" id="facetchartwrap">
           <svg id="facetlabels"></svg>
@@ -105,46 +144,9 @@
            resolve and setupTabs (shared/enrico.js) runs its own hidden
            toggle — which happens regardless of this attribute's starting
            value, so it's purely a loading-window nicety, not load-bearing
-           for the tab logic itself. -->
-      <div class="gridtoolbar">
-        <div class="gridtoolbar-left">
-          <button class="dial" id="piDial" aria-expanded="false" aria-controls="pidock" aria-label="Show controls" title="Controls">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="9" cy="7" r="1.8" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1.8" fill="currentColor" stroke="none"/><circle cx="11" cy="17" r="1.8" fill="currentColor" stroke="none"/></svg>
-          </button>
-          <div class="dock collapsed" id="pidock">
-            <div class="card">
-              <h2>Columns</h2>
-              <select class="facetselect" id="piSplitSelect"></select>
-            </div>
-            <div class="card">
-              <h2>Rows</h2>
-              <select class="facetselect" id="piArrangeSelect"></select>
-            </div>
-            <div class="card">
-              <h2 title="Colors each mark by the category it falls into for this facet — pick a facet below.">Color by</h2>
-              <select class="facetselect" id="piColorSelect"></select>
-            </div>
-            <div class="card">
-              <h2 title="Controls the ORDER of rows/columns: by their natural order (e.g. year), by how many grants are in each, or by their total dollars.">Sort bins</h2>
-              <select class="facetselect" id="piSortSelect"></select>
-            </div>
-          </div>
-          <h2>Every PI, arranged</h2>
-          <div class="searchbox">
-            <input type="search" id="piSearch" class="facetselect" placeholder="Search by name, college, or department…" aria-label="Search PIs by name, college, or department">
-            <span class="searchcount" id="piSearchCount"></span>
-          </div>
-          <select class="facetselect suggestselect" id="piSuggest" aria-label="Need a suggestion?">
-            <option value="">Need a suggestion?</option>
-          </select>
-        </div>
-        <div class="gridtoolbar-right">
-          <div class="misslegend chiprow legendpanel" id="piColorLegend"></div>
-          <button class="dial legendtoggle" id="piLegendToggle" aria-expanded="true" aria-controls="piColorLegend" aria-label="Toggle legend" title="Legend">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>
-          </button>
-        </div>
-      </div>
+           for the tab logic itself. Its own toolbar (Rows/Columns/Color/
+           Sort, search, legend) no longer lives here — see #piToolbar,
+           above, in the shared .tabbar row. -->
       <div id="pistage">
         <div class="chartwrap" id="pichartwrap">
           <svg id="pilabels"></svg>

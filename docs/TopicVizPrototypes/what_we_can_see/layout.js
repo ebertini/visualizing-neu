@@ -66,7 +66,7 @@ export function sortedOrder(nLevels, marginalN, marginalD, mode) {
 // row of columns is wider than the viewport — nothing is ever scaled down
 // or a level dropped to force a fit.
 export const MARK = 7.8, GAP = 1.3;
-export const MIN_CELL_COLS = 3, CELL_PAD = 4, COL_GUT = 10, ROW_GUT = 14, HDR_H = 24, LABEL_LANE = 285;
+export const MIN_CELL_COLS = 3, CELL_PAD = 4, COL_GUT = 10, ROW_GUT = 14, HDR_H = 24, LABEL_LANE = 210;
 // Breathing room between the chart's own container edge and the row-label
 // lane — the grid is otherwise full-bleed (no section padding of its own),
 // so without this the row labels sit flush against the browser edge.
@@ -117,7 +117,7 @@ export function fitLabel(s, maxW) {
 // own) get folded through fitLabel's existing character-level ellipsis,
 // so a label that's genuinely too long to show in full still ends in "…"
 // rather than being silently cut mid-word.
-export const LABEL_LINE_H = 18, MAX_LABEL_LINES = 2;
+export const LABEL_LINE_H = 18, MAX_LABEL_LINES = 3;
 export function wrapLabel(text, maxW, maxLines) {
   const words = text.split(/\s+/).filter(Boolean);
   const lines = [];
@@ -146,11 +146,23 @@ export function wrapLabel(text, maxW, maxLines) {
 // available width, cellCols is still floored there and the matrix is
 // allowed to exceed availW — #facetscroll (see CSS) then scrolls
 // horizontally rather than any level being dropped to force a fit.
+//
+// MIN_CELL_W is a SEPARATE, pixel-based floor on top of MIN_CELL_COLS — a
+// facet with many levels and few members per cell (e.g. "Topic (leaf)"'s 26
+// levels) can drive `fit` down to MIN_CELL_COLS purely from dividing availW
+// by nCols, producing a ~34px cell that's wide enough for its marks but too
+// narrow for its own column header to read as more than 1-2 truncated
+// characters per word (PI feedback: reads as text bleeding into the next
+// column, even though it's technically still inside its own cell's bounds).
+// Widening here, past what fits on screen, is exactly what #facetscroll's
+// horizontal scroll (above) exists for.
+const MIN_CELL_W = 84;
 export function pickCellGeometry(nCols, maxCellN, availW) {
   const want = Math.max(MIN_CELL_COLS, Math.ceil(Math.sqrt(maxCellN * 1.4)));
   const perCol = (availW - (nCols - 1) * COL_GUT) / nCols - 2 * CELL_PAD;
   const fit = Math.floor((perCol + GAP) / (MARK + GAP));
-  const cellCols = Math.max(MIN_CELL_COLS, Math.min(fit, want));
+  const minColsForWidth = Math.ceil((MIN_CELL_W - 2 * CELL_PAD + GAP) / (MARK + GAP));
+  const cellCols = Math.max(MIN_CELL_COLS, minColsForWidth, Math.min(fit, want));
   return {mark: MARK, gap: GAP, cellCols};
 }
 

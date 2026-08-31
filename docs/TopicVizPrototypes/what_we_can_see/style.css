@@ -11,7 +11,41 @@
 body{overflow:auto}
 #app{position:static;display:block;height:auto;min-height:100%}
 header{position:sticky;top:0;background:var(--bg);z-index:9}
+/* Right-aligned via the header's own flex row (enrico.css) + margin-left:
+   auto here, rather than touching that shared rule — enrico.css's header
+   is also used by topic_flow.html, which has no equivalent link. Styled as
+   a real button (not a plain text link) specifically so it reads as more
+   prominent than the removed "<b>N</b> grants · a map of evidence" subtitle
+   line ever did — this is now the ONLY way to reach the "About this data &
+   what's missing" tab, which dropped its own pill from the tab strip (see
+   main.js's TAB_DEFS `hidden: true`) to make room for each grid's toolbar
+   moving into that row instead (see .tabbar below). */
+.aboutlink{
+  margin-left:auto;flex:none;
+  font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.02em;
+  color:#fff;background:var(--c-nsf);border:1px solid var(--c-nsf);
+  padding:8px 14px;border-radius:6px;text-decoration:none;white-space:nowrap;
+}
+.aboutlink:hover{background:#005a8c;border-color:#005a8c}
+.aboutlink:focus-visible{outline:2px solid var(--c-nsf);outline-offset:2px}
 main{display:block}
+/* Tab strip + the active grid's own toolbar share one row (PI feedback:
+   save the vertical space a separate toolbar row used to cost below the
+   tabs). #facetToolbar/#piToolbar are plain siblings of #tabstrip here —
+   NOT descendants of #facetsection/#pisection — so their own visibility is
+   driven explicitly by main.js's TOOLBAR_BY_TAB rather than inherited from
+   whichever section setupTabs currently hides; the `hidden` attribute
+   either JS sets is still what actually hides them (see the global
+   [hidden] rule above). .tabs/.gridtoolbar keep their own shared-kit rules
+   (enrico.css / below) for their INTERNAL layout — only the outer
+   spacing/border that assumed each was a full-width row of its own moves
+   here, onto the shared wrapper. */
+.tabbar{
+  display:flex;align-items:center;flex-wrap:wrap;gap:4px 16px;
+  padding:0 24px 8px;border-bottom:1px solid var(--hair);
+}
+.tabbar .tabs{padding:0;border-bottom:0}
+.tabbar .gridtoolbar{flex:1;min-width:0;padding:0}
 /* Tab panels toggle via the native `hidden` attribute (see setupTabs in
    shared/enrico.js), which the browser's UA stylesheet implements as
    `[hidden]{display:none}` — an attribute selector, specificity (0,1,0).

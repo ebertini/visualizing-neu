@@ -259,8 +259,14 @@
   // against a panel that isn't actually visible yet. onActivate(key,
   // firstTime) tells the caller exactly when to do that first render.
   //
-  // opts: {tablist: Element, tabs: [{key, label, panel: Element}],
+  // opts: {tablist: Element, tabs: [{key, label, panel: Element, hidden?}],
   //        initial?: key, onActivate(key, firstTime)}
+  // A tab with `hidden: true` still participates in panel toggling and is
+  // still reachable by its hash (e.g. an external link to `#key`), but gets
+  // no rendered pill in the tablist and is skipped by ArrowLeft/Right/Home/
+  // End cycling — for a panel that should stay hash-addressable without
+  // occupying space in the tab row (what_we_can_see.html's "missing" tab,
+  // reached only via the header's "About this data" link).
   function setupTabs(opts) {
     const { tablist, tabs, onActivate } = opts;
     const activated = new Set();
@@ -270,7 +276,9 @@
     tablist.innerHTML = "";
     tablist.setAttribute("role", "tablist");
 
-    tabs.forEach((t) => {
+    const visibleTabs = tabs.filter((t) => !t.hidden);
+
+    visibleTabs.forEach((t) => {
       const b = document.createElement("button");
       b.type = "button";
       b.textContent = t.label;
@@ -283,30 +291,35 @@
       t.panel.setAttribute("aria-labelledby", b.id);
       b.addEventListener("click", () => activate(t.key));
       b.addEventListener("keydown", (e) => {
-        const idx = tabs.findIndex((x) => x.key === t.key);
+        const idx = visibleTabs.findIndex((x) => x.key === t.key);
         let ni = null;
-        if (e.key === "ArrowRight") ni = (idx + 1) % tabs.length;
-        else if (e.key === "ArrowLeft") ni = (idx - 1 + tabs.length) % tabs.length;
+        if (e.key === "ArrowRight") ni = (idx + 1) % visibleTabs.length;
+        else if (e.key === "ArrowLeft") ni = (idx - 1 + visibleTabs.length) % visibleTabs.length;
         else if (e.key === "Home") ni = 0;
-        else if (e.key === "End") ni = tabs.length - 1;
+        else if (e.key === "End") ni = visibleTabs.length - 1;
         if (ni != null) {
           e.preventDefault();
-          activate(tabs[ni].key);
-          btns[tabs[ni].key].focus();
+          activate(visibleTabs[ni].key);
+          btns[visibleTabs[ni].key].focus();
         }
       });
       btns[t.key] = b;
       tablist.appendChild(b);
     });
+    // No pill, so no labelling button — just the tabpanel role, still
+    // toggled by activate() below like any other panel.
+    tabs.filter((t) => t.hidden).forEach((t) => t.panel.setAttribute("role", "tabpanel"));
 
     function activate(key) {
       if (key === current) return;
       current = key;
       tabs.forEach((t) => {
         const active = t.key === key;
-        btns[t.key].classList.toggle("active", active);
-        btns[t.key].setAttribute("aria-selected", String(active));
-        btns[t.key].tabIndex = active ? 0 : -1;
+        if (btns[t.key]) {
+          btns[t.key].classList.toggle("active", active);
+          btns[t.key].setAttribute("aria-selected", String(active));
+          btns[t.key].tabIndex = active ? 0 : -1;
+        }
         t.panel.hidden = !active;
       });
       if (location.hash.slice(1) !== key) history.replaceState(null, "", `#${key}`);

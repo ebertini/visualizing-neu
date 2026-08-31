@@ -529,6 +529,20 @@ export function createGrid(opts) {
   document.addEventListener("keydown", e => {
     if (e.key === "Escape" && selected != null && document.activeElement.tagName !== "INPUT") clearSelection();
   });
+  // PI feedback: "clicking anywhere outside the detail panel should close
+  // it" — same document-level click-outside pattern as setupDial above.
+  // Marks/cells (rect.markrect, rect.binhit) are excluded even though
+  // they're literally outside the panel element: their own click handler
+  // (select(), above) already ran synchronously by the time this bubbles
+  // to document and decided the new `selected` — closing here too would
+  // immediately undo a click that just opened or switched the selection.
+  document.addEventListener("click", e => {
+    if (selected == null) return;
+    const panel = document.getElementById(ids.selectedPanel);
+    if (panel.contains(e.target)) return;
+    if (e.target.closest("rect.markrect, rect.binhit")) return;
+    clearSelection();
+  });
 
   // "Need a suggestion?" presets (PI feedback: entry-point questions that
   // configure Rows/Columns/Color/Sort for you) — a preset only ever names
