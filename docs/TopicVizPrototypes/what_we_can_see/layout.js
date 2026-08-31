@@ -70,12 +70,25 @@ export const MIN_CELL_COLS = 3, CELL_PAD = 4, COL_GUT = 10, ROW_GUT = 14, HDR_H 
 // A column's minimum pixel width (see pickCellGeometry's own comment below
 // for why MIN_CELL_COLS alone isn't enough) — declared up here, not down by
 // pickCellGeometry, specifically so LABEL_LANE (next line) can derive from
-// it: the row-label lane's usable text width (LABEL_MAX_W = LABEL_LANE - 40)
-// is set to match MIN_CELL_W exactly (PI feedback: the row-label lane was
-// wider than the column axis's own minimum width) — single source of truth
-// for "the narrowest a label's own box gets to be" on either axis.
-export const MIN_CELL_W = 84;
-export const LABEL_LANE = MIN_CELL_W + 40;
+// it: the row-label lane's usable text width (LABEL_MAX_W, below) is set to
+// match MIN_CELL_W exactly (PI feedback: the row-label lane was wider than
+// the column axis's own minimum width) — single source of truth for "the
+// narrowest a label's own box gets to be" on either axis.
+// 96, not 84: "Unassigned" (a real level — the Parent theme facet's
+// no-confident-topic bucket) measures 90.3px at this page's 15px mono font
+// (real-browser measurement, not a guess) — 84 was truncating it on both
+// axes. PI feedback: widen just enough to fit it, plus a small margin.
+export const MIN_CELL_W = 96;
+// Breathing room between the wrapped label text's own right edge and where
+// the mark grid actually starts (labelsSvg has no left/right padding of its
+// own — text renders flush at x=0, so this gutter is the ONLY thing
+// separating label text from the grid). Was hardcoded at 40 — a reasonable
+// fraction of the OLD, much wider 210px lane, but a disproportionate ~32%
+// of the current 124px one (PI feedback: visibly wasted empty space with
+// labels still truncating right next to it). 16 gives back most of that
+// space to the actual text budget below instead.
+const LABEL_LANE_GUTTER = 16;
+export const LABEL_LANE = MIN_CELL_W + LABEL_LANE_GUTTER;
 // Breathing room between the chart's own container edge and the row-label
 // lane — the grid is otherwise full-bleed (no section padding of its own),
 // so without this the row labels sit flush against the browser edge.
@@ -90,16 +103,19 @@ export const RING_PAD = 3;
 // from its mark grid — a bin with only a few marks (a small grid) but a
 // long label spilled text into its neighbor. Measuring the actual rendered
 // text width and sizing to fit it (up to a cap) fixes that at the source
-// instead of guessing a character count. LABEL_MAX_W leaves room for the
-// pinned row-label SVG's own left/right padding.
-export const LABEL_MAX_W = LABEL_LANE - 40;
+// instead of guessing a character count. LABEL_MAX_W leaves room for
+// LABEL_LANE_GUTTER, the pinned row-label SVG's own right-side breathing
+// room before the mark grid starts (see LABEL_LANE_GUTTER's own comment).
+export const LABEL_MAX_W = LABEL_LANE - LABEL_LANE_GUTTER;
 const measureCtx = document.createElement("canvas").getContext("2d");
 // Kept in lockstep with .rowlabel/.colhdr's actual rendered font-size
 // (style.css) — this measures the SAME text at the SAME size D3 will
 // paint it at, so wrapLabel/fitLabel's width budget matches reality. A
 // mismatch here (e.g. bumping the CSS font-size without updating this)
 // silently overflows a label past its lane or column instead of wrapping.
-measureCtx.font = "15.75px ui-monospace, 'SF Mono', Menlo, 'Cascadia Mono', Consolas, monospace";
+// Row and column labels share this one font size (PI feedback: they should
+// match) — 15px, same as .colhdr in style.css.
+measureCtx.font = "15px ui-monospace, 'SF Mono', Menlo, 'Cascadia Mono', Consolas, monospace";
 export function measureText(s) { return measureCtx.measureText(s).width; }
 export function fitLabel(s, maxW) {
   if (measureText(s) <= maxW) return s;
@@ -232,13 +248,15 @@ export function matrixLayout(aLevels, sLevels, byCell, aOrder, sOrder, availW) {
     const rowMax = rowMaxCounts[rowIdx];
     const markRows = Math.max(1, Math.ceil(rowMax / cellCols));
     const markGridH = markRows * (mark + gap) - gap + 2 * CELL_PAD;
-    // A wrapped row label (up to MAX_LABEL_LINES lines) can need more
+    // A wrapped row label (up to ROW_LABEL_MAX_LINES lines) can need more
     // vertical room than the mark grid itself does — a small cell (few
     // members) paired with a long level name is the common case — so the
     // row grows to fit whichever is taller, rather than letting the label
-    // overflow into the next row.
+    // overflow into the next row. +1 line reserves room for the "· N"
+    // member-count suffix, which grid.js renders on its OWN line below the
+    // wrapped label (PI feedback) rather than trailing the last label line.
     const labelLines = hasRows ? wrapLabel(aLevels[ai].label, LABEL_MAX_W, ROW_LABEL_MAX_LINES) : [];
-    const bandH = hasRows ? Math.max(markGridH, labelLines.length * LABEL_LINE_H + CELL_PAD) : markGridH;
+    const bandH = hasRows ? Math.max(markGridH, (labelLines.length + 1) * LABEL_LINE_H + CELL_PAD) : markGridH;
     const row = {ai, y, bandH, total: 0, labelLines};
     sOrder.forEach(si => {
       const src = byCell.get(ai + "|" + si);

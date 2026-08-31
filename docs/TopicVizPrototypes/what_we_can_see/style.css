@@ -10,7 +10,19 @@
    not a fixed fullscreen canvas. */
 body{overflow:auto}
 #app{position:static;display:block;height:auto;min-height:100%}
-header{position:sticky;top:0;background:var(--bg);z-index:9}
+/* header + .tabbar wrapped in one sticky container (what_we_can_see.html's
+   .stickytop) — ONE position:sticky;top:0 here, not two independent ones
+   (header at top:0, tabbar at top:<header's height>px). Two separately-
+   stuck siblings have to have their offsets sum EXACTLY (the second one's
+   top has to equal the first one's real rendered height to the pixel) or a
+   seam opens between them that scrolled page content shows through — found
+   via direct user report, not a guess. A single shared sticky ancestor
+   makes that seam structurally impossible: header and .tabbar are just
+   ordinary in-flow children of it, stacking with zero gap like any other
+   adjacent block elements, regardless of either one's exact height.
+   z-index:9 (unchanged from header's own former value) keeps this whole
+   sticky block above the chart/page content that scrolls underneath it. */
+.stickytop{position:sticky;top:0;z-index:9;background:var(--bg)}
 /* Right-aligned via the header's own flex row (enrico.css) + margin-left:
    auto here, rather than touching that shared rule — enrico.css's header
    is also used by topic_flow.html, which has no equivalent link. This is
@@ -58,6 +70,10 @@ main{display:block}
      (below) can never grow this past 60px either, since it's
      position:absolute — out of flow, same principle as .dock. */
   min-height:60px;
+  /* No position/sticky/z-index/background of its own — this row and
+     <header> above it share ONE sticky container (.stickytop) instead, so
+     they can never develop a seam between them (see .stickytop's own
+     comment for why two independently-stuck offsets are fragile). */
 }
 .tabbar .tabs{padding:0;border-bottom:0;flex:none} /* don't let a tight row shrink the pills before it wraps */
 /* Tab panels toggle via the native `hidden` attribute (see setupTabs in
@@ -183,8 +199,17 @@ main{display:block}
    reserved its own layout width. */
 #facetlabels, #pilabels{position:absolute;left:24px;top:0;bottom:0;pointer-events:none;overflow:hidden}
 /* Row labels can be wrapped/truncated (wrapLabel) but still need the full
-   name on hover. */
-#facetlabels .rowlabel, #pilabels .rowlabel{pointer-events:auto;cursor:default}
+   name on hover. font-size here (not on the shared .rowlabel rule below,
+   which the About-tab's own small charts also use) is scoped to just this
+   grid's pinned row-label lane via the #facetlabels/#pilabels ancestor, and
+   matches .colhdr's own 15px exactly (PI feedback: row and column labels
+   should share the same format/size) — kept in lockstep with
+   layout.js's measureCtx.font, which both wrapLabel call sites (row AND
+   column) share. NOTE: this rule was accidentally dropped somewhere during
+   this session's toolbar restructuring — row labels had silently fallen
+   back to the shared 10.5px .rowlabel rule below; restoring it here is what
+   actually fixes the size mismatch, not a new addition. */
+#facetlabels .rowlabel, #pilabels .rowlabel{pointer-events:auto;cursor:default;font-size:15px}
 /* .gridtoolbar-left/.gridtoolbar-main (below) replace an earlier design
    where the controls dial and the color legend both floated absolutely
    over the chart's own top-left/top-right corners. That broke once Rows
@@ -206,20 +231,40 @@ main{display:block}
    the DOM (see the .tabbar comment above for why). position:relative
    anchors the dock dropdown to THIS element, not the whole row. */
 .gridtoolbar-left{position:relative;display:flex;align-items:center;flex:none}
-/* Search box + suggestion select, the color legend, and the legend's own
-   toggle, in that literal DOM order — which is also the desired visual
-   order, so no CSS `order` is needed. flex:1 so this element fills the
-   row's remaining width; that's what lets the toggle's margin-left:auto
-   (below) pin it to the row's true right edge regardless of the legend's
-   own width. position:relative is this element's own containing block for
-   .legendpanel.vertical (below) — nearer and simpler than reaching up to
-   .tabbar. */
+/* On a tab with no grid toolbar of its own ("About this data & what's
+   missing" — #missingfunnelpanel), exactly one grid's dial-group is kept
+   in the DOM (not `hidden`) instead of both disappearing, purely so its
+   52px of width still reserves #tabstrip's usual position — PI feedback:
+   "Every grant"/"Every PI" should sit in the same spot on every tab, not
+   shift left when neither grid's controls are showing. Invisible + inert
+   there (visibility, not display:none, so the space still counts) — see
+   main.js's onActivate for which grid's dial-group gets this class. */
+.dial-group-ghost{visibility:hidden;pointer-events:none}
+/* Search box + suggestion select, then the color legend + its toggle
+   (grouped — see .gridtoolbar-legend below), in that literal DOM order —
+   which is also the desired visual order, so no CSS `order` is needed.
+   flex:1 so this element fills the row's remaining width; that's what lets
+   .gridtoolbar-legend's own margin-left:auto (below) pin the legend+toggle
+   PAIR to the row's true right edge. position:relative is this element's
+   own containing block for .legendpanel.vertical (below) — nearer and
+   simpler than reaching up to .tabbar. */
 .gridtoolbar-main{display:flex;align-items:center;gap:16px;flex:1;min-width:0;position:relative}
-/* Load-bearing, not cosmetic: pins the legend toggle to this row's true
-   right edge, independent of the color legend's own width — grid.js's
-   updateLegendLayout relies on that to measure the legend's available slot
-   without circularity (see its own comment for why). */
-.gridtoolbar-main .legendtoggle{margin-left:auto}
+/* Groups the color legend with its own toggle so they always sit right
+   next to each other — PI feedback: previously only the toggle had
+   margin-left:auto, so an inline legend (sized to its own content) landed
+   wherever its content ended, leaving a gap before the toggle rather than
+   sitting flush against it. Load-bearing, not cosmetic: margin-left:auto
+   here — on the GROUP, not the toggle alone — is what pins this pair to
+   the row's true right edge, independent of the legend's own width AND
+   regardless of whether the legend is currently collapsed (display:none,
+   in which case this wrapper still holds just the toggle, still pushed
+   right) — grid.js's updateLegendLayout relies on the toggle's position
+   being stable either way to measure the legend's available slot without
+   circularity (see its own comment for why). position:static (deliberately
+   NOT relative) — .legendpanel.vertical's position:absolute still resolves
+   against .gridtoolbar-main, the nearer ancestor that IS positioned; adding
+   position here too would break that anchor. */
+.gridtoolbar-legend{display:flex;align-items:center;gap:10px;margin-left:auto}
 .dial{
   display:grid;place-items:center;width:52px;height:52px;flex:none;
   border:1px solid var(--hair);border-radius:0;background:#fff;cursor:pointer;color:var(--ink);padding:0;
@@ -252,23 +297,25 @@ main{display:block}
 .facetselect:focus-visible{outline:2px solid var(--c-nsf);outline-offset:1px}
 /* Search box + "Need a suggestion?" — the second slot of the shared
    .tabbar row, right after the tab pills (see the .tabbar comment above).
-   Both fields share the SAME fixed width (below) instead of their former
-   per-keystroke auto-fit. flex:none keeps them from being squeezed by a
-   tight row, which matters beyond looks: the suggestion select's right
-   edge is grid.js's own reference point for where the color legend's
-   available slot begins. */
-.gridtoolbar-fields{display:flex;align-items:center;gap:14px;flex:none}
-/* 290px, border-box: sized to the LONGER of the two search placeholders,
-   "Search by name, college, or department…" — 39 chars × 11.5px × 0.6021em
-   (Menlo/SF Mono glyph advance width) ≈ 270px of glyphs + 16px horizontal
-   padding + 2px border ≈ 288 → 290.
-   Known, accepted consequence: the suggestion select's SELECTED option
-   labels are full sentences (e.g. "Do bigger teams cluster at certain
-   colleges, and in which themes?", ~450px of glyphs) and will visually
-   clip once picked — a native <select>'s closed box has no text-overflow
-   and can't grow to its content. The open dropdown list still shows every
-   label in full; this is inherent to "fixed width," not a bug. */
-.gridtoolbar-fields .searchbox input,
+   gap:6px (not this element's own 14px) between the search box and the
+   suggestion select — PI feedback: they should sit right next to each
+   other, not with a wide visual gap between them (that gap was really the
+   .searchcount span's own former fixed reservation, removed below, not
+   this element's gap — see its own comment). */
+.gridtoolbar-fields{display:flex;align-items:center;gap:6px;flex:none}
+/* The suggestion select keeps a fixed width — grid.js's updateLegendLayout
+   uses its right edge as the reference point for where the color legend's
+   available slot begins, so it needs a stable, predictable position.
+   290px, border-box: comfortably fits "Need a suggestion?" and most preset
+   labels. Known, accepted consequence: the SELECTED option labels are full
+   sentences (e.g. "Do bigger teams cluster at certain colleges, and in
+   which themes?", ~450px of glyphs) and will visually clip once picked — a
+   native <select>'s closed box has no text-overflow and can't grow to its
+   content. The open dropdown list still shows every label in full; this is
+   inherent to a fixed width, not a bug.
+   The search INPUT, by contrast, is flexible again (see .searchbox input
+   below) — PI feedback: wanted it auto-fitting like before, not synced to
+   this same fixed value. */
 .gridtoolbar-fields .suggestselect{flex:none;width:290px}
 /* Grant search box (title/PI/agency) reads as "search WITHIN this grid"
    rather than a global site search. Matching marks stay full-opacity;
@@ -276,20 +323,28 @@ main{display:block}
    removed from the grid, so "every grant is present" still holds while
    searching. */
 .searchbox{display:flex;align-items:center;gap:6px;min-width:0}
+/* Actual sizing to fit the input's own text is JS-driven (grid.js's
+   fitWidthToText, set as an inline style that overrides whatever's here,
+   capped at 290px) — CSS field-sizing/fit-content turned out not to
+   reliably size a native input/select to just its own text across
+   browsers. This min-width is only a floor/fallback for the brief instant
+   before that JS runs. */
 .searchbox input{
+  min-width:80px;
   font-family:var(--mono);font-size:11.5px;color:var(--ink);
   border:1px solid var(--hair);border-radius:0;padding:6px 8px;background:#fff;
 }
 .searchbox input:focus-visible{outline:2px solid var(--c-nsf);outline-offset:1px}
-/* Fixed width, not just a floor: empty → "12,345 of 12,345 match" on the
-   first keystroke is a ~145px jump that would otherwise shove the
-   suggestion select right by that much mid-typing — shrinking the color
-   legend's available slot (grid.js's updateLegendLayout measures from this
-   field's neighbor) enough to flip it from inline to vertical while the
-   user is still typing. Reserving the width up front keeps that from ever
-   moving. flex:none for the same reason .gridtoolbar-fields' other two
-   children have it. */
-.searchcount{width:150px;flex:none;font-family:var(--mono);font-size:11px;color:var(--ink);white-space:nowrap}
+/* No fixed width — sized to its own text, collapsing to ~0 when empty
+   (PI feedback: wanted the search box area flexible like before, not a
+   permanently-reserved block that reads as a wide empty gap before any
+   search is typed). Consequence, accepted: typing a search can shift the
+   suggestion select right by however wide the match-count text is, which
+   can in turn flip the color legend between inline/vertical mid-keystroke
+   (updateLegendLayout already re-measures on every render, so this is a
+   visible reflow, not a bug) — a deliberate trade for a tighter, more
+   natural-feeling search bar. */
+.searchcount{font-family:var(--mono);font-size:11px;color:var(--ink);white-space:nowrap}
 .markrect{cursor:pointer}
 .binhit{fill:transparent}
 /* Faint per-cell boundary line (PI feedback) — replaces the old fixed grey

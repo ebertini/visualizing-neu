@@ -158,10 +158,11 @@ const WIDTH_DEPENDENT_RENDER = {every: grantGrid.render, pis: piGrid.render};
 // second wrapper instead of one + CSS `order`). Neither is a descendant of
 // the section setupTabs hides/shows, so their own visibility has to be
 // driven explicitly here, alongside the width-dependent re-render below.
-const TOOLBAR_BY_TAB = {
-  every: [document.getElementById("facetDialGroup"), document.getElementById("facetToolbar")],
-  pis:   [document.getElementById("piDialGroup"),    document.getElementById("piToolbar")],
-};
+// Split into two maps (rather than kept as one, as originally): the dial
+// group needs different treatment on a tab with no grid toolbar of its own
+// ("missing") than the main toolbar does — see onActivate below.
+const DIAL_GROUP_BY_GRID = {every: document.getElementById("facetDialGroup"), pis: document.getElementById("piDialGroup")};
+const MAIN_TOOLBAR_BY_TAB = {every: document.getElementById("facetToolbar"), pis: document.getElementById("piToolbar")};
 // The "About this data" header link/button (what_we_can_see.html's
 // .aboutlink) now shares .tab/.tab.active styling with the two real tab
 // pills (PI feedback: one consistent selected/unselected look, blue =
@@ -170,11 +171,30 @@ const TOOLBAR_BY_TAB = {
 // has to be driven explicitly here too, mirroring what setupTabs already
 // does internally for the two real buttons.
 const aboutLinkEl = document.querySelector(".aboutlink");
+// Which grid's dial-group keeps reserving space on a tab with no grid
+// toolbar of its own ("missing") — defaults to "every" (TAB_DEFS[0]) before
+// either grid has ever been the active tab, then tracks whichever grid was
+// last actually shown, so switching to "About this data" from "Every PI"
+// doesn't cause an unrelated jump.
+let lastGridKey = "every";
 const tabsCtl = E.setupTabs({
   tablist: document.getElementById("tabstrip"),
   tabs: TAB_DEFS,
   onActivate: (key) => {
-    Object.entries(TOOLBAR_BY_TAB).forEach(([k, els]) => els.forEach(el => { el.hidden = k !== key; }));
+    if (key === "every" || key === "pis") lastGridKey = key;
+    // PI feedback: "Every grant"/"Every PI" should sit in the same position
+    // on every tab, including "About this data" — which has no dial/search/
+    // legend of its own. Exactly one grid's dial-group always stays in the
+    // DOM (never `hidden`) so its 52px keeps reserving #tabstrip's usual
+    // spot; on "missing" specifically it's also made invisible+inert via
+    // .dial-group-ghost (style.css) rather than shown for real, since its
+    // dock's Rows/Columns/Color/Sort selects don't apply to this tab.
+    const dialGridKey = (key === "every" || key === "pis") ? key : lastGridKey;
+    Object.entries(DIAL_GROUP_BY_GRID).forEach(([k, el]) => {
+      el.hidden = k !== dialGridKey;
+      el.classList.toggle("dial-group-ghost", k === dialGridKey && key !== "every" && key !== "pis");
+    });
+    Object.entries(MAIN_TOOLBAR_BY_TAB).forEach(([k, el]) => { el.hidden = k !== key; });
     aboutLinkEl.classList.toggle("active", key === "missing");
     const fn = WIDTH_DEPENDENT_RENDER[key]; if (fn) fn();
   },

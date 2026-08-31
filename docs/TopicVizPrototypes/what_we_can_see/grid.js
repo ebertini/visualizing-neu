@@ -18,7 +18,7 @@ import {
   computeBins, sortedOrder, matrixLayout, computeMarkPositions, reduceMotion,
   CELL_PAD, LABEL_LANE, STAGE_MARGIN, RING_PAD, LABEL_LINE_H,
 } from "./layout.js";
-import { populateSelect, populateOptions, defaultSortMode, SORT_OPTIONS } from "./facets.js";
+import { populateSelect, populateOptions, defaultSortMode, SORT_OPTIONS, fitWidthToText } from "./facets.js";
 import { NOISE } from "./constants.js";
 
 const E = window.ENRICO;
@@ -381,7 +381,12 @@ export function createGrid(opts) {
         const lines = d.labelLines
           .map((line, li) => `<tspan x="0"${li > 0 ? ` dy="${LABEL_LINE_H}"` : ""}>${E.esc(line)}</tspan>`)
           .join("");
-        return `${lines}<tspan class="n"> · ${d.total.toLocaleString()}</tspan>`;
+        // The member-count suffix always starts its OWN line (PI feedback)
+        // rather than trailing the last wrapped label line — x + dy here are
+        // unconditional, unlike the label lines' own dy above, which only
+        // applies from the second line onward. matrixLayout's bandH already
+        // reserves +1 line of height for this.
+        return `${lines}<tspan class="n" x="0" dy="${LABEL_LINE_H}"> · ${d.total.toLocaleString()}</tspan>`;
       })
       .on("mousemove", (ev, d) => {
         const label = aLevels[d.ai].full || aLevels[d.ai].label;
@@ -571,13 +576,23 @@ export function createGrid(opts) {
   document.getElementById(ids.colorSelect).addEventListener("change", e => { colorKey = e.target.value; render(); });
 
   if (searchInputEl) {
-    // Fixed width now, in CSS, shared with the suggestion select beside it
-    // (see .gridtoolbar-fields in style.css) — no per-keystroke measurement
-    // pass, and no per-keystroke width change, which is also what keeps the
-    // suggestion select's right edge (updateLegendLayout's reference point)
-    // stable while typing.
+    // Flexible again (PI feedback: wanted the search box auto-fitting like
+    // before, not a fixed width shared with the suggestion select) — sized
+    // to fit its OWN text (placeholder when empty, typed value once
+    // something's typed), capped at 290px so it can't grow arbitrarily wide.
+    // Runs once up front (for the placeholder) and again on every
+    // keystroke. Consequence, accepted: the match-count span right after it
+    // (.searchcount, no fixed width of its own — see style.css) can shift
+    // the suggestion select's position while typing, which in turn can flip
+    // the color legend between inline/vertical mid-keystroke
+    // (updateLegendLayout re-measures on every render already, so this is
+    // just a visible reflow, not a bug) — a deliberate trade for the more
+    // natural, flexible feel.
+    const SEARCH_MAX_W = 290;
+    fitWidthToText(searchInputEl, searchInputEl.value || searchInputEl.placeholder, {max: SEARCH_MAX_W});
     searchInputEl.addEventListener("input", e => {
       searchQuery = e.target.value.trim().toLowerCase();
+      fitWidthToText(searchInputEl, e.target.value || searchInputEl.placeholder, {max: SEARCH_MAX_W});
       render();
     });
   }
