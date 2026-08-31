@@ -20,6 +20,36 @@ internals, identifier gotchas, and a checklist of what's genuinely left unfinish
 
 Everything under `docs/` is published as a static site — see "Publishing" below.
 
+## Quickstart: what actually needs to run
+
+**Just want to view the finished dashboard? Nothing does.** The dashboard's own data
+(`docs/TopicVizPrototypes/data/*.json`) is committed to this repo — it's a built artifact, not
+raw data, but it's tracked deliberately so the deliverable works straight out of a fresh clone:
+
+```bash
+git clone <this repo>
+python -m http.server 8000 --directory docs/TopicVizPrototypes
+# open http://localhost:8000/what_we_can_see.html
+```
+
+**To regenerate that data** (after a raw-data update, or to work with the underlying tables in
+the notebooks), the raw inputs are committed (`DataSet/*.xlsx`) but the derived tables are not
+(`data/processed/` is gitignored — see "Should we commit `data/processed/`?" below for why).
+Two fast, free, fully deterministic steps rebuild everything the dashboard needs:
+
+```bash
+pip install -r requirements.txt      # or requirements-viz.txt for a lighter, dashboard-only set
+python src/build_dataset.py          # raw DataSet/*.xlsx -> data/processed/*.parquet (~30s)
+python -m src.refresh_topicviz       # data/processed/ + the committed topic-model output ->
+                                      # docs/TopicVizPrototypes/data/*.json (~1s)
+python -m http.server 8000 --directory docs/TopicVizPrototypes
+```
+
+`refresh_topicviz` does **not** need the heavy BERTopic/SPECTER2/embedding pipeline (that's a
+separate, rarely-needed step covered in "How grants are topic-modeled" below) — the topic model
+itself is already frozen and committed (`docs/EnricoVis/data/*.json`, `outputs/topic_keywords.json`),
+and `refresh_topicviz` reads that rather than re-fitting anything.
+
 ## 1. The data pipeline
 
 `src/build_dataset.py` reads raw `.xlsx`/`.csv` files from `DataSet/` (HR roster, grant
@@ -99,10 +129,18 @@ text where available.
 
 ### Running it locally
 
+The committed `docs/TopicVizPrototypes/data/*.json` already reflects the current state of
+everything below, so this is only needed to *regenerate* that data (see "Quickstart" above for
+just viewing it as-is):
+
 ```bash
 # One-time setup — a lighter dependency set than the full pipeline (no torch/bertopic/umap)
 uv venv --python 3.11 .venv
 uv pip install --python .venv/bin/python -r requirements-viz.txt
+
+# Rebuild data/processed/ from raw data (needed once, or whenever raw data changes —
+# refresh_topicviz below reads from here and will fail without it on a fresh clone)
+.venv/bin/python src/build_dataset.py
 
 # Build/refresh the JSON the dashboard reads
 .venv/bin/python -m src.refresh_topicviz
@@ -114,12 +152,34 @@ python -m http.server 8000 --directory docs/TopicVizPrototypes
 Then open `http://localhost:8000/what_we_can_see.html` or `http://localhost:8000/topic_flow.html`.
 See `docs/TopicVizPrototypes/README.md` for the full setup/refresh/verify workflow.
 
+### Should we commit `data/processed/`?
+
+Worth naming explicitly since it's easy to assume otherwise: `data/processed/` (the pipeline's
+output) is gitignored, not committed — only the *raw* inputs (`DataSet/*.xlsx`) and the
+dashboard's *final* built JSON (`docs/TopicVizPrototypes/data/*.json`) are. In practice this
+costs little, because regenerating it is two fast (~30s total), free, fully deterministic
+commands (above) from files already in the repo — there's no rate-limited API, paid step, or
+manual judgment call involved, unlike (for example) the NIH/NSF backfill data in
+`data/nih_nsf_backfill/`, which genuinely *is* committed specifically because re-fetching it
+would take a long, rate-limited round trip. The directory also holds some large, non-essential-
+for-the-dashboard artifacts (a ~13 MB cached BERTopic model, ~8 MB SPECTER2 embeddings, and a
+CSV *and* Parquet copy of every table) that would meaningfully bloat the git history if
+committed wholesale. If a future need arises for zero-command reproducibility of just the seven
+canonical tables specifically (no CSVs, no model/embedding caches), that's a much smaller,
+targeted ask — flag it rather than committing the whole directory.
+
 ## Publishing
 
 Everything in `docs/` is published to GitHub Pages via `.github/workflows/deploy-notebooks.yml`,
 which runs on every push to `main`: notebooks are converted to HTML, the dashboard's data/module
 directories are copied alongside its pages, and an index page is regenerated — all into
 `docs/onlineoutput/`, which is what actually deploys.
+
+**If this project ever moves to a different GitHub repo** (ownership transfer, a fork, or
+hosting it under someone else's account), the workflow needs no code changes — it's verified
+repo-agnostic. The one required step is enabling Pages in the new repo's own Settings → Pages
+(source: "GitHub Actions"), since that setting doesn't carry over automatically. See
+`CLAUDE.md`'s "Setup & core commands" section for the full walkthrough.
 
 ## A note on scope
 

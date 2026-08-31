@@ -13,6 +13,10 @@ verified. If you're new to this repo:
 2. Come back to this file for pipeline internals, identifier gotchas, and hard-won lessons
    before you change any code.
 3. See **"Open threads"** below for what's genuinely unfinished and worth picking up first.
+4. **The dashboard itself needs no setup to view** — its final built JSON is committed, so a
+   fresh clone works immediately (see "Setup & core commands" below). Only *regenerating* that
+   data, or working with the pipeline/notebooks directly, needs the dependency chain
+   (`build_dataset.py` → `refresh_topicviz.py`, both fast and free).
 
 Detailed session-by-session history (what was tried, what broke, why a decision was made)
 lives in `.claude/sessions/*.md` and the docs listed under "`docs/` reference map" — this
@@ -60,6 +64,12 @@ figures/            Duplicate of some topic figures
 
 ## Setup & core commands
 
+**Viewing the dashboard needs none of this.** `docs/TopicVizPrototypes/data/*.json` — the
+dashboard's own final built output — is committed, specifically so a fresh clone works
+immediately: `python -m http.server 8000 --directory docs/TopicVizPrototypes`, then open
+`what_we_can_see.html`. Everything below is only for *regenerating* that data (after a raw-data
+change) or for working with the pipeline/notebooks/topic model directly.
+
 ```bash
 pip install -r requirements.txt          # Python 3.11+; CPU-only for everything
 python src/build_dataset.py              # ~30s; regenerates ALL data/processed/*.parquet
@@ -97,6 +107,29 @@ rebuilds the index there, and `docs/onlineoutput/` (not `docs/` itself) deploys 
 also copies `docs/TopicVizPrototypes/{data,shared,what_we_can_see,topic_flow}/` into
 `onlineoutput/` at matching relative paths. Local equivalent:
 `python -m nbconvert --to html notebooks/*.ipynb --output-dir=docs/onlineoutput`.
+
+**Moving this to a different repo (ownership transfer, fork, or the PI's own GitHub Pages
+project — see "Open threads" #6).** Verified: the workflow and every published page are
+**repo-agnostic** — no hardcoded owner/repo name or absolute URL anywhere in
+`deploy-notebooks.yml`, `scripts/generate_index.py`, or any HTML/JS under `docs/` (checked via
+`grep` for `github.io`, leading-`/` absolute paths, and the current repo/owner strings; the only
+hits were in already-flagged-stale `docs/PUBLISHING.md` and an unrelated external doc link).
+`actions/configure-pages` + `actions/upload-pages-artifact` + `actions/deploy-pages` all deploy
+to whatever repo the workflow runs in, using GitHub's ambient repo context — nothing to edit in
+the workflow itself. To move it:
+1. Transfer/fork the repo as normal (git remote change, GitHub's own transfer/fork feature).
+2. In the **new** repo's Settings → Pages, set "Build and deployment" source to **"GitHub
+   Actions"** — this is a per-repository setting that does **not** carry over automatically on a
+   transfer or fork, and is the one manual step actually required. Without it, the workflow can
+   run without erroring but nothing will serve.
+3. Push to `main` (or run the workflow manually via `workflow_dispatch`) and confirm the
+   `deploy-pages` step reports a live URL.
+4. The site's URL changes to the new owner/repo's default Pages URL
+   (`https://<owner>.github.io/<repo-name>/`, or repo root if the new repo is itself named
+   `<owner>.github.io`) — update any external links/bookmarks separately; this is not a code
+   change.
+5. Do not follow `docs/PUBLISHING.md` — it describes an old `docs/index.html`/`--output-dir=docs`
+   setup this workflow no longer uses (see "stale/secondary" docs below).
 
 ## The data pipeline (`src/build_dataset.py`)
 
