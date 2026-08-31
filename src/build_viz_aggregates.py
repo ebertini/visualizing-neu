@@ -159,14 +159,6 @@ DENSE_FROM, DENSE_TO = 2005, 2025
 
 CAVEATS = [
     {
-        "id": "neu_status",
-        "severity": "high",
-        "text": (
-            "The $2.18B headline is not money Northeastern raised: grants are "
-            "attributed to a faculty member even if the award predates their NEU hire."
-        ),
-    },
-    {
         "id": "nih_cliff",
         "severity": "low",
         "text": (

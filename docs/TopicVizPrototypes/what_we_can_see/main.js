@@ -106,10 +106,10 @@ wireSuggestions("facetSuggest", grantGrid, GRANT_SUGGESTIONS);
 wireSuggestions("piSuggest", piGrid, PI_SUGGESTIONS);
 
 // Every grant/Every PI carry no caveat text of their own now (PI feedback:
-// clean grids, no explanatory copy) — every caveat, including neu_status
-// (the $2.18B headline) and roster_snapshot, lives on the "About this data
-// & what's missing" tab's About section (formerly a standalone about.html,
-// merged in 2026-08-30 — see missing.js), linked from the page header.
+// clean grids, no explanatory copy) — every caveat, including roster_snapshot,
+// lives on the "About this data & what's missing" tab's About section
+// (formerly a standalone about.html, merged in 2026-08-30 — see missing.js),
+// linked from the page header.
 
 // grantGrid/piGrid's initial render() and the resize listener that keeps
 // re-rendering it both live below, where the tabs are set up — a hidden
@@ -125,8 +125,8 @@ initAboutSection();
    into "What's missing & where it goes" (the by-agency/by-year coverage
    bars, the NIH-vs-NSF cliff chart, and the mosaic's one-line finding) or
    dropped ("What we cannot see" — those five points are argued elsewhere:
-   the neu_status/external_collaborators/roster_snapshot entries in
-   VIZ_META.caveats, and the missingness view itself). "Every PI" is new.
+   the external_collaborators/roster_snapshot entries in VIZ_META.caveats,
+   and the missingness view itself). "Every PI" is new.
    The formerly-standalone about.html was folded into THIS tab too
    (2026-08-30) — its own "missing" key is unchanged (about.html's own
    footer already linked to `#missing` before the merge, so no link needed

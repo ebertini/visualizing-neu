@@ -326,7 +326,7 @@ export const GRANT_SUGGESTIONS = [
   {label: "Which agencies fund which research themes?", arrange: "ag", split: "tp", color: "amt", sort: "dollars"},
   {label: "How has each research theme's funding changed over time?", arrange: "tp", split: "yr", color: "amt", sort: "natural"},
   {label: "Do bigger teams cluster at certain colleges, and in which themes?", arrange: "col", split: "team", color: "tp", sort: "dollars"},
-  {label: "How does pre-hire vs. at-NEU attribution vary by college?", arrange: "col", split: "st", color: "amt", sort: "dollars"},
+  {label: "How much money was raised at NEU vs. carried over from a prior institution?", arrange: "col", split: "st", color: "amt", sort: "dollars"},
   {label: "What's still unassigned, and in which agencies?", arrange: "tid", split: "ag", color: "ab", sort: "size"},
 ];
 export const PI_SUGGESTIONS = [
