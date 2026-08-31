@@ -250,8 +250,10 @@ so there's no multi-file drop-in step the way Track A has — just re-run it.
   buffered the way colors are (abbreviations are curated text, can't be
   pre-invented), so it needed a real edit, already done.
 
-- **The `CAVEATS` prose in `src/build_viz_aggregates.py`** (rendered on
-  `about.html`, and filtered subsets on `topic_flow.html`/`what_we_can_see.html`
+- **The `CAVEATS` prose in `src/build_viz_aggregates.py`** (rendered in full,
+  grouped by severity, on `what_we_can_see.html`'s "About this data & what's
+  missing" tab — `about.html` merged into it 2026-08-30, see CLAUDE.md — and
+  as filtered subsets on `topic_flow.html`/that same tab's coverage section
   via a per-page id whitelist). Sentences are hand-written, not computed —
   `validate()`'s checks don't verify they still describe the data correctly
   (only that `by_reason` sums correctly, etc. — the *numbers cited in prose*

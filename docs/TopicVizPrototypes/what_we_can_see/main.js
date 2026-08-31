@@ -12,10 +12,11 @@
 import { FACETS, FACETS_PI, COVERAGE, VIZ_META } from "./data.js";
 import { AGENCIES } from "./constants.js";
 import { GRANT_FACET_DEFS, PI_FACET_DEFS, GRANT_ARRANGE_FACETS, PI_ARRANGE_FACETS,
-         GRANT_SUGGESTIONS, PI_SUGGESTIONS } from "./facets.js";
+         GRANT_SUGGESTIONS, PI_SUGGESTIONS, fitWidthToText } from "./facets.js";
 import { createGrid } from "./grid.js";
 import { grantTooltip, grantDetail, piTooltip, piDetail } from "./detail.js";
 import { initMissingTab } from "./missing.js";
+import { initAboutSection } from "./about.js";
 
 const E = window.ENRICO;
 
@@ -66,9 +67,15 @@ const piGrid = createGrid({
 });
 
 // "Need a suggestion?" — populate each grid's own preset dropdown and wire
-// it to grid.applyPreset (see grid.js). Reset back to the placeholder
-// option after applying, so picking the SAME suggestion twice in a row
-// still fires a change event.
+// it to grid.applyPreset (see grid.js). The select's own displayed value
+// stays on the chosen suggestion after applying it (previously reset back
+// to the "Need a suggestion?" placeholder immediately, which looked like
+// nothing had happened) — so the dropdown itself shows which suggestion is
+// active, the same way the Rows/Columns/Color by/Sort selects show their
+// own current value. Manually changing Rows/Columns/Color/Sort afterward
+// does NOT clear this back to the placeholder — a known, accepted
+// simplification, not a bug: the label just describes what you picked, not
+// a live-tracked "is the view still exactly this."
 function wireSuggestions(selectId, grid, presets) {
   const sel = document.getElementById(selectId);
   presets.forEach((p, i) => {
@@ -76,10 +83,16 @@ function wireSuggestions(selectId, grid, presets) {
     o.value = String(i); o.textContent = p.label;
     sel.appendChild(o);
   });
+  // Sized to fit whichever option is CURRENTLY SHOWING (the "Need a
+  // suggestion?" placeholder at first, then whatever was picked) — see
+  // fitWidthToText's own comment for why this is JS-measured rather than
+  // CSS-only (a native <select> doesn't reliably size to just its selected
+  // option's text via CSS alone across browsers).
+  fitWidthToText(sel, sel.options[sel.selectedIndex].text);
   sel.addEventListener("change", () => {
+    fitWidthToText(sel, sel.options[sel.selectedIndex].text);
     if (sel.value === "") return;
     grid.applyPreset(presets[Number(sel.value)]);
-    sel.value = "";
   });
 }
 wireSuggestions("facetSuggest", grantGrid, GRANT_SUGGESTIONS);
@@ -87,8 +100,9 @@ wireSuggestions("piSuggest", piGrid, PI_SUGGESTIONS);
 
 // Every grant/Every PI carry no caveat text of their own now (PI feedback:
 // clean grids, no explanatory copy) — every caveat, including neu_status
-// (the $2.18B headline) and roster_snapshot, lives on about.html, linked
-// from the page header.
+// (the $2.18B headline) and roster_snapshot, lives on the "About this data
+// & what's missing" tab's About section (formerly a standalone about.html,
+// merged in 2026-08-30 — see missing.js), linked from the page header.
 
 // grantGrid/piGrid's initial render() and the resize listener that keeps
 // re-rendering it both live below, where the tabs are set up — a hidden
@@ -96,6 +110,7 @@ wireSuggestions("piSuggest", piGrid, PI_SUGGESTIONS);
 // tab starts hidden.
 
 initMissingTab();
+initAboutSection();
 
 /* ---------- tabs: three sections, one visible at a time ----------
    Down from the original six to three: "Coverage" and "Does it matter? What
@@ -105,18 +120,23 @@ initMissingTab();
    dropped ("What we cannot see" — those five points are argued elsewhere:
    the neu_status/external_collaborators/roster_snapshot entries in
    VIZ_META.caveats, and the missingness view itself). "Every PI" is new.
+   The formerly-standalone about.html was folded into THIS tab too
+   (2026-08-30) — its own "missing" key is unchanged (about.html's own
+   footer already linked to `#missing` before the merge, so no link needed
+   updating beyond the ones that pointed at about.html itself), only the
+   label changed to reflect the new combined scope.
    Of this tab's several render functions, only grantGrid.render and
    piGrid.render actually read live container width off their own DOM node
-   — every other one (coverage bars, cliff, mosaic finding, missingness,
-   funnel — see missing.js) has a fixed viewBox and already ran once, above,
-   regardless of which tab is active. The two width-dependent ones instead
-   (re)render every time their own tab is activated (a hidden panel
-   measures clientWidth as 0) and again on resize, but ONLY while that tab
-   is current. */
+   — every other one (about section, coverage bars, cliff, mosaic finding,
+   missingness, funnel — see missing.js) has a fixed viewBox or is plain
+   HTML and already ran once, above, regardless of which tab is active. The
+   two width-dependent ones instead (re)render every time their own tab is
+   activated (a hidden panel measures clientWidth as 0) and again on
+   resize, but ONLY while that tab is current. */
 const TAB_DEFS = [
   {key: "every", label: "Every grant", panel: document.getElementById("facetsection")},
   {key: "pis", label: "Every PI", panel: document.getElementById("pisection")},
-  {key: "missing", label: "What's missing & where it goes", panel: document.getElementById("missingfunnelpanel")},
+  {key: "missing", label: "About this data & what's missing", panel: document.getElementById("missingfunnelpanel")},
 ];
 const WIDTH_DEPENDENT_RENDER = {every: grantGrid.render, pis: piGrid.render};
 const tabsCtl = E.setupTabs({

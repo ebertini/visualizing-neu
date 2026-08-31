@@ -180,13 +180,15 @@ CAVEATS = [
         "id": "unassigned",
         "severity": "low",
         "text": (
-            "UPDATE (2026-08-29): 66 grants (2.5% of grants, 1.9% of dollars) carry no "
+            "UPDATE (2026-08-30): 36 grants (1.35% of grants, 1.0% of dollars) carry no "
             "confident topic under the curated keyword classifier — down from 697 grants "
-            "/ 26.7% of dollars under the prior BERTopic/HDBSCAN fit. 38 have real text "
-            "but zero curated-keyword evidence (a real curation-coverage gap, worth a "
-            "future curation pass, not a modeling failure); 28 are the ONR placeholder-"
-            "title records described in 'placeholder_titles' below. Shown as a grey "
-            "'Unassigned' band, never dropped."
+            "/ 26.7% of dollars under the prior BERTopic/HDBSCAN fit, and further down "
+            "from an initial 66 after a targeted curation pass closed 30 of them. Only 8 "
+            "have real text but zero curated-keyword evidence now (2 of those are text "
+            "the classifier is deliberately masked from seeing — a borrowed, low-trust "
+            "abstract source — so no amount of curation can help them); 28 are the ONR "
+            "placeholder-title records described in 'placeholder_titles' below. Shown "
+            "as a grey 'Unassigned' band, never dropped."
         ),
     },
     {
@@ -219,7 +221,7 @@ CAVEATS = [
         "id": "low_confidence",
         "severity": "low",
         "text": (
-            "501 grants (18.7%) land in the classifier's 'low' confidence tier — a "
+            "511 grants (19.1%) land in the classifier's 'low' confidence tier — a "
             "curated term matched, but weakly (a thin margin over the runner-up topic, "
             "or few matched terms). A 180-row human-labeled gold set now exists "
             "(68.3% overall accuracy, 95% CI 61.2-74.7%) and confirms the tiers "
@@ -234,7 +236,7 @@ CAVEATS = [
         "id": "secondary_theme",
         "severity": "low",
         "text": (
-            "252 grants (9.4%) sit genuinely between two parent themes — their "
+            "272 grants (10.2%) sit genuinely between two parent themes — their "
             "second-most-relevant topic (already computed by the classifier, now "
             "surfaced per grant) belongs to a DIFFERENT parent than their primary "
             "one, within a close scoring margin. This reflects real interdisciplinary "
@@ -315,6 +317,46 @@ COLLEGE_NORMALIZE = {
     "Khoury": "Khoury College of Computer Sciences",
 }
 
+# Pooled into a generic "Other" bin on BOTH the grants and PI college
+# facets — a deliberate, later decision than COLLEGE_NORMALIZE above (which
+# keeps genuine oddities as their own honest bin). "Northeastern University"
+# and "Math?" are tiny/edge-case values on both facets (2-4 records each).
+# "Network science institute" (PI facet only — never appears on the grants
+# facet) is a real but small unit, pooled for the same reason. "College of
+# Professional Studies" was pooled in an earlier pass but reverted (real
+# college, 110 of 2,247 roster faculty on the PI facet — too large to treat
+# as an edge case) — kept as its own bin on both facets. Applied by name,
+# not by size threshold, so this doesn't silently start pooling some OTHER
+# small college later just because its count drops.
+COLLEGE_POOL_TO_OTHER = {"Northeastern University", "Math?", "Network science institute"}
+COLLEGE_OTHER_LABEL = "Other"
+
+
+def _normalize_college(raw) -> str | None:
+    """Apply the SAME normalize-then-pool transform `build_facets()`'s
+    `college_idx()` closure applies inline, as a reusable function for
+    anything that needs a clean college label OUTSIDE that closure (e.g.
+    `load_colleges_per_grant()` below, and `build_college_collab()`).
+
+    Found missing from `load_colleges_per_grant()` during the About-section
+    review (2026-08-30): that function read `faculty_id_lookup.college`
+    completely raw, so duplicate strings for the same real college
+    ("Engineering" vs "College of Engineering", "Khoury" vs "Khoury College
+    of Computer Sciences", "College of science" vs "College of Science")
+    each counted as a DIFFERENT college — inflating its cross-college count
+    by 28 grants (22%) that were actually single-college. Returns None for
+    missing/blank (the caller decides what that means — "no college known,"
+    not a real college and not "Other")."""
+    if raw is None:
+        return None
+    s = str(raw).strip()
+    if not s:
+        return None
+    s = COLLEGE_NORMALIZE.get(s, s)
+    if s in COLLEGE_POOL_TO_OTHER:
+        return COLLEGE_OTHER_LABEL
+    return s
+
 DOLLAR_BANDS = [
     (0, 100_000, "< $100K"),
     (100_000, 500_000, "$100K–$500K"),
@@ -338,10 +380,18 @@ CLIFFS = [{
     "agency": "NIH",
     "last_good_year": 2019,
     "first_zero_year": 2021,
+    # UPDATE (found stale 2026-08-30, during the About-section review — this
+    # text still described the PRE-backfill state while the "nih_cliff"
+    # CAVEATS entry above already correctly says the backfill closed it,
+    # contradicting each other in the same file): the cliff shown here is
+    # historical — what coverage looked like before src/backfill_nih_reporter.py
+    # ran — not a live, still-open gap. Live 2020-2025 NIH/NIH-SubAward
+    # coverage is 94-100%, same as every other agency.
     "text": (
-        "NIH abstract coverage falls from 64% (2019) to 3% (2020) to 0% "
-        "(2021-2025). Data-collection artifact; only NIH RePORTER backfill "
-        "can repair it."
+        "NIH abstract coverage historically fell from 64% (2019) to 3% (2020) "
+        "to 0% (2021-2025) — a data-collection artifact, not a funding "
+        "decline. Since closed by a live NIH RePORTER backfill: 2020-2025 "
+        "NIH/NIH-SubAward coverage now runs 94-100%."
     ),
 }]
 
@@ -476,14 +526,20 @@ def load_pi_attrs(points: list[dict]) -> tuple[dict[str, dict], str]:
 
 
 def load_colleges_per_grant() -> dict[str, int]:
-    """grant_id -> count of DISTINCT roster colleges among EVERY person linked
-    to that grant (PI and co-PIs alike, unlike load_pi_attrs above which is
-    PI-only) — answers "how many different colleges does this grant involve"
-    (a PI-feedback item: cross-college collaboration is otherwise invisible
-    per-grant). A person absent from the roster (no college on record)
-    doesn't count toward the total, so this is a floor, not a ceiling, same
-    spirit as every other "known so far" count in this file. Degrades to an
-    empty dict (every grant reads as 0) if the parquets aren't built locally.
+    """grant_id -> count of DISTINCT NORMALIZED roster colleges among EVERY
+    person linked to that grant (PI and co-PIs alike, unlike load_pi_attrs
+    above which is PI-only) — answers "how many different colleges does
+    this grant involve" (a PI-feedback item: cross-college collaboration is
+    otherwise invisible per-grant). A person absent from the roster (no
+    college on record) doesn't count toward the total, so this is a floor,
+    not a ceiling, same spirit as every other "known so far" count in this
+    file. Degrades to an empty dict (every grant reads as 0) if the
+    parquets aren't built locally.
+
+    Uses `_normalize_college()` (same transform `college_idx()` applies) —
+    NOT the raw `faculty_id_lookup.college` string. Without it, duplicate
+    strings for the same real college inflated the cross-college count by
+    28 grants (22%); see `_normalize_college`'s own docstring.
     """
     fg_path = PROC / "faculty_grants.parquet"
     fl_path = PROC / "faculty_id_lookup.parquet"
@@ -494,12 +550,119 @@ def load_colleges_per_grant() -> dict[str, int]:
 
     fg = pd.read_parquet(fg_path, columns=["faculty_id", "grant_id"])
     fl = pd.read_parquet(fl_path, columns=["faculty_id", "college"])
-    college_by_faculty = dict(zip(fl["faculty_id"], fl["college"]))
+    college_by_faculty = {fid: _normalize_college(c) for fid, c in zip(fl["faculty_id"], fl["college"])}
 
     fg = fg.copy()
     fg["college"] = fg["faculty_id"].map(college_by_faculty)
-    fg = fg[fg["college"].notna() & (fg["college"].astype(str).str.strip() != "")]
+    fg = fg[fg["college"].notna()]
     return fg.groupby("grant_id")["college"].nunique().to_dict()
+
+
+def load_team_size_per_grant() -> dict[str, int]:
+    """grant_id -> count of DISTINCT people linked to that grant, any role.
+
+    Deliberately NOT a count of `is_copi`-flagged rows — verified against the
+    real corpus that `is_copi` is a per-row ROLE LABEL, not a team-size
+    signal: 291 of the 602 grants with an is_copi=True row have exactly ONE
+    distinct person linked to them in total (that person's role is recorded
+    as "co-PI" with no separate PI row present at all, likely because the
+    real PI isn't in this dataset) — a naive is_copi count would show these
+    291 solo records as 1-collaborator grants, which is wrong. Counting
+    distinct people (any role) instead gives 0 "extra collaborators" for a
+    genuinely solo record, matching reality. Every one of the 2,676 grants
+    has at least 1 linked person (verified), so this is never 0 — "1" means
+    solo, "2+" means an actual additional collaborator is on record.
+    Degrades to an empty dict (every grant reads as 0) if the parquet isn't
+    built locally, same as load_colleges_per_grant above.
+    """
+    fg_path = PROC / "faculty_grants.parquet"
+    if not fg_path.exists():
+        return {}
+
+    import pandas as pd  # local import: keep this script runnable with json alone
+
+    fg = pd.read_parquet(fg_path, columns=["faculty_id", "grant_id"])
+    return fg.groupby("grant_id")["faculty_id"].nunique().to_dict()
+
+
+def build_college_collab(points: list[dict]) -> dict:
+    """Cross-college PI/co-PI collaboration — the college-pair matrix
+    version of `load_colleges_per_grant()`'s per-grant count above. Nothing
+    like this existed anywhere in the pipeline before this (the only
+    precedent, notebooks/05_collaboration_network.ipynb, uses a different
+    join with no normalization and counts faculty-pair EDGES rather than
+    grants, so its numbers aren't comparable to this function's). Verified
+    independently against real data before being wired in: 100 grants cross
+    a college line under `_normalize_college()` (not 128 — see that
+    function's docstring for the duplicate-string bug this avoids).
+
+    Returns `{"n_cross_college": int, "dollars": float, "pairs": [...],
+    "by_college": [...], "by_year": [...], "provenance": str}`. Degrades to
+    an all-empty/zero shape (not a missing key) if the parquets aren't
+    built locally, matching every other "known so far" aggregate in this
+    file.
+    """
+    fg_path = PROC / "faculty_grants.parquet"
+    fl_path = PROC / "faculty_id_lookup.parquet"
+    empty = {"n_cross_college": 0, "dollars": 0.0, "pairs": [], "by_college": [],
+             "by_year": [], "provenance": "derived"}
+    if not (fg_path.exists() and fl_path.exists()):
+        return empty
+
+    import pandas as pd  # local import: keep this script runnable with json alone
+    from itertools import combinations
+    from collections import Counter
+
+    fg = pd.read_parquet(fg_path, columns=["faculty_id", "grant_id"])
+    fl = pd.read_parquet(fl_path, columns=["faculty_id", "college"])
+    college_by_faculty = {fid: _normalize_college(c) for fid, c in zip(fl["faculty_id"], fl["college"])}
+    fg = fg.copy()
+    fg["college"] = fg["faculty_id"].map(college_by_faculty)
+    fg = fg[fg["college"].notna()]
+
+    point_by_id = {str(p["id"]).strip(): p for p in points}
+    year_by_grant = {gid: p.get("year") for gid, p in point_by_id.items()}
+
+    pair_counts: Counter = Counter()
+    pair_dollars: dict[tuple, float] = {}
+    college_participation: Counter = Counter()
+    year_counts: Counter = Counter()
+    n_cross_college = 0
+    total_dollars = 0.0
+
+    for gid, sub in fg.groupby("grant_id"):
+        cols = sorted(set(sub["college"]))
+        if len(cols) < 2:
+            continue
+        n_cross_college += 1
+        amount = point_by_id.get(gid, {}).get("amount", 0.0) or 0.0
+        total_dollars += amount
+        for c in cols:
+            college_participation[c] += 1
+        for a, b in combinations(cols, 2):
+            pair_counts[(a, b)] += 1
+            pair_dollars[(a, b)] = pair_dollars.get((a, b), 0.0) + amount
+        yr = year_by_grant.get(gid)
+        if yr is not None:
+            year_counts[yr] += 1
+
+    pairs = [
+        {"a": a, "b": b, "n": n, "dollars": round(pair_dollars.get((a, b), 0.0), 2)}
+        for (a, b), n in sorted(pair_counts.items(), key=lambda kv: -kv[1])
+    ]
+    by_college = [
+        {"college": c, "n": n} for c, n in sorted(college_participation.items(), key=lambda kv: -kv[1])
+    ]
+    by_year = [{"year": y, "n": n} for y, n in sorted(year_counts.items())]
+
+    return {
+        "n_cross_college": n_cross_college,
+        "dollars": round(total_dollars, 2),
+        "pairs": pairs,
+        "by_college": by_college,
+        "by_year": by_year,
+        "provenance": "parquet",
+    }
 
 
 def build_facets(points: list[dict], topics: list[dict]) -> dict:
@@ -516,6 +679,7 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
     abs_text, abs_text_source = load_abstract_text(points)
     pi_attrs, pi_source = load_pi_attrs(points)
     n_colleges_by_grant = load_colleges_per_grant()
+    n_team_by_grant = load_team_size_per_grant()
     parent_of_topic = {t["id"]: _parent_index(t.get("parent")) for t in topics}
 
     ag_levels = list(ORDER)
@@ -539,6 +703,8 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
     col_index: dict[str, int] = {NO_PI_LABEL: 0, PI_OFF_ROSTER_LABEL: 1}
 
     def college_idx(label: str) -> int:
+        if label in COLLEGE_POOL_TO_OTHER:
+            label = COLLEGE_OTHER_LABEL
         if label not in col_index:
             col_index[label] = len(col_levels)
             col_levels.append(label)
@@ -557,6 +723,7 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
     matched_terms: list[list[str]] = []
     pi_names: list[str] = []
     n_colleges: list[int] = []
+    n_team: list[int] = []
     secondary_leaf_label: list[str | None] = []
     secondary_parent_label: list[str | None] = []
     secondary_margin: list[float | None] = []
@@ -569,8 +736,17 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
     # are untouched.
     cols: dict[str, list[float]] = {k: [] for k in
                                      ("ag", "yr", "col", "st", "ab", "asrc", "tp", "tid", "pi", "amt", "amt_raw",
-                                      "conf", "ncol")}
+                                      "conf", "ncol", "src", "team")}
     conf_index = {name: i for i, name in enumerate(CONF_LEVELS)}
+    # How the grant's CURRENT topic (tid/tp above) was actually decided —
+    # src.build_viz_data.py's assignmentSource, surfaced as its own facet so
+    # "was this LLM-adjudicated or a low-confidence keyword guess kept
+    # visible-but-flagged" is inspectable/filterable, not just buried in the
+    # per-grant detail card. Distinct from "conf" (which keeps describing the
+    # keyword classifier's OWN BM25F confidence, unchanged, even for a doc
+    # this facet says was later LLM-resolved).
+    src_levels = ["keyword_classifier", "keyword_classifier_low_confidence", "llm_adjudication", "unassigned"]
+    src_index = {name: i for i, name in enumerate(src_levels)}
     # How many distinct roster colleges a grant involves (PI + co-PIs) — a new
     # facet (PI feedback: "for each grant how many different colleges does it
     # involve?"), banded small since the real distribution is almost entirely
@@ -581,6 +757,16 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
     def ncol_band(n: int) -> int:
         return min(n, 3)
 
+    # Team size — count of DISTINCT people linked to a grant, any role (see
+    # load_team_size_per_grant's docstring for why this is NOT a count of
+    # is_copi rows). Every grant has >=1 (verified against the real corpus:
+    # zero grants show 0), so bands start at "1" with no miss bin needed —
+    # unlike ncol above, there's no "unknown" case here to reserve a slot for.
+    team_levels = ["1", "2", "3", "4+"]
+
+    def team_band(n: int) -> int:
+        return min(max(n, 1), 4) - 1
+
     for p in points:
         gid = str(p["id"]).strip()
         ids.append(gid)
@@ -590,6 +776,9 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
         this_n_colleges = int(n_colleges_by_grant.get(gid, 0))
         n_colleges.append(this_n_colleges)
         cols["ncol"].append(ncol_band(this_n_colleges))
+        this_n_team = int(n_team_by_grant.get(gid, 0))
+        n_team.append(this_n_team)
+        cols["team"].append(team_band(this_n_team))
         # .get(..., "Other") rather than a bare [] — every point SHOULD already
         # carry one of the 9 ORDER buckets (build_viz_data.py's agency_bucket()
         # already defaults to "Other"), but a defensive fallback here means an
@@ -605,6 +794,7 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
         cols["amt"].append(_dollar_band(p["amount"]))
         cols["amt_raw"].append(p["amount"])
         cols["conf"].append(conf_index.get(p.get("confTier", "none"), 0))
+        cols["src"].append(src_index.get(p.get("assignmentSource"), src_index["unassigned"]))
 
         sec_leaf = p.get("secondaryLeaf")
         if sec_leaf is not None:
@@ -640,12 +830,14 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
         "matchedTerms": matched_terms,
         "piNames": pi_names,
         "nColleges": n_colleges,
+        "nTeam": n_team,
         "secondaryLeafLabel": secondary_leaf_label,
         "secondaryParentLabel": secondary_parent_label,
         "secondaryMargin": secondary_margin,
         "hasSecondaryTheme": has_secondary_theme,
         "levels": {"ag": ag_levels, "col": col_levels, "st": st_levels, "asrc": asrc_levels,
-                   "amt": amt_levels, "conf": CONF_LEVELS, "ncol": ncol_levels},
+                   "amt": amt_levels, "conf": CONF_LEVELS, "ncol": ncol_levels, "src": src_levels,
+                   "team": team_levels},
         "cols": cols,
         "provenance": {"abstract_source": abs_source, "pi_attrs": pi_source, "abstract_text": abs_text_source},
     }
@@ -706,6 +898,8 @@ def build_facets_pi(fac, points: list[dict], topics: list[dict]) -> dict:
 
     def college_idx(raw: str) -> int:
         label = COLLEGE_NORMALIZE.get(raw, raw) if raw else PI_NOT_RECORDED
+        if label in COLLEGE_POOL_TO_OTHER:
+            label = COLLEGE_OTHER_LABEL
         if label not in col_index:
             col_index[label] = len(col_levels)
             col_levels.append(label)
@@ -1170,6 +1364,53 @@ def build_funnel() -> dict:
     return {"trunk": trunk, "branch": branch, "totals": totals, "provenance": "parquet"}
 
 
+def build_calibration() -> dict:
+    """A small block of computed (not hand-typed) facts about this session's
+    own calibration work — the BM25F constant sweep and the LLM adjudication
+    pass — for the About section's "what we found" summary. Deliberately
+    NOT hardcoded prose: every stale-number bug found during the
+    About-section review (the `unassigned`/`low_confidence`/`secondary_theme`
+    CAVEATS entries above) was exactly this failure mode — a real number,
+    hand-typed once, that drifted the moment the underlying data changed
+    again. Reading straight from the sweep's own output JSON and the
+    adjudication parquet means this can't drift the same way.
+
+    Degrades field-by-field (not as one missing key) if either input is
+    absent locally — `outputs/bm25f_sweep.json` and
+    `data/processed/llm_adjudication.parquet` are both local-only artifacts
+    from a rate-limited/paid process, not something every build regenerates.
+    """
+    import pandas as pd  # local import: keep this script runnable with json alone
+
+    out: dict = {
+        "sweep_n_runs": None, "sweep_n_beat_baseline": None, "sweep_recommendation": None,
+        "llm_n_reviewed": None, "llm_n_abstained": None, "llm_n_changed_leaf": None,
+    }
+
+    sweep_path = REPO_ROOT / "outputs" / "bm25f_sweep.json"
+    if sweep_path.exists():
+        sweep = json.loads(sweep_path.read_text())
+        out["sweep_n_runs"] = sweep.get("n_runs")
+        out["sweep_n_beat_baseline"] = len(sweep.get("beats_baseline", []))
+        out["sweep_recommendation"] = sweep.get("recommendation")
+
+    llm_path = PROC / "llm_adjudication.parquet"
+    kw_path = PROC / "topic_keyword_assignments.parquet"
+    if llm_path.exists() and kw_path.exists():
+        llm = pd.read_parquet(llm_path)
+        llm["doc_id"] = llm["doc_id"].astype(str)
+        kw = pd.read_parquet(kw_path)
+        kw = kw[~kw["is_extra"]].copy()
+        kw["doc_id"] = kw["doc_id"].astype(str)
+        merged = llm.merge(kw[["doc_id", "kw_leaf_id"]], on="doc_id", how="left")
+        answered = merged[~merged["llm_abstain"]]
+        out["llm_n_reviewed"] = int(len(llm))
+        out["llm_n_abstained"] = int(llm["llm_abstain"].sum())
+        out["llm_n_changed_leaf"] = int((answered["llm_leaf_id"] != answered["kw_leaf_id"]).sum())
+
+    return out
+
+
 def build_viz_meta(points: list[dict], topics: list[dict]) -> dict:
     from src.viz_constants import COLORS, ORDER  # reuse verbatim, palettes can't drift
 
@@ -1232,11 +1473,12 @@ def build_viz_meta(points: list[dict], topics: list[dict]) -> dict:
             # docs/TOPIC_MODEL_REFIT_CHECKLIST.md's re-curate track).
             "projection": "Curated keyword scoring (BM25F) · layout: SPECTER2 + UMAP",
             "n_points": len(points),
-            # len(...), not a literal 25 — about.html renders this verbatim
-            # ("N topics + an explicit Unassigned noise cluster"); a hardcoded
-            # count would silently disagree with the actual topic model after
-            # a refit. Excludes the id=-1 noise entry, same convention as
-            # everywhere else in this file that counts "real" topics.
+            # len(...), not a literal 25 — what_we_can_see/missing.js's
+            # renderAboutCaveats() renders this verbatim ("N topics + an
+            # explicit Unassigned noise cluster"); a hardcoded count would
+            # silently disagree with the actual topic model after a refit.
+            # Excludes the id=-1 noise entry, same convention as everywhere
+            # else in this file that counts "real" topics.
             "n_topics": len([t for t in topics if t["id"] >= 0]),
         },
         "agencies": agencies,
@@ -1263,6 +1505,8 @@ def build_viz_meta(points: list[dict], topics: list[dict]) -> dict:
         },
         "caveats": CAVEATS,
         "cliffs": CLIFFS,
+        "college_collab": build_college_collab(points),
+        "calibration": build_calibration(),
     }
 
 
@@ -1771,7 +2015,13 @@ def main() -> None:
     ]:
         p = OUT_DIR / f"{name}.json"
         _guard_output_path(p)
-        p.write_text(json.dumps(obj, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+        # allow_nan=False: fail loudly (ValueError) rather than silently
+        # write the spec-invalid `NaN` token — these are the files real
+        # browsers fetch(), and JSON.parse rejects a bare NaN outright (a
+        # sibling bug was found and fixed in src/build_viz_data.py's
+        # grants_umap.json this session — this is the same guard applied
+        # to the files that actually matter for the published site).
+        p.write_text(json.dumps(obj, ensure_ascii=False, separators=(",", ":"), allow_nan=False), encoding="utf-8")
         print(f"wrote {p.relative_to(REPO_ROOT)}  ({p.stat().st_size / 1024:.0f} KB)")
 
 

@@ -71,14 +71,21 @@ into or redefining `topic_keyword_assignments.parquet`'s own EXISTING columns
 below):** `--merge` reads `llm_adjudication.parquet` + `topic_keyword_assignments
 .parquet` and adds FOUR NEW columns to the latter (in place, alongside the
 existing ones — nothing existing is touched or redefined):
-`final_leaf_id` (= `kw_leaf_id` when `conf_tier` in {high, medium}, else
-`llm_leaf_id` when present and not abstained, else `-1`), `final_parent_id`
-(looked up from `final_leaf_id` via the curated taxonomy), `final_source`
-(`"keyword_classifier"` / `"llm_adjudication"` / `"unassigned"`), and
-`llm_reviewed` (bool — was this doc even sent to the LLM at all, so a
-consumer can tell "the LLM looked and abstained" apart from "the LLM never
-saw this doc"). Downstream consumers (`src/build_viz_data.py`) should prefer
-`final_leaf_id`/`final_parent_id` over `kw_leaf_id`/`kw_parent_id` once this
+`final_leaf_id` (= `llm_leaf_id` whenever the LLM reviewed the doc and did
+NOT abstain, REGARDLESS of `conf_tier` — this also lets a pedagogy-signal
+review override a high/medium-confidence keyword match, not just resolve a
+low-confidence one; else `kw_leaf_id` if the keyword classifier had any pick
+at all, even a low-confidence one; else `-1`), `final_parent_id` (looked up
+from `final_leaf_id` via the curated taxonomy), `final_source`
+(`"keyword_classifier"` / `"keyword_classifier_low_confidence"` (a real,
+softer-fallback design decision, not silently discarded to Unassigned) /
+`"llm_adjudication"` / `"unassigned"` — the last only when the keyword
+classifier itself never assigned a leaf AND the LLM didn't resolve it
+either), and `llm_reviewed` (bool — was this doc even sent to the LLM at
+all, so a consumer can tell "the LLM looked and abstained" apart from "the
+LLM never saw this doc"). Downstream consumers (`src/build_viz_data.py`)
+should prefer `final_leaf_id`/`final_parent_id` over `kw_leaf_id`/`kw_parent_id`
+once this
 has been run — and should show `final_source` in the grant detail card so an
 LLM-assigned label is never silently indistinguishable from a deterministic
 keyword match, preserving this whole method's inspectability claim. Wiring
@@ -202,6 +209,30 @@ RESPONSE_SCHEMA = {
     },
     "required": ["leaf_id", "confidence", "abstain", "rationale", "terms_considered"],
 }
+
+
+def _coerce_terms_considered(v) -> list[str]:
+    """Normalize `terms_considered` to a real list of strings before it ever
+    reaches pandas/pyarrow. The tool definition below does NOT set
+    `strict: true` (JSON-schema `type: array` on a tool input is a hint to
+    the model, not a server-enforced guarantee without strict mode) — a live
+    619-request run (claude-sonnet-5, effort=medium) confirmed 518 of 619
+    responses (84%) returned this field as one comma-separated STRING
+    instead of a JSON array, which crashed `pd.DataFrame(...).to_parquet(...)`
+    with 'cannot mix list and non-list, non-null values' once every doc's row
+    was assembled into one column. None -> [] (missing/null); a
+    comma-separated string is split back into the individual terms the model
+    clearly intended (confirmed real terms, comma+space separated, in every
+    sampled case — not an assumption); any other bare scalar -> a
+    single-element list; an already-well-formed list passes through
+    unchanged."""
+    if v is None:
+        return []
+    if isinstance(v, list):
+        return [str(x) for x in v]
+    if isinstance(v, str):
+        return [t.strip() for t in v.split(",") if t.strip()]
+    return [str(v)]
 
 
 def _pedagogy_signal_doc_ids() -> set[str]:
@@ -409,11 +440,35 @@ def merge_adjudication() -> pd.DataFrame:
     columns onto `topic_keyword_assignments.parquet`, leaving every existing
     column untouched, then writes the result back to the same file.
 
-    Resolution rule: trust the deterministic scorer when it was confident
-    (`conf_tier` high/medium); otherwise defer to the LLM's pick IF it didn't
-    abstain; otherwise the doc stays unassigned (-1) — an LLM is never asked
-    to override a confident deterministic match, only to adjudicate the tail
-    the scorer itself flagged as uncertain.
+    Resolution rule (revised — the first version had a real bug, see below):
+    1. If the LLM reviewed this doc AND did not abstain, its pick wins,
+       REGARDLESS of conf_tier. This is deliberate, not just for the
+       low/none-confidence tail: a doc can also reach the LLM via the
+       PEDAGOGY_SIGNAL_TERMS trigger while sitting at high/medium conf_tier
+       (the whole point of that trigger — catching a confident keyword match
+       that's actually wrong because of deceptive framing, e.g. a materials-
+       science COURSE scored as materials-science RESEARCH; confirmed real
+       case: grant 1171382). The original version of this function checked
+       `conf_tier in (high, medium)` FIRST and `continue`d before ever
+       looking at the LLM's answer — which silently defeated that trigger
+       for every doc it was built to catch, since a pedagogy-flagged
+       high-confidence doc could never be overridden no matter what the LLM
+       said. Found and fixed in the same session that added the softer
+       fallback below, not by design up front.
+    2. Otherwise (not reviewed, or the LLM abstained): trust the
+       deterministic scorer's own pick if it has one, even at `low`
+       confidence — `final_source` distinguishes this
+       (`keyword_classifier_low_confidence`) from a genuinely trustworthy
+       one (`keyword_classifier`), so a low-confidence guess is visible
+       AND labeled as shaky, rather than either silently passed off as
+       confident or discarded to Unassigned. This is a real product
+       decision, not a default: an earlier version discarded every
+       non-LLM-confirmed low-confidence doc to Unassigned outright, which
+       is more conservative but inflates the Unassigned bucket far beyond
+       what the keyword classifier's own conf_tier already communicates.
+    3. Only a doc the deterministic scorer itself never assigned at all
+       (`kw_leaf_id == -1` — i.e. `conf_tier == "none"`) and that the LLM
+       didn't resolve either ends up `final_source == "unassigned"`.
     """
     if not OUTPUT_PATH.exists():
         raise FileNotFoundError(
@@ -441,11 +496,7 @@ def merge_adjudication() -> pd.DataFrame:
     for row in kw.itertuples():
         reviewed = row.doc_id in llm.index
         llm_reviewed.append(reviewed)
-        if row.conf_tier in ("high", "medium"):
-            final_leaf_ids.append(row.kw_leaf_id)
-            final_parent_ids.append(row.kw_parent_id)
-            final_sources.append("keyword_classifier")
-            continue
+
         if reviewed:
             llm_row = llm.loc[row.doc_id]
             llm_leaf_id = llm_row["llm_leaf_id"]
@@ -455,6 +506,16 @@ def merge_adjudication() -> pd.DataFrame:
                 final_parent_ids.append(leaves.get(lid, {}).get("parent"))
                 final_sources.append("llm_adjudication")
                 continue
+
+        if row.kw_leaf_id != -1:
+            final_leaf_ids.append(row.kw_leaf_id)
+            final_parent_ids.append(row.kw_parent_id)
+            final_sources.append(
+                "keyword_classifier" if row.conf_tier in ("high", "medium")
+                else "keyword_classifier_low_confidence"
+            )
+            continue
+
         final_leaf_ids.append(-1)
         final_parent_ids.append(None)
         final_sources.append("unassigned")
@@ -465,11 +526,8 @@ def merge_adjudication() -> pd.DataFrame:
     kw["llm_reviewed"] = llm_reviewed
 
     kw.to_parquet(ASSIGNMENTS_PATH, index=False)
-    n_from_llm = sum(1 for s in final_sources if s == "llm_adjudication")
-    n_still_unassigned = sum(1 for s in final_sources if s == "unassigned")
-    print(f"merged: {n_from_llm} docs now resolved via llm_adjudication, "
-          f"{n_still_unassigned} still unassigned after adjudication, "
-          f"wrote {ASSIGNMENTS_PATH}")
+    counts = pd.Series(final_sources).value_counts().to_dict()
+    print(f"merged: final_source counts = {counts}, wrote {ASSIGNMENTS_PATH}")
     return kw
 
 
@@ -557,7 +615,7 @@ def main() -> None:
             "llm_confidence": resp.get("confidence"),
             "llm_abstain": bool(resp.get("abstain", True)),
             "llm_rationale": resp.get("rationale", ""),
-            "llm_terms_considered": resp.get("terms_considered", []),
+            "llm_terms_considered": _coerce_terms_considered(resp.get("terms_considered")),
             "llm_model": args.model,
             "llm_run_at": run_at,
         })

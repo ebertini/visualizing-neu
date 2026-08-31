@@ -48,7 +48,10 @@ DEFAULT_ROOT = REPO_ROOT / "docs" / "TopicVizPrototypes"
 PAGES = [
     ("what_we_can_see.html", "what_we_can_see/data.js"),
     ("topic_flow.html", "topic_flow/data.js"),
-    ("about.html", "about/data.js"),
+    # about.html existed here before 2026-08-30 — its content (coverage
+    # headline, every caveat, frozen-inputs summary) is now part of
+    # what_we_can_see.html's own "About this data & what's missing" tab
+    # (see what_we_can_see/missing.js); about.html/about/ no longer exist.
 ]
 
 FOOTER = """\
@@ -173,9 +176,9 @@ EXPORT_BRACE_RE = re.compile(r'export\s*\{([^}]*)\}(?!\s*from)')
 # reordering. Lookaheads assert both attributes are present on the SAME
 # tag regardless of order, with `src`'s value as the one capture group.
 SCRIPT_MODULE_SRC_RE = re.compile(r'<script(?=[^>]*\btype="module")(?=[^>]*\bsrc="([^"]+)")[^>]*>')
-# topic_flow.html and about.html use an INLINE `<script type="module">` (no
-# src) — their import line pulls in data.js, but the rest of the page logic
-# (the id-touching code) stays inline in the HTML. Capture that text too so
+# topic_flow.html uses an INLINE `<script type="module">` (no src) — its
+# import line pulls in data.js, but the rest of the page logic (the
+# id-touching code) stays inline in the HTML. Capture that text too so
 # the id cross-reference actually checks something for those two pages.
 SCRIPT_MODULE_INLINE_RE = re.compile(r'<script\s+type="module"(?!\s+src)[^>]*>(.*?)</script>', re.S)
 GETID_RE = re.compile(r'getElementById\(["\']([^"\']+)["\']\)')
@@ -271,8 +274,8 @@ def check_js_graph(root: Path) -> bool:
             entry = (root / entry_rel).resolve()
             all_ok &= _walk_graph(entry, all_modules, node_check_ok)
 
-        # topic_flow.html and about.html keep their page logic INLINE inside
-        # `<script type="module">` (no src) and only import data.js
+        # topic_flow.html keeps its page logic INLINE inside
+        # `<script type="module">` (no src) and only imports data.js
         # externally — walking only external `<script src>` entries (as
         # above) would give those two pages zero JS checking at all. Check
         # the inline body's own syntax and walk whatever it imports.
@@ -382,9 +385,9 @@ def check_id_crossref(root: Path) -> bool:
             text = mod.read_text(encoding="utf-8")
             referenced_ids |= set(GETID_RE.findall(text))
             referenced_ids |= set(QUERY_ID_RE.findall(text))
-        # Inline module script bodies (topic_flow.html, about.html keep their
-        # page logic inline, only importing data.js externally) — scan those
-        # directly out of the HTML too.
+        # Inline module script bodies (topic_flow.html keeps its page logic
+        # inline, only importing data.js externally) — scan those directly
+        # out of the HTML too.
         for inline_body in SCRIPT_MODULE_INLINE_RE.findall(html_text):
             referenced_ids |= set(GETID_RE.findall(inline_body))
             referenced_ids |= set(QUERY_ID_RE.findall(inline_body))

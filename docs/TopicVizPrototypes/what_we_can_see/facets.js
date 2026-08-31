@@ -103,20 +103,6 @@ export const GRANT_FACET_DEFS = {
     levels: () => FACETS.levels.amt.map((name, i, arr) =>
       ({key: i, label: name, color: E.seqColor(arr.length > 1 ? i / (arr.length - 1) : 1)})),
   },
-  // Classifier confidence tier (src.classify_by_keywords) — a facet the old
-  // BERTopic one-hot assignment couldn't support at all (no per-grant
-  // confidence signal existed). Ordinal low->high; "none" (Unassigned) reads
-  // as NOISE grey, the other three as a sequential ramp so "low" and "high"
-  // are visually the two ends of one scale, not arbitrary categorical hues.
-  conf: {
-    label: "Confidence", ordinal: true, legend: "chips",
-    values: () => FACETS.cols.conf,
-    levels: () => FACETS.levels.conf.map((name, i, arr) => ({
-      key: i,
-      label: name === "none" ? "Unassigned" : name[0].toUpperCase() + name.slice(1),
-      color: name === "none" ? NOISE : E.seqColor((i - 1) / Math.max(arr.length - 2, 1)),
-    })),
-  },
   // How many distinct roster colleges a grant involves (PI + co-PIs) — a new
   // facet (PI feedback: "for each grant how many different colleges does it
   // involve?"). Banded small (0/1/2/3+) since 4+ is a rarity; ordinal since
@@ -127,8 +113,36 @@ export const GRANT_FACET_DEFS = {
     levels: () => FACETS.levels.ncol.map((name, i, arr) =>
       ({key: i, label: name, color: i === 0 ? NOISE : E.seqColor((i - 1) / Math.max(arr.length - 2, 1))})),
   },
+  // Team size — count of DISTINCT people linked to a grant, any role.
+  // Deliberately NOT a count of co-PI-flagged rows: verified against the
+  // real corpus that a grant's `is_copi` flag is a per-row ROLE LABEL, not a
+  // team-size signal — 291 of 602 "has a co-PI" grants actually have only
+  // ONE person on record total (that person's role is recorded as "co-PI"
+  // with no separate PI row present at all). Counting distinct people
+  // instead gives the honest team size; every grant has >=1, so bands start
+  // at "1" (solo) with no miss bin needed, unlike "Colleges involved" above.
+  // Pairs with "PI's college" (Rows/Columns) + this (Color) to see team-size
+  // distribution by college — the closest single-mark-per-grant view can
+  // get to "how many co-PIs are from which colleges" (a true cross-college
+  // pairing breakdown would need a different chart type, e.g. a matrix).
+  team: {
+    label: "Team size", ordinal: true, legend: "chips",
+    values: () => FACETS.cols.team,
+    levels: () => FACETS.levels.team.map((name, i, arr) =>
+      ({key: i, label: name === "1" ? "1 (solo)" : name, color: E.seqColor(i / Math.max(arr.length - 1, 1))})),
+  },
+  // Both "Confidence" (the keyword classifier's own BM25F tier) and "How
+  // this topic was decided" (keyword vs. LLM-adjudicated vs. low-confidence
+  // vs. unassigned) were REMOVED as arrange/color/sort options here by
+  // product decision — surfacing per-grant confidence/QA signal invited more
+  // scrutiny ("why not all grants," "why is this one lower confidence")
+  // than it was worth. The underlying data (FACETS.cols.conf/src,
+  // FACETS.levels.conf/src) is untouched and still fully inspectable
+  // directly in facets.json/the parquet — this removal is UI-surface only.
+  // The one exception still shown per-grant is genuine Unassigned (a real
+  // content gap), via a tooltip note in detail.js, not a facet here.
 };
-export const GRANT_ARRANGE_FACETS = ["ag", "yr", "col", "st", "ab", "tp", "tid", "amt", "conf", "ncol"];
+export const GRANT_ARRANGE_FACETS = ["ag", "yr", "col", "st", "ab", "tp", "tid", "amt", "ncol", "team"];
 
 // Mirrors GRANT_FACET_DEFS above, over facets_pi.json (all 2,247 roster
 // faculty) instead of facets.json (2,676 grants) — the "every PI" tab's own
@@ -274,17 +288,31 @@ export function populateOptions(sel, opts, current) {
 // grid.js's applyPreset(). Deliberately a small, curated set of genuinely
 // common questions, not exhaustive — the controls dock still covers
 // everything else. Keys must exist in the matching facetDefs table.
+//
+// Every preset here sets Rows AND Columns (a real 2D cross-tab, not just one
+// axis with Color doing all the work) plus a Color and Sort that both add
+// something — feedback on an earlier, simpler round of presets that mostly
+// left Columns empty. One rule followed throughout: `sort` is ONE shared
+// mode applied independently to both axes' own marginal totals (grid.js),
+// so pairing an ordinal axis (year, dollar band, team size, hire year...)
+// with "dollars"/"size" sort would reorder it by magnitude instead of its
+// natural sequence — every preset below uses "natural" whenever an ordinal
+// axis is in play (chronological "Start year"/"Hire year" in particular
+// would otherwise scramble), and "dollars"/"size" only when BOTH axes are
+// plain categories with no inherent order to protect.
 export const GRANT_SUGGESTIONS = [
-  {label: "Which agencies fund the most?", arrange: "ag", split: "", color: "amt", sort: "dollars"},
-  {label: "How has funding changed over time?", arrange: "yr", split: "", color: "tp", sort: "natural"},
-  {label: "Which colleges get the most funding?", arrange: "col", split: "", color: "amt", sort: "dollars"},
-  {label: "Where is topic confidence weakest?", arrange: "conf", split: "ab", color: "tp", sort: "natural"},
-  {label: "What's still unassigned, and why?", arrange: "tid", split: "", color: "ab", sort: "size"},
+  {label: "Which agencies fund which research themes?", arrange: "ag", split: "tp", color: "amt", sort: "dollars"},
+  {label: "How has each research theme's funding changed over time?", arrange: "tp", split: "yr", color: "amt", sort: "natural"},
+  {label: "Do bigger teams cluster at certain colleges, and in which themes?", arrange: "col", split: "team", color: "tp", sort: "dollars"},
+  {label: "How does pre-hire vs. at-NEU attribution vary by college?", arrange: "col", split: "st", color: "amt", sort: "dollars"},
+  {label: "What's still unassigned, and in which agencies?", arrange: "tid", split: "ag", color: "ab", sort: "size"},
 ];
 export const PI_SUGGESTIONS = [
-  {label: "Which colleges have the most funded PIs?", arrange: "col", split: "", color: "amt", sort: "dollars"},
-  {label: "How does funding differ by rank?", arrange: "rank", split: "", color: "amt", sort: "dollars"},
-  {label: "Who hasn't been funded at all?", arrange: "hasgrants", split: "", color: "col", sort: "size"},
+  {label: "How does funding differ by rank across colleges?", arrange: "col", split: "rank", color: "amt", sort: "dollars"},
+  {label: "Who hasn't been funded, by college?", arrange: "col", split: "hasgrants", color: "tp", sort: "size"},
+  {label: "How does tenure status vary by appointment track?", arrange: "track", split: "tenure", color: "amt", sort: "dollars"},
+  {label: "Which colleges' PIs work in which research themes?", arrange: "col", split: "tp", color: "amt", sort: "dollars"},
+  {label: "How has hiring changed over time, by college?", arrange: "col", split: "hire_yr", color: "status", sort: "natural"},
 ];
 
 export const SORT_OPTIONS = [
@@ -292,3 +320,24 @@ export const SORT_OPTIONS = [
   ["size", "Bin size (grant count)"],
   ["dollars", "Bin size (total dollars)"],
 ];
+
+// Auto-sizes a text input or select element's width to fit its OWN current
+// text (an input's placeholder/value, or a select's currently-selected
+// option's label) — CSS-only approaches (field-sizing:content, width:
+// fit-content) turned out NOT to reliably size a native <select>/<input> to
+// just their own text (confirmed in a real-browser check: both stayed
+// clipped/oversized regardless), since neither element has "content" in the
+// CSS-intrinsic-sizing sense the way a div full of text does. This measures
+// the actual rendered glyph width via a shared hidden canvas context, using
+// the element's own computed font — the standard technique for "auto-width"
+// form fields, and reliable across browsers because it measures real glyphs
+// rather than depending on a layout algorithm to infer size from a value.
+let _measureCanvas = null;
+export function fitWidthToText(el, text, {min = 60, max = 420, pad = 28} = {}) {
+  if (!_measureCanvas) _measureCanvas = document.createElement("canvas");
+  const ctx = _measureCanvas.getContext("2d");
+  const cs = getComputedStyle(el);
+  ctx.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+  const w = ctx.measureText(text || "").width;
+  el.style.width = `${Math.max(min, Math.min(max, Math.ceil(w) + pad))}px`;
+}

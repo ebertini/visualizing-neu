@@ -32,8 +32,8 @@ Writes docs/EnricoVis/data/:
   grants_umap.json   {meta, colors, order, points:[{id,title,agency,agencyLabel,
                       amount,year,titleOnly,modelTitleOnly,x,y,projection,
                       t[31],dom,isNoise,bertopicDom,bertopicNoise,conf,confTier,
-                      nTerms,matchedTerms,unassignedReason,secondaryLeaf,secondaryParent,
-                      secondaryMargin,hasSecondaryTheme}]}
+                      nTerms,matchedTerms,unassignedReason,assignmentSource,
+                      secondaryLeaf,secondaryParent,secondaryMargin,hasSecondaryTheme}]}
                       secondaryLeaf/secondaryParent/secondaryMargin surface the
                       classifier's own already-computed runner-up leaf (never
                       exposed before); hasSecondaryTheme flags when that runner-up
@@ -164,10 +164,49 @@ def build() -> dict:
         if kw_row is None:
             missing_kw += 1
             tid, conf, conf_tier, n_terms, unassigned_reason = -1, 0.0, "none", 0, "no_usable_text"
+            assignment_source = "unassigned"
         else:
-            tid = int(kw_row.kw_leaf_id)
+            kw_tid = int(kw_row.kw_leaf_id)  # the keyword classifier's OWN pick — used below
+            # only for the secondary-theme computation, which is a property of
+            # its own scoring, independent of any later LLM adjudication.
             conf, conf_tier, n_terms = float(kw_row.margin_rel), kw_row.conf_tier, int(kw_row.n_terms_matched)
-            unassigned_reason = kw_row.unassigned_reason
+            # `pd.DataFrame(list_of_dicts)` (in classify_by_keywords.py's
+            # score_corpus) silently coerces a real Python `None` among
+            # otherwise-string values in this column to float `NaN` on
+            # read-back (confirmed pandas behavior — see the same issue
+            # fixed in tests/test_classify_by_keywords.py) — passing that nan
+            # straight into this dict makes `json.dump()` write the literal,
+            # SPEC-INVALID token `NaN` (not `null`) for every assigned grant.
+            # Not previously caught because nothing browser-side fetches this
+            # file directly (see standing "no browser" limitation) — Python's
+            # own json module reads its own NaN output back permissively, so
+            # this stayed invisible until something spec-compliant (a real
+            # browser's JSON.parse, `jq`, etc.) ever touched the file.
+            unassigned_reason = None if pd.isna(kw_row.unassigned_reason) else kw_row.unassigned_reason
+
+            # `final_leaf_id`/`final_source` exist only after
+            # `python -m src.adjudicate_low_confidence --merge` has been run
+            # at least once (see that module) — degrade gracefully to the
+            # keyword classifier's own pick when they're absent, so this
+            # script works identically whether or not adjudication has ever
+            # happened. When present, the LLM's resolution (or a low-
+            # confidence keyword pick kept visible-but-flagged) is what the
+            # dashboard should actually show as the topic — not a redefinition
+            # of kw_leaf_id/conf/confTier (which keep describing the keyword
+            # classifier's own BM25F result unchanged), but a NEW field
+            # (assignmentSource) plus using the resolved leaf for dom/t/isNoise.
+            has_final = hasattr(kw_row, "final_leaf_id") and pd.notna(kw_row.final_leaf_id)
+            if has_final:
+                tid = int(kw_row.final_leaf_id)
+                assignment_source = kw_row.final_source
+            else:
+                tid = kw_tid
+                assignment_source = (
+                    "unassigned" if kw_tid == -1
+                    else "keyword_classifier" if conf_tier in ("high", "medium")
+                    else "keyword_classifier_low_confidence"
+                )
+
             # Secondary-theme signal: the classifier already computes a
             # runner-up leaf/score per doc (kw_leaf2_id/margin_rel) but never
             # exposed it before — surfaces the genuinely-close, sits-between-
@@ -179,11 +218,11 @@ def build() -> dict:
             # verified against the real corpus that this threshold isolates
             # 238/2675 (8.9%) assigned grants whose runner-up leaf sits in a
             # DIFFERENT parent from the winner — a real, sizeable population.
-            if tid >= 0 and kw_row.kw_leaf2_id is not None and int(kw_row.kw_leaf2_id) != tid:
+            if kw_tid >= 0 and kw_row.kw_leaf2_id is not None and int(kw_row.kw_leaf2_id) != kw_tid:
                 secondary_leaf = int(kw_row.kw_leaf2_id)
                 secondary_parent = topics_meta.get(str(secondary_leaf), {}).get("parent")
                 secondary_margin = round(float(kw_row.margin_rel), 4)
-                primary_parent = topics_meta.get(str(tid), {}).get("parent")
+                primary_parent = topics_meta.get(str(kw_tid), {}).get("parent")
                 has_secondary_theme = (
                     secondary_margin < SECONDARY_THEME_MARGIN_THRESHOLD
                     and secondary_parent != primary_parent
@@ -241,6 +280,19 @@ def build() -> dict:
             "matchedTerms": (list(kw_row.matched_terms) if kw_row is not None
                               and kw_row.matched_terms is not None else []),
             "unassignedReason": unassigned_reason,
+            # How this grant's CURRENT topic (dom, above) was actually
+            # decided — see the has_final branch above. One of
+            # "keyword_classifier" / "keyword_classifier_low_confidence" /
+            # "llm_adjudication" / "unassigned". Always populated (falls back
+            # to a conf_tier-derived equivalent pre-adjudication) so the
+            # frontend never needs its own null-handling for this field.
+            # NOTE: kept in the data for anyone inspecting it directly, but
+            # deliberately NOT surfaced as its own visible category anywhere
+            # in what_we_can_see/ — facets.js's "src" facet folds
+            # "llm_adjudication" into "keyword_classifier" for display (a
+            # product decision: calling out "reviewed by an LLM" per grant
+            # invited "why not all grants," not an oversight).
+            "assignmentSource": assignment_source,
             # Secondary-theme signal — see the comment where these are
             # computed above. secondaryLeaf/secondaryParent/secondaryMargin
             # are always the runner-up leaf's own data when one exists (even
@@ -323,7 +375,12 @@ def main() -> None:
     for name, obj in [("grants_umap", out["grants_umap"]), ("topics", out["topics"]),
                       ("grants_hier", out["grants_hier"])]:
         p = VIZ_DIR / f"{name}.json"
-        p.write_text(json.dumps(obj, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+        # allow_nan=False: fail loudly (ValueError) on any stray float NaN
+        # rather than silently writing the invalid `NaN` token — Python's
+        # own json module reads its own NaN output back permissively, which
+        # is exactly how the `unassigned_reason` bug above stayed invisible
+        # until something spec-compliant (a real browser) touched the file.
+        p.write_text(json.dumps(obj, ensure_ascii=False, separators=(",", ":"), allow_nan=False), encoding="utf-8")
         print(f"wrote {p.relative_to(REPO_ROOT)}  ({p.stat().st_size/1024:.0f} KB)")
     m = out["grants_umap"]["meta"]
     print(f"  {m['n_points']} points | {m['n_title_only']} title-only | {m['n_noise']} noise")

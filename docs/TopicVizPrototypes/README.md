@@ -1,9 +1,11 @@
 # TopicVizPrototypes
 
-Three self-contained prototype pages for exploring Northeastern's grant/topic
-data: **`what_we_can_see.html`** (Every grant / Every PI / What's missing &
-where it goes), **`topic_flow.html`** (funding over time by topic), and
-**`about.html`** (coverage headline + caveats + frozen-inputs summary).
+Two self-contained prototype pages for exploring Northeastern's grant/topic
+data: **`what_we_can_see.html`** (Every grant / Every PI / About this data &
+what's missing — the last tab includes the coverage headline, every caveat,
+and the frozen-inputs summary, folded in 2026-08-30 from a formerly-standalone
+`about.html`, now removed) and **`topic_flow.html`** (funding over time by
+topic).
 
 They fetch their data as JSON from `data/` at load time via ES modules, so
 **they must be served over HTTP** — opening them directly as a `file://` URL
@@ -49,7 +51,6 @@ Then open in a browser:
 
 - http://localhost:8000/what_we_can_see.html
 - http://localhost:8000/topic_flow.html
-- http://localhost:8000/about.html
 
 ## Notes
 

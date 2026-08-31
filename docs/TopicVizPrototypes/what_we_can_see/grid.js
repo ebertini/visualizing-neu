@@ -18,7 +18,7 @@ import {
   computeBins, sortedOrder, matrixLayout, computeMarkPositions, reduceMotion,
   CELL_PAD, LABEL_LANE, STAGE_MARGIN, RING_PAD, LABEL_LINE_H,
 } from "./layout.js";
-import { populateSelect, populateOptions, defaultSortMode, SORT_OPTIONS } from "./facets.js";
+import { populateSelect, populateOptions, defaultSortMode, SORT_OPTIONS, fitWidthToText } from "./facets.js";
 import { NOISE } from "./constants.js";
 
 const E = window.ENRICO;
@@ -506,8 +506,14 @@ export function createGrid(opts) {
   document.getElementById(ids.colorSelect).addEventListener("change", e => { colorKey = e.target.value; render(); });
 
   if (searchInputEl) {
+    // Sized to fit its OWN text (placeholder when empty, typed value once
+    // something's typed) — see fitWidthToText's own comment for why this is
+    // JS-measured rather than CSS-only. Runs once up front (for the
+    // placeholder) and again on every keystroke.
+    fitWidthToText(searchInputEl, searchInputEl.value || searchInputEl.placeholder);
     searchInputEl.addEventListener("input", e => {
       searchQuery = e.target.value.trim().toLowerCase();
+      fitWidthToText(searchInputEl, e.target.value || searchInputEl.placeholder);
       render();
     });
   }

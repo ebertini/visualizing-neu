@@ -1,16 +1,23 @@
-// missing.js — the "What's missing & where it goes" tab: the by-agency/
-// by-year coverage bars, the NIH-vs-NSF cliff chart, the mosaic finding,
-// the sortable missing-fields table (three grains), and the funnel. Split
-// out of what_we_can_see.html's single inline script; behavior is
-// unchanged, only the module boundary is new.
+// missing.js — the "What's missing" portion of the "About this data &
+// what's missing" tab: the by-agency/by-year coverage bars, the NIH-vs-NSF
+// cliff chart, the mosaic finding, the sortable missing-fields table (three
+// grains), and the funnel. Split out of what_we_can_see.html's single
+// inline script; behavior is unchanged, only the module boundary is new.
+// The "About this data" portion (coverage headline, the money/collaboration
+// showcases, caveats, model summary) briefly lived here after the
+// about.html merge (2026-08-30) but was moved out to its own about.js the
+// same day — this file had already grown to cover three concerns before
+// that merge, and the showcases added a fourth/fifth; see about.js's own
+// module comment.
 //
-// initMissingTab() bundles the whole tab's eager-init sequence (previously
-// a flat block near the bottom of the inline script) into one exported
-// function, called once from main.js. This keeps `missGrain` — mutated by
-// the Grants/PIs/Abstract-records segmented control below — a module-
-// private `let` instead of an imported binding: assigning to an imported
-// name is a TypeError (imported bindings are read-only), so the control's
-// onChange handler has to live in the same module as the state it mutates.
+// initMissingTab() bundles this tab's eager-init sequence (previously a
+// flat block near the bottom of the inline script) into one exported
+// function, called once from main.js (alongside, not inside, about.js's
+// own initAboutSection()). This keeps `missGrain` — mutated by the
+// Grants/PIs/Abstract-records segmented control below — a module-private
+// `let` instead of an imported binding: assigning to an imported name is a
+// TypeError (imported bindings are read-only), so the control's onChange
+// handler has to live in the same module as the state it mutates.
 import { VIZ_META, COVERAGE, MISSINGNESS, FUNNEL } from "./data.js";
 import { AGENCIES, YEARS, cellByKey } from "./constants.js";
 

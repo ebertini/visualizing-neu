@@ -14,7 +14,7 @@
   <header>
     <h1>What We Can See — and What We Can't</h1>
     <div class="sub"><b id="count">0</b> grants · a map of evidence ·
-      <a href="about.html">About this data</a></div>
+      <a href="#missing">About this data</a></div>
   </header>
   <div id="loaderror" hidden style="max-width:640px;margin:96px auto;padding:0 24px;font-family:system-ui,-apple-system,sans-serif;color:#333;line-height:1.5">
     <h1 style="font-size:16px">This page couldn't load its data.</h1>
@@ -157,11 +157,55 @@
       </div>
     </section>
 
-    <!-- Tab merge wrapper — "What's missing", "Why coverage is uneven", and
-         "Where records go" share one tab (see TAB_DEFS). Each section's own
-         markup/ids stay independent; this div only groups them for
-         setupTabs. -->
+    <!-- Tab merge wrapper — "About this data", "What's missing", "Why
+         coverage is uneven", and "Where records go" share one tab (see
+         TAB_DEFS). Each section's own markup/ids stay independent; this div
+         only groups them for setupTabs. "About this data" used to be its
+         own standalone page (about.html) — merged in here (2026-08-30) so
+         it doesn't require navigating away, since all its data (VIZ_META,
+         COVERAGE) was already a subset of what this tab fetches. -->
     <div id="missingfunnelpanel" hidden>
+    <section id="aboutsection" class="aboutarticle">
+      <div class="sectionhead">
+        <h2>About this data</h2>
+        <p class="lede" id="aboutHeadline"></p>
+      </div>
+      <p id="aboutHowto"></p>
+
+      <h3>Money made through the grants</h3>
+      <p id="moneyIntro"></p>
+      <div class="stattiles" id="moneyStats"></div>
+      <p class="aboutnote">By agency — share of grants vs. share of dollars</p>
+      <div class="misslegend">
+        <span><span class="legend-dot hollow"></span> share of grants</span>
+        <span><span class="legend-dot filled"></span> share of dollars</span>
+      </div>
+      <div class="aboutstage" id="agencyDumbbellStage">
+        <svg id="agencyDumbbellChart" viewBox="0 0 900 268"></svg>
+        <div class="tooltip" id="agencyDumbbellTip"></div>
+      </div>
+
+      <h3>Inter-college collaboration</h3>
+      <p id="collabIntro"></p>
+      <div class="stattiles" id="collabStats"></div>
+      <p class="aboutnote">Shared grants between colleges</p>
+      <div class="aboutstage" id="collabMatrixStage">
+        <svg id="collabMatrixChart" viewBox="0 0 600 600"></svg>
+        <div class="tooltip" id="collabMatrixTip"></div>
+      </div>
+      <p class="aboutnote" id="collabMatrixCaption"></p>
+
+      <h3>What we found</h3>
+      <ul class="cavlist" id="findingsList"></ul>
+
+      <h3>Caveats</h3>
+      <p class="aboutnote">Read these before drawing conclusions from either grid — several
+        materially change what a chart is actually saying.</p>
+      <div id="aboutCaveats"></div>
+      <h3>What the model is</h3>
+      <dl class="modelgrid" id="modelgrid"></dl>
+    </section>
+
     <section id="missingsection">
       <div class="sectionhead">
         <h2>What's missing, field by field</h2>

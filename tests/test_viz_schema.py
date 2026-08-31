@@ -93,6 +93,59 @@ def test_viz_meta_parents_and_topics_counts(viz_meta):
         assert "conf_mean" in t
 
 
+def test_viz_meta_college_collab_shape(viz_meta):
+    # The inter-college PI/co-PI collaboration story rendered on the About
+    # section — a real cross-check on load_colleges_per_grant()'s college
+    # normalization (a wrong-but-plausible unnormalized count silently
+    # inflated this by 22% before it was fixed, see CLAUDE.md).
+    cc = viz_meta["college_collab"]
+    assert isinstance(cc["n_cross_college"], int)
+    assert cc["n_cross_college"] > 0
+    assert isinstance(cc["dollars"], (int, float))
+    assert cc["dollars"] > 0
+
+    pairs = cc["pairs"]
+    assert pairs, "college_collab.pairs is empty"
+    for p in pairs:
+        assert p["a"] != p["b"], f"self-pair not filtered out: {p}"
+        assert p["n"] > 0
+        assert p["dollars"] >= 0
+    # sorted descending by grant count, as the frontend bar list assumes
+    assert [p["n"] for p in pairs] == sorted((p["n"] for p in pairs), reverse=True)
+    # a 3-college grant contributes to 3 pairs, so the pair-count sum is a
+    # lower bound on the cross-college grant total, never smaller than it
+    assert sum(p["n"] for p in pairs) >= cc["n_cross_college"]
+
+    # The About section's collaboration matrix orders its rows/columns by
+    # by_college participation descending (server-sorted, not re-sorted
+    # client-side) so the densest corner lands top-left — if this ever came
+    # back unsorted or missing a field the matrix would silently mis-order
+    # or throw on the frontend.
+    by_college = cc["by_college"]
+    assert len(by_college) >= 2, "need at least 2 colleges for any pair to exist"
+    for c in by_college:
+        assert isinstance(c["college"], str) and c["college"]
+        assert isinstance(c["n"], int) and c["n"] > 0
+    assert [c["n"] for c in by_college] == sorted((c["n"] for c in by_college), reverse=True)
+    # every pair's colleges must be names that actually appear in by_college
+    # (the matrix looks each one up via COLLEGE_SHORT keyed on this exact
+    # string) — a name mismatch here would render a pair the matrix can
+    # never place in its own row/column order.
+    college_names = {c["college"] for c in by_college}
+    for p in cc["pairs"]:
+        assert p["a"] in college_names, f"pair college not in by_college: {p['a']}"
+        assert p["b"] in college_names, f"pair college not in by_college: {p['b']}"
+
+    # by_year feeds the client-computed "cross-college grants have grown"
+    # sentence (about.js's collabGrowthPhrase) — must be real year/count
+    # pairs, not just present.
+    by_year = cc["by_year"]
+    assert by_year, "college_collab.by_year is empty"
+    for y in by_year:
+        assert isinstance(y["year"], int)
+        assert isinstance(y["n"], int) and y["n"] >= 0
+
+
 # ── coverage.json key paths ─────────────────────────────────────────────────
 
 def test_coverage_unassigned_by_reason_sums_to_n(coverage):
@@ -204,6 +257,24 @@ def test_facets_ncol_column_and_levels(facets):
     assert "ncol" in facets["levels"]
     n_levels = len(facets["levels"]["ncol"])
     assert all(0 <= v < n_levels for v in facets["cols"]["ncol"])
+
+
+@pytest.mark.skipif(not FACETS.exists(), reason="facets.json not built locally yet")
+def test_facets_team_size_shape_and_floor(facets):
+    """Team size (nTeam/cols.team) must be computed from distinct people
+    linked to a grant, NOT a count of is_copi-flagged rows — verified against
+    the real corpus that is_copi is a role label, not a team-size signal (see
+    load_team_size_per_grant's docstring). Every grant has >=1 linked person,
+    so nTeam must never be 0 and the "team" facet needs no miss bin."""
+    n = facets["n"]
+    assert "nTeam" in facets, "nTeam (raw team-size count) missing from facets.json"
+    assert len(facets["nTeam"]) == n
+    assert all(v >= 1 for v in facets["nTeam"]), "every grant must have >=1 linked person"
+    assert "team" in facets["cols"]
+    assert len(facets["cols"]["team"]) == n
+    assert "team" in facets["levels"]
+    n_levels = len(facets["levels"]["team"])
+    assert all(0 <= v < n_levels for v in facets["cols"]["team"])
 
 
 @pytest.mark.skipif(not FACETS_PI.exists(), reason="facets_pi.json not built locally yet")

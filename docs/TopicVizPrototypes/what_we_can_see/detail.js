@@ -22,6 +22,12 @@ export function grantTooltip(i) {
   // single-college case doesn't grow the tooltip for no reason.
   const nColleges = FACETS.nColleges ? FACETS.nColleges[i] : 0;
   const collegesNote = nColleges > 1 ? ` (${nColleges} colleges involved)` : "";
+  // Team size — only shown when there's an actual additional collaborator
+  // on record (nTeam > 1), same "don't clutter the common case" rule as
+  // collegesNote above. Counts distinct PEOPLE, not is_copi-flagged rows —
+  // see facets.js's "team" facet def for why that distinction matters.
+  const nTeam = FACETS.nTeam ? FACETS.nTeam[i] : 1;
+  const teamNote = nTeam > 1 ? ` · team of ${nTeam}` : "";
   // What the grant actually IS leads the tooltip (PI feedback: "grant what
   // is it should show when you hover") — the id/amount/agency/etc. that
   // used to lead it are still there, just demoted to supporting .meta lines.
@@ -29,11 +35,26 @@ export function grantTooltip(i) {
     ? `<div class="meta">Also relevant to: ${E.esc(FACETS.secondaryParentLabel[i])} / ` +
       `${E.esc(FACETS.secondaryLeafLabel[i])} (${(FACETS.secondaryMargin[i] * 100).toFixed(0)}% margin)</div>`
     : "";
+  // How this grant's topic was actually decided (build_viz_data.py's
+  // assignmentSource) — the ONLY case still called out here is genuine
+  // Unassigned (a real content gap, worth disclosing). "keyword_classifier_
+  // low_confidence" and "llm_adjudication" are both deliberately NOT called
+  // out (product decision, not an oversight: either one read as an internal
+  // QA/confidence signal that invited more scrutiny than it was worth
+  // surfacing per-grant) — folded into the same "no note" treatment as a
+  // confident keyword match. The underlying data is unaffected; this is a
+  // display-only choice.
+  const srcIdx = FACETS.cols.src ? FACETS.cols.src[i] : 0;
+  const srcName = FACETS.levels.src ? FACETS.levels.src[srcIdx] : "keyword_classifier";
+  const srcNote = srcName === "unassigned"
+    ? `<div class="meta">⚠ Unassigned — no confident topic</div>`
+    : "";
   return `<div class="t">${E.esc(title || "(no title on record)")}</div>` +
     `<div class="meta">${E.esc(piName || "PI not on record")} · ${E.fmtAmt(FACETS.cols.amt_raw[i])}</div>` +
     `<div class="meta">${E.esc(agency.key)} · ${yr === -1 ? "year unknown" : yr}</div>` +
-    `<div class="meta">${E.esc(college)}${collegesNote}</div>` +
+    `<div class="meta">${E.esc(college)}${collegesNote}${teamNote}</div>` +
     `<div class="meta">${hasAbs ? "Has abstract" : "Title only"} · ${E.esc(parent ? parent.name : "Unassigned")}</div>` +
+    srcNote +
     secondary;
 }
 

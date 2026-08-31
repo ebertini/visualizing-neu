@@ -178,13 +178,20 @@ main{display:block}
    (see grid.js's applySearchOpacity) rather than being removed from the
    grid, so "every grant is present" still holds while searching. */
 .searchbox{display:flex;align-items:center;gap:6px;min-width:0}
+/* Actual sizing to fit the input's own text is JS-driven now (grid.js's
+   fitWidthToText, set as an inline style that overrides whatever's here) —
+   CSS field-sizing/fit-content turned out not to reliably size a native
+   input/select to just its own text across browsers. This min-width is only
+   a floor/fallback for the brief instant before that JS runs. */
 .searchbox input{
-  width:220px;font-family:var(--mono);font-size:11.5px;color:var(--ink);
+  min-width:80px;
+  font-family:var(--mono);font-size:11.5px;color:var(--ink);
   border:1px solid var(--hair);border-radius:0;padding:6px 8px;background:#fff;
 }
 .searchbox input:focus-visible{outline:2px solid var(--c-nsf);outline-offset:1px}
 .searchcount{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap}
-.suggestselect{width:auto;max-width:220px}
+/* Same idea for the suggestion picker — see main.js's fitWidthToText call. */
+.suggestselect{min-width:140px}
 .markrect{cursor:pointer}
 .binhit{fill:transparent}
 /* Faint per-cell boundary line (PI feedback) — replaces the old fixed grey
@@ -311,6 +318,115 @@ main{display:block}
   background:var(--panel);border:1px solid var(--hair);
   box-shadow:var(--shadow);padding:9px 11px;
 }
+/* "About this data" — folded in from the former standalone about.html
+   (2026-08-30); styles ported from that page's own <style> block, then
+   corrected TWICE after real-browser checks found the ported version
+   broken. First pass: the ported 14px body size sat ABOVE this page's own
+   13px `.sectionhead h2`/`h3` rule (headings rendered smaller than the
+   text they head) — fixed by bringing body text below the heading size.
+   Second pass (this comment): the outer box itself used the deleted
+   about.html's own max-width:720px + margin:0 auto — but every SIBLING
+   section in this same tab (#missingstage/.chartblock/#funnelstage) uses
+   max-width:1180px + margin:0 auto. Two different widths independently
+   centered in the same viewport put their left edges in two different
+   places, so the whole About section visibly jumped inward relative to
+   "What's missing, field by field" right below it (confirmed via a
+   headless-Chrome screenshot: ~230px apart at a 1400px viewport width).
+   Fixed by matching the sibling sections' own 1180px outer box (so the
+   section itself lines up), and instead capping just the flowing-text
+   elements (not the section, not the bar lists/stat tiles, which benefit
+   from the extra width) at a narrower reading measure via `max-width`
+   alone, with NO margin:auto — so they align left with the headings
+   above them rather than centering independently a second time. */
+.aboutarticle{padding:20px 24px 32px;max-width:1180px;margin:0 auto;font-size:12.5px;line-height:1.6}
+.aboutarticle .sectionhead{padding:0 0 2px;max-width:none}
+.aboutarticle .lede{font-size:12.5px;color:var(--ink);margin:4px 0 0;max-width:720px}
+.aboutarticle .lede b{font-weight:650}
+.aboutarticle p{margin:8px 0;max-width:720px}
+.aboutarticle h3{margin:20px 0 4px;font-size:13px;font-weight:650;letter-spacing:-.005em}
+.aboutarticle .aboutnote{color:var(--muted);font-size:11.5px;max-width:720px}
+.aboutarticle .cavlist{max-width:720px}
+/* .misslegend's own padding:0 24px;max-width:1180px;margin:0 auto was
+   written for use directly under a .sectionhead, not nested a second time
+   inside .aboutarticle (which already applies its own 24px padding) — left
+   as-is, the agency-dumbbell legend row would sit indented an extra 24px
+   past its sibling <p>/<h3> elements. Same override shape as
+   .aboutarticle .sectionhead above. */
+.aboutarticle .misslegend{padding:0;max-width:none;margin:4px 0 8px}
+
+/* Caveats, grouped by severity — a readable list rather than the flat
+   chart-footer chip row shared/enrico.js's renderCaveats builds (that
+   component takes a mandatory id filter and is meant for a single-line
+   strip under a chart, not a whole section on its own — see the OTHER,
+   whitelisted caveat row on the coverage section below, which does use
+   renderCaveats; this one deliberately shows every caveat, ungrouped by
+   any whitelist). */
+.cavgroup{margin:10px 0 18px}
+.cavgroup h4{
+  margin:0 0 8px;font-family:var(--mono);font-size:10.5px;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+}
+.cavgroup.sev-high h4{color:#8a4b00}
+.cavlist{margin:0;padding-left:20px}
+.cavlist li{margin-bottom:9px}
+.sev-high li::marker{color:#8a4b00}
+
+/* Stat tiles — a plain "not a chart" form for a single headline number
+   (per this session's dataviz-skill check: a hero number, not a plot,
+   is the right form for "$2.18B total" or "100 grants cross a college
+   line"). A simple flex row, wraps on narrow viewports. */
+.stattiles{display:flex;flex-wrap:wrap;gap:18px 28px;margin:10px 0 16px}
+.stattile{min-width:120px}
+.stattile .v{font-family:var(--mono);font-size:20px;font-weight:650;color:var(--ink);line-height:1.1}
+.stattile .l{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* Bar list — a plain horizontal bar per row, single flat accent color
+   (these are single-series magnitude comparisons, not multi-category
+   identity — a categorical palette isn't the right tool here; the
+   by-agency variant instead reuses each agency's OWN established color
+   from VIZ_META.agencies, since agency already has a real, consistent
+   identity elsewhere on this page — "color follows the entity"). */
+.barlist{margin:6px 0 4px}
+.barrow{display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:11.5px}
+.barrow .lbl{width:230px;flex:none;color:var(--ink);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.barrow .track{flex:1;background:#eef0f2;border-radius:2px;height:14px;position:relative}
+.barrow .fill{position:absolute;top:0;left:0;height:100%;border-radius:2px;background:var(--c-nsf)}
+.barrow .n{font-family:var(--mono);color:var(--muted);white-space:nowrap;min-width:70px}
+
+/* Stage for the two About-section d3 charts (agency dumbbell, college
+   matrix) — deliberately its OWN rule, not a reuse of .chartblock:
+   .chartblock re-imposes max-width:1180px;margin:0 auto plus 24px padding,
+   which would double up inside .aboutarticle (already 1180px/margin:auto)
+   and reintroduce the two-independently-centered-boxes bug fixed above.
+   No fixed height — the SVG's viewBox is JS-computed per chart and CSS
+   only makes it scale to the container's width (see grid.js's own comment
+   on why a fixed height + growing viewBox scales the whole drawing down
+   instead of growing the page). */
+.aboutstage{position:relative}
+.aboutstage svg{display:block;width:100%;overflow:visible}
+
+/* Legend dots for the agency dumbbell — circular, matching the chart's own
+   mark shape (hollow ring = share of grants, filled disc = share of
+   dollars), distinct from the square .swatch chips used for categorical
+   color legends elsewhere, so the legend shape always matches what it's
+   explaining. Neutral ink, not an agency color — this legend explains the
+   MARK, not any one agency. */
+.legend-dot{width:10px;height:10px;border-radius:50%;flex:none;display:inline-block;border:2px solid var(--ink)}
+.legend-dot.hollow{background:#fff}
+.legend-dot.filled{background:var(--ink)}
+
+/* College-collaboration matrix cells — the printed count, not the color
+   alone, carries the exact value (per-cell fill switches light/dark text
+   for contrast via a JS-computed attr, not CSS). */
+.matrixcell text{font-family:var(--mono);font-size:10.5px;text-anchor:middle;pointer-events:none}
+
+.modelgrid{
+  display:grid;grid-template-columns:auto 1fr;gap:4px 16px;
+  font-family:var(--mono);font-size:12.5px;margin:8px 0 4px;
+}
+.modelgrid dt{color:var(--muted)}
+.modelgrid dd{margin:0;color:var(--ink)}
+
 #missingstage{position:relative;padding:8px 24px 32px;max-width:1180px;margin:0 auto}
 #missingchart{display:block;width:100%;overflow:visible}
 .missrow text{font-family:var(--mono);font-size:11px}
