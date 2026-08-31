@@ -94,6 +94,8 @@ stretch item is implemented (`docs/TopicVizPrototypes/what_we_can_see/`):
 * ~~clicking anywhere outside the option dial should close it~~ — done
   (`grid.js`'s `setupDial`, a document-level click listener scoped to outside both
   the dial and its dock).
+
+
 * ~~academic rank... grouped together for coloring~~ — fixed via an explicit
   per-label `RANK_COLOR` map (`constants.js`): one hue per rank FAMILY (teaching-track,
   tenure-track), darker = more senior, replacing the old bare per-index palette lookup
