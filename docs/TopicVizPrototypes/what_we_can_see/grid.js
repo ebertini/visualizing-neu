@@ -72,10 +72,10 @@ export function createGrid(opts) {
   // highlighted and its details stay visible no matter how the view changes.
   let selected = null;
 
-  // Search (grants grid only — searchFields is undefined for the PI grid,
-  // see main.js). A HIGHLIGHT, not a filter: matching marks stay full
-  // opacity, non-matching marks dim, so the grid's own "every X is present"
-  // invariant holds even while searching — nothing is removed from the view.
+  // Search — opt-in per grid via ids.searchInput/searchFields (see main.js).
+  // A HIGHLIGHT, not a filter: matching marks stay full opacity, non-matching
+  // marks dim, so the grid's own "every X is present" invariant holds even
+  // while searching — nothing is removed from the view.
   let searchQuery = "";
   const searchInputEl = ids.searchInput && document.getElementById(ids.searchInput);
   const searchCountEl = ids.searchCount && document.getElementById(ids.searchCount);

@@ -35,9 +35,8 @@ const grantGrid = createGrid({
     chartwrap: "facetchartwrap", labelsSvg: "facetlabels", scrollDiv: "facetscroll",
     chartSvg: "facetchart", tip: "facettip", dock: "facetdock", dial: "facetDial",
     selectedPanel: "selectedGrantPanel", selectedBody: "selectedBody", selectedClose: "selectedGrantClose",
-    // Optional — only the grants grid has a search box; createGrid wires
-    // these only when both ids resolve, so omitting them (as piGrid does
-    // below) cleanly opts a grid out of search entirely.
+    // Optional — createGrid wires these only when both ids resolve, so a
+    // grid without a search box (none currently) can just omit them.
     searchInput: "facetSearch", searchCount: "facetSearchCount",
   },
   buildTooltip: grantTooltip, buildDetail: grantDetail,
@@ -62,8 +61,17 @@ const piGrid = createGrid({
     chartwrap: "pichartwrap", labelsSvg: "pilabels", scrollDiv: "piscroll",
     chartSvg: "pichart", tip: "pitip", dock: "pidock", dial: "piDial",
     selectedPanel: "piSelectedPanel", selectedBody: "piSelectedBody", selectedClose: "piSelectedClose",
+    searchInput: "piSearch", searchCount: "piSearchCount",
   },
   buildTooltip: piTooltip, buildDetail: piDetail,
+  // PI search box, mirroring the grants grid's above: filter by name,
+  // college, or department — the same fields piTooltip already shows, so a
+  // match always corresponds to something visible on hover.
+  searchFields: (data, i) => [
+    data.names[i] || "",
+    data.levels.col[data.cols.col[i]] || "",
+    data.levels.dept[data.cols.dept[i]] || "",
+  ],
 });
 
 // "Need a suggestion?" — populate each grid's own preset dropdown and wire
