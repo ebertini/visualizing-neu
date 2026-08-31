@@ -60,7 +60,15 @@ main{display:block}
    it now scrolls away once you scroll past the canvas's own top. */
 .selectedgrant-panel.floating{
   position:absolute;top:32px;right:12px;z-index:6;
-  width:340px;max-width:calc(100vw - 36px);max-height:calc(100vh - 72px);
+  /* max-height's 224px = ~200px measured distance from the actual viewport
+     top to this panel's own top edge (sticky header + toolbar row, fixed
+     px regardless of viewport size — NOT this panel's own top:32, which is
+     relative to #facetchartwrap, not the viewport) + a 24px breathing-room
+     gap at the bottom. A plain vh-based subtraction (rather than scaling a
+     fixed px gap by a multiplier) is what actually keeps a constant gap
+     from the bottom edge across different screen sizes — a multiplier on
+     top of an already-viewport-relative value can exceed 100vh entirely. */
+  width:340px;max-width:calc(100vw - 36px);max-height:calc(100vh - 224px);
   overflow-y:auto;background:var(--panel);border:1px solid var(--hair);
   border-radius:0;box-shadow:var(--shadow);padding:13px 14px;
   border-left:3px solid var(--c-nsf);
@@ -211,7 +219,7 @@ main{display:block}
 /* Selection ring — a gap around the mark rather than a stroke on it, see
    grid.js's comment on rect.selectring for why. */
 .selectring{fill:none;stroke:#0072B2;stroke-width:2.5;pointer-events:none}
-.colhdr{font-family:var(--mono);font-size:10px;fill:var(--ink)}
+.colhdr{font-family:var(--mono);font-size:15px;fill:var(--ink)}
 /* Ordinal-facet color legend (Start year): a gradient bar reads "ordered,
    low to high" in one glance where 30 flat chips would not. */
 .ramplegend{display:inline-flex;align-items:center;gap:7px}

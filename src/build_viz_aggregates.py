@@ -1609,7 +1609,7 @@ def build_missingness_abstract_records() -> dict:
         resolved_ids = set(bridge.loc[bridge["faculty_id"].astype(str).str.strip() != "", "personid"])
         pi_resolved = int(orph["personid"].astype(str).isin(resolved_ids).sum())
         fields.append({
-            "id": "pi_resolved", "label": "Writer matched to a faculty member",
+            "id": "pi_resolved", "label": "ID matched to a faculty member",
             "known": pi_resolved, "missing": orphaned_n - pi_resolved, "na": matched_n,
             "where": "Scored only among unmatched records — this record's writer ID doesn't map to anyone on the faculty roster via the ID bridge.",
         })
@@ -1617,7 +1617,7 @@ def build_missingness_abstract_records() -> dict:
         # Can't score this without the bridge — the whole grain is "not
         # applicable" rather than a fabricated 0-known claim.
         fields.append({
-            "id": "pi_resolved", "label": "Writer matched to a faculty member",
+            "id": "pi_resolved", "label": "ID matched to a faculty member",
             "known": 0, "missing": 0, "na": n,
             "where": "Scored only among unmatched records — this record's writer ID doesn't map to anyone on the faculty roster via the ID bridge.",
         })

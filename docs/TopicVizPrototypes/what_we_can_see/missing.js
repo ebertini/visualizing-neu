@@ -1,7 +1,7 @@
 // missing.js — the "What's missing" portion of the "About this data &
-// what's missing" tab: the by-agency/by-year coverage bars, the NIH-vs-NSF
-// cliff chart, the mosaic finding, the sortable missing-fields table (three
-// grains), and the funnel. Split out of what_we_can_see.html's single
+// what's missing" tab: the by-agency/by-year coverage bars, the mosaic
+// finding, the sortable missing-fields table (three grains), and the
+// funnel. Split out of what_we_can_see.html's single
 // inline script; behavior is unchanged, only the module boundary is new.
 // The "About this data" portion (coverage headline, the money/collaboration
 // showcases, caveats, model summary) briefly lived here after the
@@ -19,7 +19,7 @@
 // TypeError (imported bindings are read-only), so the control's onChange
 // handler has to live in the same module as the state it mutates.
 import { VIZ_META, COVERAGE, MISSINGNESS, FUNNEL } from "./data.js";
-import { AGENCIES, YEARS, cellByKey } from "./constants.js";
+import { AGENCIES, YEARS } from "./constants.js";
 
 const E = window.ENRICO;
 
@@ -93,52 +93,6 @@ function mosaicFindingText(){
     ? "close enough that text availability isn't driving confidence"
     : "a real gap — text availability still moves classifier confidence more than it should";
   return `Low/no-confidence rate: ${E.fmtPct(absRate)} with an abstract vs ${E.fmtPct(titleRate)} title-only (${verdict}).`;
-}
-
-/* ---------- NIH vs NSF coverage line, 2005-2025 (kept from the
-   deprecated "Does it matter?" tab — the evidence behind the single
-   loudest caveat on the page) ---------- */
-function renderCliff(){
-  const svg3 = d3.select("#cliffchart");
-  svg3.selectAll("*").remove();
-  const W=480,H=260, margin={top:10,right:16,bottom:26,left:34};
-  const yrs = YEARS.filter(y=>y>=2005 && y<=2025);
-  const x = d3.scaleLinear().domain([2005,2025]).range([margin.left,W-margin.right]);
-  const y = d3.scaleLinear().domain([0,1]).range([H-margin.bottom,margin.top]);
-
-  svg3.append("g").attr("transform",`translate(${margin.left},0)`)
-    .call(d3.axisLeft(y).ticks(5).tickFormat(d3.format(".0%")).tickSize(-(W-margin.left-margin.right)))
-    .call(g=>g.selectAll(".tick line").attr("stroke",'var(--hair)'))
-    .call(g=>g.select(".domain").remove());
-  svg3.append("g").attr("transform",`translate(0,${H-margin.bottom})`)
-    .call(d3.axisBottom(x).ticks(6).tickFormat(d3.format("d")));
-
-  function series(agency){
-    return yrs.map(yr=>{
-      const c = cellByKey[agency+"|"+yr];
-      return {yr, cov: c ? c.cov : null};
-    });
-  }
-  const line = d3.line().defined(d=>d.cov!=null).x(d=>x(d.yr)).y(d=>y(d.cov)).curve(d3.curveLinear);
-
-  [["NSF","#0072B2"],["NIH","#E69F00"]].forEach(([agency,color])=>{
-    const data = series(agency);
-    svg3.append("path").attr("d",line(data)).attr("fill","none").attr("stroke",color).attr("stroke-width",2);
-    svg3.selectAll(`.dot-${agency}`).data(data.filter(d=>d.cov!=null)).join("circle")
-      .attr("cx",d=>x(d.yr)).attr("cy",d=>y(d.cov)).attr("r",2.4).attr("fill",color);
-    const last = [...data].reverse().find(d=>d.cov!=null);
-    if(last) svg3.append("text").attr("x",x(last.yr)+5).attr("y",y(last.cov)+3)
-      .attr("class","rowlabel").attr("fill",color).text(agency);
-  });
-  // cliff marker position comes from COVERAGE.cliffs[0] (server-computed,
-  // shared with topic_flow.html via the same viz_meta.json/coverage.json
-  // source) rather than a hardcoded year — previously both files hardcoded
-  // 2019.5 independently.
-  const cliff = COVERAGE.cliffs[0];
-  const cliffX = x(cliff.last_good_year + 0.5);
-  svg3.append("line").attr("x1",cliffX).attr("x2",cliffX)
-    .attr("y1",margin.top).attr("y2",H-margin.bottom)
-    .attr("stroke","#8a4b00").attr("stroke-dasharray","4 3").attr("stroke-width",1.2);
 }
 
 /* ---------- "What's missing, field by field" ---------- */
@@ -378,7 +332,6 @@ export function initMissingTab(){
 
   renderCoverageByAgency();
   renderCoverageByYear();
-  renderCliff();
   renderMissingness();
   renderFunnel();
 }

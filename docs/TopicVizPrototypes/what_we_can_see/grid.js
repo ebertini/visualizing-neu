@@ -315,7 +315,7 @@ export function createGrid(opts) {
     rowG = rowG.enter().append("g").attr("class", "row-label-g").merge(rowG)
       .attr("transform", d => `translate(0,${d.y})`);
     rowG.selectAll("text.rowlabel").data(d => [d]).join("text")
-      .attr("class", "rowlabel").attr("x", 0).attr("y", 10)
+      .attr("class", "rowlabel").attr("x", 0).attr("y", 15)
       .html(d => {
         const lines = d.labelLines
           .map((line, li) => `<tspan x="0"${li > 0 ? ` dy="${LABEL_LINE_H}"` : ""}>${E.esc(line)}</tspan>`)
@@ -364,7 +364,7 @@ export function createGrid(opts) {
     hdrG = hdrG.enter().append("g").attr("class", "colhdr-g").merge(hdrG)
       .attr("transform", d => `translate(${layout.colX.get(d.si)},0)`);
     hdrG.selectAll("text.colhdr").data(d => [d]).join("text")
-      .attr("class", "colhdr").attr("x", CELL_PAD).attr("y", 11)
+      .attr("class", "colhdr").attr("x", CELL_PAD).attr("y", 17)
       .html(d => d.lines
         .map((line, li) => `<tspan x="${CELL_PAD}"${li > 0 ? ` dy="${LABEL_LINE_H}"` : ""}>${E.esc(line)}</tspan>`)
         .join(""))

@@ -65,8 +65,8 @@ export function sortedOrder(nLevels, marginalN, marginalD, mode) {
 // grows to content (see its CSS) and #facetscroll scrolls horizontally if a
 // row of columns is wider than the viewport — nothing is ever scaled down
 // or a level dropped to force a fit.
-export const MARK = 5.2, GAP = 1.3;
-export const MIN_CELL_COLS = 3, CELL_PAD = 4, COL_GUT = 10, ROW_GUT = 14, HDR_H = 16, LABEL_LANE = 190;
+export const MARK = 7.8, GAP = 1.3;
+export const MIN_CELL_COLS = 3, CELL_PAD = 4, COL_GUT = 10, ROW_GUT = 14, HDR_H = 24, LABEL_LANE = 285;
 // Breathing room between the chart's own container edge and the row-label
 // lane — the grid is otherwise full-bleed (no section padding of its own),
 // so without this the row labels sit flush against the browser edge.
@@ -85,7 +85,12 @@ export const RING_PAD = 3;
 // pinned row-label SVG's own left/right padding.
 export const LABEL_MAX_W = LABEL_LANE - 40;
 const measureCtx = document.createElement("canvas").getContext("2d");
-measureCtx.font = "10.5px ui-monospace, 'SF Mono', Menlo, 'Cascadia Mono', Consolas, monospace";
+// Kept in lockstep with .rowlabel/.colhdr's actual rendered font-size
+// (style.css) — this measures the SAME text at the SAME size D3 will
+// paint it at, so wrapLabel/fitLabel's width budget matches reality. A
+// mismatch here (e.g. bumping the CSS font-size without updating this)
+// silently overflows a label past its lane or column instead of wrapping.
+measureCtx.font = "15.75px ui-monospace, 'SF Mono', Menlo, 'Cascadia Mono', Consolas, monospace";
 export function measureText(s) { return measureCtx.measureText(s).width; }
 export function fitLabel(s, maxW) {
   if (measureText(s) <= maxW) return s;
@@ -112,7 +117,7 @@ export function fitLabel(s, maxW) {
 // own) get folded through fitLabel's existing character-level ellipsis,
 // so a label that's genuinely too long to show in full still ends in "…"
 // rather than being silently cut mid-word.
-export const LABEL_LINE_H = 12, MAX_LABEL_LINES = 2;
+export const LABEL_LINE_H = 18, MAX_LABEL_LINES = 2;
 export function wrapLabel(text, maxW, maxLines) {
   const words = text.split(/\s+/).filter(Boolean);
   const lines = [];
