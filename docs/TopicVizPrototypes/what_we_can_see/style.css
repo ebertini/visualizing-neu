@@ -13,39 +13,53 @@ body{overflow:auto}
 header{position:sticky;top:0;background:var(--bg);z-index:9}
 /* Right-aligned via the header's own flex row (enrico.css) + margin-left:
    auto here, rather than touching that shared rule — enrico.css's header
-   is also used by topic_flow.html, which has no equivalent link. Styled as
-   a real button (not a plain text link) specifically so it reads as more
-   prominent than the removed "<b>N</b> grants · a map of evidence" subtitle
-   line ever did — this is now the ONLY way to reach the "About this data &
-   what's missing" tab, which dropped its own pill from the tab strip (see
-   main.js's TAB_DEFS `hidden: true`) to make room for each grid's toolbar
-   moving into that row instead (see .tabbar below). */
-.aboutlink{
-  margin-left:auto;flex:none;
-  font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.02em;
-  color:#fff;background:var(--c-nsf);border:1px solid var(--c-nsf);
-  padding:8px 14px;border-radius:6px;text-decoration:none;white-space:nowrap;
-}
-.aboutlink:hover{background:#005a8c;border-color:#005a8c}
-.aboutlink:focus-visible{outline:2px solid var(--c-nsf);outline-offset:2px}
+   is also used by topic_flow.html, which has no equivalent link. This is
+   the ONLY way to reach the "About this data & what's missing" tab, which
+   dropped its own pill from the tab strip (see main.js's TAB_DEFS
+   `hidden: true`) to make room for each grid's toolbar moving into that
+   row instead (see .tabbar below).
+   Now styled identically to the two real tab pills (class="tab aboutlink"
+   in the markup) rather than as a standalone solid-blue button — PI
+   feedback: the selected/unselected look for all three (Every grant, Every
+   PI, About this data) should be the same, with blue as the "selected"
+   signal. main.js toggles .tab's own `.active` class on this element in
+   sync with which tab is showing, so `.tab.active`'s existing blue
+   underline + bold (enrico.css) is what "selected" looks like here too —
+   no bespoke CSS needed for that state. Only the positioning need (push to
+   the header's right edge, unlike the two real pills which sit in normal
+   flow inside .tabbar) is page-specific. */
+.aboutlink{margin-left:auto;flex:none}
 main{display:block}
-/* Tab strip + the active grid's own toolbar share one row (PI feedback:
-   save the vertical space a separate toolbar row used to cost below the
-   tabs). #facetToolbar/#piToolbar are plain siblings of #tabstrip here —
-   NOT descendants of #facetsection/#pisection — so their own visibility is
-   driven explicitly by main.js's TOOLBAR_BY_TAB rather than inherited from
-   whichever section setupTabs currently hides; the `hidden` attribute
-   either JS sets is still what actually hides them (see the global
-   [hidden] rule above). .tabs/.gridtoolbar keep their own shared-kit rules
-   (enrico.css / below) for their INTERNAL layout — only the outer
-   spacing/border that assumed each was a full-width row of its own moves
-   here, onto the shared wrapper. */
+/* Tab strip + the active grid's own dial and toolbar share one row (PI
+   feedback: save the vertical space a separate toolbar row used to cost
+   below the tabs, AND put the control-panel dial at the very left of
+   everything). Each grid contributes two elements to this row — a
+   `.gridtoolbar-left` (dial + dock) BEFORE #tabstrip, and a
+   `.gridtoolbar-main` (search/suggestion/legend/toggle) AFTER it — chosen
+   so DOM order already matches the desired visual order with no CSS
+   `order` property anywhere (which would move visual order without moving
+   keyboard focus order — see main.js's TOOLBAR_BY_TAB comment for the full
+   reasoning). None of these four elements are descendants of
+   #facetsection/#pisection, so their visibility is driven explicitly by
+   main.js's TOOLBAR_BY_TAB rather than inherited from whichever section
+   setupTabs currently hides; the `hidden` attribute either JS sets is
+   still what actually hides them (see the global [hidden] rule above). */
 .tabbar{
   display:flex;align-items:center;flex-wrap:wrap;gap:4px 16px;
   padding:0 24px 8px;border-bottom:1px solid var(--hair);
+  /* Floor, not a hard height: this row keeps flex-wrap:wrap above for
+     narrow viewports, and a hard height wouldn't clip a wrapped 2nd line
+     (overflow is visible by default) — it would let that line overlap the
+     chart below instead, which is worse than the row simply growing. 60px
+     = the .dial buttons' own 52px height + this rule's own 8px bottom
+     padding, since everything on this page is border-box (enrico.css's
+     `*{box-sizing:border-box}`) — a bare 52px here would reserve only 44px
+     of content and be completely inert. The color legend's vertical mode
+     (below) can never grow this past 60px either, since it's
+     position:absolute — out of flow, same principle as .dock. */
+  min-height:60px;
 }
-.tabbar .tabs{padding:0;border-bottom:0}
-.tabbar .gridtoolbar{flex:1;min-width:0;padding:0}
+.tabbar .tabs{padding:0;border-bottom:0;flex:none} /* don't let a tight row shrink the pills before it wraps */
 /* Tab panels toggle via the native `hidden` attribute (see setupTabs in
    shared/enrico.js), which the browser's UA stylesheet implements as
    `[hidden]{display:none}` — an attribute selector, specificity (0,1,0).
@@ -171,34 +185,41 @@ main{display:block}
 /* Row labels can be wrapped/truncated (wrapLabel) but still need the full
    name on hover. */
 #facetlabels .rowlabel, #pilabels .rowlabel{pointer-events:auto;cursor:default}
-/* .gridtoolbar (below) is a normal-flow row above each grid, replacing
-   an earlier design where the controls dial and the color legend both
-   floated absolutely over the chart's own top-left/top-right corners.
-   That broke once Rows started defaulting to "— none —": with no
-   row-label lane to push the matrix clear, the chart's content starts
-   flush at STAGE_MARGIN — exactly where the dial used to float — and the
-   dial ended up drawn over the column headers. Putting both in their own
-   row above the chart, in normal flow, means nothing is ever drawn on
-   top of the chart's own content. .dial is this page's own single
-   persistent toggle button, replacing shared/enrico.css's two-button
-   fold/opener pattern (see setupDial in what_we_can_see/grid.js) — reused
-   below for the legend's own open/close toggle too. .dock is still the
-   shared kit's class (for its collapsed-state transition), anchored to
-   .gridtoolbar-left (not the whole section) so it always opens directly
-   under the dial regardless of title length. */
+/* .gridtoolbar-left/.gridtoolbar-main (below) replace an earlier design
+   where the controls dial and the color legend both floated absolutely
+   over the chart's own top-left/top-right corners. That broke once Rows
+   started defaulting to "— none —": with no row-label lane to push the
+   matrix clear, the chart's content starts flush at STAGE_MARGIN — exactly
+   where the dial used to float — and the dial ended up drawn over the
+   column headers. Putting both in the shared .tabbar row instead, in
+   normal flow, means nothing is ever drawn on top of the chart's own
+   content. .dial is this page's own single persistent toggle button,
+   replacing shared/enrico.css's two-button fold/opener pattern (see
+   setupDial in what_we_can_see/grid.js) — reused below for the legend's
+   own open/close toggle too. .dock is still the shared kit's class (for
+   its collapsed-state transition), anchored to .gridtoolbar-left (its
+   own, nearer positioned ancestor) so it always opens directly under the
+   dial. */
 #facetsection, #pisection{position:relative}
-.gridtoolbar{
-  display:flex;align-items:flex-start;justify-content:space-between;
-  gap:16px;padding:16px 24px 10px;flex-wrap:wrap;
-}
-/* Dial closest to the true left margin, title right after it — both
-   flush left, matching the row-label lane's own left origin below
-   (STAGE_MARGIN). position:relative anchors the dock dropdown. */
-.gridtoolbar-left{position:relative;display:flex;align-items:center;gap:14px;min-width:0}
-.gridtoolbar-left h2{margin:0;font-size:13px;font-weight:650;letter-spacing:-.005em;white-space:nowrap}
-/* Legend closest to center, its own toggle closest to the true right
-   margin — the mirror image of dial-then-title on the left. */
-.gridtoolbar-right{position:relative;display:flex;align-items:flex-start;gap:10px;min-width:0}
+/* Dial + its dock only — search/suggestion/legend/toggle live in
+   .gridtoolbar-main below, in a separate wrapper placed AFTER #tabstrip in
+   the DOM (see the .tabbar comment above for why). position:relative
+   anchors the dock dropdown to THIS element, not the whole row. */
+.gridtoolbar-left{position:relative;display:flex;align-items:center;flex:none}
+/* Search box + suggestion select, the color legend, and the legend's own
+   toggle, in that literal DOM order — which is also the desired visual
+   order, so no CSS `order` is needed. flex:1 so this element fills the
+   row's remaining width; that's what lets the toggle's margin-left:auto
+   (below) pin it to the row's true right edge regardless of the legend's
+   own width. position:relative is this element's own containing block for
+   .legendpanel.vertical (below) — nearer and simpler than reaching up to
+   .tabbar. */
+.gridtoolbar-main{display:flex;align-items:center;gap:16px;flex:1;min-width:0;position:relative}
+/* Load-bearing, not cosmetic: pins the legend toggle to this row's true
+   right edge, independent of the color legend's own width — grid.js's
+   updateLegendLayout relies on that to measure the legend's available slot
+   without circularity (see its own comment for why). */
+.gridtoolbar-main .legendtoggle{margin-left:auto}
 .dial{
   display:grid;place-items:center;width:52px;height:52px;flex:none;
   border:1px solid var(--hair);border-radius:0;background:#fff;cursor:pointer;color:var(--ink);padding:0;
@@ -206,7 +227,15 @@ main{display:block}
 .dial:hover{background:#f4f5f7}
 .dial:focus-visible{outline:2px solid var(--c-nsf);outline-offset:1px}
 .dial[aria-expanded="true"]{background:var(--c-nsf);border-color:var(--c-nsf);color:#fff}
-#facetdock, #pidock{position:absolute;top:calc(100% + 8px);left:0}
+/* z-index:6 (not the shared kit's default 5, enrico.css) — .legendpanel.vertical
+   (below) also sits at z-index:5 in this same stacking context (neither
+   .gridtoolbar-left nor .gridtoolbar-main creates one), and DOM order alone
+   would otherwise let an open vertical legend paint over an open controls
+   dock on a narrow viewport where both are visible at once. 6, not higher,
+   so the "Selected grant"/"Selected PI" card (z-index:6, further down this
+   file) still wins that specific tie via DOM order (it comes later in the
+   document). */
+#facetdock, #pidock{position:absolute;top:calc(100% + 8px);left:0;z-index:6}
 /* The scroll div is the one that fills the container; the SVG inside it
    is sized to its own content in px by JS and can be WIDER than the
    scroll div, in which case this scrolls instead of the browser scaling
@@ -221,26 +250,46 @@ main{display:block}
   border:1px solid var(--hair);border-radius:0;padding:6px 8px;background:#fff;cursor:pointer;
 }
 .facetselect:focus-visible{outline:2px solid var(--c-nsf);outline-offset:1px}
-/* Grant search box (title/PI/agency) — sits in the toolbar's left group,
-   after the title, so it reads as "search WITHIN this grid" rather than a
-   global site search. Matching marks stay full-opacity; non-matches dim
-   (see grid.js's applySearchOpacity) rather than being removed from the
-   grid, so "every grant is present" still holds while searching. */
+/* Search box + "Need a suggestion?" — the second slot of the shared
+   .tabbar row, right after the tab pills (see the .tabbar comment above).
+   Both fields share the SAME fixed width (below) instead of their former
+   per-keystroke auto-fit. flex:none keeps them from being squeezed by a
+   tight row, which matters beyond looks: the suggestion select's right
+   edge is grid.js's own reference point for where the color legend's
+   available slot begins. */
+.gridtoolbar-fields{display:flex;align-items:center;gap:14px;flex:none}
+/* 290px, border-box: sized to the LONGER of the two search placeholders,
+   "Search by name, college, or department…" — 39 chars × 11.5px × 0.6021em
+   (Menlo/SF Mono glyph advance width) ≈ 270px of glyphs + 16px horizontal
+   padding + 2px border ≈ 288 → 290.
+   Known, accepted consequence: the suggestion select's SELECTED option
+   labels are full sentences (e.g. "Do bigger teams cluster at certain
+   colleges, and in which themes?", ~450px of glyphs) and will visually
+   clip once picked — a native <select>'s closed box has no text-overflow
+   and can't grow to its content. The open dropdown list still shows every
+   label in full; this is inherent to "fixed width," not a bug. */
+.gridtoolbar-fields .searchbox input,
+.gridtoolbar-fields .suggestselect{flex:none;width:290px}
+/* Grant search box (title/PI/agency) reads as "search WITHIN this grid"
+   rather than a global site search. Matching marks stay full-opacity;
+   non-matches dim (see grid.js's applySearchOpacity) rather than being
+   removed from the grid, so "every grant is present" still holds while
+   searching. */
 .searchbox{display:flex;align-items:center;gap:6px;min-width:0}
-/* Actual sizing to fit the input's own text is JS-driven now (grid.js's
-   fitWidthToText, set as an inline style that overrides whatever's here) —
-   CSS field-sizing/fit-content turned out not to reliably size a native
-   input/select to just its own text across browsers. This min-width is only
-   a floor/fallback for the brief instant before that JS runs. */
 .searchbox input{
-  min-width:80px;
   font-family:var(--mono);font-size:11.5px;color:var(--ink);
   border:1px solid var(--hair);border-radius:0;padding:6px 8px;background:#fff;
 }
 .searchbox input:focus-visible{outline:2px solid var(--c-nsf);outline-offset:1px}
-.searchcount{font-family:var(--mono);font-size:11px;color:var(--ink);white-space:nowrap}
-/* Same idea for the suggestion picker — see main.js's fitWidthToText call. */
-.suggestselect{min-width:140px}
+/* Fixed width, not just a floor: empty → "12,345 of 12,345 match" on the
+   first keystroke is a ~145px jump that would otherwise shove the
+   suggestion select right by that much mid-typing — shrinking the color
+   legend's available slot (grid.js's updateLegendLayout measures from this
+   field's neighbor) enough to flip it from inline to vertical while the
+   user is still typing. Reserving the width up front keeps that from ever
+   moving. flex:none for the same reason .gridtoolbar-fields' other two
+   children have it. */
+.searchcount{width:150px;flex:none;font-family:var(--mono);font-size:11px;color:var(--ink);white-space:nowrap}
 .markrect{cursor:pointer}
 .binhit{fill:transparent}
 /* Faint per-cell boundary line (PI feedback) — replaces the old fixed grey
@@ -332,40 +381,77 @@ main{display:block}
 .misslegend span{display:inline-flex;align-items:center;gap:6px}
 .chiprow-label{color:var(--ink);font-weight:600}
 
-/* The color legend defaults to a normal flex row inside .gridtoolbar-right
-   — NOT floating over the chart (see the .gridtoolbar comment above) —
-   wrapping with no horizontal scrollbar, ever: overflow just wraps to a
-   new line. Overrides .misslegend's own padding/margin (meant for a
-   full-width row) since this instance sits inside a flex toolbar cell.
-   .ramplegend (the gradient-bar variant, for start/hire year) is already
-   its own inline-flex row, so it wraps as a single unit inside this row
-   layout unchanged. Defaults OPEN (no .collapsed class in the markup) —
-   unlike .dock, which defaults collapsed — toggled by its own button via
-   the same setupDial pattern the controls dial uses.
-
-   Left in normal flow, a legend that wraps to several rows (Department:
-   91 chips, Topic (leaf): 26) would grow the WHOLE toolbar taller every
-   time it's shown — grid.js's measureLegendOverlay checks the
-   panel's actual rendered height after every render (and every time it's
-   reopened) against LEGEND_INLINE_MAX_H and adds/removes .overlay
-   accordingly, so only a legend that actually needs to scroll ever
-   leaves flow — most facets (Agency: 9 chips, NEU attribution: 4) fit on
-   one row and are never touched by this. */
+/* The color legend has two modes, chosen by WIDTH (grid.js's
+   updateLegendLayout) — replacing an earlier HEIGHT-based switch (did the
+   legend exceed ~56px tall in flow?):
+     INLINE (default, no extra class) — a single-line chip row occupying
+       whatever's left of .gridtoolbar-main's own width between the
+       suggestion select and the right-pinned legend toggle. Chosen only
+       when its own natural single-line width actually fits there.
+     VERTICAL (.vertical) — a one-chip-per-line panel floating below the
+       row, out of flow, showing the FULL list with no internal scrollbar,
+       however tall that is.
+   In BOTH modes .tabbar's own height (min-height:60px, above) is
+   untouched: inline is forced to one line (flex-wrap:nowrap + overflow
+   hidden below), vertical is position:absolute — the same principle that
+   already keeps .dock from growing anything. Overrides .misslegend's own
+   padding/margin/gap/flex-wrap (written for a full-width standalone row) —
+   equal (0,1,0) specificity, so this wins on source order, which is why
+   max-width is set to `none` EXPLICITLY below rather than by omitting it
+   (omitting it would hand the property back to .misslegend's own
+   max-width:1180px). .ramplegend (the gradient-bar variant, for start/hire
+   year) is its own inline-flex unit, unaffected by either mode. Defaults
+   OPEN (no .collapsed class in the markup) — unlike .dock, which defaults
+   collapsed — toggled by its own button via the same setupDial pattern the
+   controls dial uses. */
 .legendpanel{
-  display:flex;flex-wrap:wrap;align-items:center;gap:5px 14px;
-  max-width:600px;
+  display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;
+  gap:5px 14px;white-space:nowrap;
+  min-width:0;max-width:none;overflow:hidden;
   padding:0;margin:0;
 }
 .legendpanel.collapsed{display:none}
-/* Same idea as .dock opening below its own dial: a floating panel here
-   scrolls internally instead of pushing the chart down. right:0 aligns
-   its edge with the toggle button beside it — both anchored to the true
-   right margin — mirroring .dock's left:0 alignment under the dial. */
-.legendpanel.overlay{
+/* Same idea as .dock opening below its own dial: out of flow, floating
+   over whatever's beneath so the row it left can't change height. right:0
+   aligns its edge with the toggle button beside it (both anchored to
+   .gridtoolbar-main's own right edge via that element's flex:1 +
+   margin-left:auto) — mirroring .dock's left:0 alignment under the dial.
+   No max-height and no overflow-y, deliberately: the ask is the FULL list,
+   no internal scroll. Department's 91 chips therefore render as a very
+   tall (~1800px) floating panel that covers most of the chart until
+   dismissed via the legend toggle — intentional, not a bug, but worth
+   confirming looks acceptable in a real browser; if not, the fallback is a
+   column-wrap layout that keeps everything visible with no scrollbar in a
+   much shorter panel:
+     .legendpanel.vertical{flex-flow:column wrap;max-height:calc(100vh - 200px);align-content:flex-start}
+   — not adopted as the default because column-wrap's column widths are
+   engine-computed and have historically differed across browsers, so it
+   would need its own dedicated check before relying on it. */
+.legendpanel.vertical{
   position:absolute;top:calc(100% + 8px);right:0;z-index:5;
-  max-height:220px;overflow-y:auto;overflow-x:hidden;
+  flex-direction:column;flex-wrap:nowrap;align-items:flex-start;
+  max-width:min(420px,calc(100vw - 48px));max-height:none;overflow:visible;
+  white-space:normal;
   background:var(--panel);border:1px solid var(--hair);
   box-shadow:var(--shadow);padding:9px 11px;
+}
+/* Transient measurement state — added and removed synchronously within one
+   JS tick by grid.js's updateLegendLayout, never actually painted.
+   position:FIXED (not absolute) takes the panel fully out of flow for the
+   measurement instant, so .gridtoolbar-main lays out as if the legend
+   didn't exist — the geometry that actually defines its available slot —
+   and also means a several-thousand-px-wide `width:max-content` reading
+   (Department's real case) can never momentarily create a horizontal
+   scrollbar. width:max-content on a flex container is its exact nowrap
+   intrinsic width by definition. Every visual property is zeroed so the
+   measured number is pure content width; flex-direction/max-height/
+   overflow/white-space are re-declared here so this wins regardless of
+   whether .vertical was already applied from a previous render. */
+.legendpanel.measuring{
+  position:fixed;left:0;top:0;visibility:hidden;pointer-events:none;
+  flex-direction:row;flex-wrap:nowrap;white-space:nowrap;
+  width:max-content;max-width:none;max-height:none;overflow:visible;
+  background:none;border:0;box-shadow:none;padding:0;
 }
 /* "About this data" — folded in from the former standalone about.html
    (2026-08-30); styles ported from that page's own <style> block, then
@@ -555,27 +641,32 @@ h3{margin:20px 0 4px;font-size:13px;font-weight:650;letter-spacing:-.005em}
 /* No-grey-text pass (2026-08-31): every text color on this page becomes
    var(--ink), differentiated only by weight/style/family/size/case —
    never hue. Most of this page's own rules were edited in place above;
-   these are overrides of rules DEFINED in shared/enrico.css (header .sub,
-   the dock's .card h2, the Grants/PIs/Abstract-records .segmented control,
-   the tab strip, the coverage-caveats row, and every chart's .axis text) —
-   scoped here rather than edited in enrico.css itself, since enrico.css is
-   ALSO loaded by topic_flow.html, which this request didn't touch. Safe:
-   this stylesheet is only ever linked from what_we_can_see.html (confirmed
+   these are overrides of rules DEFINED in shared/enrico.css (the dock's
+   .card h2, the Grants/PIs/Abstract-records .segmented control, the tab
+   strip, the coverage-caveats row, and every chart's .axis text) — scoped
+   here rather than edited in enrico.css itself, since enrico.css is ALSO
+   loaded by topic_flow.html, which this request didn't touch. Safe: this
+   stylesheet is only ever linked from what_we_can_see.html (confirmed
    topic_flow.html has no <link> to it), so these overrides can never leak
    onto that page. Each one keeps whatever other differentiation the base
    rule already had (mono font, size, letter-spacing, weight); only the
-   color/fill changes. */
-header .sub{color:var(--ink)}
+   color/fill changes.
+   (header .sub / header .sub a — the pre-header-redesign "<b>N</b> grants
+   · a map of evidence · About this data" subtitle line — were both deleted
+   here; that markup no longer exists on this page, replaced by the
+   standalone .aboutlink button/tab above.) */
 .card h2{color:var(--ink)}
 .segmented button{color:var(--ink)}
-.tab{color:var(--ink)}
+/* border-radius:0 — sharp/square corners, matching this whole page's
+   established flat convention (.dial, .card, .legendpanel, the "Selected
+   grant" panel, etc. are all explicitly border-radius:0); enrico.css's
+   .tab has rounded top corners (8px 8px 0 0), an outlier fixed here since
+   .tab is confirmed used by no other page. Applies to all three
+   (Every grant, Every PI, About this data), since all three now share
+   class="tab" — see .aboutlink above. */
+.tab{color:var(--ink);border-radius:0}
 .caveats{color:var(--ink)}
 /* Was color:#8a4b00 (amber) in enrico.css — bold instead, matching the
    same substitution made for .cavgroup.sev-high above. */
 .caveats .sev-high{color:var(--ink);font-weight:700}
 .axis text{fill:var(--ink)}
-/* header .sub a (the "About this data" link, enrico.css) was the site's
-   blue accent color, resting text-decoration:none — the only cue it was a
-   link was the hover-underline. Black + always-on underline instead, same
-   substitution as the drawerbody link above. */
-header .sub a{color:var(--ink);text-decoration:underline}

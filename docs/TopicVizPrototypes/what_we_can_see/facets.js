@@ -335,23 +335,12 @@ export const SORT_OPTIONS = [
   ["dollars", "Bin size (total dollars)"],
 ];
 
-// Auto-sizes a text input or select element's width to fit its OWN current
-// text (an input's placeholder/value, or a select's currently-selected
-// option's label) — CSS-only approaches (field-sizing:content, width:
-// fit-content) turned out NOT to reliably size a native <select>/<input> to
-// just their own text (confirmed in a real-browser check: both stayed
-// clipped/oversized regardless), since neither element has "content" in the
-// CSS-intrinsic-sizing sense the way a div full of text does. This measures
-// the actual rendered glyph width via a shared hidden canvas context, using
-// the element's own computed font — the standard technique for "auto-width"
-// form fields, and reliable across browsers because it measures real glyphs
-// rather than depending on a layout algorithm to infer size from a value.
-let _measureCanvas = null;
-export function fitWidthToText(el, text, {min = 60, max = 420, pad = 28} = {}) {
-  if (!_measureCanvas) _measureCanvas = document.createElement("canvas");
-  const ctx = _measureCanvas.getContext("2d");
-  const cs = getComputedStyle(el);
-  ctx.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
-  const w = ctx.measureText(text || "").width;
-  el.style.width = `${Math.max(min, Math.min(max, Math.ceil(w) + pad))}px`;
-}
+// (fitWidthToText — a canvas-measured auto-width helper for the search input
+// and suggestion select — was removed once both became fixed-width in CSS
+// (see .gridtoolbar-fields in style.css). Its finding still stands if this
+// need ever comes back: CSS field-sizing:content and width:fit-content do
+// NOT reliably size a native <input>/<select> to its own text across
+// browsers (confirmed in a real-browser check: both stayed clipped/oversized
+// regardless), because neither element has "content" in the
+// CSS-intrinsic-sizing sense a div full of text does — measure real glyphs
+// on a canvas instead, using the element's own computed font.)

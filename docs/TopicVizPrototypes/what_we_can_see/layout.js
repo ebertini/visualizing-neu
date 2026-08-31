@@ -66,7 +66,16 @@ export function sortedOrder(nLevels, marginalN, marginalD, mode) {
 // row of columns is wider than the viewport — nothing is ever scaled down
 // or a level dropped to force a fit.
 export const MARK = 7.8, GAP = 1.3;
-export const MIN_CELL_COLS = 3, CELL_PAD = 4, COL_GUT = 10, ROW_GUT = 14, HDR_H = 24, LABEL_LANE = 210;
+export const MIN_CELL_COLS = 3, CELL_PAD = 4, COL_GUT = 10, ROW_GUT = 14, HDR_H = 24;
+// A column's minimum pixel width (see pickCellGeometry's own comment below
+// for why MIN_CELL_COLS alone isn't enough) — declared up here, not down by
+// pickCellGeometry, specifically so LABEL_LANE (next line) can derive from
+// it: the row-label lane's usable text width (LABEL_MAX_W = LABEL_LANE - 40)
+// is set to match MIN_CELL_W exactly (PI feedback: the row-label lane was
+// wider than the column axis's own minimum width) — single source of truth
+// for "the narrowest a label's own box gets to be" on either axis.
+export const MIN_CELL_W = 84;
+export const LABEL_LANE = MIN_CELL_W + 40;
 // Breathing room between the chart's own container edge and the row-label
 // lane — the grid is otherwise full-bleed (no section padding of its own),
 // so without this the row labels sit flush against the browser edge.
@@ -111,13 +120,25 @@ export function fitLabel(s, maxW) {
 
 // Row and column labels used to always cut off after one line, even when
 // there was clearly more than one line's worth of room (a tall row band,
-// a wide-enough header) — this wraps instead, up to MAX_LABEL_LINES lines,
+// a wide-enough header) — this wraps instead, up to a maxLines cap,
 // greedily packing whole words per line. Any words left over after the
 // line budget runs out (or a single word that's wider than maxW on its
 // own) get folded through fitLabel's existing character-level ellipsis,
 // so a label that's genuinely too long to show in full still ends in "…"
 // rather than being silently cut mid-word.
-export const LABEL_LINE_H = 18, MAX_LABEL_LINES = 3;
+//
+// Two DIFFERENT caps, not one shared value: MAX_LABEL_LINES (column
+// headers — a fixed cap is fine since every column already has a pixel
+// floor via MIN_CELL_W) vs. ROW_LABEL_MAX_LINES (row labels — PI feedback:
+// the row-label lane should be as narrow as a column's own minimum width,
+// but that narrower width must NOT mean more truncation — the row's own
+// band height already grows to fit however many lines a label needs, see
+// matrixLayout's bandH, so the row axis can afford a much more generous
+// cap than the column axis, which doesn't get taller for a header, only
+// wider). 12 is comfortably more lines than any real label in this
+// dataset's department/topic names needs at MIN_CELL_W's width — it's a
+// defensive ceiling, not a value anything is expected to actually hit.
+export const LABEL_LINE_H = 18, MAX_LABEL_LINES = 3, ROW_LABEL_MAX_LINES = 12;
 export function wrapLabel(text, maxW, maxLines) {
   const words = text.split(/\s+/).filter(Boolean);
   const lines = [];
@@ -147,16 +168,16 @@ export function wrapLabel(text, maxW, maxLines) {
 // allowed to exceed availW — #facetscroll (see CSS) then scrolls
 // horizontally rather than any level being dropped to force a fit.
 //
-// MIN_CELL_W is a SEPARATE, pixel-based floor on top of MIN_CELL_COLS — a
-// facet with many levels and few members per cell (e.g. "Topic (leaf)"'s 26
-// levels) can drive `fit` down to MIN_CELL_COLS purely from dividing availW
-// by nCols, producing a ~34px cell that's wide enough for its marks but too
-// narrow for its own column header to read as more than 1-2 truncated
-// characters per word (PI feedback: reads as text bleeding into the next
-// column, even though it's technically still inside its own cell's bounds).
-// Widening here, past what fits on screen, is exactly what #facetscroll's
-// horizontal scroll (above) exists for.
-const MIN_CELL_W = 84;
+// MIN_CELL_W (declared above, alongside LABEL_LANE) is a SEPARATE,
+// pixel-based floor on top of MIN_CELL_COLS — a facet with many levels and
+// few members per cell (e.g. "Topic (leaf)"'s 26 levels) can drive `fit`
+// down to MIN_CELL_COLS purely from dividing availW by nCols, producing a
+// ~34px cell that's wide enough for its marks but too narrow for its own
+// column header to read as more than 1-2 truncated characters per word (PI
+// feedback: reads as text bleeding into the next column, even though it's
+// technically still inside its own cell's bounds). Widening here, past what
+// fits on screen, is exactly what #facetscroll's horizontal scroll (above)
+// exists for.
 export function pickCellGeometry(nCols, maxCellN, availW) {
   const want = Math.max(MIN_CELL_COLS, Math.ceil(Math.sqrt(maxCellN * 1.4)));
   const perCol = (availW - (nCols - 1) * COL_GUT) / nCols - 2 * CELL_PAD;
@@ -216,7 +237,7 @@ export function matrixLayout(aLevels, sLevels, byCell, aOrder, sOrder, availW) {
     // members) paired with a long level name is the common case — so the
     // row grows to fit whichever is taller, rather than letting the label
     // overflow into the next row.
-    const labelLines = hasRows ? wrapLabel(aLevels[ai].label, LABEL_MAX_W, MAX_LABEL_LINES) : [];
+    const labelLines = hasRows ? wrapLabel(aLevels[ai].label, LABEL_MAX_W, ROW_LABEL_MAX_LINES) : [];
     const bandH = hasRows ? Math.max(markGridH, labelLines.length * LABEL_LINE_H + CELL_PAD) : markGridH;
     const row = {ai, y, bandH, total: 0, labelLines};
     sOrder.forEach(si => {

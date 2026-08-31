@@ -18,7 +18,7 @@ import {
   computeBins, sortedOrder, matrixLayout, computeMarkPositions, reduceMotion,
   CELL_PAD, LABEL_LANE, STAGE_MARGIN, RING_PAD, LABEL_LINE_H,
 } from "./layout.js";
-import { populateSelect, populateOptions, defaultSortMode, SORT_OPTIONS, fitWidthToText } from "./facets.js";
+import { populateSelect, populateOptions, defaultSortMode, SORT_OPTIONS } from "./facets.js";
 import { NOISE } from "./constants.js";
 
 const E = window.ENRICO;
@@ -34,10 +34,10 @@ export function setupDial(dial, dock, onOpen) {
   function setOpen(open) {
     dock.classList.toggle("collapsed", !open);
     dial.setAttribute("aria-expanded", String(open));
-    // Only the legend toggle passes onOpen — it re-measures whether the
-    // legend needs to become a floating overlay now that it's visible
-    // again (see measureLegendOverlay; can't measure a display:none
-    // element's height, so this can't happen while still collapsed).
+    // Only the legend toggle passes onOpen — it re-decides inline vs.
+    // vertical now that the legend is visible again (see
+    // updateLegendLayout; a display:none element has no measurable
+    // geometry, so this can't happen while still collapsed).
     if (open && onOpen) onOpen();
   }
   dial.addEventListener("click", () => setOpen(dock.classList.contains("collapsed")));
@@ -103,22 +103,78 @@ export function createGrid(opts) {
     sortMode = sel.value;
   }
 
-  // A legend that fits on roughly one row (most facets — Agency is 9 chips,
-  // NEU attribution is 4) can just sit in the toolbar's normal flow; one
-  // that wraps to several rows (Department: 91, Topic (leaf): 26) would
-  // otherwise grow the whole toolbar taller every time it's shown — the
-  // exact thing that made the dial cover the chart before this toolbar
-  // existed. So instead it becomes a floating overlay below the toolbar —
-  // same idea as the controls dock opening off its own dial — scrolling
-  // internally instead of pushing the chart down. Can't measure a
-  // display:none element, so this only runs while the legend is actually
-  // visible (collapsed legends re-measure on open — see setupDial's onOpen).
-  const LEGEND_INLINE_MAX_H = 56;
-  function measureLegendOverlay() {
+  // Inline vs. vertical color legend, decided by WIDTH — replacing an
+  // earlier HEIGHT-based rule (did the legend exceed ~56px tall in flow?).
+  // The toolbar row's visual order is dial → tab pills → search →
+  // suggestion → legend → legend toggle, and the legend gets whatever
+  // horizontal room is left between the suggestion select's right edge and
+  // the legend toggle's left edge. If its natural single-line width fits
+  // there it stays INLINE, on the row. If it doesn't, it becomes a
+  // VERTICAL floating panel below the row (.legendpanel.vertical), one chip
+  // per line, showing the full list with no internal scroll. Either way the
+  // row's own 60px height (.tabbar's min-height) is untouched: inline is
+  // forced to one line (flex-wrap:nowrap + overflow:hidden, style.css),
+  // vertical leaves flow entirely — the same principle as .dock, which has
+  // never grown anything.
+  //
+  // Why this is not circular. Both measurements are taken while the legend
+  // carries .measuring, which is position:FIXED — i.e. OUT OF FLOW. The row
+  // is therefore laid out as if the legend didn't exist, so:
+  //   · the toggle's left edge is purely (row content right − 52px), fixed
+  //     by its own margin-left:auto and independent of the legend, and
+  //   · the reading does not depend on which mode the legend happened to be
+  //     left in by the previous render.
+  // Measuring in-flow instead would reintroduce exactly the feedback loop
+  // this avoids: a too-wide in-flow legend can wrap the row and move the
+  // very button being measured.
+  //
+  // The slot arithmetic: inserting the legend between the fields group and
+  // the toggle turns ONE row gap into TWO, so the usable width is
+  // (toggle.left − suggest.right) minus both gaps — that is where the 2×
+  // comes from; it is not a fudge factor.
+  const TABBAR_GAP = 16;       // .gridtoolbar-main's own column-gap (style.css)
+  const LEGEND_FIT_SLACK = 8;  // don't wedge the legend flush against both neighbors
+  function updateLegendLayout() {
     const el = document.getElementById(ids.colorLegend);
-    if (el.classList.contains("collapsed")) return;
-    el.classList.remove("overlay"); // measure the natural, unclamped height first
-    el.classList.toggle("overlay", el.scrollHeight > LEGEND_INLINE_MAX_H);
+    const toggleEl = document.getElementById(ids.legendToggle);
+    const suggestEl = ids.suggestSelect && document.getElementById(ids.suggestSelect);
+    if (!suggestEl) return;
+    // Nothing measurable while display:none. Two ways that happens, both
+    // self-correcting: a legend closed by its own toggle re-measures on
+    // reopen (setupDial's onOpen), and a whole toolbar hidden because its
+    // tab isn't active re-measures when that tab is activated — main.js's
+    // onActivate clears `hidden` BEFORE calling render(). !offsetWidth on
+    // the toggle is the check for the second case (an abs-pos .vertical
+    // legend would still report an offsetParent, so testing the legend
+    // itself wouldn't catch it).
+    if (el.classList.contains("collapsed") || !toggleEl.offsetWidth) return;
+
+    el.classList.remove("vertical");
+    el.classList.add("measuring");
+    const natural = el.getBoundingClientRect().width;
+    const toggleR = toggleEl.getBoundingClientRect();
+    const suggestR = suggestEl.getBoundingClientRect();
+    el.classList.remove("measuring");
+
+    // If the row has WRAPPED (narrow viewport — .tabbar keeps flex-wrap:wrap
+    // as its degradation), the toggle and the suggestion select are no
+    // longer on the same line and the horizontal arithmetic between them is
+    // meaningless. Fall back to vertical: it's the one mode that can't make
+    // an already-wrapped row any taller.
+    // Compared by VERTICAL CENTER, not top edge: .gridtoolbar-main's
+    // align-items:center vertically centers differently-sized flex items
+    // (the 52px toggle vs. the ~30px suggestion select) within the same
+    // line, which staggers their TOP edges even when they're genuinely on
+    // one line — confirmed in a real-browser check (toggle top 58/height 52
+    // vs. suggest top 69/height 30, both centering on row-center 84). Center
+    // is the value align-items:center actually equalizes across a line.
+    const toggleCenter = toggleR.top + toggleR.height / 2;
+    const suggestCenter = suggestR.top + suggestR.height / 2;
+    const wrapped = Math.abs(toggleCenter - suggestCenter) > 2;
+    const availW = wrapped
+      ? 0
+      : toggleR.left - suggestR.right - TABBAR_GAP * 2 - LEGEND_FIT_SLACK;
+    el.classList.toggle("vertical", natural > availW);
   }
 
   function renderColorLegend() {
@@ -145,7 +201,12 @@ export function createGrid(opts) {
         el.innerHTML = head + levels.map(chip).join("");
       }
     }
-    measureLegendOverlay();
+    // No layout decision here — updateLegendLayout() runs at the END of
+    // render() instead, after wrap.style.height is committed. Setting that
+    // height can add or remove the document's vertical scrollbar, which
+    // changes .tabbar's own width by ~15px; measuring the legend's slot
+    // before that lands would measure against a width that's about to
+    // change.
   }
 
   // Floating "Selected" card — the persistent readout that survives every
@@ -463,6 +524,10 @@ export function createGrid(opts) {
       .attr("height", layout.mark + RING_PAD * 2);
 
     if (selected != null) markSel.filter(i => i === selected).raise();
+
+    // Last, deliberately: everything above that can affect .tabbar's usable
+    // width (the chart height, hence the document scrollbar) has settled.
+    updateLegendLayout();
   }
 
   // Rows and Columns both list every facet plus "— none —", in the SAME
@@ -506,14 +571,13 @@ export function createGrid(opts) {
   document.getElementById(ids.colorSelect).addEventListener("change", e => { colorKey = e.target.value; render(); });
 
   if (searchInputEl) {
-    // Sized to fit its OWN text (placeholder when empty, typed value once
-    // something's typed) — see fitWidthToText's own comment for why this is
-    // JS-measured rather than CSS-only. Runs once up front (for the
-    // placeholder) and again on every keystroke.
-    fitWidthToText(searchInputEl, searchInputEl.value || searchInputEl.placeholder);
+    // Fixed width now, in CSS, shared with the suggestion select beside it
+    // (see .gridtoolbar-fields in style.css) — no per-keystroke measurement
+    // pass, and no per-keystroke width change, which is also what keeps the
+    // suggestion select's right edge (updateLegendLayout's reference point)
+    // stable while typing.
     searchInputEl.addEventListener("input", e => {
       searchQuery = e.target.value.trim().toLowerCase();
-      fitWidthToText(searchInputEl, e.target.value || searchInputEl.placeholder);
       render();
     });
   }
@@ -521,10 +585,10 @@ export function createGrid(opts) {
   setupDial(document.getElementById(ids.dial), document.getElementById(ids.dock));
   // Same toggle pattern as the controls dial, reused for the legend — the
   // legend panel starts WITHOUT a .collapsed class in the markup (defaults
-  // open, where the controls dock defaults closed), and re-measures
-  // whether it needs to become a floating overlay each time it's opened
-  // (see measureLegendOverlay).
-  setupDial(document.getElementById(ids.legendToggle), document.getElementById(ids.colorLegend), measureLegendOverlay);
+  // open, where the controls dock defaults closed), and re-decides inline
+  // vs. vertical each time it's reopened (see updateLegendLayout; nothing is
+  // measurable while it's display:none).
+  setupDial(document.getElementById(ids.legendToggle), document.getElementById(ids.colorLegend), updateLegendLayout);
   document.getElementById(ids.selectedClose).addEventListener("click", clearSelection);
   document.addEventListener("keydown", e => {
     if (e.key === "Escape" && selected != null && document.activeElement.tagName !== "INPUT") clearSelection();

@@ -11,7 +11,7 @@
 // beyond that sequence.
 import { FACETS, FACETS_PI, VIZ_META } from "./data.js";
 import { GRANT_FACET_DEFS, PI_FACET_DEFS, GRANT_ARRANGE_FACETS, PI_ARRANGE_FACETS,
-         GRANT_SUGGESTIONS, PI_SUGGESTIONS, fitWidthToText } from "./facets.js";
+         GRANT_SUGGESTIONS, PI_SUGGESTIONS } from "./facets.js";
 import { createGrid } from "./grid.js";
 import { grantTooltip, grantDetail, piTooltip, piDetail } from "./detail.js";
 import { initMissingTab } from "./missing.js";
@@ -31,6 +31,12 @@ const grantGrid = createGrid({
     // Optional — createGrid wires these only when both ids resolve, so a
     // grid without a search box (none currently) can just omit them.
     searchInput: "facetSearch", searchCount: "facetSearchCount",
+    // Read-only, geometry only: updateLegendLayout (grid.js) needs this
+    // element's right edge as the left boundary of the color legend's
+    // available slot in the toolbar row. The select's own BEHAVIOR is still
+    // wired entirely outside createGrid, in wireSuggestions below — this id
+    // buys the grid's closure a measurement anchor, not ownership.
+    suggestSelect: "facetSuggest",
   },
   buildTooltip: grantTooltip, buildDetail: grantDetail,
   // Grant search box (PI feedback's "Round 2"/next-direction item): filter
@@ -55,6 +61,7 @@ const piGrid = createGrid({
     chartSvg: "pichart", tip: "pitip", dock: "pidock", dial: "piDial",
     selectedPanel: "piSelectedPanel", selectedBody: "piSelectedBody", selectedClose: "piSelectedClose",
     searchInput: "piSearch", searchCount: "piSearchCount",
+    suggestSelect: "piSuggest", // measurement anchor only — see grantGrid above
   },
   buildTooltip: piTooltip, buildDetail: piDetail,
   // PI search box, mirroring the grants grid's above: filter by name,
@@ -84,14 +91,13 @@ function wireSuggestions(selectId, grid, presets) {
     o.value = String(i); o.textContent = p.label;
     sel.appendChild(o);
   });
-  // Sized to fit whichever option is CURRENTLY SHOWING (the "Need a
-  // suggestion?" placeholder at first, then whatever was picked) — see
-  // fitWidthToText's own comment for why this is JS-measured rather than
-  // CSS-only (a native <select> doesn't reliably size to just its selected
-  // option's text via CSS alone across browsers).
-  fitWidthToText(sel, sel.options[sel.selectedIndex].text);
+  // Fixed width in CSS now, identical to the search input beside it (see
+  // .gridtoolbar-fields in style.css) — no longer auto-sized to whichever
+  // option is showing. Consequence, accepted by design: these labels are
+  // full sentences, so a picked suggestion visually clips. A native
+  // <select>'s selected-value box has no text-overflow and can't grow to
+  // its content; the open dropdown list still shows every label in full.
   sel.addEventListener("change", () => {
-    fitWidthToText(sel, sel.options[sel.selectedIndex].text);
     if (sel.value === "") return;
     grid.applyPreset(presets[Number(sel.value)]);
   });
@@ -143,19 +149,33 @@ const TAB_DEFS = [
   {key: "missing", label: "About this data & what's missing", panel: document.getElementById("missingfunnelpanel"), hidden: true},
 ];
 const WIDTH_DEPENDENT_RENDER = {every: grantGrid.render, pis: piGrid.render};
-// Each grid's own toolbar (Rows/Columns/Color/Sort dial, search, legend)
-// now lives in the tablist's own row (what_we_can_see.html's .tabbar),
-// pulled OUT of #facetsection/#pisection so it can sit inline with the tab
-// buttons instead of stacked below them — saves the vertical space a
-// second row used to cost. Since it's no longer a descendant of the
-// section setupTabs hides/shows, its own visibility has to be driven
-// explicitly here, alongside the width-dependent re-render above.
-const TOOLBAR_BY_TAB = {every: document.getElementById("facetToolbar"), pis: document.getElementById("piToolbar")};
+// Each grid's own dial+dock and its own search/suggestion/legend/toggle
+// (what_we_can_see.html's #facetDialGroup/#facetToolbar and
+// #piDialGroup/#piToolbar) live in the tablist's own row (.tabbar), pulled
+// OUT of #facetsection/#pisection — split into TWO elements per grid,
+// placed before and after #tabstrip respectively, so DOM/visual/focus order
+// all agree (see .tabbar's own comment in style.css for why that's worth a
+// second wrapper instead of one + CSS `order`). Neither is a descendant of
+// the section setupTabs hides/shows, so their own visibility has to be
+// driven explicitly here, alongside the width-dependent re-render below.
+const TOOLBAR_BY_TAB = {
+  every: [document.getElementById("facetDialGroup"), document.getElementById("facetToolbar")],
+  pis:   [document.getElementById("piDialGroup"),    document.getElementById("piToolbar")],
+};
+// The "About this data" header link/button (what_we_can_see.html's
+// .aboutlink) now shares .tab/.tab.active styling with the two real tab
+// pills (PI feedback: one consistent selected/unselected look, blue =
+// selected) even though it isn't a rendered pill in #tabstrip itself
+// (TAB_DEFS marks it `hidden: true`, above) — so its own `.active` class
+// has to be driven explicitly here too, mirroring what setupTabs already
+// does internally for the two real buttons.
+const aboutLinkEl = document.querySelector(".aboutlink");
 const tabsCtl = E.setupTabs({
   tablist: document.getElementById("tabstrip"),
   tabs: TAB_DEFS,
   onActivate: (key) => {
-    Object.entries(TOOLBAR_BY_TAB).forEach(([k, el]) => { el.hidden = k !== key; });
+    Object.entries(TOOLBAR_BY_TAB).forEach(([k, els]) => els.forEach(el => { el.hidden = k !== key; }));
+    aboutLinkEl.classList.toggle("active", key === "missing");
     const fn = WIDTH_DEPENDENT_RENDER[key]; if (fn) fn();
   },
 });
