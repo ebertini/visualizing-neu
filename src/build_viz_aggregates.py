@@ -50,8 +50,8 @@ Reads (locally built, optional — enriches provenance if present):
   data/processed/new_abstract_recovery.parquet  grant_ids the newer AcAn
                                           Grants export can supply abstract
                                           text for (see scripts/_check_new_abstracts.py) —
-                                          surfaced as a "recoverable" segment
-                                          on the grants-grain abstract field,
+                                          its count is surfaced as
+                                          viz_meta.json's calibration.acan_recoverable_n,
                                           not adopted into the pipeline itself
 
 Writes (docs/TopicVizPrototypes/data/, committed — the three prototype
@@ -96,6 +96,7 @@ except ImportError:  # run from within src/
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PROC = REPO_ROOT / "data" / "processed"
+NIH_NSF_BACKFILL = REPO_ROOT / "data" / "nih_nsf_backfill"     # read-only, tracked-in-git backfill artifacts
 ENRICOVIS_DATA = REPO_ROOT / "docs" / "EnricoVis" / "data"     # read-only upstream (PI's work)
 OUT_DIR = REPO_ROOT / "docs" / "TopicVizPrototypes" / "data"   # writable (this script's own output)
 
@@ -291,6 +292,47 @@ CAVEATS = [
             "The collaboration network this data can support is NEU-internal only."
         ),
     },
+    {
+        "id": "pi_copi_role",
+        "severity": "low",
+        "text": (
+            "is_pi and is_copi are mutually exclusive on every grant record — 'co-PI' "
+            "means only 'not the PI of record on this specific grant', not a team "
+            "dynamic on its own. 46 roster faculty are 'co-PI only' across every grant "
+            "they're linked to; 8 of those 46 are the sole person on every one of "
+            "their own grants, so their true PI is likely just missing from this "
+            "dataset — read the 'Co-PI only' bucket cautiously at that scale. The "
+            "grant list shown for any person includes grants in any role, while the "
+            "dollar/theme facets elsewhere on this page count PI-credited grants only "
+            "— a co-PI-only person can show real grant titles alongside '$0 as PI', "
+            "which is expected, not a bug."
+        ),
+    },
+    {
+        "id": "pi_backfill_merge",
+        "severity": "low",
+        "text": (
+            "13 of the 312 grants that had no PI at all now have one, filled in from "
+            "the NIH RePORTER / NSF Award Search backfill (already-fetched investigator "
+            "records, matched to this roster) — flagged on those grants as 'PI recovered "
+            "from NIH RePORTER / NSF Award Search records'. 10 of the 13 promote someone "
+            "already linked to that grant from co-PI to PI; the other 3 add a person not "
+            "previously linked at all, with their NEU-attribution status set to 'unknown' "
+            "rather than guessed. Every match here scored a perfect name match after "
+            "fixing a real bug in the matcher (a stray comma inflated the apparent name "
+            "difference) — a further, lower-confidence match tier was tried and rejected "
+            "after live spot-checks found real different-person name collisions in it. "
+            "299 grants still have no PI. Separately, 834 grants disclose other award-record "
+            "investigators (1,068 distinct names) who never matched any NEU faculty record "
+            "— shown on those grants' own detail card, never added to the Every PI list: "
+            "most of this population is genuinely external collaborators at other "
+            "institutions, not missing Northeastern people (NIH's institution flag is "
+            "record-level, not person-level, and mostly reflects legitimate pre-hire "
+            "attribution; NSF's cached data carries no institution signal at all) — "
+            "asserting a Northeastern affiliation for a majority-external population "
+            "would be a step backward in data honesty, not forward."
+        ),
+    },
 ]
 
 # Two per-grant "we can't attribute this" bins, used across facets.json and
@@ -473,27 +515,202 @@ def load_abstract_text(points: list[dict]) -> tuple[dict[str, str], str]:
     return {p["id"]: (text.get(str(p["id"]).strip(), "") or "").strip() for p in points}, "parquet"
 
 
-def load_pi_attrs(points: list[dict]) -> tuple[dict[str, dict], str]:
+def load_augmented_faculty_grants() -> "pd.DataFrame":
+    """faculty_grants.parquet's own [faculty_id, grant_id, is_pi, is_copi,
+    faculty_name, neu_status] rows (link_source="internal", unchanged),
+    UNIONED with a small number of backfill-derived rows that fill a PI gap
+    for grants with NO internal PI at all — this is the dashboard-only
+    merge of the NIH RePORTER / NSF Award Search backfill's investigator
+    data, deliberately never written back to faculty_grants.parquet itself
+    (that would reorder every funding-credit leaderboard outside this
+    dashboard's control, exactly why this was deferred in the first place).
+
+    Backfill rows come from investigator_faculty_proposals.parquet (NIH) /
+    investigator_faculty_proposals_nsf.parquet (NSF) in NIH_NSF_BACKFILL —
+    see scripts/_refresh_investigator_matches.py for how those are kept
+    current (a real comma-normalization bug fix to the shared matcher,
+    same FACULTY_MATCH_MIN=90 threshold as always; a LOWERED threshold was
+    tried and rejected after a spot-check found real different-person
+    collisions at 75-90 for exactly this population — e.g. "Julie Chen"
+    resolving to roster entry "CHEN, JIM JIM" — see that script's own
+    docstring for the full account) — filtered here to
+    `proposed_is_copi == False` (a resolved contact-PI match) for grants
+    where `is_pi` is never True in the internal table. Live: 13 grants.
+
+    Two distinct backfill actions, never a plain append:
+      - PROMOTE: if the matched faculty_id is already linked to that grant
+        (almost always as an existing is_copi=True row — the common case,
+        verified live: 10 of 13), flip that row's is_pi to True AND is_copi
+        to False, preserving the is_pi == ~is_copi invariant the "role"
+        facet and co-PI-names feature both depend on. No new row, no
+        team-size change.
+      - ADD: if the matched faculty_id has no existing link to that grant
+        at all (verified live: 3 of 13 — e.g. a grant whose only linked
+        person today is a DIFFERENT co-PI), append one new row: is_pi=True,
+        is_copi=False, neu_status="unknown" (deliberately not re-deriving
+        the real grant-start-date-vs-hire-date attribution logic for a
+        synthetic row — a documented simplification, not a silent guess).
+
+    Every promoted/added row is tagged link_source="backfill"; every
+    original row keeps link_source="internal". Every downstream loader that
+    used to read faculty_grants.parquet directly (load_pi_attrs,
+    load_colleges_per_grant, load_team_size_per_grant,
+    load_copi_names_per_grant, build_facets_pi's own by_faculty groupby)
+    reads THIS instead, so role/amt/tp/team-size/co-PI-name logic can't
+    drift out of sync about which grants actually have a PI.
+
+    Degrades to the plain internal table (link_source="internal" for
+    everything, no backfill rows) if faculty_grants.parquet or either
+    proposals parquet is missing — same honest-degrade spirit as every
+    other loader in this file.
+    """
+    import pandas as pd  # local import: keep this script runnable with json alone
+
+    cols = ["faculty_id", "grant_id", "is_pi", "is_copi", "faculty_name", "neu_status"]
+    fg_path = PROC / "faculty_grants.parquet"
+    if not fg_path.exists():
+        return pd.DataFrame(columns=cols + ["link_source"])
+
+    fg = pd.read_parquet(fg_path, columns=cols)
+    fg["faculty_id"] = fg["faculty_id"].astype(str)
+    fg["grant_id"] = fg["grant_id"].astype(str).str.strip()
+    fg["link_source"] = "internal"
+
+    prop_paths = [NIH_NSF_BACKFILL / "investigator_faculty_proposals.parquet",
+                  NIH_NSF_BACKFILL / "investigator_faculty_proposals_nsf.parquet"]
+    prop_frames = [pd.read_parquet(p, columns=["grant_id", "faculty_id", "faculty_name", "proposed_is_copi"])
+                   for p in prop_paths if p.exists()]
+    if not prop_frames:
+        return fg
+
+    proposals = pd.concat(prop_frames, ignore_index=True)
+    proposals["grant_id"] = proposals["grant_id"].astype(str).str.strip()
+    proposals["faculty_id"] = proposals["faculty_id"].astype(str)
+    # One candidate PI per grant, first-wins (verified live: no grant ever
+    # has more than one proposed_is_copi=False candidate across both
+    # sources, so "first" never actually has to break a tie today).
+    pi_candidates = proposals[~proposals["proposed_is_copi"]].drop_duplicates(subset="grant_id", keep="first")
+
+    grants_with_internal_pi = set(fg.loc[fg["is_pi"], "grant_id"])
+    gap_candidates = pi_candidates[~pi_candidates["grant_id"].isin(grants_with_internal_pi)]
+
+    existing_links = set(zip(fg["faculty_id"], fg["grant_id"]))
+    new_rows = []
+    for row in gap_candidates.itertuples(index=False):
+        if (row.faculty_id, row.grant_id) in existing_links:
+            mask = (fg["faculty_id"] == row.faculty_id) & (fg["grant_id"] == row.grant_id)
+            fg.loc[mask, "is_pi"] = True
+            fg.loc[mask, "is_copi"] = False
+            fg.loc[mask, "link_source"] = "backfill"
+        else:
+            new_rows.append({
+                "faculty_id": row.faculty_id, "grant_id": row.grant_id,
+                "is_pi": True, "is_copi": False,
+                "faculty_name": row.faculty_name, "neu_status": "unknown",
+                "link_source": "backfill",
+            })
+    if new_rows:
+        fg = pd.concat([fg, pd.DataFrame(new_rows)], ignore_index=True)
+    return fg
+
+
+def load_unmatched_investigators_per_grant() -> dict[str, list[str]]:
+    """grant_id -> deduped list of investigator names from the NIH RePORTER /
+    NSF Award Search backfill that never resolved to any roster faculty_id
+    (see load_augmented_faculty_grants's own docstring for the matcher this
+    depends on). Disclosed on the grant detail card as "other investigators
+    per official award records, not matched to an NEU faculty record" —
+    NEVER added to the Every PI roster: most of this population (~800-900
+    project-wide) is genuinely external collaborators at other institutions,
+    not missing Northeastern people (verified: NIH's is_neu_org flag is
+    record-level not person-level and its 40.9% "False" rate is mostly
+    legitimate pre-hire attribution, not noise; NSF's cached data has no
+    institution signal at all) — asserting a false Northeastern affiliation
+    for a majority-external population would be a step backward in data
+    honesty, not forward (see this project's own "external collaborators
+    are invisible, NEU-internal only" caveat).
+
+    Deliberately includes EVERY investigator on a grant (not just the
+    contact PI, and not filtered by is_neu_org — that flag isn't a reliable
+    per-person signal, per above), minus whichever ones DID resolve via
+    investigator_faculty_proposals*.parquet — so a genuine pre-hire NEU
+    co-PI on a non-NEU-org record still surfaces here if the name-matcher
+    simply didn't resolve them, rather than being silently hidden by an org
+    filter that would exclude them for the wrong reason.
+
+    Degrades to an empty dict if the raw investigator tables aren't present
+    locally.
+    """
+    nih_path = NIH_NSF_BACKFILL / "grant_nih_investigators.parquet"
+    nsf_path = NIH_NSF_BACKFILL / "grant_nsf_investigators.parquet"
+    if not (nih_path.exists() or nsf_path.exists()):
+        return {}
+
+    import pandas as pd  # local import: keep this script runnable with json alone
+
+    raw = pd.concat([pd.read_parquet(p, columns=["grant_id", "full_name"])
+                      for p in (nih_path, nsf_path) if p.exists()], ignore_index=True)
+    raw["grant_id"] = raw["grant_id"].astype(str).str.strip()
+
+    matched_paths = [NIH_NSF_BACKFILL / "investigator_faculty_proposals.parquet",
+                      NIH_NSF_BACKFILL / "investigator_faculty_proposals_nsf.parquet"]
+    matched_frames = [pd.read_parquet(p, columns=["grant_id", "full_name"]) for p in matched_paths if p.exists()]
+    matched_keys: set[tuple[str, str]] = set()
+    if matched_frames:
+        matched = pd.concat(matched_frames, ignore_index=True)
+        matched["grant_id"] = matched["grant_id"].astype(str).str.strip()
+        matched_keys = set(zip(matched["grant_id"], matched["full_name"].astype(str).str.strip()))
+
+    out: dict[str, list[str]] = {}
+    for gid, sub in raw.groupby("grant_id"):
+        seen: set[str] = set()
+        names: list[str] = []
+        for full_name in sub["full_name"]:
+            if pd.isna(full_name):
+                continue
+            name = str(full_name).strip()
+            if not name or (gid, name) in matched_keys or name in seen:
+                continue
+            seen.add(name)
+            names.append(name)
+        if names:
+            out[gid] = names
+    return out
+
+
+def load_pi_attrs(points: list[dict], fg: "pd.DataFrame | None" = None) -> tuple[dict[str, dict], str]:
     """grant_id -> {college, academic_unit, hire_date_known, neu_status, on_roster,
-    pi_name} for the grant's PI row (is_pi==True) in faculty_grants.parquet, joined to
+    pi_name, link_source} for the grant's PI row (is_pi==True), joined to
     faculty_id_lookup.parquet (college/academic_unit) and faculty.parquet
     (hire_date). A grant absent from this dict has NO PI row at all — the
     caller is responsible for mapping that to NO_PI_LABEL, not this function
     (it only reports what it found).
 
+    `fg` is the augmented faculty-grant link table (see
+    load_augmented_faculty_grants — its own docstring covers the backfill
+    merge this function is otherwise unaware of); if not passed, this
+    function loads the plain internal table itself so it still works
+    standalone (e.g. from a test), with every row reading link_source
+    "internal".
+
     Degrades honestly to an empty dict + "derived" if the parquets aren't
     built locally — every grant then reads as NO_PI_LABEL downstream, same
     spirit as load_abstract_source's fallback.
     """
-    fg_path = PROC / "faculty_grants.parquet"
     fl_path = PROC / "faculty_id_lookup.parquet"
     fac_path = PROC / "faculty.parquet"
-    if not (fg_path.exists() and fl_path.exists() and fac_path.exists()):
+    fg_path = PROC / "faculty_grants.parquet"
+    if fg is None and not fg_path.exists():
+        return {}, "derived"
+    if not (fl_path.exists() and fac_path.exists()):
         return {}, "derived"
 
     import pandas as pd  # local import: keep this script runnable with json alone
 
-    fg = pd.read_parquet(fg_path, columns=["faculty_id", "faculty_name", "grant_id", "is_pi", "neu_status"])
+    if fg is None:
+        fg = pd.read_parquet(fg_path, columns=["faculty_id", "faculty_name", "grant_id", "is_pi", "neu_status"])
+        fg = fg.copy()
+        fg["link_source"] = "internal"
     fl = pd.read_parquet(fl_path, columns=["faculty_id", "college", "academic_unit"])
     fac = pd.read_parquet(fac_path, columns=["faculty_id", "hire_date"])
 
@@ -521,11 +738,12 @@ def load_pi_attrs(points: list[dict]) -> tuple[dict[str, dict], str]:
             "neu_status": row.neu_status or "unknown",
             "on_roster": on_roster,
             "pi_name": str(row.faculty_name).strip() if pd.notna(row.faculty_name) else "",
+            "link_source": getattr(row, "link_source", "internal"),
         }
     return out, "parquet"
 
 
-def load_colleges_per_grant() -> dict[str, int]:
+def load_colleges_per_grant(fg: "pd.DataFrame | None" = None) -> dict[str, int]:
     """grant_id -> count of DISTINCT NORMALIZED roster colleges among EVERY
     person linked to that grant (PI and co-PIs alike, unlike load_pi_attrs
     above which is PI-only) — answers "how many different colleges does
@@ -540,25 +758,31 @@ def load_colleges_per_grant() -> dict[str, int]:
     NOT the raw `faculty_id_lookup.college` string. Without it, duplicate
     strings for the same real college inflated the cross-college count by
     28 grants (22%); see `_normalize_college`'s own docstring.
+
+    `fg` is the augmented faculty-grant link table (load_augmented_faculty_grants);
+    loads the plain internal table itself if not passed.
     """
-    fg_path = PROC / "faculty_grants.parquet"
     fl_path = PROC / "faculty_id_lookup.parquet"
-    if not (fg_path.exists() and fl_path.exists()):
+    fg_path = PROC / "faculty_grants.parquet"
+    if fg is None and not fg_path.exists():
+        return {}
+    if not fl_path.exists():
         return {}
 
     import pandas as pd  # local import: keep this script runnable with json alone
 
-    fg = pd.read_parquet(fg_path, columns=["faculty_id", "grant_id"])
+    if fg is None:
+        fg = pd.read_parquet(fg_path, columns=["faculty_id", "grant_id"])
     fl = pd.read_parquet(fl_path, columns=["faculty_id", "college"])
     college_by_faculty = {fid: _normalize_college(c) for fid, c in zip(fl["faculty_id"], fl["college"])}
 
-    fg = fg.copy()
+    fg = fg[["faculty_id", "grant_id"]].copy()
     fg["college"] = fg["faculty_id"].map(college_by_faculty)
     fg = fg[fg["college"].notna()]
     return fg.groupby("grant_id")["college"].nunique().to_dict()
 
 
-def load_team_size_per_grant() -> dict[str, int]:
+def load_team_size_per_grant(fg: "pd.DataFrame | None" = None) -> dict[str, int]:
     """grant_id -> count of DISTINCT people linked to that grant, any role.
 
     Deliberately NOT a count of `is_copi`-flagged rows — verified against the
@@ -572,17 +796,69 @@ def load_team_size_per_grant() -> dict[str, int]:
     genuinely solo record, matching reality. Every one of the 2,676 grants
     has at least 1 linked person (verified), so this is never 0 — "1" means
     solo, "2+" means an actual additional collaborator is on record.
+
+    `fg` is the augmented faculty-grant link table (load_augmented_faculty_grants);
+    loads the plain internal table itself if not passed. The 3 grants where
+    the backfill adds a genuinely new person (see that function's own
+    docstring) correctly show one MORE person here than the internal table
+    alone would — team size and PI credit can't drift apart for those grants.
     Degrades to an empty dict (every grant reads as 0) if the parquet isn't
     built locally, same as load_colleges_per_grant above.
     """
     fg_path = PROC / "faculty_grants.parquet"
-    if not fg_path.exists():
+    if fg is None:
+        if not fg_path.exists():
+            return {}
+        import pandas as pd  # local import: keep this script runnable with json alone
+        fg = pd.read_parquet(fg_path, columns=["faculty_id", "grant_id"])
+
+    return fg.groupby("grant_id")["faculty_id"].nunique().to_dict()
+
+
+def load_copi_names_per_grant(fg: "pd.DataFrame | None" = None) -> dict[str, list[str]]:
+    """grant_id -> deduped list of co-PI (is_copi==True) faculty_name strings
+    on that grant, in faculty_grants.parquet's own row order.
+
+    Since is_pi/is_copi are strictly mutually exclusive and jointly
+    exhaustive per row (verified: 2,368 PI rows / 776 co-PI rows, zero
+    overlap, zero neither), "everyone but the PI" and "everyone flagged
+    co-PI" are the same set for any given grant — no reconciliation with
+    load_pi_attrs (PI-only) is needed. A grant with zero PI rows at all (the
+    291-solo + 21-multi-person subset load_team_size_per_grant's docstring
+    documents) simply lists every one of its co-PI-flagged people here,
+    which is the honest reflection of the source data, not a bug.
+
+    `fg` is the augmented faculty-grant link table (load_augmented_faculty_grants)
+    — a person PROMOTED from co-PI to PI there is correctly excluded here
+    too (the augmentation flips is_copi to False on that same row, so this
+    function never has to know the promotion happened at all).
+
+    Degrades to an empty dict (every grant reads as no co-PIs) if the
+    parquet isn't built locally, same as the loaders above.
+    """
+    fg_path = PROC / "faculty_grants.parquet"
+    if fg is None and not fg_path.exists():
         return {}
 
     import pandas as pd  # local import: keep this script runnable with json alone
 
-    fg = pd.read_parquet(fg_path, columns=["faculty_id", "grant_id"])
-    return fg.groupby("grant_id")["faculty_id"].nunique().to_dict()
+    if fg is None:
+        fg = pd.read_parquet(fg_path, columns=["faculty_id", "faculty_name", "grant_id", "is_copi"])
+    copi_rows = fg[fg["is_copi"]]
+
+    out: dict[str, list[str]] = {}
+    for gid, sub in copi_rows.groupby("grant_id"):
+        seen: set[str] = set()
+        names: list[str] = []
+        for n in sub["faculty_name"]:
+            if pd.isna(n):
+                continue
+            name = str(n).strip()
+            if name and name not in seen:
+                seen.add(name)
+                names.append(name)
+        out[str(gid).strip()] = names
+    return out
 
 
 def build_college_collab(points: list[dict]) -> dict:
@@ -665,21 +941,31 @@ def build_college_collab(points: list[dict]) -> dict:
     }
 
 
-def build_facets(points: list[dict], topics: list[dict]) -> dict:
+def build_facets(points: list[dict], topics: list[dict], fg: "pd.DataFrame | None" = None) -> dict:
     """Per-grant facet table for the "every grant, arranged" unit visualization.
     Columnar/dictionary-encoded rather than an array of 2,676 objects — keeps
     the fetched JSON payload small and every column trivial to bin in d3.
     Every categorical column has a bin for missing values; no grant is ever
     dropped from a facet, by construction (see the invariant tests in
     validate()).
+
+    `fg` is the augmented faculty-grant link table (load_augmented_faculty_grants)
+    — built once by main() and threaded through here plus build_facets_pi()
+    and the standalone load_pi_attrs() call that feeds missingness, so all
+    three see the exact same backfill merge. Built here if not passed, so
+    this function still works called standalone.
     """
     from src.viz_constants import ORDER
 
     abs_src, abs_source = load_abstract_source(points)
     abs_text, abs_text_source = load_abstract_text(points)
-    pi_attrs, pi_source = load_pi_attrs(points)
-    n_colleges_by_grant = load_colleges_per_grant()
-    n_team_by_grant = load_team_size_per_grant()
+    if fg is None:
+        fg = load_augmented_faculty_grants()
+    pi_attrs, pi_source = load_pi_attrs(points, fg)
+    n_colleges_by_grant = load_colleges_per_grant(fg)
+    n_team_by_grant = load_team_size_per_grant(fg)
+    copi_names_by_grant = load_copi_names_per_grant(fg)
+    unmatched_investigators_by_grant = load_unmatched_investigators_per_grant()
     parent_of_topic = {t["id"]: _parent_index(t.get("parent")) for t in topics}
 
     ag_levels = list(ORDER)
@@ -724,6 +1010,7 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
     pi_names: list[str] = []
     n_colleges: list[int] = []
     n_team: list[int] = []
+    copi_names: list[list[str]] = []
     secondary_leaf_label: list[str | None] = []
     secondary_parent_label: list[str | None] = []
     secondary_margin: list[float | None] = []
@@ -736,7 +1023,16 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
     # are untouched.
     cols: dict[str, list[float]] = {k: [] for k in
                                      ("ag", "yr", "col", "st", "ab", "asrc", "tp", "tid", "pi", "amt", "amt_raw",
-                                      "conf", "ncol", "src", "team")}
+                                      "conf", "ncol", "src", "team", "piSrc")}
+    # Per-grant PI-link provenance — "none" (no PI at all) / "internal"
+    # (from faculty_grants.parquet, unchanged) / "backfill" (filled from the
+    # NIH RePORTER / NSF Award Search backfill, see
+    # load_augmented_faculty_grants). Structurally identical to the "asrc"
+    # column above (abstract-source provenance) — the one existing
+    # precedent this file has for a genuine row-by-row provenance field.
+    pi_src_levels = ["none", "internal", "backfill"]
+    pi_src_index = {name: i for i, name in enumerate(pi_src_levels)}
+    unmatched_investigators: list[list[str]] = []
     conf_index = {name: i for i, name in enumerate(CONF_LEVELS)}
     # How the grant's CURRENT topic (tid/tp above) was actually decided —
     # src.build_viz_data.py's assignmentSource, surfaced as its own facet so
@@ -779,6 +1075,8 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
         this_n_team = int(n_team_by_grant.get(gid, 0))
         n_team.append(this_n_team)
         cols["team"].append(team_band(this_n_team))
+        copi_names.append(copi_names_by_grant.get(gid, []))
+        unmatched_investigators.append(unmatched_investigators_by_grant.get(gid, []))
         # .get(..., "Other") rather than a bare [] — every point SHOULD already
         # carry one of the 9 ORDER buckets (build_viz_data.py's agency_bucket()
         # already defaults to "Other"), but a defensive fallback here means an
@@ -815,11 +1113,13 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
             cols["col"].append(college_idx(NO_PI_LABEL))
             cols["st"].append(st_index[NO_PI_LABEL])
             cols["pi"].append(0)
+            cols["piSrc"].append(pi_src_index["none"])
             pi_names.append("")
         else:
             cols["col"].append(college_idx(attrs["college"]))
             cols["st"].append(st_index.get(attrs["neu_status"], st_index["unknown"]))
             cols["pi"].append(1 if attrs["on_roster"] else 0)
+            cols["piSrc"].append(pi_src_index.get(attrs.get("link_source"), pi_src_index["internal"]))
             pi_names.append(attrs.get("pi_name", ""))
 
     return {
@@ -831,13 +1131,15 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
         "piNames": pi_names,
         "nColleges": n_colleges,
         "nTeam": n_team,
+        "unmatchedInvestigators": unmatched_investigators,
+        "coPiNames": copi_names,
         "secondaryLeafLabel": secondary_leaf_label,
         "secondaryParentLabel": secondary_parent_label,
         "secondaryMargin": secondary_margin,
         "hasSecondaryTheme": has_secondary_theme,
         "levels": {"ag": ag_levels, "col": col_levels, "st": st_levels, "asrc": asrc_levels,
                    "amt": amt_levels, "conf": CONF_LEVELS, "ncol": ncol_levels, "src": src_levels,
-                   "team": team_levels},
+                   "team": team_levels, "piSrc": pi_src_levels},
         "cols": cols,
         "provenance": {"abstract_source": abs_source, "pi_attrs": pi_source, "abstract_text": abs_text_source},
     }
@@ -853,7 +1155,7 @@ def _ngrants_band(n: int) -> int:
     return len(NGRANTS_BANDS) - 1
 
 
-def build_facets_pi(fac, points: list[dict], topics: list[dict]) -> dict:
+def build_facets_pi(fac, points: list[dict], topics: list[dict], fg: "pd.DataFrame | None" = None) -> dict:
     """Per-PI facet table (same columnar shape as build_facets above) for the
     "every PI" unit visualization — over all 2,247 roster faculty, not just
     the 570 who appear on a grant. That's the deliberate point: most of the
@@ -870,16 +1172,23 @@ def build_facets_pi(fac, points: list[dict], topics: list[dict]) -> dict:
     filtered to `neu_status == "earned_at_neu"` (PI feedback: "dollars earned
     from grants a PI earned AT Northeastern") — a separate facet, not a
     redefinition of amt/amt_raw, per the titleOnly/modelTitleOnly lesson.
+
+    `fg` is the augmented faculty-grant link table (load_augmented_faculty_grants,
+    built once by main() and threaded through build_facets/build_facets_pi
+    alike) — built here if not passed, so this dollars-as-PI credit picks
+    up the same backfill-sourced PI links facets.json's "piSrc" discloses,
+    rather than the two ever disagreeing about who's credited as PI.
     """
     if fac is None:
         return {"n": 0, "ids": [], "names": [], "levels": {}, "cols": {}, "grant_titles": [], "provenance": "derived"}
 
     import pandas as pd
 
-    fg_path = PROC / "faculty_grants.parquet"
-    if not fg_path.exists():
+    if fg is None:
+        fg = load_augmented_faculty_grants()
+    if fg.empty:
         return {"n": 0, "ids": [], "names": [], "levels": {}, "cols": {}, "grant_titles": [], "provenance": "derived"}
-    fg = pd.read_parquet(fg_path, columns=["faculty_id", "grant_id", "is_pi", "neu_status"])
+    fg = fg[["faculty_id", "grant_id", "is_pi", "is_copi", "neu_status"]].copy()
     fg["faculty_id"] = fg["faculty_id"].astype(str)
     fg["grant_id"] = fg["grant_id"].astype(str).str.strip()
 
@@ -890,7 +1199,7 @@ def build_facets_pi(fac, points: list[dict], topics: list[dict]) -> dict:
     names: list[str] = []
     cols: dict[str, list] = {k: [] for k in
                               ("col", "dept", "rank", "track", "tenure", "hire_yr",
-                               "status", "hasgrants", "ngrants", "amt", "amt_raw", "amt_neu", "amt_neu_raw", "tp")}
+                               "status", "hasgrants", "ngrants", "role", "amt", "amt_raw", "amt_neu", "amt_neu_raw", "tp")}
     grant_titles: list[list[str]] = []
 
     col_levels: list[str] = []
@@ -939,6 +1248,21 @@ def build_facets_pi(fac, points: list[dict], topics: list[dict]) -> dict:
     tenure_index = {k: i for i, k in enumerate(tenure_levels)}
     status_levels = ["Active", "Departed"]
     hasgrants_levels = ["No grants in this corpus", "Has grants"]
+    # is_pi/is_copi are strictly mutually exclusive and jointly exhaustive on
+    # every faculty_grants row (verified against the live corpus: 2,368 PI
+    # rows / 776 co-PI rows, zero overlap, zero neither) — so "co-PI" is only
+    # ever a PER-GRANT label, "not the PI of record on this grant," never a
+    # per-faculty fact on its own. The useful per-faculty signal is whether
+    # someone was ever PI, ever co-PI, or both across their different
+    # grants — a fixed 4-way enum, not a numeric band, so no band-table is
+    # needed the way _dollar_band/_ngrants_band use one. This closes a real
+    # gap: before this facet existed, the 46 co-PI-only faculty were silently
+    # merged into amt/tp's "No grants as PI" bin (1,736 = 1,690 no-grants +
+    # 46 co-PI-only) — indistinguishable from having no grants at all. See
+    # the "pi_copi_role" CAVEATS entry below for the known ~17% suspect rate
+    # on the "Co-PI only" bucket (8 of the 46 are solo on every one of their
+    # own grants, i.e. their true PI is likely just missing from this data).
+    role_levels = ["No grants in this corpus", "PI only", "Co-PI only", "Both PI and co-PI"]
     amt_levels = ["No grants as PI"] + [label for (_lo, _hi, label) in DOLLAR_BANDS]
     ngrants_levels = [label for (_lo, _hi, label) in NGRANTS_BANDS]  # index-parallel to _ngrants_band's return
     # Index 0 is the "no PI grants" bin (covers both "no grants at all" and
@@ -983,6 +1307,7 @@ def build_facets_pi(fac, points: list[dict], topics: list[dict]) -> dict:
         if their_grants is None or their_grants.empty:
             cols["hasgrants"].append(0)
             cols["ngrants"].append(_ngrants_band(0))
+            cols["role"].append(0)
             cols["amt"].append(0)
             cols["amt_raw"].append(0.0)
             cols["amt_neu"].append(0)
@@ -1014,6 +1339,11 @@ def build_facets_pi(fac, points: list[dict], topics: list[dict]) -> dict:
 
         cols["hasgrants"].append(1)
         cols["ngrants"].append(_ngrants_band(n_grants))
+
+        ever_pi = bool(their_grants["is_pi"].any())
+        ever_copi = bool(their_grants["is_copi"].any())
+        cols["role"].append(3 if (ever_pi and ever_copi) else 1 if ever_pi else 2 if ever_copi else 0)
+
         cols["amt_raw"].append(pi_dollars)
         if not pi_points:
             cols["amt"].append(0)
@@ -1026,7 +1356,16 @@ def build_facets_pi(fac, points: list[dict], topics: list[dict]) -> dict:
                 parent_counts[pid] = parent_counts.get(pid, 0) + 1
             dominant = max(parent_counts.items(), key=lambda kv: (kv[1], -kv[0]))[0]
             cols["tp"].append(dominant)
-        grant_titles.append([p["title"] or "" for p in pi_points][:8])
+        # ANY grant this person is linked to, any role — not just PI-credited
+        # ones. Previously sourced from `pi_points` only, so a co-PI-only
+        # faculty member (hasgrants=1) got an empty list here, and detail.js's
+        # piDetail() then falsely rendered "No grants for this person in this
+        # corpus." for someone who has real grants, just never as PI. Only
+        # affects what's DISPLAYED — amt/amt_raw/tp (PI-dollar-credit) above
+        # are unchanged, still PI-only, per the funding-credit-model caveat.
+        all_grant_ids = their_grants["grant_id"].unique().tolist()
+        all_points = [point_by_id[g] for g in all_grant_ids if g in point_by_id]
+        grant_titles.append([p["title"] or "" for p in all_points][:8])
 
     # .get(v, 1) rather than [v]: falls back to the "Unassigned" bin (index 1)
     # for a parent id PARENT_NAMES doesn't have a name for yet — e.g. right
@@ -1043,7 +1382,7 @@ def build_facets_pi(fac, points: list[dict], topics: list[dict]) -> dict:
         "levels": {
             "col": col_levels, "dept": dept_levels, "rank": rank_levels, "track": track_levels,
             "tenure": tenure_levels, "status": status_levels, "hasgrants": hasgrants_levels,
-            "ngrants": ngrants_levels, "amt": amt_levels,
+            "ngrants": ngrants_levels, "role": role_levels, "amt": amt_levels,
             "amt_neu": ["No grants earned at NEU as PI"] + [label for (_lo, _hi, label) in DOLLAR_BANDS],
             "tp": tp_levels,
         },
@@ -1056,8 +1395,11 @@ def build_facets_pi(fac, points: list[dict], topics: list[dict]) -> dict:
 def load_recoverable() -> set[str]:
     """grant_ids the newer AcAn Grants export can supply abstract text for
     (see scripts/_check_new_abstracts.py) — a diagnostic, not a pipeline
-    input, so this degrades to an empty set (no "recoverable" segment shown)
-    rather than erroring if that script hasn't been run locally."""
+    input, so this degrades to an empty set (calibration.acan_recoverable_n
+    reads as 0, not missing) rather than erroring if that script hasn't
+    been run locally. Called from build_calibration() only — the grants
+    missingness grain no longer carries this as its own "Recoverable"
+    column, repurposed to "Recovered" (the backfill's contribution) instead."""
     path = PROC / "new_abstract_recovery.parquet"
     if not path.exists():
         return set()
@@ -1085,8 +1427,8 @@ def load_faculty_roster() -> tuple["pd.DataFrame | None", "pd.DataFrame | None",
     return fac, lookup, "parquet"
 
 
-def build_missingness_grants(points: list[dict], pi_attrs: dict[str, dict], recoverable: set[str]) -> dict:
-    """Per-field known/missing/(recoverable) counts across all 2,676 grants."""
+def build_missingness_grants(points: list[dict], pi_attrs: dict[str, dict]) -> dict:
+    """Per-field known/missing/(recovered) counts across all 2,676 grants."""
     n = len(points)
     fields = []
 
@@ -1102,13 +1444,35 @@ def build_missingness_grants(points: list[dict], pi_attrs: dict[str, dict], reco
     row("dates", "Start year", sum(1 for p in points if p["year"] is not None),
         "Always recorded in this corpus.")
 
+    # abs_src is recomputed here (not threaded in as a parameter) rather than
+    # passed from build_facets — it's the exact same pure, deterministic
+    # function call over the same committed parquet, so this can't drift
+    # into a second independently-computed source of the same fact the way
+    # two different IMPLEMENTATIONS could; it's just called twice.
+    abs_src, _ = load_abstract_source(points)
     abs_known = sum(1 for p in points if not p["titleOnly"])
-    abs_recoverable = sum(
-        1 for p in points if p["titleOnly"] and str(p["id"]).strip() in recoverable
+    # How many of the KNOWN abstracts above came from the NIH RePORTER / NSF
+    # Award Search backfill rather than the original data-team upload —
+    # this table used to carry a "Recoverable" column/segment here instead,
+    # scored against the (separately tracked, tiny — see calibration.
+    # acan_recoverable_n) AcAn refresh check — barely ever populated (only
+    # this one field, at 3). Repurposed to "Recovered": a subset of KNOWN
+    # (not of missing), populated for both fields the backfill actually
+    # touched (abstract text AND, below, PI links), so the bar/table
+    # visually shows how much of what's known came from the backfill
+    # rather than the original upload.
+    abs_backfilled = sum(
+        1 for p in points
+        if abs_src.get(str(p["id"]).strip()) in ("nih_reporter", "nsf_api", "nih_reporter_parent")
     )
-    row("abstract", "Abstract text", abs_known,
-        "No abstract record matched this grant in the upload system.",
-        extra={"recoverable": abs_recoverable} if recoverable else None)
+    abs_where = "No abstract record matched this grant in the upload system."
+    if abs_backfilled:
+        abs_where += (
+            f" {abs_backfilled} of the {abs_known} known values above came from the NIH "
+            "RePORTER / NSF Award Search backfill, not the original upload."
+        )
+    row("abstract", "Abstract text", abs_known, abs_where,
+        extra={"recovered": abs_backfilled} if abs_backfilled else None)
 
     row("topic", "Topic label", sum(1 for p in points if p["dom"] not in (-1, ARTIFACT_TOPIC_ID)),
         "No curated keyword term matched this grant's text (or it has no usable text at all).")
@@ -1117,9 +1481,16 @@ def build_missingness_grants(points: list[dict], pi_attrs: dict[str, dict], reco
         attrs = pi_attrs.get(gid)
         return attrs is not None and pred(attrs)
 
-    row("pi_link", "PI matched to a grant record",
-        sum(1 for p in points if pi_attrs.get(str(p["id"]).strip()) is not None),
-        "No principal investigator record links to this grant at all.")
+    pi_known = sum(1 for p in points if pi_attrs.get(str(p["id"]).strip()) is not None)
+    pi_backfilled = sum(1 for attrs in pi_attrs.values() if attrs.get("link_source") == "backfill")
+    pi_where = "No principal investigator record links to this grant at all."
+    if pi_backfilled:
+        pi_where += (
+            f" {pi_backfilled} of the {pi_known} known values above were filled in from the "
+            "same NIH RePORTER / NSF Award Search backfill."
+        )
+    row("pi_link", "PI matched to a grant record", pi_known, pi_where,
+        extra={"recovered": pi_backfilled} if pi_backfilled else None)
     row("college", "PI's college",
         sum(1 for p in points if has(str(p["id"]).strip(), lambda a: a["on_roster"])),
         "The PI isn't on the current faculty roster snapshot (often: departed or renamed).")
@@ -1255,8 +1626,7 @@ def build_missingness_abstract_records() -> dict:
     return {"n": n, "fields": fields, "provenance": "parquet"}
 
 
-def build_missingness(points: list[dict], pi_attrs: dict[str, dict], recoverable: set[str],
-                       fac, lookup) -> dict:
+def build_missingness(points: list[dict], pi_attrs: dict[str, dict], fac, lookup) -> dict:
     """Per-field known/missing/not-applicable counts, split by grain — grants,
     PIs, and raw abstract-upload records — for the "What's missing" panel.
     Each grain has its own natural denominator; scoring PI-level gaps against
@@ -1265,7 +1635,7 @@ def build_missingness(points: list[dict], pi_attrs: dict[str, dict], recoverable
     """
     return {
         "grains": {
-            "grants": build_missingness_grants(points, pi_attrs, recoverable),
+            "grants": build_missingness_grants(points, pi_attrs),
             "pis": build_missingness_pis(fac, lookup),
             "abstract_records": build_missingness_abstract_records(),
         },
@@ -1385,7 +1755,14 @@ def build_calibration() -> dict:
     out: dict = {
         "sweep_n_runs": None, "sweep_n_beat_baseline": None, "sweep_recommendation": None,
         "llm_n_reviewed": None, "llm_n_abstained": None, "llm_n_changed_leaf": None,
+        "acan_recoverable_n": None,
     }
+
+    # How many grants the 2026-08-13 AcAn refresh could add abstract text
+    # for (scripts/_check_new_abstracts.py) — was hand-typed as a literal
+    # "3" in the About section's own prose before this, exactly the
+    # stale-number failure mode this whole function exists to avoid.
+    out["acan_recoverable_n"] = len(load_recoverable())
 
     sweep_path = REPO_ROOT / "outputs" / "bm25f_sweep.json"
     if sweep_path.exists():
@@ -1992,12 +2369,17 @@ def main() -> None:
     viz_meta = build_viz_meta(points, topics)
     topic_time = build_topic_time(points, topics)
     coverage = build_coverage(points)
-    facets = build_facets(points, topics)
-    pi_attrs, _ = load_pi_attrs(points)
-    recoverable = load_recoverable()
+    # Built ONCE, threaded through every function below that used to read
+    # faculty_grants.parquet independently — otherwise facets.json's
+    # "piSrc"/dollars-as-PI and missingness could each see a different
+    # picture of who's linked to a grant. See its own docstring for the
+    # backfill merge this represents.
+    fg = load_augmented_faculty_grants()
+    facets = build_facets(points, topics, fg)
+    pi_attrs, _ = load_pi_attrs(points, fg)
     fac, lookup, _ = load_faculty_roster()
-    facets_pi = build_facets_pi(fac, points, topics)
-    missingness = build_missingness(points, pi_attrs, recoverable, fac, lookup)
+    facets_pi = build_facets_pi(fac, points, topics, fg)
+    missingness = build_missingness(points, pi_attrs, fac, lookup)
     funnel = build_funnel()
 
     report = validate(points, topics, viz_meta, topic_time, coverage, facets, facets_pi, missingness, funnel)

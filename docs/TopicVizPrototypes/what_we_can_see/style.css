@@ -27,7 +27,7 @@ main{display:block}
    same createGrid() factory in what_we_can_see/grid.js). */
 .sectionhead{padding:20px 24px 2px;max-width:1180px;margin:0 auto}
 .sectionhead h2{margin:0 0 4px;font-size:13px;font-weight:650;letter-spacing:-.005em}
-.sectionhead .sub2{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.sectionhead .sub2{font-family:var(--mono);font-size:11px;color:var(--ink)}
 
 /* Caveats live inside the section's own text box, right after the
    drawer, rather than as a separate full-width bar (PI feedback: a
@@ -67,15 +67,14 @@ main{display:block}
 }
 .selectedgrant-panel h2{
   margin:0 0 6px;font-family:var(--mono);font-size:10.5px;font-weight:600;
-  letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+  letter-spacing:.08em;text-transform:uppercase;color:var(--ink);
 }
 .selectedgrant-panel .detailblock{max-width:none}
 .cardclose{
   position:absolute;top:8px;right:8px;width:22px;height:22px;
   display:grid;place-items:center;border:0;background:none;border-radius:0;
-  cursor:pointer;color:var(--muted);font-size:16px;line-height:1;
+  cursor:pointer;color:var(--ink);font-size:16px;line-height:1;
 }
-.cardclose:hover{color:var(--ink)}
 .cardclose:focus-visible{outline:2px solid var(--c-nsf);outline-offset:1px}
 
 /* Layered narrative: most sections lead with a plain claim (h2 + sub2)
@@ -86,7 +85,7 @@ main{display:block}
    controls dial, and the caveats row. */
 .drawer{margin-top:6px}
 .drawer summary{
-  cursor:pointer;font-family:var(--mono);font-size:10.5px;color:var(--muted);
+  cursor:pointer;font-family:var(--mono);font-size:10.5px;color:var(--ink);
   letter-spacing:.03em;list-style:none;user-select:none;
 }
 .drawer summary::-webkit-details-marker{display:none}
@@ -99,6 +98,14 @@ main{display:block}
   max-width:720px;
 }
 .drawer .drawerbody b{font-weight:650}
+/* The one inline <a> in a drawer body (the NIH RePORTER link in the
+   coverage section) had no rule targeting it at all before this pass — it
+   rendered in the browser's raw unstyled default link blue (#0000EE), not
+   even this page's own --c-nsf blue. Fixed here as part of the same
+   no-grey-text pass: black + always-on underline (not hover-only) so the
+   link is still visually distinguishable as clickable without relying on
+   any hue at all. */
+.drawer .drawerbody a{color:var(--ink);text-decoration:underline}
 /* No fixed height here on purpose — JS sets the chartwrap's height to
    match the actual bin layout each render (see grid.js's render()). A
    fixed height meant the SVG's viewBox grew taller as "Columns" produced
@@ -189,7 +196,7 @@ main{display:block}
   border:1px solid var(--hair);border-radius:0;padding:6px 8px;background:#fff;
 }
 .searchbox input:focus-visible{outline:2px solid var(--c-nsf);outline-offset:1px}
-.searchcount{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap}
+.searchcount{font-family:var(--mono);font-size:11px;color:var(--ink);white-space:nowrap}
 /* Same idea for the suggestion picker — see main.js's fitWidthToText call. */
 .suggestselect{min-width:140px}
 .markrect{cursor:pointer}
@@ -204,7 +211,7 @@ main{display:block}
 /* Selection ring — a gap around the mark rather than a stroke on it, see
    grid.js's comment on rect.selectring for why. */
 .selectring{fill:none;stroke:#0072B2;stroke-width:2.5;pointer-events:none}
-.colhdr{font-family:var(--mono);font-size:10px;fill:var(--muted)}
+.colhdr{font-family:var(--mono);font-size:10px;fill:var(--ink)}
 /* Ordinal-facet color legend (Start year): a gradient bar reads "ordered,
    low to high" in one glance where 30 flat chips would not. */
 .ramplegend{display:inline-flex;align-items:center;gap:7px}
@@ -212,7 +219,7 @@ main{display:block}
   width:150px;height:10px;border-radius:3px;border:1px solid var(--hair);
   background:linear-gradient(to right,#bcd9ec,#0072B2);
 }
-.ramplegend .end{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.ramplegend .end{font-family:var(--mono);font-size:10.5px;color:var(--ink)}
 
 /* #facettip / #missingtip need the same look as enrico.css's #tip (a
    single id-selector there, since the base kit assumed one tooltip per
@@ -227,7 +234,7 @@ main{display:block}
 }
 .tooltip.show{opacity:1;transform:none}
 .tooltip .t{font-weight:600;margin-bottom:5px;letter-spacing:-.005em}
-.tooltip .meta{font-family:var(--mono);font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.tooltip .meta{font-family:var(--mono);font-size:11px;color:var(--ink);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 
 /* markTooltip()'s HTML (.t title line + .meta rows) is reused verbatim
    in the "Selected grant"/"Selected PI" card (a STATIC, non-floating
@@ -239,7 +246,7 @@ main{display:block}
    the actual container these two <div>s render buildTooltip()+buildDetail()
    into (see grid.js's renderSelectedCard). */
 .detailblock .t{font-weight:bold;margin-bottom:5px;letter-spacing:-.005em;font-size:12.5px}
-.detailblock .meta{font-style:italic;font-family:var(--mono);font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px}
+.detailblock .meta{font-style:italic;font-family:var(--mono);font-size:11px;color:var(--ink);display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px}
 
 /* Capped height + its own scroll — an abstract or grant list can run
    long, and this card already floats over the chart rather than pushing
@@ -250,7 +257,7 @@ main{display:block}
   font-size:12px;line-height:1.55;color:var(--ink);white-space:pre-line;
   max-height:260px;overflow-y:auto;
 }
-.detailblock .abstract-empty{color:var(--muted);font-style:italic}
+.detailblock .abstract-empty{color:var(--ink);font-style:italic}
 .detailblock .abstract .grantlist{margin:0;padding-left:18px}
 .detailblock .abstract .grantlist li{margin-bottom:4px}
 
@@ -267,7 +274,7 @@ main{display:block}
    which would look out of place in this compact floating card. */
 .detailblock .grantmore{margin-top:2px}
 .detailblock .grantmore summary{
-  cursor:pointer;font-size:11.5px;color:var(--muted);list-style:none;user-select:none;
+  cursor:pointer;font-size:11.5px;font-style:italic;color:var(--ink);list-style:none;user-select:none;
 }
 .detailblock .grantmore summary::-webkit-details-marker{display:none}
 .detailblock .grantmore summary::before{content:"▸ ";display:inline-block}
@@ -279,7 +286,7 @@ main{display:block}
    list, one row per field, sorted by % missing (server-sorted in
    missingness.json). Fixed 900-wide viewBox, scales via width:100%. Also
    reused (via .missrow/.misshit) by the by-agency coverage bars below. */
-.misslegend{display:flex;gap:16px;padding:0 24px;max-width:1180px;margin:0 auto 8px;font-family:var(--mono);font-size:11px;color:var(--muted);flex-wrap:wrap}
+.misslegend{display:flex;gap:16px;padding:0 24px;max-width:1180px;margin:0 auto 8px;font-family:var(--mono);font-size:11px;color:var(--ink);flex-wrap:wrap}
 .misslegend span{display:inline-flex;align-items:center;gap:6px}
 .chiprow-label{color:var(--ink);font-weight:600}
 
@@ -333,19 +340,48 @@ main{display:block}
    "What's missing, field by field" right below it (confirmed via a
    headless-Chrome screenshot: ~230px apart at a 1400px viewport width).
    Fixed by matching the sibling sections' own 1180px outer box (so the
-   section itself lines up), and instead capping just the flowing-text
-   elements (not the section, not the bar lists/stat tiles, which benefit
-   from the extra width) at a narrower reading measure via `max-width`
-   alone, with NO margin:auto — so they align left with the headings
-   above them rather than centering independently a second time. */
+   section itself lines up).
+   Third pass (this comment, 2026-08-31): the flowing-text elements
+   (p/.lede/.aboutnote/.cavlist) were ALSO individually capped at a
+   narrower 720px reading measure, on top of the already-1180px section —
+   direct user feedback was that this read as visually broken, not just
+   narrower: the Caveats/"What we found"/other About-section text stopped
+   at roughly half the page width while its own sibling section
+   ("Why abstract coverage is so uneven") and every chart on this same page
+   use the full 1180px box with no such cap. Removed the per-element cap
+   entirely rather than adjusting its number — this page's own established
+   convention is "flowing text uses the section's full width," and a
+   narrower reading measure was never applied anywhere else on it. */
 .aboutarticle{padding:20px 24px 32px;max-width:1180px;margin:0 auto;font-size:12.5px;line-height:1.6}
 .aboutarticle .sectionhead{padding:0 0 2px;max-width:none}
-.aboutarticle .lede{font-size:12.5px;color:var(--ink);margin:4px 0 0;max-width:720px}
+.aboutarticle .lede{font-size:12.5px;color:var(--ink);margin:4px 0 0}
 .aboutarticle .lede b{font-weight:650}
-.aboutarticle p{margin:8px 0;max-width:720px}
-.aboutarticle h3{margin:20px 0 4px;font-size:13px;font-weight:650;letter-spacing:-.005em}
-.aboutarticle .aboutnote{color:var(--muted);font-size:11.5px;max-width:720px}
-.aboutarticle .cavlist{max-width:720px}
+.aboutarticle p{margin:8px 0}
+/* A plain top-level rule, not scoped to .aboutarticle — same reasoning as
+   .aboutnote below: #coveragesection's three chart titles ("Abstract
+   coverage by agency", etc.) need to read as real titles, matching the
+   weight/size already established by "Money made through the grants" and
+   its siblings, not a second, invented title style. */
+h3{margin:20px 0 4px;font-size:13px;font-weight:650;letter-spacing:-.005em}
+/* A plain top-level rule, not scoped to .aboutarticle — .aboutnote is a
+   small muted chart-caption utility ("By agency — ...", "Shared grants
+   between colleges", etc.), and #coveragesection's own three stacked,
+   previously-uncaptioned charts need the exact same convention, not a
+   second one invented for a different section. */
+.aboutnote{color:var(--ink);font-size:11.5px;font-style:italic}
+/* #coveragesection's three chart captions are direct children of the plain
+   <section> (no wrapping .aboutarticle-style box the way the About
+   section's own .aboutnote uses provide one implicitly) — without this,
+   they render flush at the true page edge while every sibling
+   .sectionhead/.chartblock in the same section sits in the standard
+   24px-padded, 1180px-centered box, visibly misaligned from the charts
+   directly below them. Same box as .chartblock/.sectionhead, not a new one. */
+#coveragesection .aboutnote{padding:0 24px;max-width:1180px;margin:0 auto;box-sizing:border-box}
+/* Same box-alignment need as .aboutnote just above, now that the three
+   chart captions are real <h3> titles instead — 3-value margin combines
+   the base h3 rule's own vertical rhythm (20px top, 4px bottom) with
+   horizontal centering in one shorthand, rather than the two colliding. */
+#coveragesection h3{padding:0 24px;max-width:1180px;margin:20px auto 4px;box-sizing:border-box}
 /* .misslegend's own padding:0 24px;max-width:1180px;margin:0 auto was
    written for use directly under a .sectionhead, not nested a second time
    inside .aboutarticle (which already applies its own 24px padding) — left
@@ -364,12 +400,15 @@ main{display:block}
 .cavgroup{margin:10px 0 18px}
 .cavgroup h4{
   margin:0 0 8px;font-family:var(--mono);font-size:10.5px;font-weight:600;
-  letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+  letter-spacing:.08em;text-transform:uppercase;color:var(--ink);
 }
-.cavgroup.sev-high h4{color:#8a4b00}
+/* Severity used to be color-coded (amber for "high"); now distinguished by
+   weight/decoration only — heavier + underlined, standing apart from the
+   base h4's 600 weight without relying on hue. */
+.cavgroup.sev-high h4{font-weight:800;text-decoration:underline}
 .cavlist{margin:0;padding-left:20px}
 .cavlist li{margin-bottom:9px}
-.sev-high li::marker{color:#8a4b00}
+.sev-high li::marker{font-weight:800}
 
 /* Stat tiles — a plain "not a chart" form for a single headline number
    (per this session's dataviz-skill check: a hero number, not a plot,
@@ -378,7 +417,7 @@ main{display:block}
 .stattiles{display:flex;flex-wrap:wrap;gap:18px 28px;margin:10px 0 16px}
 .stattile{min-width:120px}
 .stattile .v{font-family:var(--mono);font-size:20px;font-weight:650;color:var(--ink);line-height:1.1}
-.stattile .l{font-size:11px;color:var(--muted);margin-top:2px}
+.stattile .l{font-size:11px;color:var(--ink);margin-top:2px}
 
 /* Bar list — a plain horizontal bar per row, single flat accent color
    (these are single-series magnitude comparisons, not multi-category
@@ -391,7 +430,7 @@ main{display:block}
 .barrow .lbl{width:230px;flex:none;color:var(--ink);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .barrow .track{flex:1;background:#eef0f2;border-radius:2px;height:14px;position:relative}
 .barrow .fill{position:absolute;top:0;left:0;height:100%;border-radius:2px;background:var(--c-nsf)}
-.barrow .n{font-family:var(--mono);color:var(--muted);white-space:nowrap;min-width:70px}
+.barrow .n{font-family:var(--mono);color:var(--ink);white-space:nowrap;min-width:70px}
 
 /* Stage for the two About-section d3 charts (agency dumbbell, college
    matrix) — deliberately its OWN rule, not a reuse of .chartblock:
@@ -424,14 +463,14 @@ main{display:block}
   display:grid;grid-template-columns:auto 1fr;gap:4px 16px;
   font-family:var(--mono);font-size:12.5px;margin:8px 0 4px;
 }
-.modelgrid dt{color:var(--muted)}
+.modelgrid dt{color:var(--ink);font-weight:600}
 .modelgrid dd{margin:0;color:var(--ink)}
 
 #missingstage{position:relative;padding:8px 24px 32px;max-width:1180px;margin:0 auto}
 #missingchart{display:block;width:100%;overflow:visible}
 .missrow text{font-family:var(--mono);font-size:11px}
 .missrow .lbl{fill:var(--ink);font-weight:600;font-family:var(--sans)}
-.missrow .pct{fill:var(--muted)}
+.missrow .pct{fill:var(--ink)}
 .misshit{fill:transparent;cursor:pointer}
 
 /* Shared wrapper for the sortable missing-fields table and the
@@ -444,10 +483,13 @@ main{display:block}
 .misstable{width:100%;border-collapse:collapse;font-size:12px}
 .misstable th, .misstable td{padding:6px 10px;text-align:left;border-bottom:1px solid var(--hair)}
 .misstable th{
-  font-family:var(--mono);font-size:10.5px;color:var(--muted);font-weight:600;
+  font-family:var(--mono);font-size:10.5px;color:var(--ink);font-weight:600;
   letter-spacing:.03em;cursor:pointer;user-select:none;white-space:nowrap;
 }
-.misstable th.sorted{color:var(--ink)}
+/* Which column is sorted used to be shown by color alone (ink vs. muted);
+   now the ▲/▼ arrow appended to the header text (missing.js) is the only
+   indicator, reinforced with extra weight rather than a second hue. */
+.misstable th.sorted{font-weight:800}
 .misstable th:focus-visible{outline:2px solid var(--c-nsf);outline-offset:-2px}
 .misstable td.num, .misstable th.num{font-family:var(--mono);text-align:right}
 .misstable tbody tr:hover{background:#f8f9fa}
@@ -459,11 +501,39 @@ main{display:block}
 #funnelchart{display:block;width:100%;overflow:visible}
 .funnelbar text{font-family:var(--mono);font-size:11px}
 .funnelbar .lbl{fill:var(--ink);font-weight:600;font-family:var(--sans)}
-.funnelbar .n{fill:var(--muted)}
-.funnelloss{font-family:var(--mono);font-size:10.5px;fill:var(--muted)}
+.funnelbar .n{fill:var(--ink)}
+.funnelloss{font-family:var(--mono);font-size:10.5px;font-style:italic;fill:var(--ink)}
 .funnelhit{fill:transparent;cursor:pointer}
 .branchlabel{font-size:12px;font-weight:650;fill:var(--ink);font-family:var(--sans)}
 .segseglabel{font-family:var(--mono);font-size:9.5px;fill:#fff}
 
 .rowlabel{font-family:var(--mono);font-size:10.5px;fill:var(--ink)}
-.rowlabel .n{fill:var(--muted)}
+.rowlabel .n{font-style:italic;fill:var(--ink)}
+
+/* No-grey-text pass (2026-08-31): every text color on this page becomes
+   var(--ink), differentiated only by weight/style/family/size/case —
+   never hue. Most of this page's own rules were edited in place above;
+   these are overrides of rules DEFINED in shared/enrico.css (header .sub,
+   the dock's .card h2, the Grants/PIs/Abstract-records .segmented control,
+   the tab strip, the coverage-caveats row, and every chart's .axis text) —
+   scoped here rather than edited in enrico.css itself, since enrico.css is
+   ALSO loaded by topic_flow.html, which this request didn't touch. Safe:
+   this stylesheet is only ever linked from what_we_can_see.html (confirmed
+   topic_flow.html has no <link> to it), so these overrides can never leak
+   onto that page. Each one keeps whatever other differentiation the base
+   rule already had (mono font, size, letter-spacing, weight); only the
+   color/fill changes. */
+header .sub{color:var(--ink)}
+.card h2{color:var(--ink)}
+.segmented button{color:var(--ink)}
+.tab{color:var(--ink)}
+.caveats{color:var(--ink)}
+/* Was color:#8a4b00 (amber) in enrico.css — bold instead, matching the
+   same substitution made for .cavgroup.sev-high above. */
+.caveats .sev-high{color:var(--ink);font-weight:700}
+.axis text{fill:var(--ink)}
+/* header .sub a (the "About this data" link, enrico.css) was the site's
+   blue accent color, resting text-decoration:none — the only cue it was a
+   link was the hover-underline. Black + always-on underline instead, same
+   substitution as the drawerbody link above. */
+header .sub a{color:var(--ink);text-decoration:underline}

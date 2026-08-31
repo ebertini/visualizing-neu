@@ -49,12 +49,24 @@ export function grantTooltip(i) {
   const srcNote = srcName === "unassigned"
     ? `<div class="meta">⚠ Unassigned — no confident topic</div>`
     : "";
+  // PI-link provenance — only disclosed when the PI came from an external
+  // backfill, not the original dataset (same "only flag genuine gaps, not
+  // the common case" rule srcNote above already follows). FACETS.cols.piSrc
+  // is a levels-enum column ("none"/"internal"/"backfill") built by
+  // load_augmented_faculty_grants(); see that function's own docstring for
+  // the NIH RePORTER / NSF Award Search merge this represents.
+  const piSrcIdx = FACETS.cols.piSrc ? FACETS.cols.piSrc[i] : 1;
+  const piSrcName = FACETS.levels.piSrc ? FACETS.levels.piSrc[piSrcIdx] : "internal";
+  const piSrcNote = piSrcName === "backfill"
+    ? `<div class="meta">PI recovered from NIH RePORTER / NSF Award Search records, not the original dataset</div>`
+    : "";
   return `<div class="t">${E.esc(title || "(no title on record)")}</div>` +
     `<div class="meta">${E.esc(piName || "PI not on record")} · ${E.fmtAmt(FACETS.cols.amt_raw[i])}</div>` +
     `<div class="meta">${E.esc(agency.key)} · ${yr === -1 ? "year unknown" : yr}</div>` +
     `<div class="meta">${E.esc(college)}${collegesNote}${teamNote}</div>` +
     `<div class="meta">${hasAbs ? "Has abstract" : "Title only"} · ${E.esc(parent ? parent.name : "Unassigned")}</div>` +
     srcNote +
+    piSrcNote +
     secondary;
 }
 
@@ -94,7 +106,41 @@ function highlightMatches(text, terms) {
   return escaped.replace(combined, m => `<mark>${m}</mark>`);
 }
 
+// Co-PI names, below the tooltip's own "· team of X" line (grantTooltip's
+// output is prepended to this in the Selected-grant overlay — see grid.js's
+// renderSelectedCard: `buildTooltip(selected) + buildDetail(selected)`).
+// Gated on nTeam > 1, same "don't clutter the common case" rule as teamNote
+// above — is_pi/is_copi are mutually exclusive per row, so "everyone but the
+// PI" IS "everyone flagged co-PI" (see load_copi_names_per_grant's own
+// docstring); a solo grant (nTeam === 1) never reaches this line, so a
+// solo-labeled-"co-PI" record never shows a self-referential name here.
+// Deliberately only on the overlay's detail body, not the shared hover
+// tooltip — a variable-length name list doesn't belong on a small per-mark
+// tooltip.
+function copiNote(i) {
+  const nTeam = FACETS.nTeam ? FACETS.nTeam[i] : 1;
+  const coPis = FACETS.coPiNames ? FACETS.coPiNames[i] : [];
+  if (nTeam <= 1 || !coPis || !coPis.length) return "";
+  return `<div class="meta">Co-PIs: ${coPis.map(n => E.esc(n)).join(", ")}</div>`;
+}
+
+// Other investigators the NIH RePORTER / NSF Award Search backfill records
+// on this award who never resolved to any NEU faculty record — deliberately
+// disclosed HERE, on the specific grant they're mentioned on, and NEVER
+// added to the Every PI roster: most of this population project-wide is
+// genuinely external collaborators at other institutions, not missing
+// Northeastern people (see load_unmatched_investigators_per_grant's own
+// docstring for why). Framed as "per official award records," not as a
+// claim about anyone's institution.
+function unmatchedNote(i) {
+  const names = FACETS.unmatchedInvestigators ? FACETS.unmatchedInvestigators[i] : [];
+  if (!names || !names.length) return "";
+  return `<div class="meta">Co-PIs per official award records, not matched to an ` +
+    `NEU faculty record: ${names.map(n => E.esc(n)).join(", ")}</div>`;
+}
+
 export function grantDetail(i) {
+  const note = copiNote(i) + unmatchedNote(i);
   const text = FACETS.abstracts[i];
   if (text) {
     const terms = FACETS.matchedTerms ? FACETS.matchedTerms[i] : [];
@@ -103,14 +149,14 @@ export function grantDetail(i) {
         `found in this text (${terms.length} of them). <span class="fingerprint-terms">` +
         `${terms.map(t => E.esc(t)).join(", ")}</span></div>`
       : "";
-    return `<div class="abstract">${highlightMatches(text, terms)}</div>${fingerprint}`;
+    return `${note}<div class="abstract">${highlightMatches(text, terms)}</div>${fingerprint}`;
   }
   const reason = FACETS.cols.ab[i] === 0
     ? "this grant is title-only in the source data"
     : FACETS.provenance.abstract_text === "derived"
       ? "abstract text wasn't available when this page was built"
       : "no abstract text on record for this grant";
-  return `<div class="abstract abstract-empty">No abstract available — ${reason}.</div>`;
+  return `${note}<div class="abstract abstract-empty">No abstract available — ${reason}.</div>`;
 }
 
 export function piTooltip(i) {

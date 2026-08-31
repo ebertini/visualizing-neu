@@ -213,6 +213,20 @@ export const PI_FACET_DEFS = {
     levels: () => FACETS_PI.levels.ngrants.map((name, i, arr) =>
       ({key: i, label: name, color: E.seqColor(arr.length > 1 ? i / (arr.length - 1) : 1)})),
   },
+  // "Was this person ever a PI, ever a co-PI, or both, across their
+  // different grants?" — is_pi/is_copi are mutually exclusive PER GRANT
+  // ROW (verified: 2,368 PI rows / 776 co-PI rows, zero overlap), so
+  // "co-PI" is only ever a per-grant label; this rolls it up to the one
+  // per-faculty question that's actually answerable. Categorical, not a
+  // ramp — these are four distinct identities (no grants / PI only /
+  // co-PI only / both), not a magnitude scale. See the "pi_copi_role"
+  // caveat for the "Co-PI only" bucket's known ~17% suspect rate.
+  role: {
+    label: "PI / co-PI role", ordinal: false, legend: "chips",
+    values: () => FACETS_PI.cols.role,
+    levels: () => FACETS_PI.levels.role.map((name, i) =>
+      ({key: i, label: name, color: [NOISE, "#0072B2", "#F28E2B", "#2ca02c"][i] || NOISE})),
+  },
   amt: {
     label: "Dollars as PI", ordinal: true, legend: "chips",
     values: () => FACETS_PI.cols.amt,
@@ -243,7 +257,7 @@ export const PI_FACET_DEFS = {
       color: i === 0 ? NOISE : i === 1 ? "#9AA0A6" : TP_COLORS[(i - 2) % TP_COLORS.length]})),
   },
 };
-export const PI_ARRANGE_FACETS = ["col", "dept", "rank", "track", "tenure", "hire_yr", "status", "hasgrants", "ngrants", "amt", "amt_neu", "tp"];
+export const PI_ARRANGE_FACETS = ["col", "dept", "rank", "track", "tenure", "hire_yr", "status", "hasgrants", "ngrants", "role", "amt", "amt_neu", "tp"];
 
 // Every function below is shared by both unit-visualization grids ("Every
 // grant" over facetDefs=GRANT_FACET_DEFS/data=FACETS, "Every PI" over

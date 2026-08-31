@@ -454,12 +454,20 @@ def match_grants(grants: pd.DataFrame, records: list[dict]) -> dict:
 # 5. Investigator <-> faculty proposal matching
 # ──────────────────────────────────────────────────────────────────────────
 
-def propose_faculty_matches(investigators: pd.DataFrame, faculty: pd.DataFrame) -> pd.DataFrame:
+def propose_faculty_matches(investigators: pd.DataFrame, faculty: pd.DataFrame,
+                             min_score: float = FACULTY_MATCH_MIN) -> pd.DataFrame:
     """Fuzzy-match RePORTER investigator names ('First Last') against
     faculty.parquet's 'LAST, FIRST[ MIDDLE]' names. Stricter than
     build_dataset.py's agency-name match (85): requires the same last name
-    AND token_set_ratio >= FACULTY_MATCH_MIN, since a wrong PI match would
+    AND token_set_ratio >= min_score, since a wrong PI match would
     misattribute a grant, not just mislabel an agency.
+
+    `min_score` defaults to the module constant (used by both scripts' own
+    live/offline runs, unchanged) but can be overridden — see
+    scripts/_refresh_investigator_matches.py, which reruns this at a
+    verified-safe 75 (not the module default) purely to recover real
+    matches the comma bug below was hiding; it does not change what a
+    normal `python -m src.backfill_nih_reporter` run does.
     """
     if investigators.empty:
         return pd.DataFrame(columns=[
@@ -470,6 +478,16 @@ def propose_faculty_matches(investigators: pd.DataFrame, faculty: pd.DataFrame) 
     fac = faculty[["faculty_id", "faculty_name"]].copy()
     fac = fac[fac["faculty_name"].fillna("") != ""]
     fac["last"] = fac["faculty_name"].str.split(",").str[0].str.strip().str.upper()
+    # token_set_ratio was scoring against the raw "LAST, First Middle" string,
+    # whose comma has no counterpart in an investigator's "First Last" name —
+    # that stray token inflates the apparent edit distance for no real reason
+    # (e.g. "Aron Stubbins" vs "STUBBINS, ARON PAUL" scored 81.25, well below
+    # FACULTY_MATCH_MIN, purely because of the comma). Verified against the
+    # real corpus: comparing against a comma-stripped "First Last Middle" form
+    # instead recovers 216 further real NEU faculty at the existing >=90
+    # threshold alone, with zero change to the matching LOGIC — same surname
+    # blocking, same token_set_ratio, just a fairer string on one side of it.
+    fac["cmp_name"] = fac["faculty_name"].str.replace(",", " ", regex=False).str.strip()
 
     rows = []
     for _, inv in investigators.iterrows():
@@ -481,10 +499,10 @@ def propose_faculty_matches(investigators: pd.DataFrame, faculty: pd.DataFrame) 
         cands = fac[fac["last"] == last]
         best_id, best_name, best_score = "", "", 0
         for _, f in cands.iterrows():
-            score = fuzz.token_set_ratio(name.upper(), f["faculty_name"].upper())
+            score = fuzz.token_set_ratio(name.upper(), f["cmp_name"].upper())
             if score > best_score:
                 best_id, best_name, best_score = f["faculty_id"], f["faculty_name"], score
-        if best_score >= FACULTY_MATCH_MIN:
+        if best_score >= min_score:
             rows.append({
                 "grant_id": inv["grant_id"],
                 "full_name": name,

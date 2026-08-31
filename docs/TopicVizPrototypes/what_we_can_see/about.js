@@ -353,6 +353,67 @@ function renderCollabMatrix(cc) {
   }
 }
 
+// ---------- What the NIH RePORTER / NSF Award Search backfill added ----------
+// A highlight the user asked for explicitly, separate from the two MAIN
+// showcases above — computed client-side from FACETS (already loaded),
+// same anti-stale-number discipline as everything else in this file.
+// Covers both backfills that exist: abstract TEXT (asrc column) and PI
+// IDENTITY (piSrc column, from this session's investigator-matching merge —
+// see load_augmented_faculty_grants's own docstring in build_viz_aggregates.py).
+function renderBackfillHighlight() {
+  const asrcLevels = FACETS.levels.asrc;
+  let backfilledAbstracts = 0, haveAbstractBefore = 0;
+  for (let i = 0; i < FACETS.n; i++) {
+    const name = asrcLevels[FACETS.cols.asrc[i]];
+    if (name === "nih_reporter" || name === "nsf_api" || name === "nih_reporter_parent") backfilledAbstracts++;
+    if (name === "internal" || name === "orphan_recovered") haveAbstractBefore++;
+  }
+  const haveAbstractNow = FACETS.cols.ab.reduce((s, v) => s + v, 0);
+
+  const piSrcLevels = FACETS.levels.piSrc || [];
+  let piBackfillCount = 0;
+  if (FACETS.cols.piSrc) {
+    for (let i = 0; i < FACETS.n; i++) {
+      if (piSrcLevels[FACETS.cols.piSrc[i]] === "backfill") piBackfillCount++;
+    }
+  }
+  let grantsWithUnmatched = 0;
+  const unmatchedNames = new Set();
+  if (FACETS.unmatchedInvestigators) {
+    for (let i = 0; i < FACETS.n; i++) {
+      const list = FACETS.unmatchedInvestigators[i];
+      if (list && list.length) {
+        grantsWithUnmatched++;
+        list.forEach(n => unmatchedNames.add(n));
+      }
+    }
+  }
+
+  document.getElementById("backfillIntro").innerHTML =
+    `Two separate NIH RePORTER / NSF Award Search backfills recovered real data this ` +
+    `pipeline didn't otherwise have — abstract text, and (later) grant PI identity:`;
+
+  document.getElementById("backfillStats").innerHTML = [
+    stattile(backfilledAbstracts.toLocaleString(), "grants gained real abstract text from the backfill"),
+    stattile(`${E.fmtPct(haveAbstractBefore / FACETS.n, 1)} → ${E.fmtPct(haveAbstractNow / FACETS.n, 1)}`,
+      "abstract coverage, before → after"),
+    stattile(piBackfillCount.toLocaleString(), "grants gained a PI that had none before"),
+    stattile(grantsWithUnmatched.toLocaleString(), `grants disclose other named investigators (${unmatchedNames.size.toLocaleString()} distinct people) not matched to an NEU faculty record`),
+  ].join("");
+
+  // acan_recoverable_n is computed (not hand-typed) from
+  // data/processed/new_abstract_recovery.parquet — see build_calibration's
+  // own docstring for why: a literal "3" here was exactly the stale-number
+  // failure mode this file's other numbers all avoid.
+  const acanN = VIZ_META.calibration ? VIZ_META.calibration.acan_recoverable_n : null;
+  document.getElementById("backfillNote").textContent = (acanN != null)
+    ? `A separate, much smaller check: a refreshed abstract export the data team provided later ` +
+      `(2026-08-13) was compared against what's already here — it would only add ${acanN} more ` +
+      `grants' worth of text, too small to justify re-running the topic model over, so it was ` +
+      `never adopted.`
+    : "";
+}
+
 // ---------- Supporting "what we found" summary ----------
 // The strongest, cheapest-to-verify findings from this session's own
 // calibration work — deliberately a short list, not everything the review
@@ -447,6 +508,7 @@ export function initAboutSection() {
   renderHeadline();
   renderMoney();
   renderCollaboration();
+  renderBackfillHighlight();
   renderFindings();
   renderCaveats();
 }

@@ -145,9 +145,12 @@ function renderCliff(){
 // Three grains, one at a time (PI feedback: split by grants vs. PIs rather
 // than one flat list) — each scored against its OWN population (2,676
 // grants / 2,247 roster faculty / 8,075 raw abstract-upload records), never
-// against a shared 2,676. A field with a "recoverable" count (currently
-// only "Abstract text", from scripts/_check_new_abstracts.py) gets a third
-// bar segment — recoverable grants are a SUBSET of "missing", not additional.
+// against a shared 2,676. A field with a "recovered" count (currently
+// "Abstract text" and "PI matched to a grant record", both filled in by the
+// NIH RePORTER / NSF Award Search backfill — see build_viz_aggregates.py's
+// build_missingness_grants) gets a third bar segment — recovered values are
+// a SUBSET of "known" (how much of what's known came from the backfill
+// rather than the original upload), not additional on top of it.
 let missGrain = "grants";
 const MISS_GRAIN_LABELS = {grants: "grants", pis: "faculty on the current roster", abstract_records: "raw abstract-upload records"};
 
@@ -170,10 +173,19 @@ function renderMissingness(){
 
   fields.forEach((f, i) => {
     const n = grain.n || 1;
-    const recoverable = Math.min(f.recoverable || 0, f.missing);
-    const stillMissing = f.missing - recoverable;
-    const wKnown = barW * (f.known / n), wRec = barW * (recoverable / n),
-          wMiss = barW * (stillMissing / n), wNA = barW * (f.na / n);
+    // "Recovered" is a SUBSET OF KNOWN (how much of what's known came from
+    // the NIH RePORTER / NSF Award Search backfill rather than the
+    // original upload) — not a subset of missing. This used to be a
+    // "Recoverable" segment carved out of MISSING instead (a forward-
+    // looking, barely-ever-populated forecast from a separate, tiny,
+    // never-adopted AcAn check — see calibration.acan_recoverable_n for
+    // that number now). Repurposed because it was populated for one field
+    // out of ten; "recovered" is populated for two (abstract text, PI
+    // link) and shows something that already happened, not a hypothetical.
+    const recovered = Math.min(f.recovered || 0, f.known);
+    const originalKnown = f.known - recovered;
+    const wKnown = barW * (originalKnown / n), wRec = barW * (recovered / n),
+          wMiss = barW * (f.missing / n), wNA = barW * (f.na / n);
     const g = svg4.append("g").attr("class", "missrow").attr("transform", `translate(0,${top + i * rowH})`);
 
     g.append("text").attr("class", "lbl").attr("x", 0).attr("y", rowH / 2 + 4).text(f.label);
@@ -202,7 +214,7 @@ function renderMissingness(){
         missTip.show(
           `<div class="t">${E.esc(f.label)}</div>` +
           `<div class="meta">${f.known.toLocaleString()} known (${E.fmtPct(f.known / n)})</div>` +
-          (recoverable > 0 ? `<div class="meta">${recoverable.toLocaleString()} recoverable from a newer data export</div>` : "") +
+          (recovered > 0 ? `<div class="meta">${recovered.toLocaleString()} of those recovered via the NIH RePORTER / NSF Award Search backfill</div>` : "") +
           `<div class="meta">${f.missing.toLocaleString()} missing (${E.fmtPct(f.missing / n)})</div>` +
           (f.na > 0 ? `<div class="meta">${f.na.toLocaleString()} not applicable</div>` : ""),
           ev.clientX, ev.clientY);
@@ -220,7 +232,7 @@ const MISS_TABLE_COLS = [
   {key: "known", label: "Known", num: true},
   {key: "missing", label: "Missing", num: true},
   {key: "pct", label: "% missing", num: true},
-  {key: "recoverable", label: "Recoverable", num: true},
+  {key: "recovered", label: "Recovered", num: true},
   {key: "where", label: "Where the gap comes from", num: false},
 ];
 function renderMissingTable(grain){
@@ -229,7 +241,7 @@ function renderMissingTable(grain){
 
   function draw(){
     const rows = grain.fields
-      .map(f => ({...f, pct: grain.n ? f.missing / grain.n : 0, recoverable: f.recoverable || 0}))
+      .map(f => ({...f, pct: grain.n ? f.missing / grain.n : 0, recovered: f.recovered || 0}))
       .sort((a, b) => (a[sortKey] > b[sortKey] ? 1 : a[sortKey] < b[sortKey] ? -1 : 0) * sortDir);
     el.innerHTML = `<table class="misstable"><thead><tr>` +
       MISS_TABLE_COLS.map(c => `<th data-key="${c.key}" class="${c.num ? "num" : ""}${c.key === sortKey ? " sorted" : ""}">` +
@@ -240,7 +252,7 @@ function renderMissingTable(grain){
         `<td class="num">${f.known.toLocaleString()}</td>` +
         `<td class="num">${f.missing.toLocaleString()}</td>` +
         `<td class="num">${E.fmtPct(f.pct)}</td>` +
-        `<td class="num">${f.recoverable ? f.recoverable.toLocaleString() : "—"}</td>` +
+        `<td class="num">${f.recovered ? f.recovered.toLocaleString() : "—"}</td>` +
         `<td>${E.esc(f.where || "")}</td>` +
         `</tr>`).join("") +
       `</tbody></table>`;
