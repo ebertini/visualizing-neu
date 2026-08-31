@@ -160,6 +160,9 @@ This is the most relevant metric for analysis purposes:
 **Questions for data team:**
 - Why do 64.4% of `grants-with-abstract` rows exist without abstract text?
 - Can missing abstracts be backfilled from NSF Award Search or NIH RePORTER public APIs?
+  **Answered (2026-08-20): yes** — `src/backfill_nih_reporter.py` / `src/backfill_nsf_awards.py`
+  recovered 311 of 320 previously text-less NIH-family grants (97.2%) and 144 of 155 NSF grants
+  (92.9%) directly from the funders' own public APIs, live. See `data/nih_nsf_backfill/` and §9 below.
 - Is abstract collection mandatory for current grant submissions?
 
 ---
@@ -186,6 +189,7 @@ This is the most relevant metric for analysis purposes:
 4. **Grant abstracts:**
    - Is abstract collection mandatory for current submissions?
    - Can we backfill missing abstracts from NSF Award Search or NIH RePORTER?
+     **Answered (2026-08-20): yes, done** — see §9.
 
 5. **Additional context:**
    - Are there fields indicating grant subcategories (e.g., CAREER awards, center grants)?
@@ -255,8 +259,28 @@ next real step here — this cross-check is meant to make that decision evidence
 make it.
 
 **Where this surfaces today:** `docs/TopicVizPrototypes/what_we_can_see.html`'s "What's missing
-& where it goes" tab shows the 198 recoverable grants as a distinct segment on the "Abstract
+& where it goes" tab shows the recoverable grants as a distinct segment on the "Abstract
 text" row (known / recoverable / still missing), sourced from
 `data/processed/new_abstract_recovery.parquet`.
+
+**Update (2026-08-20) — superseded by a live NIH RePORTER / NSF Award Search backfill.**
+`src/backfill_nih_reporter.py` and `src/backfill_nsf_awards.py` now pull abstract text (and
+investigator data) directly from the funders' own public APIs, live — no longer blocked by "no
+HuggingFace network access" (that restriction was specific to the SPECTER2/BERTopic step, not
+network access in general; see `docs/TOPIC_MODEL_REFIT_CHECKLIST.md`). Adopted gap-fill-only via
+a new `src/build_dataset.py` step (`_apply_abstract_backfill`): 306 NIH + 148 NSF + 5
+`nih_reporter_parent` (a lower-trust parent-center fallback, stored but excluded from the topic-
+model fit) previously text-less grants filled — a few short of the 311/144 the backfill scripts
+themselves reported above, because this step runs BEFORE `reconcile_orphans.py` while those
+figures were measured after it; a handful of grants that `reconcile_orphans.py` would otherwise
+recover from an orphan abstract are already text-less at this earlier point too. Re-running this
+section's own cross-check
+afterward, the AcAn export's marginal value collapsed from 198 recoverable grants to **3** — it
+was almost entirely the same recovery the live funder APIs now provide directly and more
+authoritatively. Given the tiny remaining yield, adopting the AcAn export itself was dropped from
+this pass rather than building the extra plumbing (persisting its abstract text, wiring a third
+backfill source) for 3 grants; `data/processed/new_abstract_recovery.parquet` still reflects
+those 3, in case a future pass wants them. The re-fit this section flagged as the necessary next
+step is now in progress (Phase 3 of the backfill plan).
 
 ---

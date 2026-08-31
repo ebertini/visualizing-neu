@@ -1,0 +1,181 @@
+grant_id,kw_parent_label,kw_leaf_label,conf_tier,bertopic_topic_id
+1008724,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,low,8
+1028812,Environmental Science & Ecology,Predator-Prey & Rocky Intertidal Ecology,medium,-1
+1035009,Materials Science & Structural/Civil Engineering,Materials Science & Nanotechnology,low,-1
+1037087,"Computing, Networking & Robotic Systems",5G/mmWave & Cellular Wireless Communications,low,-1
+1088539,"Computing, Networking & Robotic Systems","Theoretical CS, Network & Data Science",low,9
+1089431,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,medium,-1
+1095800,Environmental Science & Ecology,Environmental Health & Ecological Restoration,high,13
+1106361,Environmental Science & Ecology,Environmental Health & Ecological Restoration,low,-1
+1108195,Environmental Science & Ecology,Groundwater/Soil Chemistry & Water Quality,medium,13
+1113526,,Unassigned,none,14
+1121286,Environmental Science & Ecology,Ocean Biogeochemistry & Carbonate Chemistry,medium,4
+1125387,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,medium,-1
+1129681,"Computing, Networking & Robotic Systems","Control Systems, Cyber-Physical Systems & Machine Learning",low,-1
+1132045,"Social Science, Public Policy & Workforce Development",Social Science & Public Policy,low,21
+1142321,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,low,23
+1143092,"Social Science, Public Policy & Workforce Development","Education, Games & Informal STEM Learning",low,-1
+1146776,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,medium,-1
+1152380,Public & Behavioral Health,Digital/Mobile Health & Behavioral Interventions,low,1
+1168098,"Computing, Networking & Robotic Systems",Computer Architecture & High-Performance Computing,medium,-1
+1168704,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,low,-1
+1171799,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,medium,0
+1181728,Biomedical Sciences,Molecular & Cellular Biomedicine,medium,11
+1199033,Biomedical Sciences,Molecular & Cellular Biomedicine,low,18
+1275571,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,medium,-1
+1281786,Biomedical Sciences,Molecular & Cellular Biomedicine,medium,0
+1287791,"Social Science, Public Policy & Workforce Development",Conference & Student Travel Awards,high,26
+131881,Biomedical Sciences,Molecular & Cellular Biomedicine,low,5
+131969,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,low,23
+1329067,Biomedical Sciences,Molecular & Cellular Biomedicine,high,-1
+1333357,"Social Science, Public Policy & Workforce Development",Social Science & Public Policy,low,16
+1337096,Public & Behavioral Health,Public Health Services & Clinical Outcomes,medium,-1
+1339792,Biomedical Sciences,Molecular & Cellular Biomedicine,medium,11
+1348894,"Computing, Networking & Robotic Systems",Energy Harvesting & Low-Power RF/Wireless Sensors,high,-1
+1348905,"Social Science, Public Policy & Workforce Development",Conference & Student Travel Awards,high,26
+1349801,Biomedical Sciences,Molecular & Cellular Biomedicine,medium,8
+1359433,Public & Behavioral Health,Digital/Mobile Health & Behavioral Interventions,low,-1
+1366686,Biomedical Sciences,Molecular & Cellular Biomedicine,low,-1
+1367913,Environmental Science & Ecology,"Hydrology, Flooding & Watershed Science",high,16
+1368241,"Social Science, Public Policy & Workforce Development","Education, Games & Informal STEM Learning",low,-1
+1457383,"Computing, Networking & Robotic Systems","Control Systems, Cyber-Physical Systems & Machine Learning",medium,-1
+1457625,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,medium,-1
+1458191,Biomedical Sciences,"Speech, Hearing & Cognitive Neuroscience",high,3
+1460062,"Computing, Networking & Robotic Systems",Computer Architecture & High-Performance Computing,low,-1
+1460531,Biomedical Sciences,Molecular & Cellular Biomedicine,low,0
+1462007,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,medium,0
+1462119,"Computing, Networking & Robotic Systems",IoT & Embedded Systems,high,-1
+1463498,"Social Science, Public Policy & Workforce Development","Faculty Development, Diversity & Institutional Partnerships",low,-1
+1464124,Biomedical Sciences,Molecular & Cellular Biomedicine,low,8
+1467616,Biomedical Sciences,Molecular & Cellular Biomedicine,medium,-1
+1468109,Materials Science & Structural/Civil Engineering,Materials Science & Nanotechnology,medium,0
+1469229,Biomedical Sciences,Molecular & Cellular Biomedicine,low,-1
+1469417,"Computing, Networking & Robotic Systems","Control Systems, Cyber-Physical Systems & Machine Learning",high,-1
+1469920,Public & Behavioral Health,Digital/Mobile Health & Behavioral Interventions,low,-1
+1476404,Biomedical Sciences,"Speech, Hearing & Cognitive Neuroscience",medium,29
+1477615,Biomedical Sciences,"Speech, Hearing & Cognitive Neuroscience",high,6
+1480127,Public & Behavioral Health,Digital/Mobile Health & Behavioral Interventions,high,20
+1483282,,Unassigned,none,2
+1484932,Biomedical Sciences,Molecular & Cellular Biomedicine,high,-1
+1492122,Environmental Science & Ecology,Groundwater/Soil Chemistry & Water Quality,medium,-1
+1498542,,Unassigned,none,-1
+1513534,Public & Behavioral Health,Digital/Mobile Health & Behavioral Interventions,high,1
+1532850,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,medium,9
+1533216,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,low,-1
+1535623,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,medium,-1
+1536837,"Social Science, Public Policy & Workforce Development","Security, Trafficking, Public Health Crisis & Disaster Resilience",low,-1
+1540349,Mathematics & Fundamental Physics,"Algebra, Geometry & Mathematical Physics",high,2
+1543045,Biomedical Sciences,Molecular & Cellular Biomedicine,low,-1
+1543196,Biomedical Sciences,Neuroscience & Neural Circuits,high,-1
+1543474,"Computing, Networking & Robotic Systems",Programming Languages & Software Engineering,medium,-1
+1545318,Materials Science & Structural/Civil Engineering,Materials Science & Nanotechnology,medium,0
+1548315,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,medium,7
+1573433,"Computing, Networking & Robotic Systems",Energy Harvesting & Low-Power RF/Wireless Sensors,low,-1
+1580210,Materials Science & Structural/Civil Engineering,Civil & Earthquake Engineering,medium,21
+1581666,"Social Science, Public Policy & Workforce Development","Faculty Development, Diversity & Institutional Partnerships",medium,0
+1588489,Biomedical Sciences,"Speech, Hearing & Cognitive Neuroscience",medium,6
+1590149,Public & Behavioral Health,Public Health Services & Clinical Outcomes,low,3
+1608501,"Social Science, Public Policy & Workforce Development","Faculty Development, Diversity & Institutional Partnerships",medium,12
+1617606,Materials Science & Structural/Civil Engineering,Materials Science & Nanotechnology,medium,0
+1625141,Mathematics & Fundamental Physics,"Algebra, Geometry & Mathematical Physics",high,2
+1626382,Biomedical Sciences,Molecular & Cellular Biomedicine,high,5
+1629989,Mathematics & Fundamental Physics,"Algebra, Geometry & Mathematical Physics",high,2
+1631426,Biomedical Sciences,"Speech, Hearing & Cognitive Neuroscience",high,6
+1641248,Environmental Science & Ecology,Predator-Prey & Rocky Intertidal Ecology,medium,4
+1646918,Biomedical Sciences,"Speech, Hearing & Cognitive Neuroscience",high,6
+1648758,Public & Behavioral Health,Digital/Mobile Health & Behavioral Interventions,medium,-1
+1657655,,Unassigned,none,2
+1658743,Public & Behavioral Health,Public Health Services & Clinical Outcomes,medium,1
+1667930,Materials Science & Structural/Civil Engineering,Materials Science & Nanotechnology,low,-1
+1668813,Mathematics & Fundamental Physics,"Algebra, Geometry & Mathematical Physics",high,2
+1669262,"Computing, Networking & Robotic Systems",IoT & Embedded Systems,high,27
+1688349,"Computing, Networking & Robotic Systems",Cryptography & Hardware Security,medium,17
+1688801,Mathematics & Fundamental Physics,"Algebra, Geometry & Mathematical Physics",high,2
+1689061,Mathematics & Fundamental Physics,"Algebra, Geometry & Mathematical Physics",high,2
+1691605,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,medium,-1
+1696269,Biomedical Sciences,"Speech, Hearing & Cognitive Neuroscience",medium,-1
+1697564,"Social Science, Public Policy & Workforce Development","Faculty Development, Diversity & Institutional Partnerships",low,-1
+1704959,"Social Science, Public Policy & Workforce Development",Social Science & Public Policy,medium,10
+1706312,"Computing, Networking & Robotic Systems",Rehabilitation Robotics & Assistive Technology,medium,3
+1722957,Materials Science & Structural/Civil Engineering,Materials Science & Nanotechnology,high,0
+1723938,"Computing, Networking & Robotic Systems",Programming Languages & Software Engineering,medium,-1
+1745157,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,medium,-1
+1761611,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,medium,-1
+1762791,Materials Science & Structural/Civil Engineering,Civil & Earthquake Engineering,high,24
+1763042,"Social Science, Public Policy & Workforce Development",Social Science & Public Policy,high,-1
+1763456,Biomedical Sciences,"Speech, Hearing & Cognitive Neuroscience",low,3
+1764713,Public & Behavioral Health,"Psychosocial Stress, Trauma & Health Disparities",medium,6
+1776746,"Computing, Networking & Robotic Systems","Control Systems, Cyber-Physical Systems & Machine Learning",medium,0
+1778141,,Unassigned,none,0
+1784807,"Computing, Networking & Robotic Systems",Cryptography & Hardware Security,high,27
+1785199,"Computing, Networking & Robotic Systems",5G/mmWave & Cellular Wireless Communications,high,7
+1785814,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,medium,-1
+1786469,"Computing, Networking & Robotic Systems",Cryptography & Hardware Security,high,-1
+1786825,Biomedical Sciences,Molecular & Cellular Biomedicine,high,5
+1788419,"Computing, Networking & Robotic Systems","Control Systems, Cyber-Physical Systems & Machine Learning",medium,-1
+211511,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,medium,14
+275873,Biomedical Sciences,Molecular & Cellular Biomedicine,high,-1
+278357,Biomedical Sciences,Molecular & Cellular Biomedicine,medium,-1
+290045,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,low,-1
+297770,Public & Behavioral Health,Digital/Mobile Health & Behavioral Interventions,medium,-1
+316566,"Social Science, Public Policy & Workforce Development",Social Science & Public Policy,medium,-1
+319213,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,medium,-1
+330286,Environmental Science & Ecology,Groundwater/Soil Chemistry & Water Quality,high,13
+334348,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,medium,24
+339361,Mathematics & Fundamental Physics,Particle Physics & High-Energy Physics,high,2
+340192,Materials Science & Structural/Civil Engineering,Materials Science & Nanotechnology,high,0
+342389,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,medium,-1
+348032,Materials Science & Structural/Civil Engineering,Materials Science & Nanotechnology,medium,-1
+356838,"Computing, Networking & Robotic Systems",Cryptography & Hardware Security,medium,-1
+359887,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,low,-1
+360485,Mathematics & Fundamental Physics,"Algebra, Geometry & Mathematical Physics",high,2
+374357,"Social Science, Public Policy & Workforce Development",Social Science & Public Policy,low,-1
+377346,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,medium,-1
+384837,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,low,-1
+386442,Mathematics & Fundamental Physics,Particle Physics & High-Energy Physics,medium,-1
+387197,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,low,-1
+387243,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,low,-1
+541110,"Computing, Networking & Robotic Systems","Control Systems, Cyber-Physical Systems & Machine Learning",low,-1
+543986,Biomedical Sciences,Molecular & Cellular Biomedicine,medium,-1
+645905,Biomedical Sciences,Molecular & Cellular Biomedicine,medium,-1
+648460,Public & Behavioral Health,Public Health Services & Clinical Outcomes,high,-1
+648545,Public & Behavioral Health,"Psychosocial Stress, Trauma & Health Disparities",medium,1
+651327,Biomedical Sciences,Molecular & Cellular Biomedicine,medium,11
+652382,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,low,17
+654845,"Social Science, Public Policy & Workforce Development",Social Science & Public Policy,high,-1
+655641,Biomedical Sciences,"Speech, Hearing & Cognitive Neuroscience",medium,6
+657392,Public & Behavioral Health,"Psychosocial Stress, Trauma & Health Disparities",low,6
+659314,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,medium,-1
+661713,"Computing, Networking & Robotic Systems",5G/mmWave & Cellular Wireless Communications,low,-1
+669079,,Unassigned,none,-1
+671276,"Social Science, Public Policy & Workforce Development",Conference & Student Travel Awards,high,26
+671593,Materials Science & Structural/Civil Engineering,Civil & Earthquake Engineering,low,24
+677946,Public & Behavioral Health,Digital/Mobile Health & Behavioral Interventions,medium,-1
+679519,Materials Science & Structural/Civil Engineering,Materials Science & Nanotechnology,high,0
+680663,Mathematics & Fundamental Physics,"Algebra, Geometry & Mathematical Physics",high,2
+682077,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,low,15
+709893,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,low,5
+714230,Environmental Science & Ecology,Groundwater/Soil Chemistry & Water Quality,low,-1
+743094,Environmental Science & Ecology,Groundwater/Soil Chemistry & Water Quality,medium,24
+747556,Public & Behavioral Health,Public Health Services & Clinical Outcomes,medium,-1
+80712,,Unassigned,none,14
+820017,Materials Science & Structural/Civil Engineering,Civil & Earthquake Engineering,medium,24
+853187,"Social Science, Public Policy & Workforce Development","Faculty Development, Diversity & Institutional Partnerships",low,5
+878188,"Social Science, Public Policy & Workforce Development","Education, Games & Informal STEM Learning",low,0
+892629,Materials Science & Structural/Civil Engineering,Materials Science & Nanotechnology,low,-1
+892917,Public & Behavioral Health,Digital/Mobile Health & Behavioral Interventions,medium,-1
+896135,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,low,-1
+896293,"Computing, Networking & Robotic Systems",Computer Architecture & High-Performance Computing,medium,17
+900571,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,medium,-1
+934039,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,medium,-1
+945794,Mathematics & Fundamental Physics,"Algebra, Geometry & Mathematical Physics",medium,2
+946395,Biomedical Sciences,"Speech, Hearing & Cognitive Neuroscience",high,3
+954799,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,low,-1
+963776,"Social Science, Public Policy & Workforce Development",Social Science & Public Policy,high,1
+971359,"Social Science, Public Policy & Workforce Development","Education, Games & Informal STEM Learning",low,-1
+973781,"Social Science, Public Policy & Workforce Development","Faculty Development, Diversity & Institutional Partnerships",high,10
+977679,"Social Science, Public Policy & Workforce Development","Faculty Development, Diversity & Institutional Partnerships",low,-1
+977746,"Computing, Networking & Robotic Systems",5G/mmWave & Cellular Wireless Communications,medium,-1
+988396,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,low,-1
+992503,"Social Science, Public Policy & Workforce Development","Security, Trafficking, Public Health Crisis & Disaster Resilience",low,1
+992506,Mathematics & Fundamental Physics,Gravitational Wave Detection & LIGO Instrumentation,high,2

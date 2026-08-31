@@ -17,6 +17,16 @@ ipykernel>=6.29
 rapidfuzz>=3.6
 python-dateutil>=2.9
 
+# NIH RePORTER / NSF Award Search backfill (src/backfill_nih_reporter.py,
+# src/backfill_nsf_awards.py)
+requests>=2.31
+
+# Phase 4c bounded LLM adjudication (src/adjudicate_low_confidence.py) —
+# optional, off by default; only needed to actually run that script. No
+# ANTHROPIC_API_KEY is set in this dev environment — see that module's
+# docstring for why no live call was attempted here.
+anthropic>=0.40
+
 # Network analysis (Week 7)
 networkx>=3.3
 python-louvain>=0.16

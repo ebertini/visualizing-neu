@@ -1,477 +1,576 @@
 {
   "_meta": {
-    "n_topics": 25
+    "n_topics": 31
   },
   "topics": {
     "0": {
-      "label": "Materials & Condensed-Matter Physics",
+      "label": "Neuroscience & Neural Circuits",
       "top_terms": [
-        "materials",
-        "quantum",
-        "magnetic",
-        "spin",
-        "energy",
-        "properties",
-        "devices",
-        "material",
-        "electronic",
-        "fundamental"
+        "neurons",
+        "neuronal",
+        "neural circuits",
+        "nervous system",
+        "synaptic",
+        "individual neurons",
+        "reconstruction",
+        "optogenetic",
+        "synapses",
+        "dendritic"
+      ],
+      "parent": "P0"
+    },
+    "1": {
+      "label": "Molecular & Cellular Biomedicine & Biotechnology",
+      "top_terms": [
+        "magnetic resonance",
+        "worm",
+        "c elegans",
+        "biochemical",
+        "molecular",
+        "cellular",
+        "therapeutic",
+        "in vivo",
+        "proteins",
+        "in vitro"
+      ],
+      "parent": "P0"
+    },
+    "2": {
+      "label": "Speech, Hearing & Cognitive Neuroscience",
+      "top_terms": [
+        "behavioral",
+        "adults",
+        "age",
+        "older",
+        "cochlear implants",
+        "dysarthria",
+        "phonological",
+        "working memory",
+        "listening",
+        "neurocognitive"
+      ],
+      "parent": "P0"
+    },
+    "3": {
+      "label": "Public Health Services & Clinical Outcomes",
+      "top_terms": [
+        "medicare",
+        "cvd",
+        "hospital",
+        "clinical",
+        "patients",
+        "public health",
+        "chronic",
+        "stress",
+        "risk",
+        "acute"
       ],
       "parent": "P1"
     },
-    "1": {
-      "label": "Machine Learning, Robotics & Cognition",
+    "4": {
+      "label": "Psychosocial Stress, Trauma & Health Disparities",
       "top_terms": [
-        "learning",
-        "brain",
-        "robots",
-        "cognitive",
-        "control",
-        "speech",
-        "human",
-        "tasks",
-        "motor",
-        "neural"
+        "immigrants",
+        "mpfc",
+        "sex-specific",
+        "amygdala",
+        "ses",
+        "fear",
+        "ptsd",
+        "aggression",
+        "victimization",
+        "adherence"
+      ],
+      "parent": "P1"
+    },
+    "5": {
+      "label": "Digital/Mobile Health & Behavioral Interventions",
+      "top_terms": [
+        "health behavior",
+        "pa",
+        "physical activity",
+        "sleep",
+        "phone",
+        "mental health",
+        "just-in-time",
+        "app",
+        "healthcare",
+        "primary care"
+      ],
+      "parent": "P1"
+    },
+    "6": {
+      "label": "Environmental Health & Ecological Restoration",
+      "top_terms": [
+        "natural environment",
+        "disturbance",
+        "restoration",
+        "environmental health",
+        "biomonitoring",
+        "community engagement core",
+        "emerging contaminants",
+        "health and justice",
+        "srp",
+        "srp centers"
+      ],
+      "parent": "P2"
+    },
+    "7": {
+      "label": "Predator-Prey & Rocky Intertidal Ecology",
+      "top_terms": [
+        "intertidal",
+        "predator effects",
+        "prey",
+        "rocky",
+        "predators",
+        "predation",
+        "reefs",
+        "trophic",
+        "environmental change",
+        "gulf of maine"
+      ],
+      "parent": "P2"
+    },
+    "8": {
+      "label": "Ocean Biogeochemistry & Carbonate Chemistry",
+      "top_terms": [
+        "calcification",
+        "dom",
+        "ecosystem services",
+        "genetic diversity",
+        "marsh",
+        "ocean acidification",
+        "organic carbon",
+        "salt marshes",
+        "tide",
+        "dissolved organic"
+      ],
+      "parent": "P2"
+    },
+    "9": {
+      "label": "Hydrology, Flooding & Watershed Science",
+      "top_terms": [
+        "flood risk",
+        "floodplain",
+        "mississippi river",
+        "sedimentary",
+        "hydrologic",
+        "flood",
+        "geomorphic",
+        "flooding",
+        "earth system",
+        "precipitation"
+      ],
+      "parent": "P2"
+    },
+    "10": {
+      "label": "Groundwater/Soil Chemistry & Water Quality",
+      "top_terms": [
+        "electrolysis",
+        "sodium",
+        "coal",
+        "north carolina",
+        "water quality",
+        "soil"
+      ],
+      "parent": "P2"
+    },
+    "11": {
+      "label": "Conference & Student Travel Awards",
+      "top_terms": [
+        "attend",
+        "student travel",
+        "travel",
+        "students to attend",
+        "acm",
+        "attending",
+        "present their work",
+        "travel support",
+        "provides travel",
+        "travel funds"
+      ],
+      "parent": "P7"
+    },
+    "12": {
+      "label": "Social Science & Public Policy",
+      "top_terms": [
+        "stakeholders",
+        "policy",
+        "government",
+        "organizations",
+        "economic",
+        "urban",
+        "society",
+        "researchers",
+        "needs",
+        "social science"
+      ],
+      "parent": "P3"
+    },
+    "13": {
+      "label": "Faculty Development, Diversity & Institutional Partnerships",
+      "top_terms": [
+        "faculty",
+        "professional development",
+        "professional",
+        "leadership",
+        "institutions",
+        "urm",
+        "recruitment",
+        "diverse",
+        "mentor",
+        "partnership"
+      ],
+      "parent": "P7"
+    },
+    "14": {
+      "label": "Education, Games & Informal STEM Learning",
+      "top_terms": [
+        "computational thinking",
+        "science learning",
+        "student learning",
+        "learners",
+        "learning tools",
+        "stem learning",
+        "systems thinking",
+        "learning activities",
+        "curricula",
+        "science education"
+      ],
+      "parent": "P3"
+    },
+    "15": {
+      "label": "Security, Trafficking, Public Health Crisis & Disaster Resilience",
+      "top_terms": [
+        "human trafficking",
+        "illicit supply networks",
+        "interdiction",
+        "trafficking networks",
+        "victims",
+        "illicit",
+        "covid-19",
+        "shortages",
+        "debris",
+        "illegal"
+      ],
+      "parent": "P3"
+    },
+    "16": {
+      "label": "Civil & Earthquake Engineering",
+      "top_terms": [
+        "steel",
+        "earthquake",
+        "collapse",
+        "earthquake engineering",
+        "performance-based",
+        "existing structures",
+        "full-scale",
+        "neesr",
+        "seismic",
+        "structural systems"
+      ],
+      "parent": "P4"
+    },
+    "17": {
+      "label": "Materials Science & Nanotechnology",
+      "top_terms": [
+        "materials",
+        "temperature",
+        "thermal",
+        "films",
+        "nanostructures",
+        "thin",
+        "fabrication",
+        "semiconductor",
+        "nanoscale",
+        "spin"
+      ],
+      "parent": "P4"
+    },
+    "18": {
+      "label": "Algebra, Geometry, Mathematical Physics & Metascience",
+      "top_terms": [
+        "categorical",
+        "cluster algebras",
+        "cohomology",
+        "commutative",
+        "elliptic",
+        "integrable systems",
+        "maurice auslander",
+        "noncommutative",
+        "noncommutative algebra",
+        "poisson"
       ],
       "parent": "P5"
     },
-    "2": {
-      "label": "Mathematics & Theoretical Physics",
-      "top_terms": [
-        "theory",
-        "physics",
-        "algebras",
-        "quantum",
-        "geometry",
-        "representation",
-        "representation theory",
-        "algebra",
-        "particle",
-        "groups"
-      ],
-      "parent": "P1"
-    },
-    "3": {
-      "label": "Molecular & Computational Biology",
-      "top_terms": [
-        "protein",
-        "proteins",
-        "dna",
-        "biological",
-        "molecular",
-        "function",
-        "biology",
-        "physics",
-        "computational",
-        "binding"
-      ],
-      "parent": "P0"
-    },
-    "4": {
-      "label": "Cancer & Drug Delivery / Therapeutics",
-      "top_terms": [
-        "cancer",
-        "tumor",
-        "delivery",
-        "drug",
-        "cells",
-        "therapeutic",
-        "therapy",
-        "vivo",
-        "drugs",
-        "intracellular"
-      ],
-      "parent": "P0"
-    },
-    "5": {
-      "label": "Marine Ecology & Biogeochemistry",
-      "top_terms": [
-        "marine",
-        "ocean",
-        "species",
-        "ecosystem",
-        "environmental",
-        "carbon",
-        "diversity",
-        "change",
-        "coastal",
-        "climate"
-      ],
-      "parent": "P2"
-    },
-    "6": {
-      "label": "Wireless Networks & Communications",
-      "top_terms": [
-        "wireless",
-        "spectrum",
-        "networks",
-        "network",
-        "ghz",
-        "5g",
-        "communication",
-        "algorithms",
-        "radio",
-        "wireless networks"
-      ],
-      "parent": "P4"
-    },
-    "7": {
-      "label": "STEM Education & Faculty/Workforce Development",
-      "top_terms": [
-        "faculty",
-        "stem",
-        "education",
-        "icorps",
-        "women",
-        "graduate",
-        "national",
-        "mentoring",
-        "innovation",
-        "node"
-      ],
-      "parent": "P7"
-    },
-    "8": {
-      "label": "Security, Privacy & Cryptography",
-      "top_terms": [
-        "security",
-        "privacy",
-        "attacks",
-        "hardware",
-        "cryptographic",
-        "secure",
-        "sidechannel",
-        "private",
-        "computation",
-        "attack"
-      ],
-      "parent": "P3"
-    },
-    "9": {
-      "label": "Public & Behavioral Health",
-      "top_terms": [
-        "health",
-        "patients",
-        "delirium",
-        "risk",
-        "intervention",
-        "care",
-        "mental",
-        "hiv",
-        "alcohol",
-        "mental health"
-      ],
-      "parent": "P6"
-    },
-    "10": {
-      "label": "Structural & Earthquake Engineering",
-      "top_terms": [
-        "wind",
-        "energy",
-        "buildings",
-        "structural",
-        "sensor",
-        "collapse",
-        "structures",
-        "sensing",
-        "earthquake",
-        "monitoring"
-      ],
-      "parent": "P1"
-    },
-    "11": {
-      "label": "Mixed / low-coherence (fisheries + thin-metadata)",
-      "top_terms": [
-        "fisheries",
-        "cholesterol",
-        "follicles",
-        "natural human",
-        "fishery",
-        "natural",
-        "ovarian",
-        "linkages",
-        "human",
-        "lobster"
-      ],
-      "parent": null
-    },
-    "12": {
-      "label": "Neurophysiology & Ion Channels",
-      "top_terms": [
-        "brain",
-        "cardiac",
-        "channel",
-        "activity",
-        "channels",
-        "neurons",
-        "neural",
-        "imaging",
-        "heart",
-        "ca2"
-      ],
-      "parent": "P0"
-    },
-    "13": {
-      "label": "Programming Languages & Formal Methods",
-      "top_terms": [
-        "software",
-        "languages",
-        "programming",
-        "language",
-        "contracts",
-        "verification",
-        "components",
-        "developers",
-        "programming languages",
-        "tools"
-      ],
-      "parent": "P3"
-    },
-    "14": {
-      "label": "Tissue Engineering & Regenerative Medicine",
-      "top_terms": [
-        "tissue",
-        "cell",
-        "stem",
-        "cells",
-        "vascular",
-        "bone",
-        "regeneration",
-        "mechanical",
-        "stem cells",
-        "collagen"
-      ],
-      "parent": "P0"
-    },
-    "15": {
-      "label": "Network Science & Complex Systems",
-      "top_terms": [
-        "networks",
-        "network",
-        "social",
-        "algorithms",
-        "complex",
-        "complex networks",
-        "dynamics",
-        "routing",
-        "graphs",
-        "computer"
-      ],
-      "parent": "P4"
-    },
-    "16": {
-      "label": "Neuropharmacology & Addiction",
-      "top_terms": [
-        "addiction",
-        "receptors",
-        "ligands",
-        "drug",
-        "receptor",
-        "abuse",
-        "novel",
-        "agonists",
-        "compounds",
-        "genetic"
-      ],
-      "parent": "P0"
-    },
-    "17": {
-      "label": "Coastal Resilience & Flood Hazards",
-      "top_terms": [
-        "water",
-        "coastal",
-        "flood",
-        "flooding",
-        "river",
-        "hurricane",
-        "sediment",
-        "drinking water",
-        "communities",
-        "natural"
-      ],
-      "parent": "P2"
-    },
-    "18": {
-      "label": "Antimicrobial & Infectious Disease",
-      "top_terms": [
-        "compounds",
-        "bacteria",
-        "microorganisms",
-        "antibiotics",
-        "drug",
-        "species",
-        "infection",
-        "lead",
-        "antimicrobial",
-        "cells"
-      ],
-      "parent": "P0"
-    },
     "19": {
-      "label": "Underwater Acoustic Networks",
+      "label": "Particle Physics & High-Energy Physics",
       "top_terms": [
-        "underwater",
-        "acoustic",
-        "ocean",
-        "marine",
-        "layer",
-        "networking",
-        "testbed",
-        "ice",
-        "physical layer",
-        "sensing"
+        "extra dimensions",
+        "higgs",
+        "higgs boson",
+        "new physics",
+        "quark",
+        "standard model",
+        "supersymmetry",
+        "theorynet",
+        "particle physics",
+        "lhc"
       ],
-      "parent": "P2"
+      "parent": "P5"
     },
     "20": {
-      "label": "Mobility, Supply Chains & Illicit Networks",
+      "label": "Gravitational Wave Detection & Observational Astrophysics",
       "top_terms": [
-        "trafficking",
-        "mobility",
-        "social",
-        "supply",
-        "urban",
-        "infrastructure",
-        "transit",
-        "human",
-        "networks",
-        "health"
+        "a+",
+        "advanced ligo",
+        "astrophysics",
+        "ccr",
+        "cosmic",
+        "gravitational wave",
+        "ligo",
+        "mirror coatings",
+        "thermal noise",
+        "gravitational"
+      ],
+      "parent": "P5"
+    },
+    "21": {
+      "label": "Control Systems, Cyber-Physical Systems & Machine Learning",
+      "top_terms": [
+        "nonlinear control",
+        "dnn",
+        "robust control",
+        "computationally tractable",
+        "dnns",
+        "distributed optimization",
+        "state estimation",
+        "systems theory",
+        "reinforcement learning",
+        "control systems"
       ],
       "parent": "P6"
     },
-    "21": {
-      "label": "Control Theory & Distributed Optimization",
-      "top_terms": [
-        "control",
-        "power",
-        "robust",
-        "optimization",
-        "framework",
-        "delays",
-        "network",
-        "distributed",
-        "uncertainty",
-        "performance"
-      ],
-      "parent": "P4"
-    },
     "22": {
-      "label": "Environmental Health Policy & Chemical Exposure",
+      "label": "Programming Languages & Software Engineering",
       "top_terms": [
-        "environmental",
-        "health",
-        "chemicals",
-        "social",
-        "environmental health",
-        "conference",
-        "labor",
-        "exposure",
-        "policy",
-        "scientists"
+        "java",
+        "software contracts",
+        "type systems",
+        "typed",
+        "software engineers",
+        "javascript",
+        "contracts",
+        "program analysis",
+        "software developers",
+        "bugs"
       ],
-      "parent": "P2"
+      "parent": "P6"
     },
     "23": {
-      "label": "Cloud & High-Performance Computing",
+      "label": "Wireless Communications, Antennas & Electromagnetic Metamaterials",
       "top_terms": [
-        "computing",
-        "cloud",
-        "storage",
-        "biomedical imaging",
-        "checkpointing",
-        "hardware",
-        "computer",
-        "biomedical",
-        "cloud computing",
-        "memory"
+        "60 ghz",
+        "cellular networks",
+        "mmwave",
+        "pawr",
+        "ultra-broadband",
+        "wireless research",
+        "5g",
+        "thz",
+        "6g",
+        "mimo"
       ],
-      "parent": "P3"
+      "parent": "P6"
     },
     "24": {
-      "label": "Learning Games & Computational Thinking",
+      "label": "Rehabilitation Robotics & Assistive Technology",
       "top_terms": [
-        "learning",
-        "game",
-        "physical activity",
-        "computer",
-        "education",
-        "narrative",
-        "computational thinking",
-        "physical",
-        "activity",
-        "thinking"
+        "gait",
+        "human-robot",
+        "knee",
+        "robots",
+        "rehabilitation",
+        "locomotion",
+        "stroke",
+        "assistive",
+        "robotics",
+        "walking"
       ],
-      "parent": "P7"
+      "parent": "P6"
+    },
+    "25": {
+      "label": "Cryptography & Hardware Security",
+      "top_terms": [
+        "fully homomorphic encryption",
+        "homomorphic",
+        "side-channel attacks",
+        "system security",
+        "information leakage",
+        "encryption",
+        "differential privacy",
+        "encrypted",
+        "hardware security",
+        "side-channel"
+      ],
+      "parent": "P6"
+    },
+    "26": {
+      "label": "Computer Architecture & High-Performance Computing",
+      "top_terms": [
+        "i/o",
+        "distributed systems",
+        "ndn",
+        "virtualization",
+        "caching",
+        "computer architecture",
+        "gpus",
+        "hpc",
+        "performance and reliability",
+        "gpu"
+      ],
+      "parent": "P6"
+    },
+    "27": {
+      "label": "Theoretical CS, Network & Data Science",
+      "top_terms": [
+        "complex networks",
+        "complexity theory",
+        "group theory",
+        "randomness",
+        "bounds",
+        "lower bounds",
+        "network dynamics",
+        "network analysis",
+        "network science",
+        "databases"
+      ],
+      "parent": "P6"
+    },
+    "28": {
+      "label": "Underwater Acoustic Communications & Marine Robotics",
+      "top_terms": [
+        "acoustic communications",
+        "acoustic waveguide remote",
+        "autonomous underwater vehicles",
+        "marine mammal",
+        "modems",
+        "ocean acoustic",
+        "ocean acoustic waveguide",
+        "underwater acoustic",
+        "underwater communication",
+        "underwater networking"
+      ],
+      "parent": "P6"
+    },
+    "29": {
+      "label": "Energy Harvesting & Low-Power RF/Wireless Sensors",
+      "top_terms": [
+        "zero-power",
+        "near-zero",
+        "rfid",
+        "wireless sensor networks",
+        "rf",
+        "ultra-low power",
+        "wireless sensor",
+        "energy harvesting",
+        "harvest",
+        "harvesting"
+      ],
+      "parent": "P6"
+    },
+    "30": {
+      "label": "IoT & Embedded Systems",
+      "top_terms": [
+        "safety and security",
+        "iot systems",
+        "embedded",
+        "latency",
+        "internet-of-things",
+        "embedded systems",
+        "iot devices",
+        "system-level",
+        "architecture",
+        "fpga"
+      ],
+      "parent": "P6"
     },
     "-1": {
-      "label": "Unassigned / noise",
+      "label": "Unassigned",
       "top_terms": [],
       "parent": null
     }
   },
   "parents": {
     "P0": {
-      "label": "Life Sciences & Biomedicine",
+      "label": "Biomedical Sciences",
       "topic_ids": [
-        3,
-        4,
-        12,
-        14,
-        16,
-        18
+        0,
+        1,
+        2
       ]
     },
     "P1": {
-      "label": "Physical Sciences & Engineering",
+      "label": "Public & Behavioral Health",
       "topic_ids": [
-        0,
-        2,
-        10
+        3,
+        4,
+        5
       ]
     },
     "P2": {
-      "label": "Environment, Ocean & Climate",
+      "label": "Environmental Science & Ecology",
       "topic_ids": [
-        5,
-        17,
-        19,
-        22
+        6,
+        7,
+        8,
+        9,
+        10
       ]
     },
     "P3": {
-      "label": "Computing & Cybersecurity",
+      "label": "Social Science, Public Policy & Education Research",
       "topic_ids": [
-        8,
-        13,
-        23
+        12,
+        14,
+        15
       ]
     },
     "P4": {
-      "label": "Networks, Signals & Control",
+      "label": "Materials Science & Structural/Civil Engineering",
       "topic_ids": [
-        6,
-        15,
-        21
+        16,
+        17
       ]
     },
     "P5": {
-      "label": "AI, Robotics & Cognition",
+      "label": "Mathematics & Fundamental Physics",
       "topic_ids": [
-        1
-      ]
-    },
-    "P6": {
-      "label": "Society, Health & Mobility",
-      "topic_ids": [
-        9,
+        18,
+        19,
         20
       ]
     },
-    "P7": {
-      "label": "Education & Learning",
+    "P6": {
+      "label": "Computing, Networking & Robotic Systems",
       "topic_ids": [
-        7,
-        24
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ]
+    },
+    "P7": {
+      "label": "Workforce Development & Institutional Partnerships",
+      "topic_ids": [
+        11,
+        13
       ]
     }
   }

@@ -1,0 +1,3167 @@
+﻿grant_id,award_num,full_name,is_contact_pi,rank_order
+1171240,9501172,David Kaeli,True,0
+1171644,9702257,John Lesko,True,0
+1171799,9701998,Albert-Laszlo Barabasi,True,0
+1172215,9703384,Gregory Abowd,True,0
+1172687,9702656,Sara Wadia-Fascetti,True,0
+1171279,9733573,Carla Brodley,True,0
+1172169,9734054,Jacqueline Isaacs,True,0
+1171382,9983901,Rajmohan Rajaraman,True,0
+330286,0093752,Akram Alshawabkeh,True,0
+332075,0096543,Dagmar Sternad,True,0
+335050,0101793,Herbert Levine,True,0
+335127,0102193,Harm Derksen,True,0
+336519,0103599,Slava Epstein,True,0
+336885,0107326,Kellee Tsai,True,0
+340645,0113236,David Madigan,True,0
+341866,0117387,Octavia Camps,True,0
+341866,0117387,Mario Sznaier,False,1
+343766,0121661,Gregory Abowd,True,0
+343766,0121661,Irfan A Essa,False,1
+343766,0121661,Aaron F Bobick,False,2
+343766,0121661,Elizabeth D Mynatt,False,3
+343766,0121661,Wendy A Rogers,False,4
+310732,0227577,Claire Duggan,True,0
+310732,0227577,Charles A DiMarzio,False,1
+326755,0010064,Matthias Felleisen,True,0
+326755,0010064,Stephen Bloch,False,1
+326755,0010064,Matthew R Flatt,False,2
+326755,0010064,Kathryn Fisler,False,3
+326755,0010064,Shriram Krishnamurthi,False,4
+341787,0116560,Seth Hutchinson,True,0
+341787,0116560,David J Kriegman,False,1
+348550,0129117,Daniel Distel,True,0
+348616,0129652,Sergey Kravchenko,True,0
+351927,0134511,Carolyn Lee-Parsons,True,0
+355378,0139967,Pran Nath,True,0
+355378,0139967,Tomasz R Taylor,False,1
+357234,0140529,Ahmed Busnaina,True,0
+360395,0204113,Gene Cooperman,True,0
+360485,0204421,Maxim Braverman,True,0
+366934,0211816,Paul Champion,True,0
+366934,0211816,J Timothy T Sage,False,1
+369930,0218314,Thomas Sheahan,True,0
+370129,0220027,ming wang,True,0
+370129,0220027,George M Lloyd,False,1
+371464,0221224,Daniel Distel,True,0
+371473,0221267,Slava Epstein,True,0
+371473,0221267,Paul Vouros,False,1
+373378,0225178,Ahmed Busnaina,True,0
+373378,0225178,George G Adams,False,1
+373378,0225178,Nathan E Israeloff,False,2
+373378,0225178,Jeffrey A Hopwood,False,3
+373378,0225178,Sinan Muftu,False,4
+373423,0225630,Herbert Levine,True,0
+373423,0225630,Kim k Baldridge,False,1
+373423,0225630,Jose N Onuchic,False,2
+373423,0225630,Michael J Holst,False,3
+373423,0225630,Wouter-Jan Rappel,False,4
+310776,0227872,Sara Wadia-Fascetti,True,0
+315986,0235398,Ennio Mingolla,True,0
+316125,0236338,John Coley,True,0
+317705,0237297,Carla Mattos,True,0
+317887,0238190,Mark Williams,True,0
+319213,0238815,Ozlem Ergun,True,0
+319498,0240265,Geoffrey Trussell,True,0
+322035,0240955,J Timothy Sage,True,0
+322035,0240955,Paul M Champion,False,1
+323905,0242449,Hanumant Singh,True,0
+323974,0242834,Tomasz Taylor,True,0
+333371,0098801,Srinivas Sridhar,True,0
+333545,0100273,David Luzzi,True,0
+333545,0100273,Louis Girifalco,False,1
+334348,0305526,Thomas Sheahan,True,0
+336375,0306269,Matthias Felleisen,True,0
+341112,0310891,David Kaeli,True,0
+341164,0311142,Alexandru Suciu,True,0
+343409,0313065,Stephen Intille,True,0
+343409,0313065,Kent Larson,False,1
+343409,0313065,Joseph Paradiso,False,2
+343422,0313183,Edmund Yeh,True,0
+352053,0135303,Mary Jo Ondrechen,True,0
+354213,0322352,Lisa Feldman Barrett,True,0
+354377,0323364,Brian Helmuth,True,0
+354463,0323856,James Benneyan,True,0
+360778,0330286,Sagar Kamarthi,True,0
+362490,0331941,Ahmed Busnaina,True,0
+362490,0331941,Glen P Miller,False,1
+362490,0331941,Carol Barry,False,2
+362490,0331941,Joey L Mead,False,3
+364490,0335574,Carla Brodley,True,0
+368238,0339108,Haris Koutsopoulos,True,0
+311212,0347532,Jennifer Dy,True,0
+311249,0347712,Blair MacIntyre,True,0
+311370,0348341,Slava Epstein,True,0
+312166,0441089,Albert-Laszlo Barabasi,True,0
+313311,0348819,Yang Zhang,True,0
+313347,0349019,Harm Derksen,True,0
+314789,0350691,Phil Brown,True,0
+317419,0353232,Pran Nath,True,0
+318108,0446030,Carla Brodley,True,0
+318448,0447987,Emanuela Barberis,True,0
+324902,0451464,ming wang,True,0
+325044,0401869,Phil Brown,True,0
+327436,0404114,Jacqueline Isaacs,True,0
+327436,0404114,Richard Czerw,False,1
+330853,0405670,Jonathan Weitsman,True,0
+330955,0406057,Milen Yakimov,True,0
+344421,0415469,George ODoherty,True,0
+346735,0417413,Panagiotis Manolios,True,0
+346735,0417413,J Strother Moore,False,1
+346735,0417413,Olin G Shivers,False,2
+352386,0421383,Susan Spencer,True,0
+352386,0421383,Rebecca K Willits,False,1
+352386,0421383,James Churchill,False,2
+352534,0422022,Carol Livermore,True,0
+357954,0424066,Gavin Shatkin,True,0
+360902,0425795,Daniel Distel,True,0
+360910,0425826,Ahmed Busnaina,True,0
+360910,0425826,Nicol E McGruer,False,1
+360910,0425826,Glen P Miller,False,2
+360910,0425826,Carol Barry,False,3
+360910,0425826,Joey L Mead,False,4
+361057,0426737,Albert-Laszlo Barabasi,True,0
+361154,0427502,Milica Stojanovic,True,0
+361225,0428122,Hanumant Singh,True,0
+361225,0428122,Susan E Humphris,False,1
+361225,0428122,Dana R Yoerger,False,2
+361225,0428122,Timothy M Shank,False,3
+361225,0428122,Robert A Sohn,False,4
+363067,0428737,Hanumant Singh,True,0
+363067,0428737,Jean K Whelan,False,1
+363067,0428737,Brian S Bingham,False,2
+363067,0428737,Richard Camilli,False,3
+363067,0428737,Hanumant Singh,False,4
+363163,0429365,David Lazer,True,0
+363163,0429365,Jane E Fountain,False,1
+363194,0429595,Matthias Felleisen,True,0
+363240,0429924,Panagiotis Manolios,True,0
+363296,0430276,Cristina Nita-Rotaru,True,0
+368389,0341080,Patricia Mabrouk,True,0
+368389,0341080,Alicia K Russell,False,1
+369396,0612444,Daniel Distel,True,0
+370581,0342555,David Kaeli,True,0
+370581,0342555,Gene Cooperman,False,1
+312484,0443233,Marvin Miller,True,0
+312484,0443233,Thomas P Fehlner,False,1
+312484,0443233,Bradley D Smith,False,2
+312484,0443233,Slavi C Sevov,False,3
+312484,0443233,Kenneth W Henderson,False,4
+313044,0520075,Milica Stojanovic,True,0
+315120,0443616,Graham Jones,True,0
+315120,0443616,Phyllis R Strauss,False,1
+315120,0443616,Don Heiman,False,2
+315120,0443616,David E Budil,False,3
+315120,0443616,Sanjeev Mukerjee,False,4
+320231,0524835,Deniz Erdogmus,True,0
+320231,0524835,M. Misha Pavel,False,1
+320231,0524835,Eric A Wan,False,2
+323258,0400676,Carmine Vittoria,True,0
+323258,0400676,Shaheen M Islam,False,1
+323258,0400676,Vincent G Harris,False,2
+323281,0400760,Ali Abur,True,0
+323292,0400819,Jennifer Bowen,True,0
+323698,0555025,John Logan,True,0
+323698,0555025,Phil Brown,False,1
+323698,0555025,Steven P Hamburg,False,2
+323698,0555025,John F Mustard,False,3
+323698,0555025,Rachel Morello-Frosch,False,4
+324603,0450218,Dagmar Sternad,True,0
+325289,0403026,Sergey Kravchenko,True,0
+328907,0527440,Lisa Feldman Barrett,True,0
+328907,0527440,Jon Horvitz,False,1
+329004,0527912,Kai-tak Wan,True,0
+331664,0454126,David Madigan,True,0
+333704,0529320,ming wang,True,0
+333704,0529320,J. E Indacochea,False,1
+333811,0530151,Don DeGroot,True,0
+333811,0530151,Thomas C Sheahan,False,1
+333811,0530151,Jason T DeJong,False,2
+333811,0530151,Brian McAdoo,False,3
+333811,0530151,Laurie G Baise,False,4
+333864,0530756,Gregory Deierlein,True,0
+333864,0530756,Jerome F Hajjar,False,1
+333864,0530756,Sarah L Billington,False,2
+333923,0531127,Julie Chen,True,0
+333923,0531127,Teiichi Ando,False,1
+333923,0531127,Hongwei Sun,False,2
+333923,0531127,Charalabos C Doumanidis,False,3
+334587,0601258,Mehrdad Sasani,True,0
+335467,0456304,Arun Bansil,True,0
+335467,0456304,Marta J Hersek,False,1
+335467,0456304,Nicholas A Gross,False,2
+335531,0456568,Pran Nath,True,0
+337579,0532223,Lee Freitag,True,0
+337579,0532223,Milica Stojanovic,False,1
+337601,0532387,Stanley Wasserman,True,0
+337601,0532387,Noshir S Contractor,False,1
+337601,0532387,Albert-Laszlo Barabasi,False,2
+337601,0532387,Katy Borner,False,3
+337601,0532387,Alessandro Vespignani,False,4
+339361,0457001,Stephen Reucroft,True,0
+339361,0457001,John D Swain,False,1
+339361,0457001,Darien R Wood,False,2
+339362,0457002,Srinivas Sridhar,True,0
+341987,0501166,Mario Sznaier,True,0
+341987,0501166,Constantino M Lagoa,False,1
+342389,0534315,Blair MacIntyre,True,0
+342389,0534315,Jay D Bolter,False,1
+342389,0534315,Richard Catrambone,False,2
+342389,0534315,Maribeth G Coleman,False,3
+343316,0312558,Octavia Camps,True,0
+343316,0312558,Mario Sznaier,False,1
+343316,0312558,George Kesidis,False,2
+345220,0125668,David Luzzi,True,0
+345220,0125668,Eduardo D Glandt,False,1
+345220,0125668,David J Graves,False,2
+345220,0125668,Sally D Solomon,False,3
+345220,0125668,Ali A Houshmand,False,4
+345914,0504331,Srinivas Sridhar,True,0
+345914,0504331,Mary Jo Ondrechen,False,1
+345914,0504331,Sanjeev Mukerjee,False,2
+345914,0504331,Mansoor M Amiji,False,3
+345914,0504331,Jeffrey W Ruberti,False,4
+345914,0504331,Gilda A Barabino,False,5
+345952,0504557,Eduardo Sontag,True,0
+346532,0537056,Jacqueline Isaacs,True,0
+346532,0537056,Thomas P Cullinane,False,1
+346532,0537056,Donna Qualters,False,2
+346955,0537537,Moneesh Upmanyu,True,0
+349042,0505599,David Madigan,True,0
+349244,0506661,Robert Hurt,True,0
+349244,0506661,Agnes B Kane,False,1
+349244,0506661,Phil Brown,False,2
+349244,0506661,Gregory P Crawford,False,3
+349244,0506661,Jeffrey Morgan,False,4
+355474,0540902,Carla Brodley,True,0
+355658,0541707,Jeffrey Ruberti,True,0
+356693,0509719,Victoria Bolotina,True,0
+356693,0509719,Diomedes Logothetis,False,1
+356729,0509894,M. K. Yegian,True,0
+356729,0509894,Akram N Alshawabkeh,False,1
+356738,0509935,Rupal Patel,True,0
+363430,0513650,Katy Borner,True,0
+363430,0513650,Stanley Wasserman,False,1
+363430,0513650,Albert-Laszlo Barabasi,False,2
+363430,0513650,Alessandro Vespignani,False,3
+363430,0513650,Santiago Schnell,False,4
+363439,0513699,Alexander Kabanov,True,0
+363439,0513699,Tatiana K Bronich,False,1
+369750,0517292,Mary Jo Ondrechen,True,0
+371787,0629887,Ali Abur,True,0
+372253,0345713,Kenneth Henderson,True,0
+373618,0438871,Olin Shivers,True,0
+373618,0438871,Panagiotis Manolios,False,1
+313768,0551486,Matthias Felleisen,True,0
+315543,0615025,Eric Feron,True,0
+315543,0615025,Santosh Pande,False,1
+315543,0615025,Olin G Shivers,False,2
+316566,0631112,Jacqueline Isaacs,True,0
+320082,0523862,Daniel Distel,True,0
+320082,0523862,Jonathan A Eisen,False,1
+322488,0617472,Michael Tolley,True,0
+325656,0634847,Stefano Basagni,True,0
+326201,0647116,Octavia Camps,True,0
+326386,0648054,Mario Sznaier,True,0
+329412,0600304,Tomasz Taylor,True,0
+329450,0600575,Luca Caracoglia,True,0
+329451,0600578,Sara Wadia-Fascetti,True,0
+329451,0600578,Carey M Rappaport,False,1
+329451,0600578,Eric L Miller,False,2
+329729,0619047,Roberto Leon,True,0
+329729,0619047,Jerome F Hajjar,False,1
+329759,0619184,Rebecca Willits,True,0
+329759,0619184,Robert S Martin,False,1
+329759,0619184,Shelley D Minteer,False,2
+329759,0619184,Susan A Spencer,False,3
+329759,0619184,Cheryl A Miller,False,4
+329886,0619616,Gene Cooperman,True,0
+329886,0619616,David R Kaeli,False,1
+329886,0619616,Javed A Aslam,False,2
+329886,0619616,Jennifer G Dy,False,3
+329886,0619616,Ravi Sundaram,False,4
+332655,0635119,Rajmohan Rajaraman,True,0
+332655,0635119,Ravi Sundaram,False,1
+334607,0601383,David Horsley,True,0
+334607,0601383,Ian M Kennedy,False,1
+334607,0601383,Krassimira Hristova,False,2
+337833,0533625,Betty Salzberg,True,0
+337833,0533625,Javed A Aslam,False,1
+340192,0603115,Nian Sun,True,0
+340192,0603115,Vincent G Harris,False,1
+340192,0603115,Jun-Ming Liu,False,2
+342417,0534482,Javed Aslam,True,0
+343078,0638671,Daniel Distel,True,0
+343849,0621242,David Lazer,True,0
+344058,0622239,Deniz Erdogmus,True,0
+344058,0622239,M. Misha Pavel,False,1
+346257,0605704,Sanjay Sampath,True,0
+346257,0605704,Toshio Nakamura,False,1
+346257,0605704,Andrew Gouldstone,False,2
+346257,0605704,Lysa Russo,False,3
+346257,0605704,Curtis A Johnson,False,4
+350867,0606090,Nathan Israeloff,True,0
+355451,0540818,Matthias Felleisen,True,0
+355523,0541102,Yunsi Fei,True,0
+357772,0608892,Latika Menon,True,0
+357772,0608892,Srinivas Sridhar,False,1
+357772,0608892,Donald M O'Malley,False,2
+357772,0608892,Mehmet R Dokmeci,False,3
+357772,0608892,Armen Stepanyants,False,4
+357805,0609078,Christopher Bosso,True,0
+357805,0609078,Ahmed A Busnaina,False,1
+357805,0609078,Jacqueline A Isaacs,False,2
+357805,0609078,William D Kay,False,3
+357805,0609078,Ronald L Sandler,False,4
+359887,0543209,Robert Futrelle,True,0
+359887,0543209,Javed A Aslam,False,1
+359887,0543209,Peter Tarasewich,False,2
+361366,0641498,Mario Sznaier,True,0
+364734,0545787,J Timothy Sage,True,0
+364734,0545787,Paul M Champion,False,1
+365376,0626882,Edmund Yeh,True,0
+365421,0627145,Amin Vahdat,True,0
+365421,0627145,Geoffrey M Voelker,False,1
+365421,0627145,Dmitri Krioukov,False,2
+365497,0627529,Kevin Fu,True,0
+365497,0627529,Wayne P Burleson,False,1
+369035,0549036,Takeo Watanabe,True,0
+369035,0549036,Aaron R Seitz,False,1
+369302,0612031,Steven Kelling,True,0
+369302,0612031,Martin T Wells,False,1
+369302,0612031,Rich A Caruana,False,2
+369302,0612031,Mirek Riedewald,False,3
+369302,0612031,Daniel Fink,False,4
+371698,0629255,Daniel Distel,True,0
+374234,0613805,Matthias Felleisen,True,0
+374326,0614371,Eduardo Sontag,True,0
+311399,0713259,Carla Brodley,True,0
+311465,0713690,Deniz Erdogmus,True,0
+311465,0713690,M. Misha Pavel,False,1
+311465,0713690,Holly B Jimison,False,2
+311657,0714327,Andrew Myers,True,0
+311682,0714393,Matthew Eckelman,True,0
+311790,0721260,Lisa Feldman Barrett,True,0
+312009,0722070,Dmitri Krioukov,True,0
+312009,0722070,Kimberly C Claffy,False,1
+314034,0645384,David DeSteno,True,0
+314168,0646057,Geoffrey Mason,True,0
+314168,0646057,Susan Montgomery,False,1
+314168,0646057,Joseph A Wolf,False,2
+314168,0646057,Milen T Yakimov,False,3
+316889,0632872,Matthias Felleisen,True,0
+317127,0708541,Yung Joon Jung,True,0
+317127,0708541,Ahmed A Busnaina,False,1
+317127,0708541,Pulickel M Ajayan,False,2
+317127,0708541,Latika Menon,False,3
+317127,0708541,Young-Kyun Kwon,False,4
+318695,0709044,Guevara Noubir,True,0
+318719,0709140,Jay Brockman,True,0
+318719,0709140,Peter M Kogge,False,1
+318719,0709140,Albert-Laszlo Barabasi,False,2
+318719,0709140,Nitesh Chawla,False,3
+320280,0701107,Milen Yakimov,True,0
+320609,0702564,Vincent Harris,True,0
+320609,0702564,Carmine Vittoria,False,1
+320609,0702564,Patanjali V Parimi,False,2
+320861,0726837,ming wang,True,0
+327102,0725386,Mingzhong Wu,True,0
+327102,0725386,Carl E Patton,False,1
+327102,0725386,Mingzhong Wu,False,2
+327118,0725444,Seth Hutchinson,True,0
+331294,0715833,Sanjay Rao,True,0
+331294,0715833,Cristina Nita-Rotaru,False,1
+331375,0716335,Edmund Yeh,True,0
+331386,0716386,Kevin Fu,True,0
+334040,0636325,Carla Brodley,True,0
+334040,0636325,Carla S Ellis,False,1
+334040,0636325,Andrew Bernat,False,2
+337882,0648525,Geoffrey Trussell,True,0
+339725,0709527,Graham Sherwood,True,0
+339725,0709527,Alan Lishness,False,1
+339725,0709527,Jonathan Grabowski,False,2
+339725,0709527,Graham D Sherwood,False,3
+348032,0723001,David Budil,True,0
+348032,0723001,Mary Jo Ondrechen,False,1
+348032,0723001,Don Heiman,False,2
+348032,0723001,Constantinos Mavroidis,False,3
+348032,0723001,Sanjeev Mukerjee,False,4
+348068,0723128,Frank Miller,True,0
+348068,0723128,Hai-Lung Tsai,False,1
+348068,0723128,Jay A Switzer,False,2
+348068,0723128,Melanie R Mormile,False,3
+348068,0723128,Kai-tak Wan,False,4
+351758,0624088,John Logan,True,0
+351758,0624088,Phil Brown,False,1
+351758,0624088,Steven P Hamburg,False,2
+351758,0624088,John F Mustard,False,3
+351758,0624088,Rachel Morello-Frosch,False,4
+353540,0705508,Matthew Goodwin,True,0
+355985,0712821,Rupal Patel,True,0
+356029,0713003,Octavia Camps,True,0
+356029,0713003,Mario Sznaier,False,1
+356838,0716581,Guevara Noubir,True,0
+356838,0716581,Agnes H Chan,False,1
+357049,0717593,Kenneth Henderson,True,0
+357087,0717750,Jacqueline Isaacs,True,0
+357087,0717750,Thomas P Cullinane,False,1
+357087,0717750,James C Benneyan,False,2
+357087,0717750,Donna Qualters,False,3
+361844,0653090,Christos Zahopoulos,True,0
+361844,0653090,Thomas P Cullinane,False,1
+361844,0653090,Mohamad Metghalchi,False,2
+361844,0653090,Claire J Duggan,False,3
+361844,0653090,Yiannis A Levendis,False,4
+367319,0706837,Maxim Braverman,True,0
+367441,0707212,Valerio Toledano Laredo,True,0
+373481,0653582,Guido Mueller,True,0
+373481,0653582,Hai-Ping Cheng,False,1
+373482,0653587,Brent Nelson,True,0
+374357,0654176,Sara Wadia-Fascetti,True,0
+374357,0654176,Carey M Rappaport,False,1
+374357,0654176,Dionisio Bernal,False,2
+374357,0654176,Barry Bluestone,False,3
+374357,0654176,Ingrid Y Padilla,False,4
+374521,0700664,Sagar Kamarthi,True,0
+374521,0700664,Ibrahim Zeid,False,1
+374542,0700764,Rebecca Carrier,True,0
+374542,0700764,Gilda A Barabino,False,1
+374542,0700764,Shashi K Murthy,False,2
+374634,0727628,Geoffrey Trussell,True,0
+374693,0727984,Rebecca Carrier,True,0
+374693,0727984,Daniel D Burkey,False,1
+374693,0727984,Rebecca L Carrier,False,2
+374831,0728634,Kenneth Mopper,True,0
+374831,0728634,Patrick G Hatcher,False,1
+374831,0728634,Jingdong Mao,False,2
+374831,0728634,Kenneth Mopper,False,3
+375328,0731125,Pradeep Kurup,True,0
+375328,0731125,Jayant Kumar,False,1
+375328,0731125,Hongwei Sun,False,2
+375328,0731125,Ramaswamy Nagarajan,False,3
+375328,0731125,Zhiyong Gu,False,4
+376617,0738294,Latika Menon,True,0
+376696,0738720,Stefano Basagni,True,0
+377395,0742054,Stefano Basagni,True,0
+377605,0742924,Michael Silevitch,True,0
+377605,0742924,Claire J Duggan,False,1
+377829,0744197,Celia Pearce,True,0
+378034,0745579,Gregory Abowd,True,0
+378034,0745579,Rosa Arriaga,False,1
+378621,0748626,Mirek Riedewald,True,0
+378621,0748626,Daniel Fink,False,1
+379450,0757025,Olin Shivers,True,0
+379469,0757138,Kai-tak Wan,True,0
+381701,0808626,David Madigan,True,0
+386466,0837678,Albert-Laszlo Barabasi,True,0
+1008724,0727984,Rebecca Carrier,True,0
+1008724,0727984,Daniel D Burkey,False,1
+1008724,0727984,Rebecca L Carrier,False,2
+1279175,0708420,Milica Stojanovic,True,0
+317092,0708375,Stephen Intille,True,0
+321226,0751091,David Kaeli,True,0
+321226,0751091,Mehdi B Tahoori,False,1
+331396,0822283,Jose Onuchic,True,0
+331396,0822283,Peter G Wolynes,False,1
+331396,0822283,Herbert Levine,False,2
+331396,0822283,Terence T Hwa,False,3
+348209,0650271,James Murray,True,0
+348209,0650271,David E Luzzi,False,1
+348209,0650271,S. Ann M Heath,False,2
+348209,0650271,Melody R Wilt,False,3
+376295,0736930,Katherine Ziemer,True,0
+376295,0736930,Albert Sacco,False,1
+376295,0736930,Rebecca L Carrier,False,2
+376295,0736930,Elizabeth J Podlaha-Murphy,False,3
+376295,0736930,Katherine Ziemer,False,4
+377346,0741793,A. Graham Lappin,True,0
+377346,0741793,Richard E Taylor,False,1
+377346,0741793,Bradley D Smith,False,2
+377346,0741793,Slavi C Sevov,False,3
+377346,0741793,Kenneth W Henderson,False,4
+377866,0744456,Mark Williams,True,0
+377911,0744738,Paul Champion,True,0
+377911,0744738,J Timothy T Sage,False,1
+378794,0749451,George ODoherty,True,0
+379236,0755389,Rebecca Willits,True,0
+379241,0755431,Yiannis Levendis,True,0
+379555,0757561,Darien Wood,True,0
+379555,0757561,George O Alverson,False,1
+379555,0757561,Emanuela Barberis,False,2
+379556,0757567,Brian Magerko,True,0
+379556,0757567,Celia Pearce,False,1
+379556,0757567,Mark O Riedl,False,2
+379652,0757959,Pran Nath,True,0
+379652,0757959,Haim Goldberg,False,1
+379652,0757959,Tomasz R Taylor,False,2
+379652,0757959,Brent D Nelson,False,3
+380592,0803409,Carla Brodley,True,0
+380592,0803409,Roni Khardon,False,1
+380757,0804407,Hai-Ping Cheng,True,0
+382307,0811170,Sara Wadia-Fascetti,True,0
+382307,0811170,J. Murray Gibson,False,1
+382307,0811170,Graham B Jones,False,2
+382307,0811170,Luis Falcon,False,3
+382307,0811170,Jacqueline A Isaacs,False,4
+382307,0811170,Kathrin S Zippel,False,5
+382315,0811194,Sirje Weldon,True,0
+382315,0811194,Christie L Sahley,False,1
+382315,0811194,Klod Kokini,False,2
+382315,0811194,Alice L Pawley,False,3
+382315,0811194,Gwendolyn C Taylor,False,4
+382315,0811194,Valentine Moghadam,False,5
+382315,0811194,Dorothy Reed,False,6
+383236,0816840,Slava Epstein,True,0
+383556,0818678,Carla Mattos,True,0
+384146,0823497,Hossein Mosallaei,True,0
+384243,0824005,Ali Abur,True,0
+384243,0824005,Hanoch Lev-Ari,False,1
+384245,0824008,Nian Sun,True,0
+384646,0825846,Jeremy Long,True,0
+384646,0825846,Geoffrey C Trussell,False,1
+384649,0825864,Yingzi Lin,True,0
+384649,0825864,Yung Joon Jung,False,1
+384837,0827084,David DeSteno,True,0
+385045,0828386,Sarah Burgard,True,0
+385045,0828386,Tiffany Joseph,False,1
+385053,0828466,Ming Su,True,0
+385053,0828466,Louis C Chow,False,1
+385371,0830164,Hossein Mosallaei,True,0
+385598,0831244,Kevin Fu,True,0
+385633,0831426,David Evans,True,0
+385633,0831426,John C Lach,False,1
+385633,0831426,Abhi Shelat,False,2
+385633,0831426,Benton H Calhoun,False,3
+385686,0831728,Milica Stojanovic,True,0
+385844,0832803,Celia Pearce,True,0
+386442,0837092,Emanuela Barberis,True,0
+386772,0841100,Panagiotis Manolios,True,0
+386891,0844078,Panagiotis Manolios,True,0
+387019,0848420,Pinar Keskinocak,True,0
+387019,0848420,Julie L Swann,False,1
+387019,0848420,Ozlem Ergun,False,2
+387197,0853262,Herbert Levine,True,0
+387243,0855724,ming wang,True,0
+387326,0904464,Dagmar Sternad,True,0
+387338,0907110,Jonathan Weitsman,True,0
+945639,0946610,Milica Stojanovic,True,0
+946395,0934509,Deniz Erdogmus,True,0
+946622,0934506,Deniz Erdogmus,True,0
+946925,0929576,Deniz Erdogmus,True,0
+1007313,0739229,Carla Brodley,True,0
+1007313,0739229,Carla S Ellis,False,1
+1007313,0739229,Bryant W York,False,2
+1007313,0739229,Margaret Martonosi,False,3
+1007313,0739229,Erik C Russell,False,4
+1007313,0739229,Andrew Bernat,False,5
+651874,0925708,Swastik Kar,True,0
+651874,0925708,Saroj Nayak,False,1
+651874,0925708,Morris A Washington,False,2
+651877,0901179,Maxim Braverman,True,0
+651999,0946463,David Kaeli,True,0
+651999,0946463,Badrinath Roysam,False,1
+651999,0946463,William C Karl,False,2
+651999,0946463,Gregory C Sharp,False,3
+651999,0946463,Nayda G Santiago,False,4
+651999,0946463,Homer Pien,False,5
+652305,0901439,Bradley Lehman,True,0
+652382,0916133,Gene Cooperman,True,0
+652630,0843603,Mary Jo Ondrechen,True,0
+652630,0843603,Penny J Beuning,False,1
+652779,0917569,ming wang,True,0
+653886,0855140,Matthias Felleisen,True,0
+654027,0909043,David Wise,True,0
+654027,0909043,Moira Zellner,False,1
+654716,0918033,Scott Valcourt,True,0
+654845,0948819,Peter Furth,True,0
+655641,0921139,David DeSteno,True,0
+656280,0925566,Yung Joon Jung,True,0
+656392,0937196,ming wang,True,0
+656517,0949108,David Lazer,True,0
+656773,0931871,Timothy Bretl,True,0
+656773,0931871,Seth Hutchinson,False,1
+657166,0850635,Kenneth Mopper,True,0
+657166,0850635,Aron Stubbins,False,1
+657392,0909854,Richard Melloni,True,0
+657392,0909854,Maria C Carrillo,False,1
+657816,0900339,James Benneyan,True,0
+657820,0704067,Pran Nath,True,0
+657920,0958927,Guevara Noubir,True,0
+658397,0928279,Ralph Grubbs,True,0
+658435,0925808,Vincent Harris,True,0
+658435,0925808,Carmine Vittoria,False,1
+658593,0926581,Brian Helmuth,True,0
+658593,0926581,Jijun Tang,False,1
+658893,0924241,Timmons Roberts,True,0
+659000,0854792,Valerio Toledano Laredo,True,0
+659010,0906608,Laura Lewis,True,0
+659010,0906608,Don Heiman,False,1
+659010,0906608,Latika Menon,False,2
+659115,0925285,Latika Menon,True,0
+659314,0853685,Stanley Sandler,True,0
+659314,0853685,Steven R Lustig,False,1
+659561,0915527,Rupal Patel,True,0
+659562,0914808,Deniz Erdogmus,True,0
+659562,0914808,Rupal Patel,False,1
+659563,0915624,Keith Edwards,True,0
+659563,0915624,Christopher A Le Dantec,False,1
+659716,0927088,Yung Joon Jung,True,0
+659759,0907007,Don Heiman,True,0
+659759,0907007,Latika Menon,False,1
+659943,0915054,Dan Suciu,True,0
+659943,0915054,Magdalena Balazinska,False,1
+659943,0915054,Wolfgang Gatterbauer,False,2
+659955,0915910,Jennifer Dy,True,0
+660185,0901394,Carol Livermore,True,0
+660185,0901394,George Barbastathis,False,1
+660375,0901442,Rifat Sipahi,True,0
+660388,0901298,Harm Derksen,True,0
+660485,0849804,Ibrahim Zeid,True,0
+660485,0849804,Mohamad Metghalchi,False,1
+660485,0849804,Claire J Duggan,False,2
+660796,0908767,Laura Lewis,True,0
+660796,0908767,Don Heiman,False,1
+661243,0923403,Hongwei Sun,True,0
+661243,0923403,Carol Barry,False,1
+661243,0923403,Zhiyong Gu,False,2
+661243,0923403,Xingwei Wang,False,3
+661243,0923403,Byungki Kim,False,4
+661262,0922712,Yvonne Gindt,True,0
+661262,0922712,H. David Husic,False,1
+661262,0922712,William H Miles,False,2
+661262,0922712,Jennifer L Rutherford,False,3
+661421,0923313,Wayne Burleson,True,0
+661421,0923313,Deepak K Ganesan,False,1
+661421,0923313,Kevin Fu,False,2
+661421,0923313,Yanlei Diao,False,3
+661421,0923313,Charles Ross,False,4
+661421,0923313,Wayne P Burleson,False,5
+661555,0909990,Agnes Chan,True,0
+661555,0909990,David R Kaeli,False,1
+661555,0909990,Riccardo Pucella,False,2
+661713,0905266,Cristina Nita-Rotaru,True,0
+661747,0915985,Guevara Noubir,True,0
+661747,0915985,Rajmohan Rajaraman,False,1
+661756,0916877,Edmund Yeh,True,0
+661990,0906489,Mingzhong Wu,True,0
+661990,0906489,Lincoln D Carr,False,1
+662005,0901443,Peter Topalov,True,0
+662072,0832785,Ahmed Busnaina,True,0
+662072,0832785,Nicol E McGruer,False,1
+662072,0832785,Glen P Miller,False,2
+662072,0832785,Carol Barry,False,3
+662072,0832785,Joey L Mead,False,4
+662787,0928587,Richard Porter,True,0
+663346,0851989,Carol Barry,True,0
+663346,0851989,Jacqueline A Isaacs,False,1
+663347,0754996,Kristen Billiar,True,0
+663347,0754996,Marsha W Rolle,False,1
+663599,0901433,Mario Sznaier,True,0
+663599,0901433,Octavia I Camps,False,1
+664155,0917750,M. K. Yegian,True,0
+664155,0917750,Akram N Alshawabkeh,False,1
+664588,0833636,Ibrahim Zeid,True,0
+664588,0833636,Ahmed A Busnaina,False,1
+664588,0833636,Claire J Duggan,False,2
+664588,0833636,Sagar V Kamarthi,False,3
+664588,0833636,Jacqueline A Isaacs,False,4
+664900,0834022,Pran Nath,True,0
+664905,0856675,Egon Schulte,True,0
+665045,0915655,Cristina Nita-Rotaru,True,0
+665264,0848345,Steven Vollmer,True,0
+665826,0855292,Hai-Ping Cheng,True,0
+945580,0956532,Sagar Kamarthi,True,0
+945580,0956532,Ibrahim Zeid,False,1
+947572,0920869,Mirek Riedewald,True,0
+947821,0853437,Brian Helmuth,True,0
+947821,0853437,David S Wethey,False,1
+947821,0853437,Carol A Blanchette,False,2
+947821,0853437,Sean P Place,False,3
+1006092,0933223,Ning Wang,True,0
+1006092,0933223,Ning Wang,False,1
+1007650,0901185,Gordana Todorov,True,0
+671276,1045384,Tommaso Melodia,True,0
+671552,1000391,Dionisio Bernal,True,0
+671593,1000666,Junho Song,True,0
+671593,1000666,Jerome F Hajjar,False,1
+671912,0928666,Robert Chen,True,0
+671912,0928666,Arthur Eisenkraft,False,1
+671912,0928666,Christos Zahopoulos,False,2
+671912,0928666,Pamela Pelletier,False,3
+671912,0928666,Tala Khudairi,False,4
+672764,0835976,Barbara Shinn-Cunningham,True,0
+672764,0835976,Robert Sekuler,False,1
+672764,0835976,Frank Guenther,False,2
+672764,0835976,Heather Ames,False,3
+672764,0835976,Michael E Hasselmo,False,4
+672764,0835976,Earl K Miller,False,5
+672764,0835976,Barbara G Shinn-Cunningham,False,6
+672778,1034990,James Benneyan,True,0
+673022,1010298,Alexandru Suciu,True,0
+673113,1023333,Ramiro Martinez,True,0
+673153,1057868,David Lazer,True,0
+673282,1027724,Deniz Erdogmus,True,0
+673313,1029679,James Rehg,True,0
+673313,1029679,Mark A Clements,False,1
+673313,1029679,Gregory D Abowd,False,2
+673313,1029679,Agata Rozga,False,3
+673592,1029711,Vipin Kumar,True,0
+673592,1029711,Shashi Shekhar,False,1
+673592,1029711,Auroop R Ganguly,False,2
+673592,1029711,Arindam Banerjee,False,3
+673592,1029711,Jonathan A Foley,False,4
+673993,1028990,John Breier,True,0
+673993,1028990,Hanumant Singh,False,1
+674633,1026665,Herbert Levine,True,0
+674699,0970059,Jerome Hajjar,True,0
+674893,0961741,Jonathan Grabowski,True,0
+674894,0961633,David Kimbro,True,0
+674894,0961633,Randall Hughes,False,1
+674959,1102481,Swastik Kar,True,0
+675252,0961364,Matthew Bracken,True,0
+675252,0961364,Geoffrey C Trussell,False,1
+675411,1010818,Miyoko Chu,True,0
+675411,1010818,Richard E Bonney,False,1
+675411,1010818,Steven T Kelling,False,2
+675411,1010818,Mirek Riedewald,False,3
+675543,1114891,George ODoherty,True,0
+675580,1061834,Rebecca Willits,True,0
+675597,1005888,Maxim Braverman,True,0
+675892,0960978,Gene Cooperman,True,0
+676281,1027408,Stine Grodal,True,0
+676281,1027408,Stine Grodal,False,1
+676480,1048082,Brent Nelson,True,0
+676591,0921360,Rifat Sipahi,True,0
+676610,1055945,Tommaso Melodia,True,0
+676610,1055945,Stella Batalama,False,1
+676610,1055945,Dimitris A Pados,False,2
+676610,1055945,Weifeng Su,False,3
+677144,1019624,Bettie Ward,True,0
+677144,1019624,Jennifer L Bowen,False,1
+677325,1031167,Beril Toktay,True,0
+677325,1031167,Atalay Atasu,False,1
+677325,1031167,Ozlem Ergun,False,2
+677372,1039646,Dmitri Krioukov,True,0
+677372,1039646,Kimberly C Claffy,False,1
+677377,1040684,Edmund Yeh,True,0
+677946,1012086,Timothy Bickmore,True,0
+678157,1014806,Andrew Gouldstone,True,0
+678157,1014806,Beverly K Jaeger,False,1
+678159,1014779,Hongwei Sun,True,0
+678183,0965843,Srinivas Sridhar,True,0
+678183,0965843,Laura H Lewis,False,1
+678183,0965843,Mansoor M Amiji,False,2
+678183,0965843,Oscar J Perales-Perez,False,3
+678183,0965843,Tamara M Floyd Smith,False,4
+678183,0965843,Carlos M Rinaldi-Ramos,False,5
+678256,1017793,Mirek Riedewald,True,0
+678273,1017903,Javed Aslam,True,0
+678444,1020065,Leilah Lyons,True,0
+678444,1020065,Moira Zellner,False,1
+678444,1020065,Emily S Minor,False,2
+678504,1026369,Paul Champion,True,0
+678504,1026369,J Timothy T Sage,False,1
+678641,1031995,Justin Ries,True,0
+678786,0920540,Daniel Distel,True,0
+678895,1000085,Ozlem Ergun,True,0
+678895,1000085,Pinar Keskinocak,False,1
+679188,0963010,Geoffrey Trussell,True,0
+679188,0963010,Joseph Ayers,False,1
+679188,0963010,Matthew E Bracken,False,2
+679188,0963010,Steven Vollmer,False,3
+679447,0959584,Guevara Noubir,True,0
+679447,0959584,Stefano Basagni,False,1
+679447,0959584,Peter Desnoyers,False,2
+679447,0959584,Marsette A Vona,False,3
+679519,1039673,Anthony Caruso,True,0
+679519,1039673,Peter A Dowben,False,1
+679519,1039673,Gary J Mankey,False,2
+679519,1039673,Vincent G Harris,False,3
+679519,1039673,Boris Sinkovic,False,4
+679600,1040101,Purnima Makris,True,0
+679612,1039951,Hanumant Singh,True,0
+679612,1039951,Albert J Plueddemann,False,1
+679612,1039951,Fiammetta Straneo,False,2
+679612,1039951,Lee E Freitag,False,3
+679612,1039951,Sarah B Das,False,4
+679683,1006007,Nathan Israeloff,True,0
+679827,0964465,Alan Mislove,True,0
+679828,0964236,Dmitri Krioukov,True,0
+679828,0964236,Kimberly C Claffy,False,1
+679968,1032754,Dianne Quigley,True,0
+679968,1032754,Phil Brown,False,1
+680044,1057955,Guevara Noubir,True,0
+680044,1057955,Bernardo G Barbiellini-Amidei,False,1
+680076,1042119,Zhiyong Gu,True,0
+680076,1042119,Alfred A Donatelli,False,1
+680076,1042119,Carol Barry,False,2
+680076,1042119,Hongwei Sun,False,3
+680076,1042119,Bridgette Budhlall,False,4
+680348,1065932,Herbert Levine,True,0
+680663,1001632,Milen Yakimov,True,0
+680854,1034840,Ozlem Ergun,True,0
+680854,1034840,Reginald DesRoches,False,1
+680854,1034840,Pinar Keskinocak,False,2
+681210,1005077,Michael Silevitch,True,0
+681210,1005077,David R Kaeli,False,1
+681454,1002543,Carmine Vittoria,True,0
+681454,1002543,Vincent G Harris,False,1
+681978,1031111,Mengyan Shen,True,0
+681978,1031111,Hongwei Sun,False,1
+681978,1031111,Marina Ruths,False,2
+682000,1049595,David Lazer,True,0
+682077,1016418,Matthias Felleisen,True,0
+682108,1017439,David Kaeli,True,0
+682142,1047962,Jan Vitek,True,0
+682142,1047962,Olga Vitek,False,1
+682589,1041971,David Kaeli,True,0
+682712,1018543,Abhi Shelat,True,0
+682737,0964641,Wayne Burleson,True,0
+682737,0964641,John Collura,False,1
+682737,0964641,Christof Paar,False,2
+682737,0964641,Kevin Fu,False,3
+682842,1011904,Heather Ames,True,0
+682842,1011904,Heather Ames,False,1
+683195,1033889,Carolyn Lee-Parsons,True,0
+683195,1033889,Erin J Cram,False,1
+945794,1011709,Plamen Iliev,True,0
+945794,1011709,Bojko N Bakalov,False,1
+945794,1011709,Milen T Yakimov,False,2
+946281,1032161,David Hutchins,True,0
+946281,1032161,Gretchen E Hofmann,False,1
+946281,1032161,Brian Helmuth,False,2
+946281,1032161,Amy Moran,False,3
+1008605,1040101,Purnima Makris,True,0
+736134,1134104,Carlos Hidrovo Chavez,True,0
+736752,1124657,Wenyuan Xu,True,0
+736752,1124657,Brian Helmuth,False,1
+736755,1125095,David Lazer,True,0
+736755,1125095,Alessandro Vespignani,False,1
+736950,1135572,Moira Zellner,True,0
+736950,1135572,Andrew E Johnson,False,1
+736950,1135572,Josh Radinsky,False,2
+736950,1135572,Charles Hoch,False,3
+736950,1135572,Leilah Lyons,False,4
+737426,1129433,Laura Lewis,True,0
+737527,1115527,Qin Chen,True,0
+737672,1059316,Dana Brooks,True,0
+737672,1059316,Charles A DiMarzio,False,1
+737832,1129441,Hanumant Singh,True,0
+738740,1203859,Jonathan Grabowski,True,0
+739001,1106214,Moneesh Upmanyu,True,0
+739001,1106214,Alain S Karma,False,1
+739217,1135854,Taskin Padir,True,0
+739218,1136027,Gunar Schirner,True,0
+739218,1136027,Deniz Erdogmus,False,1
+739218,1136027,Kaushik R Chowdhury,False,2
+739235,1135660,Yun Fu,True,0
+739235,1135660,Venkat N Krovi,False,1
+739235,1135660,Dan K Ramsey,False,2
+739364,1205560,Edmund Yeh,True,0
+739583,1122845,David DeSteno,True,0
+739678,1110675,Geoffrey Trussell,True,0
+739678,1110675,Catherine M Matassa,False,1
+739842,1123378,Deborah Phillips,True,0
+739842,1123378,Anna K Mikulak,False,1
+739842,1123378,Matthew Nisbet,False,2
+740053,1123580,Anthony Kwasnica,True,0
+740053,1123580,Yang Zhang,False,1
+740084,1060009,Amy Farrell,True,0
+740084,1060009,Liana Pennington,False,1
+740096,1128905,Phil Brown,True,0
+740096,1128905,Mercedes Lyson,False,1
+740158,1121057,Erel Levine,True,0
+740290,1145224,Celia Pearce,True,0
+740862,1128541,Carey Rappaport,True,0
+740862,1128541,Jose A Martinez-Lorenzo,False,1
+740965,1066578,Darien Wood,True,0
+740965,1066578,George O Alverson,False,1
+740965,1066578,Emanuela Barberis,False,2
+740989,1044313,John Chandy,True,0
+740989,1044313,Yunsi Fei,False,1
+740989,1044313,Zhijie Shi,False,2
+740989,1044313,Mark Tehranipoor,False,3
+741205,1130027,Andrew Gouldstone,True,0
+741205,1130027,Teiichi Ando,False,1
+741205,1130027,Sinan Muftu,False,2
+741241,1133992,Rifat Sipahi,True,0
+741241,1133992,Andrew Gouldstone,False,1
+741241,1133992,Beverly K Jaeger,False,2
+741241,1133992,Samuel Frank,False,3
+741599,1116799,Rupal Patel,True,0
+741674,1100245,Craig Maloney,True,0
+741674,1100245,Amit Acharya,False,1
+741777,1158744,Michael Silevitch,True,0
+741873,1117684,Gabriel Robins,True,0
+741873,1117684,Abhi Shelat,False,1
+742062,1136984,Purnima Makris,True,0
+742062,1136984,Nicholas C Makris,False,1
+742463,1102485,Mohamad Metghalchi,True,0
+742463,1102485,Claire J Duggan,False,1
+742463,1102485,Richard Harris,False,2
+742878,1126669,Justin Ries,True,0
+742878,1126669,Allen F Glazner,False,1
+742878,1126669,Brent A McKee,False,2
+742878,1126669,Drew S Coleman,False,3
+742960,1126357,Tommaso Melodia,True,0
+742960,1126357,Joseph F Atkinson,False,1
+742960,1126357,Stella Batalama,False,2
+742960,1126357,Dimitris A Pados,False,3
+742960,1126357,Weifeng Su,False,4
+743084,1124762,Craig Lent,True,0
+743084,1124762,Gregory L Snider,False,1
+743084,1124762,S Alex Kandel,False,2
+743084,1124762,Kenneth W Henderson,False,3
+743094,1134940,M. K. Yegian,True,0
+743094,1134940,Kenneth H Stokoe,False,1
+743094,1134940,Sabanayagam Thevanayagam,False,2
+743094,1134940,Akram N Alshawabkeh,False,3
+743094,1134940,Arvin Farid,False,4
+743095,1134997,Dionisio Bernal,True,0
+743178,1117121,Dimitris Pados,True,0
+743178,1117121,Dimitris A Pados,False,1
+743335,1041877,Kevin Tomsovic,True,0
+743335,1041877,Yilu Liu,False,1
+743335,1041877,Joe H Chow,False,2
+743335,1041877,Ali Abur,False,3
+743335,1041877,Gregory V Murphy,False,4
+743658,1069258,Dimitris Metaxas,True,0
+743658,1069258,Vladimir Pavlovic,False,1
+743658,1069258,Ahmed M Elgammal,False,2
+743658,1069258,Tina Eliassi-Rad,False,3
+743658,1069258,Hui Xiong,False,4
+744136,1149218,Mark Patterson,True,0
+744171,1140190,Thomas Seager,True,0
+744171,1140190,Jacqueline A Isaacs,False,1
+744171,1140190,Abigail Mechtenberg,False,2
+744171,1140190,Evan Selinger,False,3
+745191,1130936,Peter Furth,True,0
+745250,1118061,Todd Leen,True,0
+745250,1118061,Deniz Erdogmus,False,1
+745281,1064922,Matthias Felleisen,True,0
+745324,1203008,Amal Ahmed,True,0
+745431,1120329,Jacqueline Isaacs,True,0
+745431,1120329,Ahmed A Busnaina,False,1
+745431,1120329,Christopher J Bosso,False,2
+745431,1120329,Joey L Mead,False,3
+745431,1120329,Julie B Zimmerman,False,4
+745882,1111781,David Evans,True,0
+745882,1111781,Aaron J Mackey,False,1
+745882,1111781,Abhi Shelat,False,2
+745910,1116777,Engin Kirda,True,0
+746032,1052790,Lisa Feldman Barrett,True,0
+746329,1068869,Herbert Levine,True,0
+746329,1068869,Wouter-Jan Rappel,False,1
+746329,1068869,Alexander Groisman,False,2
+746329,1068869,Mark H Ginsberg,False,3
+746329,1068869,Eugene Tkachenko,False,4
+746402,1145342,Ali Abur,True,0
+746559,1068138,Hai-Ping Cheng,True,0
+821537,1205562,Edmund Yeh,True,0
+823577,1234410,Edmund Yeh,True,0
+945567,1066138,Melvin Bernstein,True,0
+945567,1066138,Mohamad Metghalchi,False,1
+945567,1066138,David E Luzzi,False,2
+945567,1066138,Jerome F Hajjar,False,3
+945567,1066138,Sara Wadia-Fascetti,False,4
+945709,1057625,Aaron Seitz,True,0
+945928,1110526,Mark Kirkpatrick,True,0
+945928,1110526,Samuel V Scarpino,False,1
+947582,1117184,Panagiotis Manolios,True,0
+947582,1117184,Evgueni Goldberg,False,1
+1007152,1103813,Gordana Todorov,True,0
+1007724,1136984,Purnima Makris,True,0
+1007724,1136984,Nicholas C Makris,False,1
+1070250,1216435,Herbert Levine,True,0
+1072251,1104000,Paul Hand,True,0
+742594,1162304,Gordana Todorov,True,0
+742594,1162304,Alexander Martsinkovsky,False,1
+742594,1162304,Kiyoshi Igusa,False,2
+743097,1135005,Mehrdad Sasani,True,0
+743097,1135005,Xiaoyun Shao,False,1
+743614,1143681,Kaushik Chowdhury,True,0
+743614,1143681,Stefano Basagni,False,1
+816592,1243916,Isiah Warner,True,0
+816592,1243916,Francisco R Hung,False,1
+816592,1243916,Daniel Hayes,False,2
+816801,1240409,Jonathan Fay,True,0
+816801,1240409,Jason Owen-Smith,False,1
+816801,1240409,Aileen Huang-Saad,False,2
+816831,1158784,Neel Joshi,True,0
+817398,1206305,Valerio Toledano Laredo,True,0
+817689,1211613,Guillermo Podesta,True,0
+817689,1211613,Rajagopalan Balaji,False,1
+817689,1211613,Moira Zellner,False,2
+817689,1211613,Charles M Macal,False,3
+817689,1211613,Poonam Arora,False,4
+817784,1244730,David Lazer,True,0
+817825,1250199,Craig Maloney,True,0
+817825,1250199,Larry A Wasserman,False,1
+818049,1141452,Sara Wadia-Fascetti,True,0
+818309,1203857,Slava Epstein,True,0
+818309,1203857,Yoshiteru Aoi,False,1
+818422,1139138,Sanjit Seshia,True,0
+818422,1139138,George C Necula,False,1
+818422,1139138,Alberto L Sangiovanni Vincentelli,False,2
+818422,1139138,Bjoern Hartmann,False,3
+818422,1139138,Stavros Tripakis,False,4
+818422,1139138,Sanjit A Seshia,False,5
+818657,1146161,Aron Stubbins,True,0
+818657,1146161,Marc E Frischer,False,1
+818747,1232046,Kai-tak Wan,True,0
+818747,1232046,Sinan Muftu,False,1
+818837,1226834,David Lazer,True,0
+819054,1234560,Andrew Myers,True,0
+819054,1234560,Jerome F Hajjar,False,1
+819843,1161194,David L Kimbro,False,1
+819898,1251129,Ningfang Mi,True,0
+819940,1217981,Arnold Rosenberg,True,0
+819940,1217981,Rajmohan Rajaraman,False,1
+819959,1218197,Guevara Noubir,True,0
+819959,1218197,Erik-Oliver Blass,False,1
+819959,1218197,Guevara Noubir,False,2
+819968,1218586,Deepak Ganesan,True,0
+819968,1218586,Kevin Fu,False,1
+820011,1213596,George ODoherty,True,0
+820017,1200820,Jerome Hajjar,True,0
+820017,1200820,Mark D Webster,False,1
+820797,1256172,Javed Aslam,True,0
+821980,1212940,Zoran Popovic,True,0
+821980,1212940,Georg Seelig,False,1
+821980,1212940,Seth Cooper,False,2
+822041,1202376,Swastik Kar,True,0
+822041,1202376,Yung Joon Jung,False,1
+822159,1216038,Rajmohan Rajaraman,True,0
+822159,1216038,Ravi Sundaram,False,1
+822237,1265141,Ahmed Busnaina,True,0
+822268,1264216,Srinivas Sridhar,True,0
+822281,1258689,Latika Menon,True,0
+822344,1144804,Terri Camesano,True,0
+822344,1144804,Kristen L Billiar,False,1
+822344,1144804,Glenn R Gaudette,False,2
+822344,1144804,Marsha W Rolle,False,3
+822344,1144804,Frank Hoy,False,4
+822344,1144804,Ki Chon,False,5
+822517,1236182,Philip Larese-Casanova,True,0
+822517,1236182,Annalisa Onnis-Hayden,False,1
+822536,1241332,Jose Onuchic,True,0
+822536,1241332,Herbert Levine,False,1
+822631,1217525,Marek Kimmel,True,0
+822631,1217525,Herbert Levine,False,1
+822631,1217525,Christopher M Smith,False,2
+823173,1237512,Carla Mattos,True,0
+823275,1229059,Christopher Hill,True,0
+823275,1229059,Gene Cooperman,False,1
+823275,1229059,Claudio Rebbi,False,2
+823275,1229059,Prashant Shenoy,False,3
+823412,1228897,Carla Mattos,True,0
+823412,1228897,Mary Jo Ondrechen,False,1
+823412,1228897,Penny J Beuning,False,2
+823412,1228897,Lee Makowski,False,3
+823471,1241668,Guevara Noubir,True,0
+823471,1241668,David R Kaeli,False,1
+823471,1241668,William Robertson,False,2
+823548,1212999,Milica Stojanovic,True,0
+823621,1218717,Gesualdo Scutari,True,0
+823621,1218717,Tommaso Melodia,False,1
+823657,1260828,Phil Brown,True,0
+823669,1128383,Ali Abur,True,0
+823669,1128383,Hanoch Lev-Ari,False,1
+824446,1205494,Erel Levine,True,0
+824515,1158340,Lee Makowski,True,0
+824515,1158340,Dana H Brooks,False,1
+824515,1158340,Deniz Erdogmus,False,2
+825992,1218075,Thomas Wahl,True,0
+825992,1218075,Miriam E Leeser,False,1
+826098,1216853,Jan Vitek,True,0
+826098,1216853,William S Cleveland,False,1
+826098,1216853,Ananth Grama,False,2
+826098,1216853,Olga Vitek,False,3
+826098,1216853,Suresh Jagannathan,False,4
+826130,1227843,Jennifer Dy,True,0
+826229,1206255,Kailash Misra,True,0
+826229,1206255,Brian J Parshall,False,1
+826229,1206255,Daniel K Nakano,False,2
+826229,1206255,Ben Cox,False,3
+826229,1206255,Milen T Yakimov,False,4
+826261,1231598,Mingzhong Wu,True,0
+826415,1232551,Albrecht Jander,True,0
+826415,1232551,Mingzhong Wu,False,1
+826427,1209249,Tommaso Melodia,True,0
+826639,1234704,Jay Brandes,True,0
+826639,1234704,William B Savidge,False,1
+826639,1234704,Catherine R Edwards,False,2
+826639,1234704,Aron Stubbins,False,3
+826828,1248590,Luca Caracoglia,True,0
+827114,1223834,Cristina Nita-Rotaru,True,0
+827114,1223834,Charles E Killian,False,1
+827192,1158176,Mary Jo Ondrechen,True,0
+827192,1158176,Penny J Beuning,False,1
+827525,1244769,Nebiyou Tilahun,True,0
+827525,1244769,Piyushimita Thakuriah,False,1
+827525,1244769,Moira Zellner,False,2
+827525,1244769,Nebiyou Tilahun,False,3
+896191,1314484,Yun Fu,True,0
+896413,1261297,Herbert Levine,True,0
+896413,1261297,Christopher M Smith,False,1
+899112,1261694,Blair MacIntyre,True,0
+903082,1309542,Herbert Levine,True,0
+1006291,1218197,Guevara Noubir,True,0
+1006291,1218197,Erik-Oliver Blass,False,1
+1006291,1218197,Guevara Noubir,False,2
+1071216,1146056,Mark Patterson,True,0
+1071527,1211819,Jonathan Weitsman,True,0
+826439,1250316,Tommaso Melodia,True,0
+892374,1333889,Kai-tak Wan,True,0
+892374,1333889,Sinan Muftu,False,1
+892374,1333889,April Z Gu,False,2
+892569,1319206,Emanuele Viola,True,0
+892629,1311875,Bradley Lehman,True,0
+892917,1251151,Marc Suchard,True,0
+892917,1251151,David Madigan,False,1
+892968,1265755,April Kloxin,True,0
+892968,1265755,Abraham Joy,False,1
+893673,1340972,Scott Valcourt,True,0
+893673,1340972,Robert D Russell,False,1
+893673,1340972,Patrick F Messer,False,2
+893781,1305655,Mary Jo Ondrechen,True,0
+893781,1305655,Penny J Beuning,False,1
+894175,1262442,Byron Wallace,True,0
+894175,1262442,Thomas Trikalinos,False,1
+894175,1262442,Christopher Schmid,False,2
+894321,1309579,Jeffrey Ruberti,True,0
+894726,1338687,Matthew Eckelman,True,0
+894726,1338687,Christopher J Bosso,False,1
+894726,1338687,Jacqueline A Isaacs,False,2
+894726,1338687,Ronald L Sandler,False,3
+895452,1309337,Sergey Kravchenko,True,0
+895632,1338372,David Kimbro,True,0
+896031,1343432,Herbert Levine,True,0
+896031,1343432,Christopher M Smith,False,1
+896052,1264562,Hossein Tavana,True,0
+896052,1264562,Rebecca K Willits,False,1
+896135,1329759,Stavros Tripakis,True,0
+896135,1329759,Edward A Lee,False,1
+896282,1319501,Gunar Schirner,True,0
+896282,1319501,David R Kaeli,False,1
+896293,1319019,Alan Mislove,True,0
+896293,1319019,Christopher Wilson,False,1
+896890,1333070,John Williams,True,0
+896890,1333070,Samuel E Munoz,False,1
+897252,1347350,Daniel Wichs,True,0
+897350,1349692,Marvin Onabajo,True,0
+897364,1348098,Hongwei Sun,True,0
+897364,1348098,Zhiyong Gu,False,1
+897364,1348098,Majid Charmchi,False,2
+897604,1332249,Carol Livermore,True,0
+897604,1332249,Roger Alperin,False,1
+897604,1332249,Sangeeta N Bhatia,False,2
+897604,1332249,Martin L Culpepper,False,3
+897718,1307611,Isiah Warner,True,0
+897718,1307611,Francisco R Hung,False,1
+897718,1307611,Daniel Hayes,False,2
+897719,1264588,Taskin Padir,True,0
+897719,1264588,Jeanine L Skorinko,False,1
+897911,1243948,Paul Champion,True,0
+898017,1318081,Herbert Windom,True,0
+898017,1318081,Clark R Alexander,False,1
+898017,1318081,Jay Brandes,False,2
+898017,1318081,Aron Stubbins,False,3
+898539,1304387,Dean Chang,True,0
+898539,1304387,Darryll J Pines,False,1
+898539,1304387,John J Lesko,False,2
+898539,1304387,James Chung,False,3
+898664,1331439,Gregory Abowd,True,0
+898699,1249946,Robert Chen,True,0
+898699,1249946,Robyn E Hannigan,False,1
+898699,1249946,Maria H Ivanova,False,2
+898699,1249946,Robert F Chen,False,3
+898947,1333524,Yingzi Lin,True,0
+898950,1263455,Guohao Dai,True,0
+898950,1263455,Xavier Intes,False,1
+899037,1302032,Harm Derksen,True,0
+899070,1357665,Justin Ries,True,0
+899338,1244203,Carla Mattos,True,0
+899592,1337554,Drew Coleman,True,0
+899592,1337554,Allen F Glazner,False,1
+899592,1337554,Donna Surge,False,2
+899592,1337554,Justin B Ries,False,3
+899823,1318396,Arvind Krishnamurthy,True,0
+899823,1318396,David R Choffnes,False,1
+900003,1328816,Jerome Hajjar,True,0
+900571,1258091,Jo Ann Banks,True,0
+900571,1258091,Olga Vitek,False,1
+900590,1341067,Herbert Levine,True,0
+900590,1341067,Christopher M Smith,False,1
+900602,1314392,Tomasz Taylor,True,0
+900602,1314392,Brent D Nelson,False,1
+900817,1243883,Mark Williams,True,0
+900817,1243883,Megan E Nunez,False,1
+900827,1303038,Milen Yakimov,True,0
+901052,1314774,Pran Nath,True,0
+901052,1314774,Haim Goldberg,False,1
+901052,1314774,Tomasz R Taylor,False,2
+901052,1314774,Brent D Nelson,False,3
+901225,1262734,Carla Mattos,True,0
+901225,1262734,Patricia A Mabrouk,False,1
+901317,1318145,Octavia Camps,True,0
+901317,1318145,Mario Sznaier,False,1
+901611,1315213,Nian-xiang Sun,True,0
+901804,1248587,Sarah Ostadabbas,True,0
+901804,1248587,Mehrdad Nourani,False,1
+902188,1319580,Panagiotis Manolios,True,0
+902188,1319580,Evgueni Goldberg,False,1
+902544,1332731,Tommaso Melodia,True,0
+903210,1330142,Kevin Fu,True,0
+903210,1330142,Jenna Wiens,False,1
+903210,1330142,Peter Honeyman,False,2
+903210,1330142,Michael Bailey,False,3
+903217,1314655,Yunsi Fei,True,0
+903217,1314655,Aidong A Ding,False,1
+903227,1314603,Tina Eliassi-Rad,True,0
+903232,1314722,Daniel Wichs,True,0
+903288,1261162,Nicole Sanderlin,True,0
+903288,1261162,John J Lesko,False,1
+903288,1261162,Bevlee A Watford,False,2
+903555,1345424,Celia Pearce,True,0
+903607,1343126,Christopher Bosso,True,0
+903607,1343126,Michael G Bennett,False,1
+970655,1412462,Mark Patterson,True,0
+970939,1355623,Taskin Padir,True,0
+970939,1355623,Jerome Schaufeld,False,1
+980774,1400499,Herbert Levine,True,0
+994042,1355986,Gregory Abowd,True,0
+1071500,1337854,Yunsi Fei,True,0
+1071500,1337854,Miriam E Leeser,False,1
+1071500,1337854,David R Kaeli,False,2
+1072081,1306621,Vivek Venkatachalam,True,0
+952036,1362893,Yaning Li,True,0
+953347,1422715,Rajmohan Rajaraman,True,0
+954206,1434880,Luca Caracoglia,True,0
+955386,1447587,Auroop Ganguly,True,0
+957316,1427654,Jose Onuchic,True,0
+957316,1427654,Herbert Levine,False,1
+957316,1427654,Peter Wolynes,False,2
+957316,1427654,Mary C Farach-Carson,False,3
+957863,1408345,Christopher Wilson,True,0
+957863,1408345,David M Lazer,False,1
+957863,1408345,Alan Mislove,False,2
+957905,1405881,Matthias Felleisen,True,0
+958332,1427389,Robert Twilley,True,0
+958332,1427389,SIU-NGAN NINA Lam,False,1
+958332,1427389,Qin J Chen,False,2
+958332,1427389,Samuel Bentley,False,3
+958332,1427389,Kehui Xu,False,4
+958557,1437371,Justin Ries,True,0
+959138,1353140,Jennifer Bowen,True,0
+959559,1356890,Aron Stubbins,True,0
+959615,1361411,Marek Kimmel,True,0
+959615,1361411,Herbert Levine,False,1
+959946,1340764,Aron Stubbins,True,0
+960234,1422327,Karen Quigley,True,0
+960234,1422327,Jolie B Wormwood,False,1
+960260,1407160,Ibrahim Zeid,True,0
+960260,1407160,Claire J Duggan,False,1
+960260,1407160,Sagar V Kamarthi,False,2
+961820,1409191,Alan Mislove,True,0
+961983,1442728,Jennifer Dy,True,0
+961983,1442728,Aidong A Ding,False,1
+961983,1442728,Tarik Gouhier,False,2
+961983,1442728,Auroop R Ganguly,False,3
+962457,1431984,Elizabeth DiSalvo,True,0
+962457,1431984,Gregory D Abowd,False,1
+963644,1434824,Yung Joon Jung,True,0
+963644,1434824,David R Kaeli,False,1
+963644,1434824,Moneesh Upmanyu,False,2
+963644,1434824,Carol Livermore,False,3
+963776,1423998,Lauren MacLean,True,0
+963776,1423998,Kirk Harris,False,1
+964347,1449266,Rupal Patel,True,0
+964347,1449266,Yun Fu,False,1
+964368,1445934,Josep Jornet,True,0
+964368,1445934,Qiaoqiang Gan,False,1
+964368,1445934,Zhi Sun,False,2
+964398,1445261,Randall Erb,True,0
+964398,1445261,Marilyn L Minus,False,1
+965446,1406925,Jonathan Esole,True,0
+966582,1401984,Darien Wood,True,0
+966582,1401984,George O Alverson,False,1
+966582,1401984,Emanuela Barberis,False,2
+968614,1452777,Abraham Joy,True,0
+970998,1443188,Sriram Chellappan,True,0
+970998,1443188,Sajal K Das,False,1
+970998,1443188,Francesco Restuccia,False,2
+970998,1443188,John R Lovitt,False,3
+971200,1353853,Edgar Goluch,True,0
+971200,1353853,Slava S Epstein,False,1
+971359,1442759,Daniel Distel,True,0
+971450,1421399,Javed Aslam,True,0
+972445,1442999,Dmitri Krioukov,True,0
+973781,1444853,Sarah Echohawk,True,0
+973781,1444853,Mary Jo Ondrechen,False,1
+973781,1444853,Robert E Megginson,False,2
+973781,1444853,Chris J Cornelius,False,3
+973781,1444853,Melinda McClanahan,False,4
+973784,1442676,Daniel Distel,True,0
+976283,1431838,Tarek Abdoun,True,0
+976283,1431838,Usama El Shamy,False,1
+976283,1431838,Victoria G Bennett,False,2
+976283,1431838,Casper Harteveld,False,3
+976866,1429373,Justin Ries,True,0
+976882,1428392,M Saif Islam,True,0
+976882,1428392,Neville C Luhmann,False,1
+976882,1428392,David A Horsley,False,2
+976882,1428392,Subhash Mahajan,False,3
+976882,1428392,Xiaoguang Liu,False,4
+977001,1428567,Stefano Basagni,True,0
+977001,1428567,Milica Stojanovic,False,1
+977001,1428567,Yunsi Fei,False,2
+977086,1436436,Sandra Shefelbine,True,0
+977086,1436436,Marilyn L Minus,False,1
+977718,1413985,Arjun Guha,True,0
+977746,1423250,Edmund Yeh,True,0
+977781,1422304,Dimitrios Koutsonikolas,True,0
+977781,1422304,Ramalingam Sridhar,False,1
+977788,1503609,Tommaso Melodia,True,0
+978846,1427111,Seth Hutchinson,True,0
+978846,1427111,Timothy Bretl,False,1
+978846,1427111,Soon-Jo Chung,False,2
+978846,1427111,Mani Golparvar-Fard,False,3
+978862,1427081,Robert Platt,True,0
+980275,1422750,Casper Harteveld,True,0
+980275,1422750,Casper Harteveld,False,1
+980777,1416246,Tomasz Taylor,True,0
+980777,1416246,Brent D Nelson,False,1
+982657,1509782,Taskin Padir,True,0
+982657,1509782,Michael A Gennert,False,1
+982657,1509782,Jeanine L Skorinko,False,2
+982657,1509782,Sonia Chernova,False,3
+982661,1514649,Dmitry Berenson,True,0
+982661,1514649,Taskin Padir,False,1
+982681,1426171,Karen Quigley,True,0
+982681,1426171,Jolie B Wormwood,False,1
+984041,1404163,Mario Sznaier,True,0
+984041,1404163,Octavia I Camps,False,1
+984041,1404163,Ferdinand L Hellweger,False,2
+986162,1421412,Matthias Felleisen,True,0
+986279,1440788,Gene Cooperman,True,0
+986806,1464525,Paul Hand,True,0
+986995,1407962,Mingzhong Wu,True,0
+986995,1407962,Lincoln D Carr,False,1
+987072,1437362,Julie Swann,True,0
+987072,1437362,Ozlem Ergun,False,1
+987946,1420953,Dimitrios Koutsonikolas,True,0
+988396,1410751,Neel Joshi,True,0
+989404,1413134,Erel Levine,True,0
+992228,1409738,Engin Kirda,True,0
+992228,1409738,William Robertson,False,1
+992248,1409453,Guevara Noubir,True,0
+992262,1421815,Cristina Nita-Rotaru,True,0
+992289,1421444,Alan Mislove,True,0
+992295,1413964,Daniel Wichs,True,0
+992503,1419588,Ineke Marshall,True,0
+992503,1419588,Ekaterina Botchkovar,False,1
+992506,1404110,Hai-Ping Cheng,True,0
+992534,1353338,Rhea Eskew,True,0
+992851,1446398,Aaron Lauda,True,0
+992851,1446398,Milen T Yakimov,False,1
+994031,1442065,Herbert Levine,True,0
+1028812,1520781,Byron Wallace,True,0
+1088383,1403171,Richard West,True,0
+1088539,1441828,Dmitri Krioukov,True,0
+1088840,1422133,Amal Ahmed,True,0
+1088899,1429953,Dimitrios Koutsonikolas,True,0
+1088924,1442524,Jacqueline Isaacs,True,0
+1495543,1451070,Sara Wadia-Fascetti,True,0
+957915,1405871,David Choffnes,True,0
+973823,1418256,Sarah Das,True,0
+973823,1418256,Albert J Plueddemann,False,1
+973823,1418256,Hanumant Singh,False,2
+973823,1418256,Sarah B Das,False,3
+979357,1421025,Amy Mueller,True,0
+1026009,1538505,Gunther Zupanc,True,0
+1026009,1538505,Rifat Sipahi,False,1
+1026366,1457631,Teresa Cutright,True,0
+1026366,1457631,Donald W Ott,False,1
+1026366,1457631,Rebecca K Willits,False,2
+1026366,1457631,Thomas C Leeper,False,3
+1026366,1457631,Malena I Espanol,False,4
+1026442,1535929,Ravi Sundaram,True,0
+1026442,1535929,Rajmohan Rajaraman,False,1
+1026507,1517295,Carla Mattos,True,0
+1027105,1458477,Predrag Radivojac,True,0
+1028297,1514283,Christoph Riedl,True,0
+1028301,1514490,Timothy Bickmore,True,0
+1028301,1514490,Harriet J Fell,False,1
+1028335,1526275,Stacy Marsella,True,0
+1028335,1526275,Magy Seif ElNasr,False,1
+1028345,1524380,Christopher Le Dantec,True,0
+1028709,1537824,Ozlem Ergun,True,0
+1028856,1462774,Luca Caracoglia,True,0
+1029285,1459706,Justin Ries,True,0
+1029946,1458150,Geoffrey Trussell,True,0
+1029946,1458150,Tarik Gouhier,False,1
+1030055,1457494,Aron Stubbins,True,0
+1030377,1522550,Jose Onuchic,True,0
+1030491,1451253,Philip Larese-Casanova,True,0
+1030578,1341513,Ted Maksym,True,0
+1030578,1341513,Hanumant Singh,False,1
+1030578,1341513,Clayton Kunz,False,2
+1031574,1458158,Tarik Gouhier,True,0
+1031574,1458158,Steven Vollmer,False,1
+1031584,1507621,Gregory Fiete,True,0
+1031768,1544895,Deniz Erdogmus,True,0
+1031768,1544895,Taskin Padir,False,1
+1031768,1544895,Gunar Schirner,False,2
+1031771,1544636,Cagdas Onal,True,0
+1031771,1544636,Cagdas D Onal,False,1
+1031902,1463945,Christopher Amato,True,0
+1032122,1525412,David Kaeli,True,0
+1032247,1539567,Qin Chen,True,0
+1032247,1539567,Robert R Twilley,False,1
+1032247,1539567,Steven R Brandt,False,2
+1032247,1539567,Honggao Liu,False,3
+1032247,1539567,Zuo G Xue,False,4
+1032578,1550294,Purnima Makris,True,0
+1032578,1550294,Gunar Schirner,False,1
+1033096,1517290,Mary Jo Ondrechen,True,0
+1033096,1517290,Penny J Beuning,False,1
+1033184,1534401,Hai-Ping Cheng,True,0
+1033184,1534401,George Christou,False,1
+1033184,1534401,Xiaoguang Zhang,False,2
+1033370,1518976,Andrew Abbott,True,0
+1033370,1518976,Anjanette M. Chan Tack,False,1
+1033936,1548514,Dagmar Sternad,True,0
+1034210,1505718,Jillian Goldfarb,True,0
+1034210,1505718,Allison M Dennis,False,1
+1034291,1548521,Babak Heydari,True,0
+1034485,1555720,Josep Jornet,True,0
+1034485,1555720,Michal K Stachowiak,False,1
+1035009,1542707,Marija Drndic,True,0
+1035009,1542707,Vincent Meunier,False,1
+1035009,1542707,Mauricio Terrones,False,2
+1035009,1542707,Meni Wanunu,False,3
+1035009,1542707,Anthony N Vamivakas,False,4
+1035407,1531533,Aileen Huang-Saad,True,0
+1035407,1531533,Julie C Libarkin,False,1
+1036489,1536397,Rifat Sipahi,True,0
+1036662,1536354,Sandra Shefelbine,True,0
+1036662,1536354,Alain S Karma,False,1
+1036662,1536354,Randall M Erb,False,2
+1036869,1519211,Ibrahim Zeid,True,0
+1037087,1541250,Tommaso Melodia,True,0
+1038132,1535496,John Coley,True,0
+1038959,1521103,Gordana Todorov,True,0
+1038959,1521103,Alexander Martsinkovsky,False,1
+1038959,1521103,Kiyoshi Igusa,False,2
+1039027,1462739,Deborah Leckband,True,0
+1039027,1462739,Ning Wang,False,1
+1039309,1505305,Valerio Toledano Laredo,True,0
+1039890,1531195,Magnus Egerstedt,True,0
+1039890,1531195,Steven W McLaughlin,False,1
+1039890,1531195,Eric M Feron,False,2
+1039890,1531195,Blair MacIntyre,False,3
+1039890,1531195,Raheem A Beyah,False,4
+1040113,1533484,Nian Sun,True,0
+1040742,1546749,Herbert Levine,True,0
+1040830,1542065,Abraham Joy,True,0
+1041494,1544018,Herbert Levine,True,0
+1041587,1540016,Peter Beling,True,0
+1041587,1540016,William T Scherer,False,1
+1041587,1540016,Abhi Shelat,False,2
+1041729,1503050,Robin Walters,True,0
+1042605,1542954,Gillian Puttick,True,0
+1042605,1542954,Eli Tucker-Raymond,False,1
+1042605,1542954,Gillian Smith,False,2
+1042605,1542954,Casper Harteveld,False,3
+1043071,1526642,Armen Stepanyants,True,0
+1043196,1455450,Mehrdad Sasani,True,0
+1043196,1455450,Matthew J Eckelman,False,1
+1043196,1455450,David J Fannon,False,2
+1043196,1455450,Matthias Ruth,False,3
+1043772,1522052,David McManus,True,0
+1043772,1522052,Jane S Saczynski,False,1
+1044050,1518844,Matthias Felleisen,True,0
+1044050,1518844,Jan Vitek,False,1
+1044299,1540920,Barbara Shinn-Cunningham,True,0
+1044299,1540920,Andrea A Chiba,False,1
+1044299,1540920,Aaron Seitz,False,2
+1044299,1540920,Drew Davidson,False,3
+1044550,1456897,Phil Brown,True,0
+1044550,1456897,Alissa Cordner,False,1
+1045155,1508440,Abraham Joy,True,0
+1045155,1508440,Ali N Dhinojwala,False,1
+1046129,1528411,Iris Berent,True,0
+1047425,1510281,Charles DiMarzio,True,0
+1048411,1516371,Carolyn Lee-Parsons,True,0
+1048411,1516371,Erin J Cram,False,1
+1087997,1503986,Herbert Levine,True,0
+1088421,1504257,Aileen Huang-Saad,True,0
+1088421,1504257,Julie C Libarkin,False,1
+1088558,1545279,Srinivas Sridhar,True,0
+1088558,1545279,Thomas Webster,False,1
+1088558,1545279,Jessica Ramella-Roman,False,2
+1088558,1545279,Birol Ozturk,False,3
+1088558,1545279,Oscar Perales Perez,False,4
+1088558,1545279,Chenzhong Li,False,5
+1088598,1543056,Ahmed Busnaina,True,0
+1088598,1543056,Vladimir P Torchilin,False,1
+1088994,1600280,Cristina Nita-Rotaru,True,0
+1088995,1600266,Cristina Nita-Rotaru,True,0
+1027083,1546428,Jennifer Dy,True,0
+1027083,1546428,David R Kaeli,False,1
+1027083,1546428,April Z Gu,False,2
+1118269,1609038,Sridevi Sarma,True,0
+1118269,1609038,Raimond L Winslow,False,1
+1118397,1603247,Lara Anderson,True,0
+1118397,1603247,Shing-Tung Yau,False,1
+1118397,1603247,Paolo Aluffi,False,2
+1118397,1603247,Jonathan M Esole,False,3
+1118891,1637559,Sucheta Soundarajan,True,0
+1118891,1637559,Yanzhi Wang,False,1
+1119154,1645671,Meni Wanunu,True,0
+1119795,1629879,Seth Cooper,True,0
+1120281,1541430,Scott Valcourt,True,0
+1120636,1617122,John Whitney,True,0
+1121089,1638302,Jacqueline Griffin,True,0
+1121089,1638302,David R Kaeli,False,1
+1121089,1638302,Stacy Marsella,False,2
+1121089,1638302,Casper Harteveld,False,3
+1121089,1638302,Ozlem Ergun,False,4
+1121286,1556738,Randall Hughes,True,0
+1121331,1618406,Andrea Parker,True,0
+1121331,1618406,Magy Seif ElNasr,False,1
+1121331,1618406,Carmen Sceppa,False,2
+1121331,1618406,Jessica A Hoffman,False,3
+1121425,1640472,Hanumant Singh,True,0
+1121563,1602984,Ming Su,True,0
+1121980,1519268,Liza Weinstein,True,0
+1121980,1519268,Yingchan Zhang,False,1
+1122121,1640430,Hanumant Singh,True,0
+1122216,1562490,Jerome Hajjar,True,0
+1122265,1654137,Cristina Nita-Rotaru,True,0
+1122265,1654137,Dan Goldwasser,False,1
+1122287,1650452,Brian Davis,True,0
+1122287,1650452,Carin A Helfer,False,1
+1122287,1650452,Rouzbeh Amini,False,2
+1122727,1646380,Shantanu Chakrabartty,True,0
+1122727,1646380,Xuan Zhang,False,1
+1122951,1558017,Malcolm Maden,True,0
+1122951,1558017,James R Monaghan,False,1
+1122972,1560601,Lauren MacLean,True,0
+1122972,1560601,Jason G Stone,False,1
+1122988,1565788,George ODoherty,True,0
+1123245,1620637,Christopher Beasley,True,0
+1123950,1649729,Taskin Padir,True,0
+1123950,1649729,Bahram Shafai,False,1
+1124095,1620526,James Halverson,True,0
+1124171,1651902,Yun Fu,True,0
+1124378,1633970,M. K. Yegian,True,0
+1124378,1633970,Akram N Alshawabkeh,False,1
+1124530,1562876,Hongwei Sun,True,0
+1124530,1562876,Zhiyong Gu,False,1
+1124530,1562876,Majid Charmchi,False,2
+1125039,1601895,Laura Lewis,True,0
+1125077,1625353,Liza Weinstein,True,0
+1125077,1625353,Anjuli N Ferreira-Fahlberg,False,1
+1125208,1603832,Rebecca Willits,True,0
+1125208,1603832,Matthew L Becker,False,1
+1125275,1643249,Guevara Noubir,True,0
+1125292,1649290,Bradley Lehman,True,0
+1125292,1649290,Mahshid Amirabadi,False,1
+1125369,1601229,Harm Derksen,True,0
+1125717,1639210,Taskin Padir,True,0
+1125784,1641989,Ilya Krivorotov,True,0
+1125784,1641989,Andrei N Slavin,False,1
+1125784,1641989,Mingzhong Wu,False,2
+1125784,1641989,Frank L Hunte,False,3
+1126121,1648836,Taskin Padir,True,0
+1126713,1619738,Hongwei Sun,True,0
+1126884,1646233,Abhi Shelat,True,0
+1126988,1615946,Penny Beuning,True,0
+1127332,1655442,Ramamoorthi Ravi,True,0
+1127332,1655442,Wolfgang Gatterbauer,False,1
+1127443,1638325,Ryan Koppes,True,0
+1127495,1617728,David Choffnes,True,0
+1127495,1617728,Alan Mislove,False,1
+1127522,1620575,Pran Nath,True,0
+1127522,1620575,Tomasz R Taylor,False,1
+1127522,1620575,Brent D Nelson,False,2
+1127537,1635174,Yun Fu,True,0
+1127607,1629929,Dimitrios Koutsonikolas,True,0
+1127607,1629929,Dimitris A Pados,False,1
+1127607,1629929,Zhi Sun,False,2
+1127607,1629929,Josep M Jornet,False,3
+1127951,1634277,Dionisio Bernal,True,0
+1128100,1641081,Abraham Joy,True,0
+1128180,1618727,Tommaso Melodia,True,0
+1128233,1650186,Slava Epstein,True,0
+1128294,1563697,Yunsi Fei,True,0
+1128294,1563697,Aidong A Ding,False,1
+1128294,1563697,Thomas Wahl,False,2
+1128436,1635989,Brian Helmuth,True,0
+1128436,1635989,Tarik Gouhier,False,1
+1128549,1616234,Alan Mislove,True,0
+1128608,1564653,Bradley Lehman,True,0
+1128608,1564653,Claire J Duggan,False,1
+1128608,1564653,Khalil Shujaee,False,2
+1128608,1564653,Marilyn L Minus,False,3
+1128608,1564653,Richard Harris,False,4
+1129089,1650886,Cristina Nita-Rotaru,True,0
+1129197,1563320,Alan Mislove,True,0
+1129197,1563320,David R Choffnes,False,1
+1129197,1563320,Christopher Wilson,False,2
+1129202,1618955,David Choffnes,True,0
+1129240,1601862,Milen Yakimov,True,0
+1129392,1559894,David Kaeli,True,0
+1129405,1555608,Rupal Patel,True,0
+1129442,1637124,Daniel O'Brien,True,0
+1129442,1637124,David M Lazer,False,1
+1129681,1622536,Stratis Ioannidis,True,0
+1129681,1622536,Jennifer G Dy,False,1
+1129681,1622536,Deniz Erdogmus,False,2
+1129718,1653416,Cristina Nita-Rotaru,True,0
+1129741,1618732,Jan Vitek,True,0
+1129741,1618732,Amal Ahmed,False,1
+1129829,1618379,David Kaeli,True,0
+1129829,1618379,Yunsi Fei,False,1
+1130086,1635618,Jay Brandes,True,0
+1130086,1635618,William L Miller,False,1
+1130086,1635618,Aron Stubbins,False,2
+1130086,1635618,Leanne Powers,False,3
+1130351,1646671,Abhi Shelat,True,0
+1130858,1618731,Tommaso Melodia,True,0
+1130858,1618731,Matteo Rinaldi,False,1
+1131271,1622301,Jose Perea,True,0
+1131449,1605817,Herbert Levine,True,0
+1131476,1624175,David Kaeli,True,0
+1131740,1606128,Rebecca Carrier,True,0
+1131740,1606128,James R Monaghan,False,1
+1131740,1606128,Joydip Kundu,False,2
+1131798,1561404,Susanne Jaeggi,True,0
+1131974,1557868,Brian Helmuth,True,0
+1131974,1557868,Geoffrey C Trussell,False,1
+1132045,1638234,Mario Sznaier,True,0
+1132045,1638234,Octavia I Camps,False,1
+1132045,1638234,Lisa Feldman Barrett,False,2
+1132045,1638234,Stacy Marsella,False,3
+1132045,1638234,Jacqueline A Griffin,False,4
+1132435,1643018,Dean Chang,True,0
+1132435,1643018,James Chung,False,1
+1132435,1643018,Mark B Mondry,False,2
+1132435,1643018,John J Lesko,False,3
+1132710,1624662,David Kaeli,True,0
+1132829,1606422,Benjamin Knudsen,True,0
+1132926,1605568,Richard West,True,0
+1133099,1640909,Leanne Chukoskie,True,0
+1133099,1640909,Jorge V Jose,False,1
+1133099,1640909,Joseph Snider,False,2
+1133387,1655161,Herbert Levine,True,0
+1167595,1650826,Tina Eliassi-Rad,True,0
+1168098,1654532,Edmund Yeh,True,0
+1168602,1658450,Yingzi Lin,True,0
+1168652,1658790,Deniz Erdogmus,True,0
+1168704,1659090,Swastik Kar,True,0
+1169108,1661496,Marc Edwards,True,0
+1169108,1661496,Kelsey Pieper,False,1
+1169108,1661496,Adrienne L Katner,False,2
+1169275,1664445,Abhi Shelat,True,0
+1169314,1664923,Christopher Amato,True,0
+1169511,1700720,Leila Deravi,True,0
+1169603,1701635,Jonathan Esole,True,0
+1170153,1719418,Jennifer Bowen,True,0
+1166909,1635423,Kathleen Lotterhos,True,0
+1166909,1635423,Justin B Ries,False,1
+1166944,1637854,Dagmar Sternad,True,0
+1167052,1643280,Alec Gallimore,True,0
+1167052,1643280,Andreas C Cangellaris,False,1
+1167052,1643280,Theresa S Mayer,False,2
+1167052,1643280,Aileen Huang-Saad,False,3
+1167052,1643280,Jonathan Fay,False,4
+1167052,1643280,Suresh V Garimella,False,5
+1167205,1645877,Valerio Toledano Laredo,True,0
+1167205,1645877,Jonathan Weitsman,False,1
+1167205,1645877,Milen T Yakimov,False,2
+1167205,1645877,Christopher E Beasley,False,3
+1167205,1645877,Ana-Maria Castravet,False,4
+1167205,1645877,Valerio Toledano Laredo,False,5
+1167205,1645877,Ivan Loseu,False,6
+1167527,1650469,Qinru Qiu,True,0
+1167527,1650469,Yanzhi Wang,False,1
+1167537,1650497,Bradley Lehman,True,0
+1167537,1650497,Laura H Lewis,False,1
+1167537,1650497,Taskin Padir,False,2
+1167537,1650497,Mahshid Amirabadi,False,3
+1168178,1655060,Susan Silbey,True,0
+1168178,1655060,H.C. Robinson,False,1
+1168333,1656429,James Monaghan,True,0
+1168384,1656951,Laurent Lessard,True,0
+1168424,1657197,Ehsan Elhamifar,True,0
+1168468,1657466,Michelle Borkin,True,0
+1168480,1657562,Xuan Zhang,True,0
+1168534,1657938,Hanumant Singh,True,0
+1168844,1659757,Christopher Le Dantec,True,0
+1168844,1659757,Ellen W Zegura,False,1
+1168844,1659757,Christopher A Le Dantec,False,2
+1168978,1660301,Michael Zimber,True,0
+1168978,1660301,Marsha W Rolle,False,1
+1169626,1701748,Jennifer Bowen,True,0
+1169626,1701748,Ashley N Bulseco,False,1
+1280165,1646121,Mario Sznaier,True,0
+1280408,1655701,Kathleen Lotterhos,True,0
+1280408,1655701,Sam Yeaman,False,1
+1280658,1659403,Edmund Yeh,True,0
+1280658,1659403,Harvey B Newman,False,1
+1280658,1659403,Christos Papadopoulos,False,2
+1280898,1661532,Guevara Noubir,True,0
+1280898,1661532,David R Kaeli,False,1
+1280898,1661532,William Robertson,False,2
+1280909,1663651,Gail-Joon Ahn,True,0
+1280909,1663651,Stephen Yau,False,1
+1280909,1663651,Adam Doupe,False,2
+1280909,1663651,Ziming Zhao,False,3
+1280909,1663651,Ruoyu Wang,False,4
+1280909,1663651,Dijiang Huang,False,5
+1281371,1701023,Taskin Padir,True,0
+1281400,1702618,Mark Patterson,True,0
+1281400,1702618,Brian Helmuth,False,1
+1281400,1702618,Loretta A Fernandez,False,2
+1281444,1702274,Matthew Hogancamp,True,0
+1281508,1701043,Yung Joon Jung,True,0
+1281508,1701043,Swastik Kar,False,1
+1281694,1703454,Engin Kirda,True,0
+1281786,1705757,Kai-tak Wan,True,0
+1281786,1705757,Sinan Muftu,False,1
+1281857,1705958,Carlos Hidrovo Chavez,True,0
+1281919,1706050,Josep Jornet,True,0
+1281919,1706050,Michal K Stachowiak,False,1
+1281919,1706050,Liang Feng,False,2
+1281919,1706050,Yongho Bae,False,3
+1282023,1707666,Darien Wood,True,0
+1282023,1707666,Emanuela Barberis,False,1
+1282023,1707666,Toyoko J Orimoto,False,2
+1282033,1704662,Jian Tang,True,0
+1282033,1704662,Yanzhi Wang,False,1
+1282326,1707870,Hai-Ping Cheng,True,0
+1282440,1710211,Aleksandr Noy,True,0
+1282440,1710211,Meni Wanunu,False,1
+1282477,1709616,Jing-Ke Weng,True,0
+1282692,1710892,Laurent Lessard,True,0
+1283489,1715212,Erel Levine,True,0
+1283616,1715858,Deniz Erdogmus,True,0
+1283648,1715153,Frank Tip,True,0
+1283681,1716623,Sagar Khare,True,0
+1283681,1716623,Eduardo D Sontag,False,1
+1283965,1718088,Jonathan Ullman,True,0
+1284001,1718286,Ravi Sundaram,True,0
+1284003,1718355,Stratis Ioannidis,True,0
+1284003,1718355,Edmund M Yeh,False,1
+1284072,1717634,Alina Oprea,True,0
+1284074,1717636,Brian Levine,True,0
+1284138,1718177,Josep Jornet,True,0
+1284138,1718177,Qiaoqiang Gan,False,1
+1284138,1718177,Zhi Sun,False,2
+1284138,1718177,Liang Feng,False,3
+1284138,1718177,Edward P Furlani,False,4
+1284144,1717213,Stratis Ioannidis,True,0
+1284144,1717213,Miriam E Leeser,False,1
+1284390,1720595,Edward Yu,True,0
+1284390,1720595,Brian A Korgel,False,1
+1284390,1720595,Xiaoqin E Li,False,2
+1284390,1720595,Gregory Fiete,False,3
+1284390,1720595,Delia J Milliron,False,4
+1284570,1722553,Geoffrey Trussell,True,0
+1284570,1722553,Jennifer L Bowen,False,1
+1284570,1722553,Kathleen E Lotterhos,False,2
+1284716,1723998,Dagmar Sternad,True,0
+1284722,1722801,Kayvan Najarian,True,0
+1284722,1722801,Harm Derksen,False,1
+1284722,1722801,Michael Sjoding,False,2
+1284722,1722801,Theodore Iwashyna,False,3
+1284877,1724191,Robert Platt,True,0
+1284987,1724257,Robert Platt,True,0
+1285169,1727044,Kristen Buchanan,True,0
+1285169,1727044,Stuart Field,False,1
+1285169,1727044,Mingzhong Wu,False,2
+1285387,1726512,Tommaso Melodia,True,0
+1285387,1726512,Stefano Basagni,False,1
+1285387,1726512,Milica Stojanovic,False,2
+1285387,1726512,Matteo Rinaldi,False,3
+1285495,1727518,Sandra Shefelbine,True,0
+1285495,1727518,James R Monaghan,False,1
+1285524,1733701,Xue Lin,True,0
+1285524,1733701,David R Kaeli,False,1
+1285660,1729588,Gregory Fiete,True,0
+1285660,1729588,Jianshi Zhou,False,1
+1285730,1730148,Josep Jornet,True,0
+1285730,1730148,Stella Batalama,False,1
+1285730,1730148,Dimitris A Pados,False,2
+1285730,1730148,Jonathan P Bird,False,3
+1285730,1730148,Erik Einarsson,False,4
+1285738,1730396,Enrico Bertini,True,0
+1285738,1730396,Claudio T Silva,False,1
+1285980,1733984,Iris Berent,True,0
+1286071,1734822,Teresa Cutright,True,0
+1286071,1734822,Rebecca K Willits,False,1
+1286095,1736185,Casper Harteveld,True,0
+1286095,1736185,Gillian Smith,False,1
+1286190,1735316,Melissa Pespeni,True,0
+1286190,1735316,Lori Stevens,False,1
+1286190,1735316,Stephen R Keller,False,2
+1286190,1735316,Laurent Hebert-Dufresne,False,3
+1286190,1735316,Vijay Kanagala,False,4
+1286190,1735316,Lesley-Ann L Dupigny-Giroux,False,5
+1286190,1735316,Samuel V Scarpino,False,6
+1286190,1735316,Brandon Ogbunugafor,False,7
+1286190,1735316,Laurent Hebert-Dufresne,False,8
+1286201,1734497,Christopher Amato,True,0
+1286224,1735260,Marc Meyer,True,0
+1286224,1735260,Paul V Croke,False,1
+1286224,1735260,Kevin J Scanlon,False,2
+1286231,1735505,Albert-Laszlo Barabasi,True,0
+1286231,1735505,Edmund M Yeh,False,1
+1286231,1735505,Auroop R Ganguly,False,2
+1286231,1735505,Stephen Flynn,False,3
+1286231,1735505,Kathryn Coronges,False,4
+1286275,1734821,Albert-Laszlo Barabasi,True,0
+1286323,1735743,Tarik Gouhier,True,0
+1286362,1738687,Phil Brown,True,0
+1286362,1738687,Lauren Richter,False,1
+1286541,1739748,Qinru Qiu,True,0
+1286541,1739748,Amit K Sanyal,False,1
+1286541,1739748,Senem Velipasalar,False,2
+1286541,1739748,Jian Tang,False,3
+1286541,1739748,Yanzhi Wang,False,4
+1286613,1736749,Purnima Makris,True,0
+1286630,1739643,Xuan Zhang,True,0
+1286630,1739643,Christopher Gill,False,1
+1286630,1739643,Humberto Gonzalez,False,2
+1286944,1742521,James Benneyan,True,0
+1287057,1740229,Michelle Borkin,True,0
+1287156,1740907,Guevara Noubir,True,0
+1287156,1740907,Kaushik R Chowdhury,False,1
+1287265,1741355,Dmitri Krioukov,True,0
+1287307,1740467,Swastik Kar,True,0
+1287307,1740467,J. Ardie Butch Dillen,False,1
+1287357,1741855,Josep Jornet,True,0
+1287380,1741669,Herbert Levine,True,0
+1287428,1743392,Peter Wolynes,True,0
+1287428,1743392,Herbert Levine,False,1
+1287428,1743392,Melvin N Waxham,False,2
+1287428,1743392,Michael R Diehl,False,3
+1287428,1743392,Margaret S Cheung,False,4
+1287455,1745926,Frank Tip,True,0
+1287476,1741197,Stratis Ioannidis,True,0
+1287476,1741197,Tina Eliassi-Rad,False,1
+1287670,1745771,Leanne Chukoskie,True,0
+1287791,1743823,David Choffnes,True,0
+1287830,1748208,Herbert Levine,True,0
+1287948,1760582,Navid Jafari,True,0
+1287948,1760582,Qin J Chen,False,1
+1287948,1760582,Xin Li,False,2
+1288048,1744634,Matthew Goodwin,True,0
+1288494,1760296,Marc Edwards,True,0
+1288494,1760296,Amy J Pruden,False,1
+1288494,1760296,Kelsey Pieper,False,2
+1288494,1760296,Adrienne L Katner,False,3
+1288494,1760296,William J Rhoads,False,4
+1306111,1744232,Aaron Lauda,True,0
+1306111,1744232,Milen T Yakimov,False,1
+1306155,1810172,Marc Edwards,True,0
+1306155,1810172,Kelsey Pieper,False,1
+1306155,1810172,William J Rhoads,False,2
+1306523,1707964,Hai-Ping Cheng,True,0
+1313164,1824613,Aron Stubbins,True,0
+1313190,1822020,Craig Maloney,True,0
+1313216,1824723,Aron Stubbins,True,0
+1286487,1736943,David Kimbro,True,0
+1286617,1740218,Gene Cooperman,True,0
+1306178,1806186,Arghavan Louhghalam,True,0
+1306178,1806186,Sara Wadia-Fascetti,False,1
+1306178,1806186,Shirley J Dyke,False,2
+1306866,1755922,Christopher Martens,True,0
+1313096,1747748,Yunsi Fei,True,0
+1318869,1818413,Gordana Todorov,True,0
+1318869,1818413,Alexander Martsinkovsky,False,1
+1319056,1757650,Bradley Lehman,True,0
+1319249,1812412,Sara Wadia-Fascetti,True,0
+1319249,1812412,Mohamad Metghalchi,False,1
+1319249,1812412,Carla Mattos,False,2
+1319249,1812412,Benjamin Hescott,False,3
+1319249,1812412,Richard Harris,False,4
+1319249,1812412,Barbara Guthrie,False,5
+1320968,1757443,Wendy Smith,True,0
+1320968,1757443,Veronica Godoy-Carter,False,1
+1320968,1757443,Rebeca B Rosengaus,False,2
+1332827,1803265,Milen Yakimov,True,0
+1332827,1803265,Andrei Okounkov,False,1
+1332921,1830876,Eugene Tunik,True,0
+1333047,1832756,April Gu,True,0
+1333256,1755695,Sarah Ostadabbas,True,0
+1333355,1761950,Qi Wang,True,0
+1333355,1761950,Yingzi Lin,False,1
+1333357,1759596,Gavin Shatkin,True,0
+1333624,1802412,Valerio Toledano Laredo,True,0
+1333657,1804107,Samuel Munoz,True,0
+1334070,1816837,Amal Ahmed,True,0
+1334225,1764316,Kathleen Lotterhos,True,0
+1334225,1764316,Geoffrey C Trussell,False,1
+1334225,1764316,Daniel I Bolnick,False,2
+1334225,1764316,Joanna L Kelley,False,3
+1334225,1764316,Morgan Kelly,False,4
+1334230,1813930,Emanuele Viola,True,0
+1334597,1827940,Tommaso Melodia,True,0
+1334620,1763922,Sam Tobin-Hochstadt,True,0
+1334620,1763922,Matthias Felleisen,False,1
+1334620,1763922,Jeremy G Siek,False,2
+1334666,1827923,Tommaso Melodia,True,0
+1347147,1815219,Cristina Nita-Rotaru,True,0
+1347251,1812467,Fabrizio Lombardi,True,0
+1347359,1805244,Carlos Hidrovo Chavez,True,0
+1347616,1807814,Adrian Feiguin,True,0
+1347958,1836437,Josep Jornet,True,0
+1348357,1821791,Dimitrios Koutsonikolas,True,0
+1348366,1756812,Sasha Wagner,True,0
+1348366,1756812,Aron Stubbins,False,1
+1348548,1764221,Paul Champion,True,0
+1348892,1814631,Octavia Camps,True,0
+1348892,1814631,Mario Sznaier,False,1
+1348893,1763709,Tommaso Melodia,True,0
+1348893,1763709,Matteo Rinaldi,False,1
+1348894,1812588,Aatmesh Shrivastava,True,0
+1348894,1812588,Marvin Onabajo,False,1
+1348905,1838986,Jonathan Bell,True,0
+1349083,1810498,Lace Padilla,True,0
+1349083,1810498,Steven L Franconeri,False,1
+1349215,1841893,Renata Konrad,True,0
+1349215,1841893,Andrew C Trapp,False,1
+1349215,1841893,Meredith Dank,False,2
+1349215,1841893,Kayse L Maass,False,3
+1349314,1800738,Gabor Lippner,True,0
+1349350,1763348,Hessam Mahdavifar,True,0
+1349456,1806561,Toyoko Orimoto,True,0
+1349564,1763878,Robert Platt,True,0
+1349659,1818132,Jing-Ke Weng,True,0
+1349689,1805043,Rebecca Carrier,True,0
+1349801,1816640,Erin Cram,True,0
+1350587,1759736,Olga Vitek,True,0
+1350587,1759736,Jan Vitek,False,1
+1350587,1759736,Kylie A Bemis,False,2
+1350668,1833200,Samuel Munoz,True,0
+1350668,1833200,Edward Beighley,False,1
+1350673,1828506,Mark Williams,True,0
+1350673,1828506,Jeffrey W Ruberti,False,1
+1350673,1828506,Penny J Beuning,False,2
+1350673,1828506,Meni Wanunu,False,3
+1350673,1828506,Ke Zhang,False,4
+1350723,1815940,Andrea Parker,True,0
+1350723,1815940,Brooke F Welles,False,1
+1350734,1816382,Christopher Amato,True,0
+1350944,1801903,Dimitrios Koutsonikolas,True,0
+1350944,1801903,Josep M Jornet,False,1
+1350971,1755901,Cody Dunne,True,0
+1351003,1760251,Sinan Muftu,True,0
+1351229,1849588,Eduardo Sontag,True,0
+1351389,1816426,Seth Cooper,True,0
+1351389,1816426,Sara A Wylie,False,1
+1351817,1816244,Hanumant Singh,True,0
+1351817,1816244,Tommaso Melodia,False,1
+1361409,1817712,Mark Williams,True,0
+1361409,1817712,Megan E Nunez,False,1
+1361409,1817712,Thayaparan Paramanathan,False,2
+1361604,1810961,Yiannis Levendis,True,0
+1361732,1763822,Jonathan Bell,True,0
+1361823,1835309,Ajay Satpute,True,0
+1361823,1835309,Jennifer G Dy,False,1
+1361823,1835309,Sarah Ostadabbas,False,2
+1361823,1835309,John B Hutchinson,False,3
+1361823,1835309,Jan-Willem van de Meent,False,4
+1361823,1835309,Ajay Satpute,False,5
+1361873,1761416,Richard West,True,0
+1362078,1757078,George ODoherty,True,0
+1362078,1757078,Oyindasola Oyelaran,False,1
+1362303,1845089,Abraham Joy,True,0
+1366252,1815349,Pau Closas,True,0
+1366283,1855567,Marc Edwards,True,0
+1366283,1855567,Kathleen M Gray,False,1
+1366283,1855567,Kelsey Pieper,False,2
+1366283,1855567,Adrienne L Katner,False,3
+1366283,1855567,William J Rhoads,False,4
+1366283,1855567,Marc A Edwards,False,5
+1366495,1808381,Mario Sznaier,True,0
+1366495,1808381,Octavia I Camps,False,1
+1366646,1804550,Eugene Tunik,True,0
+1366646,1804550,Dana H Brooks,False,1
+1366646,1804550,Deniz Erdogmus,False,2
+1366686,1803872,Tania Konry,True,0
+1366691,1838315,Lauren Martin,True,0
+1366691,1838315,Thomas Sharkey,False,1
+1366691,1838315,Kelle Barrick,False,2
+1366691,1838315,Kayse L Maass,False,3
+1366799,1825942,Dagmar Sternad,True,0
+1366930,1825669,Aileen Huang-Saad,True,0
+1367098,1838796,Yingzi Lin,True,0
+1367098,1838796,Sagar V Kamarthi,False,1
+1367355,1827817,Phil Brown,True,0
+1367355,1827817,Alissa Cordner,False,1
+1367472,1830425,John Whitney,True,0
+1367472,1830425,Robert Platt,False,1
+1367541,1856359,Qin Chen,True,0
+1367645,1831755,Timothy Bickmore,True,0
+1367645,1831755,Michael Paasche-Orlow,False,1
+1367672,1823244,Matthias Felleisen,True,0
+1367672,1823244,Matthew R Flatt,False,1
+1367672,1823244,Robert B Findler,False,2
+1367672,1823244,Sam Tobin-Hochstadt,False,3
+1367724,1822165,Qinru Qiu,True,0
+1367724,1822165,Pramod K Varshney,False,1
+1367724,1822165,Chilukuri K Mohan,False,2
+1367724,1822165,Yanzhi Wang,False,3
+1367730,1837985,Kayvan Najarian,True,0
+1367730,1837985,Harm Derksen,False,1
+1367730,1837985,Kevin Ward,False,2
+1367730,1837985,Kayvan Najarian,False,3
+1367730,1837985,Timothy Cornell,False,4
+1367849,1801546,Stavros Tripakis,True,0
+1367849,1801546,Cristina Nita-Rotaru,False,1
+1367913,1902126,Samuel Munoz,True,0
+1367913,1902126,Philip Larese-Casanova,False,1
+1367913,1902126,Loretta A Fernandez,False,2
+1368241,1840493,Ozlem Ergun,True,0
+1368241,1840493,Haris N Koutsopoulos,False,1
+1368241,1840493,Jennie C Stephens,False,2
+1368241,1840493,Christopher Wilson,False,3
+1368241,1840493,Rashmi Dyal-Chand,False,4
+1368567,1836880,Miriam Leeser,True,0
+1368740,1816028,Jonathan Ullman,True,0
+1368740,1816028,Abhi Shelat,False,1
+1378540,1854685,Predrag Radivojac,True,0
+1367653,1841512,Sanjeev Mukerjee,True,0
+1368014,1835656,Yang Zhang,True,0
+1368265,1904103,Laurentiu Maxim,True,0
+1368265,1904103,Terence J Gaffney,False,1
+1368265,1904103,Alexandru I Suciu,False,2
+1377851,1929941,Jay Banner,True,0
+1377851,1929941,Steven Gray,False,1
+1377851,1929941,Auroop R Ganguly,False,2
+1377851,1929941,Ashlynn S Stillwell,False,3
+1377851,1929941,Kasey M Faust,False,4
+1377978,1901378,Xue Lin,True,0
+1377978,1901378,Miriam E Leeser,False,1
+1378146,1936009,Abraham Joy,True,0
+1378182,1850264,Aanjhan Ranganathan,True,0
+1378646,1854185,Nicole Sanderlin,True,0
+1378646,1854185,David Knight,False,1
+1378646,1854185,John J Lesko,False,2
+1378749,1916839,Yongmin Liu,True,0
+1378749,1916839,Yun Fu,False,1
+1379121,1935762,Herbert Levine,True,0
+1379414,1933051,Hongli Zhu,True,0
+1379961,1931137,Matthew Eckelman,True,0
+1379968,1827343,Alain Karma,True,0
+1380047,1915849,Mingzhong Wu,True,0
+1380156,1854213,Yanzhi Wang,True,0
+1380156,1854213,Srinivas Tadigadapa,False,1
+1380407,1850072,Corliss Thompson,True,0
+1380407,1850072,Elizabeth Zulick,False,1
+1380407,1850072,Kelly J Conn,False,2
+1380490,1917015,David Kimbro,True,0
+1380842,1930231,Pau Closas,True,0
+1381702,1915815,Ryan Ellis,True,0
+1381702,1915815,William Robertson,False,1
+1381957,1915843,Paul Whitford,True,0
+1381984,1901830,Milen Yakimov,True,0
+1382277,1933397,Guohao Dai,True,0
+1382343,1905398,Xuwen Zhu,True,0
+1382581,1900879,Alan Mislove,True,0
+1382581,1900879,Christopher Wilson,False,1
+1382748,1851043,Randall Hughes,True,0
+1382748,1851043,Torrance C Hanley,False,1
+1383148,1852678,Luca Caracoglia,True,0
+1455798,1907250,Xiaoning Jin,True,0
+1455798,1907250,Hongli Zhu,False,1
+1455858,1936648,Laurent Lessard,True,0
+1455882,1916762,Yunsi Fei,True,0
+1456089,1918128,Liza Weinstein,True,0
+1456089,1918128,Anita Patil-Deshmukh,False,1
+1456100,1940307,Steven Lopez,True,0
+1456100,1940307,Semion K Saikin,False,1
+1456169,1909771,Hessam Mahdavifar,True,0
+1456220,1916374,Hongwei Sun,True,0
+1456220,1916374,Yan Luo,False,1
+1456762,1933878,Shahin Shahrampour,True,0
+1456762,1933878,Alfredo A Garcia,False,1
+1456775,1938052,Sara Wadia-Fascetti,True,0
+1457029,1946944,Erel Levine,True,0
+1457092,1937500,Stratis Ioannidis,True,0
+1457092,1937500,Jennifer G Dy,False,1
+1457092,1937500,Kaushik R Chowdhury,False,2
+1457092,1937500,Tommaso Melodia,False,3
+1457092,1937500,Yanzhi Wang,False,4
+1457095,1910064,Christopher Wilson,True,0
+1457383,1932351,Xue Lin,True,0
+1457388,1923789,Kaushik Chowdhury,True,0
+1457388,1923789,Tommaso Melodia,False,1
+1457551,1909172,Yanzhi Wang,True,0
+1457588,1856090,Noshir Contractor,True,0
+1457588,1856090,Leslie A DeChurch,False,1
+1457588,1856090,Alina Lungeanu,False,2
+1457625,1900941,Enrico Bertini,True,0
+1457691,1931997,Cristina Nita-Rotaru,True,0
+1457745,1913328,Pran Nath,True,0
+1457745,1913328,Tomasz R Taylor,False,1
+1457745,1913328,Brent D Nelson,False,2
+1457950,1910601,Devesh Tiwari,True,0
+1458021,1929300,Yunsi Fei,True,0
+1458021,1929300,Xue Lin,False,1
+1458021,1929300,Thomas Wahl,False,2
+1458170,1916398,William Robertson,True,0
+1458179,1921771,Rhea Eskew,True,0
+1458191,1928604,Leanne Chukoskie,True,0
+1458191,1928604,Pamela C Cosman,False,1
+1458331,1916710,Rebecca Willits,True,0
+1458396,1921281,Daniel O'Brien,True,0
+1458423,1912354,Andrew Myers,True,0
+1458423,1912354,Anil Pervizaj,False,1
+1458423,1912354,Jens L Wind,False,2
+1458431,1924534,Hongli Zhu,True,0
+1458431,1924534,Joshua W Gallaway,False,1
+1458487,1909314,Huy Nguyen,True,0
+1458647,1919117,Yanzhi Wang,True,0
+1458838,1854573,Cristian Cassella,True,0
+1458838,1854573,Marvin Onabajo,False,1
+1458838,1854573,Matteo Rinaldi,False,2
+1459468,1910621,Aron Stubbins,True,0
+1459471,1925601,Tommaso Melodia,True,0
+1459471,1925601,Stefano Basagni,False,1
+1459471,1925601,Abhimanyu Gosain,False,2
+1459471,1925601,Kaushik R Chowdhury,False,3
+1459565,1939334,Tommaso Melodia,True,0
+1459795,1940760,Jonathan Bell,True,0
+1459840,1935337,Eugene Tunik,True,0
+1459840,1935337,Deniz Erdogmus,False,1
+1459840,1935337,Taskin Padir,False,2
+1459840,1935337,Mathew Yarossi,False,3
+1459930,1927425,Alessandro Vespignani,True,0
+1459930,1927425,Kathryn Coronges,False,1
+1459977,1928528,Norma Saiph Savage,True,0
+1460062,1909363,Rajmohan Rajaraman,True,0
+1460068,1949701,Gregory Fiete,True,0
+1460220,1928608,H.C. Robinson,True,0
+1460220,1928608,Ozlem Ergun,False,1
+1460220,1928608,Steven P Vallas,False,2
+1460220,1928608,Michael B Kane,False,3
+1460237,1917885,Thomason Price,True,0
+1460237,1917885,Tiffany M Barnes,False,1
+1460237,1917885,Christopher Martens,False,2
+1460531,1931777,Yongmin Liu,True,0
+1460553,1901117,Byron Wallace,True,0
+1460553,1901117,Jan-Willem van de Meent,False,1
+1460772,1925658,Peter Desnoyers,True,0
+1460772,1925658,Miriam E Leeser,False,1
+1460944,1915065,Sarah Ostadabbas,True,0
+1460967,1910327,Peter Desnoyers,True,0
+1461087,1944964,Sarah Ostadabbas,True,0
+1461087,1944964,Alireza Ramezani,False,1
+1461110,1943761,Benjamin Knudsen,True,0
+1461245,1925644,Jan Vitek,True,0
+1461245,1925644,Olga Vitek,False,1
+1461256,1916020,Alan Mislove,True,0
+1461256,1916020,Jonathan Ullman,False,1
+1461528,1935888,Kathy DeerInWater,True,0
+1461528,1935888,Mary Jo Ondrechen,False,1
+1461528,1935888,Timberley M Roane,False,2
+1461528,1935888,Chris J Cornelius,False,3
+1461528,1935888,Ryan E Emanuel,False,4
+1461538,1905214,Mary Jo Ondrechen,True,0
+1461538,1905214,Deniz Erdogmus,False,1
+1461538,1905214,Penny J Beuning,False,2
+1461623,1944453,Taskin Padir,True,0
+1461659,1911197,Bir Bhanu,True,0
+1461659,1911197,Aaron R Seitz,False,1
+1461821,1934146,Jeannette Wing,True,0
+1461821,1934146,David Madigan,False,1
+1461911,1910522,Amal Ahmed,True,0
+1461943,1935646,Sagar Kamarthi,True,0
+1461943,1935646,Jacqueline A Isaacs,False,1
+1461943,1935646,Xiaoning Jin,False,2
+1461943,1935646,Mohsen Moghaddam,False,3
+1461943,1935646,Kemi Jona,False,4
+1462007,1936853,Beverly Sanders,True,0
+1462007,1936853,Erik Deumens,False,1
+1462007,1936853,Hai-Ping Cheng,False,2
+1462007,1936853,James K Freericks,False,3
+1462007,1936853,Chenglong Li,False,4
+1462050,1911462,Julie Schneider,True,0
+1462050,1911462,Roberta M Golinkoff,False,1
+1462050,1911462,Zhenghan Qi,False,2
+1462056,1915247,Casper Harteveld,True,0
+1462056,1915247,Yevgeniya V Zastavker,False,1
+1462068,1924145,Steven Vollmer,True,0
+1462119,1909020,David Choffnes,True,0
+1462322,1928654,Taskin Padir,True,0
+1462322,1928654,Kemi Jona,False,1
+1462322,1928654,Alicia S Modestino,False,2
+1462322,1928654,KRISTIAN KLOECKL,False,3
+1462322,1928654,John J Basl,False,4
+1462432,1907727,Frank Tip,True,0
+1481312,2002532,Yingzi Lin,True,0
+1481366,1933786,Alexandru Suciu,True,0
+1481366,1933786,Laurentiu G Maxim,False,1
+1481366,1933786,Christin N Bibby,False,2
+1481372,1904024,Sergey Kravchenko,True,0
+1537979,2034516,Matthew Hogancamp,True,0
+1456812,1935602,Renata Konrad,True,0
+1456812,1935602,Andrew C Trapp,False,1
+1456812,1935602,Meredith Dank,False,2
+1456812,1935602,Kayse L Maass,False,3
+1459340,1931389,Richard West,True,0
+1460949,1925110,Hyunglae Lee,True,0
+1460949,1925110,Sze Zheng Yong,False,1
+1461342,1932066,Sze Zheng Yong,True,0
+1461440,1935618,Kayse Maass,True,0
+1461440,1935618,Amy S Farrell,False,1
+1461440,1935618,Shawn Bhimani,False,2
+1481355,2010551,Sara Wadia-Fascetti,True,0
+1481355,2010551,Daniel Rothstein,False,1
+1481355,2010551,Luz Santana,False,2
+1481355,2010551,Tomoko Ouchi,False,3
+1481355,2010551,Andrew P Minigan,False,4
+1481355,2010551,Margaret Wald,False,5
+1481543,2005106,Pau Closas,True,0
+1481819,2002606,Christopher Amato,True,0
+1487385,1939098,Peter Desnoyers,True,0
+1487385,1939098,Gene Cooperman,False,1
+1487569,1947017,Jennie Stephens,True,0
+1487569,1947017,Marla D Perez-Lugo,False,1
+1487569,1947017,Cecilio Ortiz,False,2
+1487569,1947017,Laura Kuhl,False,3
+1487569,1947017,Ryan N Ellis,False,4
+1487598,1948790,Laura Senier,True,0
+1487598,1948790,Sharon Harlan,False,1
+1487598,1948790,Martha F Davis,False,2
+1487677,1946910,Gunther Zupanc,True,0
+1488121,2013756,Stratis Ioannidis,True,0
+1488410,2013067,Jerome Hajjar,True,0
+1488410,2013067,Yanzhi Wang,False,1
+1488410,2013067,Jerome F Hajjar,False,2
+1488575,2023217,Devesh Tiwari,True,0
+1488575,2023217,Xiaolin Xu,False,1
+1488948,1945323,Daniel Faber,True,0
+1489040,2018500,Yang Zhang,True,0
+1493933,1945436,Psyche Loui,True,0
+1494304,1943801,Xiaoning Jin,True,0
+1494695,2026631,David Lazer,True,0
+1494695,2026631,Alessandro Vespignani,False,1
+1494695,2026631,Briony Swire-Thompson,False,2
+1495149,2030180,Mary Jo Ondrechen,True,0
+1495149,2030180,Penny J Beuning,False,1
+1495303,2028449,Jacqueline Griffin,True,0
+1495303,2028449,David R Kaeli,False,1
+1495303,2028449,Stacy Marsella,False,2
+1495303,2028449,Casper Harteveld,False,3
+1495303,2028449,Ozlem Ergun,False,4
+1495329,2029104,Laura Lewis,True,0
+1495334,1952032,Anupam Joshi,True,0
+1495334,1952032,Taskin Padir,False,1
+1495334,1952032,Carmen Sceppa,False,2
+1495334,1952032,Dana B Bradley,False,3
+1532593,1947972,Ajay Satpute,True,0
+1532593,1947972,Deniz Erdogmus,False,1
+1532593,1947972,Lisa Feldman Barrett,False,2
+1532667,1920020,David Kaeli,True,0
+1532667,1920020,Yanzhi Wang,False,1
+1532667,1920020,Xue Lin,False,2
+1532667,1920020,Devesh Tiwari,False,3
+1532850,1956096,Renee Miller,True,0
+1532850,1956096,Mirek Riedewald,False,1
+1532850,1956096,Wolfgang Gatterbauer,False,2
+1533195,2000856,John Coley,True,0
+1533199,1955227,David Choffnes,True,0
+1533199,1955227,Alan Mislove,False,1
+1533216,2004947,Ke Zhang,True,0
+1533388,1941242,Matteo Rinaldi,True,0
+1533388,1941242,Joseph V Mantese,False,1
+1533388,1941242,Zhenyun Qian,False,2
+1533427,1946999,Mahdi Imani,True,0
+1533555,2005957,Sarah Ostadabbas,True,0
+1533981,2006661,Jose Perea,True,0
+1534100,1955004,Josep Jornet,True,0
+1534280,2010010,Sandra Shefelbine,True,0
+1534280,2010010,James R Monaghan,False,1
+1534784,2011857,Geoffrey Trussell,True,0
+1534951,2004875,Neel Joshi,True,0
+1534974,2007686,Matthias Felleisen,True,0
+1535090,2024790,Christopher Amato,True,0
+1535090,2024790,Stacy Marsella,False,1
+1535623,2007257,Andrew Johnson,True,0
+1535623,2007257,Barbara M DiEugenio,False,1
+1535623,2007257,Moira Zellner,False,2
+1535664,2029519,Sauvik Das,True,0
+1535664,2029519,Gregory D Abowd,False,1
+1535718,2008302,Seth Hutchinson,True,0
+1535718,2008302,Sang-won Leigh,False,1
+1535718,2008302,Seth Hutchinson,False,2
+1535862,1953961,Fabrizio Lombardi,True,0
+1535949,2007066,Arjun Guha,True,0
+1536121,2014556,Holly Jimison,True,0
+1536121,2014556,Aatmesh Shrivastava,False,1
+1536121,2014556,Mariya Shiyko,False,2
+1536121,2014556,Hui Fang,False,3
+1536485,2102291,Arjun Guha,True,0
+1536702,2032501,Jeffrey Ruberti,True,0
+1536712,2028536,David Choffnes,True,0
+1536756,2006995,Arjun Guha,True,0
+1536837,2031326,Alicia Modestino,True,0
+1536837,2031326,Kemi Jona,False,1
+1536837,2031326,Taskin Padir,False,2
+1536919,2038493,Mario Sznaier,True,0
+1536919,2038493,Octavia I Camps,False,1
+1536974,2017626,Geoffrey Trussell,True,0
+1537001,2008072,Ningfang Mi,True,0
+1537020,2008514,Yanzhi Wang,True,0
+1537157,2011770,Hai-Ping Cheng,True,0
+1537216,2011776,Hai-Ping Cheng,True,0
+1537353,2019012,Edmund Yeh,True,0
+1537353,2019012,Harvey B Newman,False,1
+1537353,2019012,Jason Cong,False,2
+1537353,2019012,Lixia Zhang,False,3
+1537353,2019012,Susmit Shannigrahi,False,4
+1537497,2017927,Daniel Grossman,True,0
+1537497,2017927,Zachary Tatlock,False,1
+1537497,2017927,Adriana Schulz,False,2
+1537497,2017927,Jeffrey Lipton,False,3
+1537541,2011848,Darien Wood,True,0
+1537541,2011848,Emanuela Barberis,False,1
+1537541,2011848,Toyoko J Orimoto,False,2
+1537800,2027744,Qi Wang,True,0
+1537843,2031142,Nian Sun,True,0
+1537901,2034632,Abhimanyu Gosain,True,0
+1537901,2034632,Habarakada L Madanayake,False,1
+1537901,2034632,Josep M Jornet,False,2
+1537901,2034632,Tommaso Melodia,False,3
+1537930,2037798,Ziming Zhao,True,0
+1538363,2025453,Safa Jamali,True,0
+1538387,2028109,John Coley,True,0
+1538609,2031778,Mary Jo Ondrechen,True,0
+1538609,2031778,Steven A Lopez,False,1
+1538609,2031778,Mona S Minkara,False,2
+1538650,2020063,Luca Caracoglia,True,0
+1539200,2031195,Sridevi Sarma,True,0
+1539200,2031195,Raimond L Winslow,False,1
+1539262,2026618,Mohsen Moghaddam,True,0
+1539262,2026618,Stacy Marsella,False,1
+1539262,2026618,Kemi Jona,False,2
+1539262,2026618,Alicia S Modestino,False,3
+1539270,2037896,Tommaso Melodia,True,0
+1539270,2037896,Stefano Basagni,False,1
+1539270,2037896,Kaushik R Chowdhury,False,2
+1539270,2037896,Josep M Jornet,False,3
+1539270,2037896,Abhimanyu Gosain,False,4
+1539318,2029850,Kelsey Pieper,True,0
+1539318,2029850,Aron Stubbins,False,1
+1539318,2029850,Ameet Pinto,False,2
+1539318,2029850,Kelsey Pieper,False,3
+1539408,2028374,Enrico Bertini,True,0
+1539408,2028374,Rumi Chunara,False,1
+1539408,2028374,Lace M Padilla,False,2
+1539633,2014003,Kayvan Najarian,True,0
+1539633,2014003,Harm Derksen,False,1
+1539633,2014003,Jonathan Gryak,False,2
+1539633,2014003,Jessica R Golbus,False,3
+1539633,2014003,Keith D Aaronson,False,4
+1539739,2022205,Paul Hand,True,0
+1539870,2043183,Xiaolin Xu,True,0
+1539984,2100037,Jonathan Bell,True,0
+1540033,2035003,Jonathan Bell,True,0
+1540085,2038421,Ozlem Ergun,True,0
+1540143,2031498,Christine Julien,True,0
+1540143,2031498,Darla Castelli,False,1
+1540223,2025431,Aileen Huang-Saad,True,0
+1540223,2025431,Prateek Shekhar,False,1
+1540292,2038515,Toshikazu Miyoshi,True,0
+1540349,2041823,Xuwen Zhu,True,0
+1540385,2040036,Gunther Zupanc,True,0
+1540481,2032384,Daniel O'Brien,True,0
+1540481,2032384,J. Lee Hargraves,False,1
+1540481,2032384,Qi Wang,False,2
+1540481,2032384,Alina Ristea,False,3
+1540481,2032384,Russell K Schutt,False,4
+1540502,2102288,Arjun Guha,True,0
+1540573,2031077,Kevin Fu,True,0
+1540573,2031077,Sara Rampazzi,False,1
+1540713,2035717,Adriana Schulz,True,0
+1540713,2035717,Dieter Fox,False,1
+1540713,2035717,Byron Boots,False,2
+1540713,2035717,Jeffrey Lipton,False,3
+1540747,2039945,Nikos Passas,True,0
+1540747,2039945,Mansoor M Amiji,False,1
+1540747,2039945,Ravi Sundaram,False,2
+1540780,2055193,Jonathan Bell,True,0
+1540929,2034804,Matteo Rinaldi,True,0
+1542897,2002980,Mingzhong Wu,True,0
+1542897,2002980,Lincoln D Carr,False,1
+1543045,2015053,Oljora Rezhdo,True,0
+1543045,2015053,Rebecca L Carrier,False,1
+1543474,2052696,Arjun Guha,True,0
+1543883,2113403,Rebecca Willits,True,0
+1573413,2136317,Laurent Lessard,True,0
+1538183,2039584,Thomas Sharkey,True,0
+1538183,2039584,Kelle Barrick,False,1
+1538183,2039584,Yongjia Song,False,2
+1538183,2039584,Lauren E Martin,False,3
+1538183,2039584,Kayse L Maass,False,4
+1539590,2038625,Jiang Hu,True,0
+1539590,2038625,Panganamala R Kumar,False,1
+1539590,2038625,Yu Ding,False,2
+1539590,2038625,Sarbajit Banerjee,False,3
+1539590,2038625,Shahin Shahrampour,False,4
+1539590,2038625,Jiang Hu,False,5
+1539590,2038625,Sarbajit Banerjee,False,6
+1542954,2051052,Mesfin Tsige,True,0
+1542973,2113898,Nian Sun,True,0
+1543130,2031237,Carolyn Lee-Parsons,True,0
+1543130,2031237,Erin J Cram,False,1
+1543196,2039189,Josep Jornet,True,0
+1543196,2039189,Matteo Rinaldi,False,1
+1543196,2039189,Hui Fang,False,2
+1543659,2043431,Pascal Van Hentenryck,True,0
+1543659,2043431,SUBHRAJIT GUHATHAKURTA,False,1
+1543659,2043431,Christopher A Le Dantec,False,2
+1543659,2043431,Kari E Watkins,False,3
+1543942,2109966,Ryan Ellis,True,0
+1544284,2034948,Cristian Cassella,True,0
+1544331,2044602,Joshua Gallaway,True,0
+1544348,2044993,Christopher Amato,True,0
+1544399,2046683,DAPENG BI,True,0
+1544529,2047213,Mahshid Amirabadi,True,0
+1554089,2126978,Prateek Shekhar,True,0
+1554089,2126978,Prateek Shekhar,False,1
+1554148,2055510,Daniel Wichs,True,0
+1554298,2043437,Megan Denver,True,0
+1554298,2043437,Rod K Brunson,False,1
+1554415,2043905,Kathleen Lotterhos,True,0
+1554431,2047207,Harikrishnan Parameswaran,True,0
+1554507,2047317,Michael Kane,True,0
+1568154,2043318,Dagmar Sternad,True,0
+1568200,2052443,Samuel Munoz,True,0
+1568200,2052443,Qin J Chen,False,1
+1568456,2131243,Milen Yakimov,True,0
+1568537,2123085,Geoffrey Trussell,True,0
+1568537,2123085,John D Coley,False,1
+1568537,2123085,Jennifer L Bowen,False,2
+1568537,2123085,Randall Hughes,False,3
+1568537,2123085,Steven Scyphers,False,4
+1568579,2126251,Aileen Huang-Saad,True,0
+1568794,2126053,Fabrizio Lombardi,True,0
+1568859,2045906,Abigail Koppes,True,0
+1572452,2047094,MD NOOR E ALAM,True,0
+1572529,2107256,Lawson Wong,True,0
+1572529,2107256,Robert Platt,False,1
+1572529,2107256,Robin S Walters,False,2
+1572529,2107256,Jan-Willem van de Meent,False,3
+1572708,2053448,Paul Hand,True,0
+1572823,2052796,Sanjeev Mukerjee,True,0
+1572823,2052796,Joshua W Gallaway,False,1
+1573155,2114116,Emanuele Viola,True,0
+1573227,2113696,Sara Lopez-Pintado,True,0
+1573301,2130891,Miriam Leeser,True,0
+1573339,2116372,Matthias Felleisen,True,0
+1573381,2130889,Tommaso Melodia,True,0
+1573433,2130716,Hongwei Sun,True,0
+1573593,2136206,Shahin Shahrampour,True,0
+1577998,2050052,Mohsen Moghaddam,True,0
+1577998,2050052,Tucker J Marion,False,1
+1577998,2050052,Paolo Ciuccarelli,False,2
+1578057,2107062,Stratis Ioannidis,True,0
+1578057,2107062,Edmund M Yeh,False,1
+1578126,2052455,Eduardo Sontag,True,0
+1578906,2104869,Safa Jamali,True,0
+1579902,2128743,Mohsen Moghaddam,True,0
+1579902,2128743,Stacy Marsella,False,1
+1579902,2128743,Kemi Jona,False,2
+1579902,2128743,Alicia S Modestino,False,3
+1579902,2128743,Nicholas Wilson,False,4
+1579918,2114191,Mingyang Lu,True,0
+1579918,2114191,Herbert Levine,False,1
+1579925,2115110,Ehsan Elhamifar,True,0
+1580049,2114825,Gregory Fiete,True,0
+1580079,2121121,Milad Siami,True,0
+1580124,2134973,Francesco Restuccia,True,0
+1580170,2117626,Eugene Tunik,True,0
+1580170,2117626,Dana H Brooks,False,1
+1580170,2117626,Deniz Erdogmus,False,2
+1580170,2117626,Susan Whitfield-Gabrieli,False,3
+1580210,2137282,Ali Abur,True,0
+1580634,2122707,Casper Harteveld,True,0
+1580634,2122707,Gillian M Puttick,False,1
+1580634,2122707,Michael Cassidy,False,2
+1580634,2122707,Giovanni M Troiano,False,3
+1580680,2127466,Remy Gatins,True,0
+1580915,2048894,Tarik Gouhier,True,0
+1580915,2048894,Brian Helmuth,False,1
+1580983,2118962,Safa Jamali,True,0
+1581172,2127749,Nicholas Beauchamp,True,0
+1581198,2120603,Jonathan Ullman,True,0
+1581198,2120603,Alina M Oprea,False,1
+1581213,2121426,Carla Mattos,True,0
+1581246,2119930,Gregory Abowd,True,0
+1581246,2119930,Michael B Silevitch,False,1
+1581246,2119930,Claire J Duggan,False,2
+1581246,2119930,Richard Harris,False,3
+1581246,2119930,Jacqueline El-Sayed,False,4
+1581246,2119930,Karen Horting,False,5
+1581344,2103351,Cristian Cassella,True,0
+1581482,2125326,Qi Wang,True,0
+1581482,2125326,Amy Mueller,False,1
+1581482,2125326,Brooke F Welles,False,2
+1581482,2125326,Yanzhi Wang,False,3
+1581482,2125326,Hao Sun,False,4
+1581585,2125222,Aatmesh Shrivastava,True,0
+1581666,2120501,Adrian Feiguin,True,0
+1581753,2120510,Phil Brown,True,0
+1581753,2120510,Alissa Cordner,False,1
+1581801,2139930,Dimitrios Koutsonikolas,True,0
+1581906,2122174,Lace Padilla,True,0
+1581906,2122174,Roger C Bales,False,1
+1582024,2147769,Harm Derksen,True,0
+1582578,2127200,Engin Kirda,True,0
+1582613,2118164,Laura Lewis,True,0
+1582906,2102649,George ODoherty,True,0
+1583068,2139482,Laurent Lessard,True,0
+1583127,2120447,Kaushik Chowdhury,True,0
+1583127,2120447,Tommaso Melodia,False,1
+1583127,2120447,Francesco Restuccia,False,2
+1583564,2124897,Devesh Tiwari,True,0
+1583641,2114197,Qi Wang,True,0
+1583791,2127669,Aron Stubbins,True,0
+1583791,2127669,Jason J Guo,False,1
+1583846,2136168,Yongmin Liu,True,0
+1594505,2133342,Pascal Van Hentenryck,True,0
+1594505,2133342,SUBHRAJIT GUHATHAKURTA,False,1
+1594505,2133342,Christopher A Le Dantec,False,2
+1594505,2133342,Kari E Watkins,False,3
+1594557,2117814,Dimitrios Koutsonikolas,True,0
+1594557,2117814,Stefano Basagni,False,1
+1594557,2117814,Josep M Jornet,False,2
+1594557,2117814,Tommaso Melodia,False,3
+1594557,2117814,Kaushik R Chowdhury,False,4
+1594618,2131929,David Lazer,True,0
+1594618,2131929,David R Choffnes,False,1
+1594618,2131929,Christopher Wilson,False,2
+1608193,2053741,Mehrdad Sasani,True,0
+1608193,2053741,Hao Sun,False,1
+1608414,2123972,Dagmar Sternad,True,0
+1608501,2013949,Herbert Levine,True,0
+1608857,2154884,Leanne Chukoskie,True,0
+1608910,2202395,Mahdi Imani,True,0
+1608938,2209494,Calina Copos,True,0
+1608987,2116189,David Lazer,True,0
+1582628,2133740,Daniel Bolnick,True,0
+1582628,2133740,Tina Eliassi-Rad,False,1
+1582628,2133740,Samuel V Scarpino,False,2
+1582628,2133740,Miaoyan Wang,False,3
+1582628,2133740,Samuel V Scarpino,False,4
+1583747,2134178,Robin Walters,True,0
+1583747,2134178,Jan-Willem van de Meent,False,1
+1609019,2142396,Casper Harteveld,True,0
+1609123,2141841,Ambika Bajpayee,True,0
+1620441,2203212,Norma Saiph Savage,True,0
+1620698,2147782,Samuel Munoz,True,0
+1620894,2203717,Sara Wadia-Fascetti,True,0
+1620894,2203717,Daniel Rothstein,False,1
+1620894,2203717,Tomoko Ouchi,False,2
+1620894,2203717,Eleanor Finnegan,False,3
+1620894,2203717,Cigdem Talgar,False,4
+1620894,2203717,Luz Santana,False,5
+1620894,2203717,Tiana Yom,False,6
+1621137,2141135,Sara Rouhanifard,True,0
+1621137,2141135,Meni Wanunu,False,1
+1621144,2146409,Ruobing Bai,True,0
+1621267,2143016,Tovah Day,True,0
+1621351,2144540,Devesh Tiwari,True,0
+1621469,2143882,Sarah Ostadabbas,True,0
+1621476,2144556,Steven Lopez,True,0
+1624158,2141035,Yi Zheng,True,0
+1624158,2141035,khushnood a qazi,False,1
+1624158,2141035,Ralph B Ahlgren,False,2
+1624653,2139882,Qin Chen,True,0
+1624704,2203175,Ryan Ellis,True,0
+1624704,2203175,William Robertson,False,1
+1624967,2219774,Steven Lopez,True,0
+1624967,2219774,Christina W Li,False,1
+1625069,2140223,Yaning Li,True,0
+1625141,2205730,Aaron Lauda,True,0
+1625141,2205730,Milen T Yakimov,False,1
+1627481,2145382,Cody Dunne,True,0
+1627508,2144703,Aatmesh Shrivastava,True,0
+1629580,2200762,Milen Yakimov,True,0
+1629796,2146754,Marvin Onabajo,True,0
+1629796,2146754,Yunsi Fei,False,1
+1629796,2146754,Aatmesh Shrivastava,False,2
+1629796,2146754,Francesco Restuccia,False,3
+1629834,2150417,Ibrahim Zeid,True,0
+1629834,2150417,Claire J Duggan,False,1
+1629989,2203108,Gordana Todorov,True,0
+1630018,2208182,Milad Siami,True,0
+1630018,2208182,Mario Sznaier,False,1
+1630310,2202268,Yongmin Liu,True,0
+1630357,2224289,Yun Fu,True,0
+1633086,2147498,Mary Jo Ondrechen,True,0
+1633086,2147498,Penny J Beuning,False,1
+1633209,2212537,Olin Shivers,True,0
+1633278,2207953,Gregory Fiete,True,0
+1633451,2142519,Alireza Ramezani,True,0
+1633451,2142519,Lawson L Wong,False,1
+1636362,2200228,Maimuna Majumder,True,0
+1636362,2200228,Milind S Tambe,False,1
+1636362,2200228,Brooke F Welles,False,2
+1636362,2200228,FEI FANG,False,3
+1636362,2200228,Angel Desai,False,4
+1636663,2148475,Moira Zellner,True,0
+1636772,2153690,Xiaolin Xu,True,0
+1636864,2212010,Yunsi Fei,True,0
+1636864,2212010,Aidong A Ding,False,1
+1637086,2219575,Albert-Laszlo Barabasi,True,0
+1637150,2208797,Carla Brodley,True,0
+1637335,2211954,Byron Wallace,True,0
+1637371,2220408,Steven Holtzen,True,0
+1637371,2220408,Amal Ahmed,False,1
+1637459,2226339,Guofei Gu,True,0
+1637459,2226339,Narasimha A Reddy,False,1
+1637459,2226339,Cristina Nita-Rotaru,False,2
+1637459,2226339,Walter R Magnussen,False,3
+1637459,2226339,Hongxin Hu,False,4
+1637521,2219334,Samuel Munoz,True,0
+1637521,2219334,Edward Beighley,False,1
+1637521,2219334,Aron Stubbins,False,2
+1637706,2218845,Francesco Restuccia,True,0
+1637706,2218845,Marvin Onabajo,False,1
+1637734,2219921,Engin Kirda,True,0
+1637982,2144914,Aanjhan Ranganathan,True,0
+1642067,2203322,Jennifer Bowen,True,0
+1642067,2203322,Randall Hughes,False,1
+1642087,2209624,Michelle Borkin,True,0
+1642201,2209903,Pran Nath,True,0
+1642201,2209903,Tomasz R Taylor,False,1
+1642201,2209903,Brent D Nelson,False,2
+1642201,2209903,James Halverson,False,3
+1642212,2210333,Fabian Ruehle,True,0
+1642232,2206563,Jonathan Blazek,True,0
+1642796,2214013,Tommaso Melodia,True,0
+1642796,2214013,Pedram Johari,False,1
+1642796,2214013,Joseph S Neimat,False,2
+1642796,2214013,Doug Pham,False,3
+1642796,2214013,David Frakes,False,4
+1642957,2216629,Carla Brodley,True,0
+1642957,2216629,Burcin Campbell,False,1
+1643783,2235625,Enrico Bertini,True,0
+1643809,2204746,Sara Wadia-Fascetti,True,0
+1643809,2204746,Jacqueline A Isaacs,False,1
+1643809,2204746,Randall Hughes,False,2
+1643809,2204746,Richard Harris,False,3
+1643809,2204746,Tadarrayl M Starke,False,4
+1644480,2228533,Qi Wang,True,0
+1644480,2228533,Daniel P Aldrich,False,1
+1644480,2228533,Kelsey Pieper,False,2
+1644510,2212049,Adriana Schulz,True,0
+1644510,2212049,Jeffrey Lipton,False,1
+1644630,2228510,Jacqueline Griffin,True,0
+1644630,2228510,David R Kaeli,False,1
+1644630,2228510,Stacy Marsella,False,2
+1644630,2228510,Casper Harteveld,False,3
+1644630,2228510,Ozlem Ergun,False,4
+1644938,2225368,Aatmesh Shrivastava,True,0
+1644941,2225590,Josep Jornet,True,0
+1644941,2225590,Michele Polese,False,1
+1644976,2228617,Hongxin Hu,True,0
+1644976,2228617,Siwei Lyu,False,1
+1644976,2228617,Ziming Zhao,False,2
+1644976,2228617,Yini Zhang,False,3
+1644976,2228617,Maria Y Rodriguez,False,4
+1644979,2230036,Daniel O'Brien,True,0
+1644979,2230036,Moira Zellner,False,1
+1644979,2230036,Amy Mueller,False,2
+1644979,2230036,Michelle M Laboy,False,3
+1644979,2230036,Nayeli Rodriguez,False,4
+1650472,2233559,Matteo Rinaldi,True,0
+1650472,2233559,Kristen Dorsey,False,1
+1650472,2233559,Benyamin Davaji,False,2
+1650473,2237004,Shantanu Chakrabartty,True,0
+1650473,2237004,Xuan Zhang,False,1
+1650598,2146502,Nikos Passas,True,0
+1650598,2146502,Ravi Sundaram,False,1
+1650598,2146502,Muhammad H Zaman,False,2
+1650598,2146502,Mansoor M Amiji,False,3
+1650893,2218579,Mari Silbey,True,0
+1650893,2218579,Stefano Basagni,False,1
+1650893,2218579,Tommaso Melodia,False,2
+1650893,2218579,William Wallace,False,3
+1650893,2218579,Kaushik R Chowdhury,False,4
+1660017,2219953,Purnima Makris,True,0
+1660073,2236644,Enrico Bertini,True,0
+1668942,2312007,Sze Zheng Yong,True,0
+1675413,2330961,Emma Tosch,True,0
+1675413,2330961,Christopher Martens,False,1
+1636577,2147220,Ronald Sandler,True,0
+1636577,2147220,John J Basl,False,1
+1636577,2147220,Sina Fazelpour,False,2
+1636577,2147220,Chad Lee-Stronach,False,3
+1636577,2147220,Kathleen A Creel,False,4
+1643045,2218748,Esteban Moro Egido,True,0
+1643045,2218748,Esteban Moro Egido,False,1
+1643223,2218791,Daniel O'Brien,True,0
+1643223,2218791,Nigel S Jacob,False,1
+1650521,2229472,Francesco Restuccia,True,0
+1650760,2229021,Marvin Onabajo,True,0
+1650760,2229021,Miriam E Leeser,False,1
+1650760,2229021,Cristian Cassella,False,2
+1667684,2227756,Jonathan TIlly,True,0
+1667684,2227756,Dori C Woods,False,1
+1667694,2309500,Myung Jhon,True,0
+1667694,2309500,Ahmed A Busnaina,False,1
+1667694,2309500,Elias Towe,False,2
+1667719,2239356,Rhea Eskew,True,0
+1667930,2231080,Paul Champion,True,0
+1668356,2300450,Jeffrey Lipton,True,0
+1668593,2309935,Nian Sun,True,0
+1668670,2314678,Matthew Eckelman,True,0
+1668715,2303707,Tucker Marion,True,0
+1668715,2303707,Maria C Yang,False,1
+1668813,2305107,Gordana Todorov,True,0
+1668847,2305854,Ziming Zhao,True,0
+1668946,2315830,Xiaolin Xu,True,0
+1669011,2306112,Malihe Alikhani,True,0
+1669263,2237295,Cheng Tan,True,0
+1669288,2236920,Samuel Munoz,True,0
+1669317,2238175,Lace Padilla,True,0
+1674239,2227985,Xiaoyu Tang,True,0
+1674268,2232692,Jonathan Ullman,True,0
+1674344,2240330,Psyche Loui,True,0
+1674344,2240330,Elizabeth H Margulis,False,1
+1674491,2241887,David Lazer,True,0
+1674581,2247307,Alan Mislove,True,0
+1674613,2246079,Carla Brodley,True,0
+1674613,2246079,Tracy K Camp,False,1
+1675161,2312752,Hessam Mahdavifar,True,0
+1675244,2311649,Huy Nguyen,True,0
+1675788,2308605,David Kimbro,True,0
+1675788,2308605,Geoffrey C Trussell,False,1
+1675788,2308605,Tarik Gouhier,False,2
+1675875,2239742,Sara Hashmi,True,0
+1688179,2240788,Shahin Shahrampour,True,0
+1688273,2302838,Mohsen Moghaddam,True,0
+1688273,2302838,Kemi Jona,False,1
+1688273,2302838,Casper Harteveld,False,2
+1688273,2302838,Mehmet Kosa,False,3
+1688314,2244340,Ozlem Ergun,True,0
+1688314,2244340,David R Kaeli,False,1
+1688314,2244340,Gino J Lim,False,2
+1688314,2244340,Alicia S Modestino,False,3
+1688314,2244340,Joyce Shirazi,False,4
+1688314,2244340,Jerald Dumas,False,5
+1688349,2247892,Xiaolin Xu,True,0
+1688592,2241938,Karen Quigley,True,0
+1688592,2241938,Ajay Satpute,False,1
+1688592,2241938,Karen S Quigley,False,2
+1688736,2245957,Herbert Levine,True,0
+1688736,2245957,Rama Soundararajan,False,1
+1688736,2245957,Sendurai A Mani,False,2
+1688798,2246636,Sijia Dong,True,0
+1688801,2305363,Xuwen Zhu,True,0
+1689061,2302664,Iva Halacheva,True,0
+1689083,2247484,Alina Oprea,True,0
+1689083,2247484,Jonathan Ullman,False,1
+1689225,2302568,Valerio Toledano Laredo,True,0
+1689796,2324411,Yiannis Levendis,True,0
+1689796,2324411,Mohamad Metghalchi,False,1
+1689796,2324411,Randall M Erb,False,2
+1689932,2310254,Huaizu Jiang,True,0
+1689932,2310254,Xue Lin,False,1
+1690039,2307742,Frank Tip,True,0
+1690151,2312875,Francesco Restuccia,True,0
+1690151,2312875,Tommaso Melodia,False,1
+1690151,2312875,Alina M Oprea,False,2
+1690195,2329684,Taskin Padir,True,0
+1690195,2329684,Leanne Chukoskie,False,1
+1690288,2312275,David Kaeli,True,0
+1690646,2330220,Francesco Restuccia,True,0
+1690890,2326597,Xiaolin Xu,True,0
+1690947,2329540,Frank Tip,True,0
+1690947,2329540,Engin Kirda,False,1
+1690956,2319675,Amy Mueller,True,0
+1690956,2319675,Philip Larese-Casanova,False,1
+1690974,2315884,Matthias Felleisen,True,0
+1691017,2332541,David Choffnes,True,0
+1691352,2319962,Xiaolin Xu,True,0
+1691352,2319962,Miriam E Leeser,False,1
+1691352,2319962,Michael H Zink,False,2
+1691398,2326173,Arjun Guha,True,0
+1691713,2337074,Ravinder Dahiya,True,0
+1691761,2326559,Pau Closas,True,0
+1691761,2326559,Tales C Imbiriba,False,1
+1692162,2325095,Josep Jornet,True,0
+1692324,2310592,Carl DiSalvo,True,0
+1692324,2310592,Elora L Raymond,False,1
+1692324,2310592,Carl F DiSalvo,False,2
+1692341,2312158,Yanzhi Wang,True,0
+1692385,2317114,Ada Lerner,True,0
+1692385,2317114,Ari E Waldman,False,1
+1692385,2317114,LAURA EDELSON,False,2
+1692484,2334061,Ada Lerner,True,0
+1692613,2239672,Xiaolin Xu,True,0
+1701846,2327137,Megan Hofmann,True,0
+1701975,2328050,Max Shepherd,True,0
+1702501,2323469,Qimin Yan,True,0
+1702530,2327066,Sarah Ostadabbas,True,0
+1702547,2329013,Francesco Restuccia,True,0
+1702547,2329013,Vishal Saxena,False,1
+1702741,2319500,Stavros Tripakis,True,0
+1702741,2319500,Christopher Amato,False,1
+1702999,2309945,Darien Wood,True,0
+1702999,2309945,Emanuela Barberis,False,1
+1702999,2309945,Toyoko J Orimoto,False,2
+1703063,2325632,Renee Miller,True,0
+1703063,2325632,Tina Eliassi-Rad,False,1
+1703464,2314182,Robert Platt,True,0
+1703464,2314182,Robin S Walters,False,1
+1703744,2329062,Aatmesh Shrivastava,True,0
+1703744,2329062,Nian X Sun,False,1
+1703744,2329062,Benyamin Davaji,False,2
+1703744,2329062,Aatmesh Shrivastava,False,3
+1703800,2329826,Yan Luo,True,0
+1703800,2329826,Hongwei Sun,False,1
+1703800,2329826,Sheree Pagsuyoin,False,2
+1703800,2329826,Frederic J Chain,False,3
+1703800,2329826,Jayakannan Jayapalan,False,4
+1703841,2310303,Tania Konry,True,0
+1703857,2311969,Mahdi Imani,True,0
+1703901,2328254,Ye Zhao,True,0
+1703901,2328254,Seth Hutchinson,False,1
+1703901,2328254,Daniel I Goldman,False,2
+1706273,2311160,Dmitri Krioukov,True,0
+1706312,2234346,Murat Akcakaya,True,0
+1706312,2234346,Sarah Ostadabbas,False,1
+1706312,2234346,George F Wittenberg,False,2
+1706312,2234346,Emily Grattan,False,3
+1706312,2234346,Harry F Kovelman,False,4
+1709712,2416375,Xuan Zhang,True,0
+1709891,2408972,Mingzhong Wu,True,0
+1722825,2432393,Malihe Alikhani,True,0
+1728068,2412249,Damon Hall,True,0
+1689567,2318594,Sandra Shefelbine,True,0
+1689567,2318594,James R Monaghan,False,1
+1691605,2318290,Piotr Sapiezynski,True,0
+1691605,2318290,Alan Mislove,False,1
+1692208,2332721,Josep Jornet,True,0
+1692208,2332721,Tommaso Melodia,False,1
+1692208,2332721,Michele Polese,False,2
+1692208,2332721,Michael J Marcus,False,3
+1692208,2332721,Vitaly Petrov,False,4
+1702706,2235827,Lucas Landherr,True,0
+1709568,2409892,Matthew Eckelman,True,0
+1709714,2333352,Peter Desnoyers,True,0
+1709867,2330377,Ali Abur,True,0
+1710339,2349755,Benjamin Knudsen,True,0
+1710339,2349755,Jose Perea,False,1
+1710339,2349755,Thomas Brazelton,False,2
+1710339,2349755,Iva Halacheva,False,3
+1710677,2413092,Jonathan Bell,True,0
+1710681,2335187,Rajmohan Rajaraman,True,0
+1710790,2340482,Lili Su,True,0
+1710863,2339761,Andreia Ionescu,True,0
+1722940,2426460,Hai-Ping Cheng,True,0
+1722957,2420266,Mingzhong Wu,True,0
+1722984,2430412,Yongmin Liu,True,0
+1723086,2414743,Cristian Cassella,True,0
+1723086,2414743,Xufeng Zhang,False,1
+1723086,2414743,Luca Colombo,False,2
+1723086,2414743,Nian X Sun,False,3
+1723310,2408455,David Bau,True,0
+1723310,2408455,Byron Wallace,False,1
+1723310,2408455,Arjun Guha,False,2
+1723310,2408455,Carla E Brodley,False,3
+1723310,2408455,Jonathan Bell,False,4
+1723358,2336564,William Robertson,True,0
+1723358,2336564,David R Kaeli,False,1
+1723358,2336564,Guevara Noubir,False,2
+1723376,2345872,Benjamin Woolston,True,0
+1723376,2345872,Ahmad S Khalil,False,1
+1723388,2403855,Allison Dennis,True,0
+1723541,2430436,Hai-Ping Cheng,True,0
+1723747,2429331,Hai-Ping Cheng,True,0
+1723874,2346316,Myojung Chung,True,0
+1723938,2341880,Megan Hofmann,True,0
+1724137,2412803,Kathleen Lotterhos,True,0
+1724270,2323908,Yongmin Liu,True,0
+1724270,2323908,Sunil Mittal,False,1
+1724425,2414457,Yaning Li,True,0
+1724767,2341858,Rahul Bhargava,True,0
+1724767,2341858,Fernando Bermejo,False,1
+1724893,2349972,Daniel Wichs,True,0
+1724906,2417715,Ningfang Mi,True,0
+1724983,2402438,Qi Wang,True,0
+1724983,2402438,Jing Du,False,1
+1724983,2402438,Yanzhi Wang,False,2
+1724983,2402438,Chen Chen,False,3
+1725072,2400411,John Coley,True,0
+1725072,2400411,Brian Helmuth,False,1
+1725072,2400411,Catie Nielson,False,2
+1725189,2346324,Taskin Padir,True,0
+1725192,2414276,David Horsley,True,0
+1725844,2433683,Moneesh Upmanyu,True,0
+1725863,2418908,Michael Correll,True,0
+1725863,2418908,Enrico Bertini,False,1
+1725982,2429369,Hai-Ping Cheng,True,0
+1725998,2345791,Purnima Makris,True,0
+1725998,2345791,Sean Carter,False,1
+1726662,2419109,Adrian Feiguin,True,0
+1727017,2416792,Sahar Abi-Hassan,True,0
+1727170,2419801,Erin Cram,True,0
+1727393,2337713,Xufeng Zhang,True,0
+1727393,2337713,Benedetta Flebus,False,1
+1727537,2349619,Qing Zhao,True,0
+1727754,2400110,George ODoherty,True,0
+1727798,2412864,Emanuela Barberis,True,0
+1727798,2412864,Toyoko J Orimoto,False,1
+1727836,2346487,Josep Jornet,True,0
+1727836,2346487,Andrew Gouldstone,False,1
+1727836,2346487,Tommaso Melodia,False,2
+1727836,2346487,Nathan D Fite,False,3
+1727836,2346487,Kaushik R Chowdhury,False,4
+1727868,2412651,Michele Di Pierro,True,0
+1727886,2420945,Esteban Moro Egido,True,0
+1727956,2426396,Tianshi Li,True,0
+1727983,2340283,Edmund Yeh,True,0
+1727983,2340283,Dimitrios Koutsonikolas,False,1
+1728159,2339611,Alexandra To,True,0
+1728221,2339443,Norma Saiph Savage,True,0
+1728290,2338401,Mona Minkara,True,0
+1728332,2340405,Siddhartha Ghosh,True,0
+1728361,2340278,Alireza Ramezani,True,0
+1759893,2348189,Hari Prasath Palani,True,0
+1759893,2348189,Nicholas Giudice,False,1
+1759893,2348189,Melanie Tory,False,2
+1759894,2331081,Alina Oprea,True,0
+1759894,2331081,Marcela S Boboila,False,1
+1760183,2414751,Ibrahim Zeid,True,0
+1760183,2414751,Claire J Duggan,False,1
+1760226,2418612,Casper Harteveld,True,0
+1760226,2418612,Seth Cooper,False,1
+1760226,2418612,Mehmet Kosa,False,2
+1760226,2418612,Eileen McGivney,False,3
+1760226,2418612,Erica Kleinman,False,4
+1760335,2412008,Hongyang Zhang,True,0
+1760575,2418664,Malihe Alikhani,True,0
+1760622,2430982,Benyamin Davaji,True,0
+1761075,2427714,Bob De Schutter,True,0
+1761075,2427714,Celia Pearce,False,1
+1761075,2427714,Leanne Chukoskie,False,2
+1761075,2427714,Casper Harteveld,False,3
+1761075,2427714,Miso Kim,False,4
+1761524,2404911,Zhenyu Tian,True,0
+1761657,2433994,Kenneth Duffy,True,0
+1761726,2430923,Marco Colangelo,True,0
+1761726,2430923,Matteo Rinaldi,False,1
+1761726,2430923,Benyamin Davaji,False,2
+1761779,2437381,Leanne Chukoskie,True,0
+1761852,2439018,Sara Wadia-Fascetti,True,0
+1761888,2403433,Chenyan Jia,True,0
+1761946,2425023,Esteban Moro Egido,True,0
+1762103,2421566,Benjamin Woolston,True,0
+1762103,2421566,Nicholas R Sandoval,False,1
+1762103,2421566,Aimee Shen,False,2
+1762160,2403252,Norma Saiph Savage,True,0
+1762177,2425444,Aravind Nagulu,True,0
+1762177,2425444,Shantanu Chakrabartty,False,1
+1762177,2425444,Arun Natarajan,False,2
+1762522,2437048,David Horsley,True,0
+1762641,2434248,Carla Brodley,True,0
+1762654,2409351,Christopher Amato,True,0
+1762654,2409351,Robert Platt,False,1
+1762727,2403304,David Bau,True,0
+1762743,2405232,Teresa Cutright,True,0
+1762743,2405232,Linda Coats,False,1
+1762743,2405232,Rebecca K Willits,False,2
+1762743,2405232,Lakiesha N Williams,False,3
+1762743,2405232,Tonya W Stone,False,4
+1762791,2421490,Luca Caracoglia,True,0
+1762973,2506234,Mingzhong Wu,True,0
+1763042,2402961,David Choffnes,True,0
+1763456,2417448,Sarah Ostadabbas,True,0
+1763557,2421289,Babak Heydari,True,0
+1763557,2421289,Daniel O'Brien,False,1
+1763557,2421289,Gabor P Lippner,False,2
+1763557,2421289,Silvia Prina,False,3
+1768944,2512972,Ziming Zhao,True,0
+1785392,2523436,Ziming Zhao,True,0
+1726758,2430026,Emanuele Viola,True,0
+1761611,2412650,Herbert Levine,True,0
+1761611,2412650,Alain S Karma,False,1
+1762217,2403094,Michael Correll,True,0
+1762217,2403094,Lace M Padilla,False,1
+1763772,2439118,Yizhi You,True,0
+1765308,2430575,Ruobing Bai,True,0
+1765443,2435418,Cristian Cassella,True,0
+1765443,2435418,Marvin Onabajo,False,1
+1765531,2513548,Aravind Nagulu,True,0
+1765700,2442970,Wei Xie,True,0
+1765735,2442812,Soheil Behnezhad,True,0
+1765790,2442888,Ji Yong Shin,True,0
+1765802,2442685,Steven Holtzen,True,0
+1765824,2440175,Qing Zhao,True,0
+1768085,2446501,Aron Stubbins,True,0
+1768425,2445991,Cristina Schultz,True,0
+1768527,2503754,Cristian Cassella,True,0
+1768527,2503754,Xufeng Zhang,False,1
+1769228,2443141,Juliet Davidow,True,0
+1769237,2442796,Jonathan Blazek,True,0
+1769288,2440758,Ruobing Bai,True,0
+1783661,2414652,Stratis Ioannidis,True,0
+1783661,2414652,Jennifer G Dy,False,1
+1783661,2414652,Kaushik R Chowdhury,False,2
+1783661,2414652,Yanzhi Wang,False,3
+1783673,2438338,Samuel Munoz,True,0
+1783673,2438338,Geoffrey C Trussell,False,1
+1783673,2438338,Damon M Hall,False,2
+1783673,2438338,Peter J Dennedy-Frank,False,3
+1783749,2434016,Guevara Noubir,True,0
+1783911,2434081,Michele Polese,True,0
+1783911,2434081,Tommaso Melodia,False,1
+1784018,2448881,Moira Zellner,True,0
+1784286,2520694,Matthew Eckelman,True,0
+1784433,2450826,Francisco Hung,True,0
+1784495,2450006,Juner Zhu,True,0
+1784495,2450006,Wei Li,False,1
+1784745,2500961,Xubo Yue,True,0
+1784807,2453496,Ziming Zhao,True,0
+1784807,2453496,Engin Kirda,False,1
+1785199,2504572,Josep Jornet,True,0
+1785312,2505012,David Choffnes,True,0
+1785814,2513656,Prashant Pandey,True,0
+1785971,2518317,Eric Gallimore,True,0
+1785971,2518317,Hanumant Singh,False,1
+1785971,2518317,Michael R Benjamin,False,2
+1785971,2518317,Toby E Schneider,False,3
+1786330,2524730,Gordana Todorov,True,0
+1786335,2449452,Michele Polese,True,0
+1786335,2449452,Tommaso Melodia,False,1
+1786335,2449452,Abhimanyu Gosain,False,2
+1786335,2449452,Eric Anderson,False,3
+1786469,2531225,Kevin Fu,True,0
+1786469,2531225,Wayne P Burleson,False,1
+1786469,2531225,Julian M Goldman,False,2
+1786469,2531225,Jennifer R Amos,False,3
+1786469,2531225,Xuan Zhang,False,4
+1786529,2531937,Richard West,True,0
+1786579,2529743,Sandra Shefelbine,True,0
+1786825,2503350,Ke Zhang,True,0
+1786985,2530870,Pau Closas,True,0
+1786989,2533836,Herbert Levine,True,0
+1787138,2515168,John Basl,True,0
+1787138,2515168,Cansu Canca,False,1
+1787337,2525087,Stavros Tripakis,True,0
+1787337,2525087,Christopher Amato,False,1
+1787439,2529237,Aravind Nagulu,True,0
+1787529,2528860,Kristen Dorsey,True,0
+1787529,2528860,Matthew S Goodwin,False,1
+1787529,2528860,Megan K Hofmann,False,2
+1787529,2528860,Aston K McCullough,False,3
+1787750,2534124,Nikolai Slavov,True,0
+1787812,2509390,Francesco Restuccia,True,0
+1787812,2509390,Josep M Jornet,False,1
+1787971,2536075,Mallesham Dasari,True,0
+1787977,2516355,Aileen Huang-Saad,True,0
+1788173,2531351,Lace Padilla,True,0
+1788246,2535077,Maitraye Das,True,0
+1788402,2441203,Benjamin Woolston,True,0
+1788419,2442658,Robin Walters,True,0
+1788431,2442593,Varun Mishra,True,0
+1788507,2442552,Kayse Maass,True,0
+1788581,2442321,Shahin Shahrampour,True,0
+1788632,2443423,Xiaoyu Tang,True,0
+1796648,2523696,Alina Lungeanu,True,0
+1796648,2523696,Alina Lungeanu,False,1
+1796648,2523696,Dakota S Murray,False,2
+1796758,2449989,Xiaolin Xu,True,0
+1796957,2453553,Steven Lopez,True,0
+1797289,2526200,Yang Ye,True,0
+1797289,2526200,Yingzi Lin,False,1
+1797289,2526200,Andrew T Myers,False,2
+1797575,2535930,Carla Brodley,True,0
+1797758,2551600,Benjamin Knudsen,True,0
+1786400,2530896,Francesco Restuccia,True,0
+1786400,2530896,Flavio Esposito,False,1
+1462839,1552559,Andrew Myers,True,0
+1463491,1453796,Amal Ahmed,True,0
+1463495,1454414,Matthew Eckelman,True,0
+1463497,1452751,Ningfang Mi,True,0
+1470511,1453255,Ke Zhang,True,0
+1462840,1553088,Christopher Wilson,True,0
+1468684,1653671,Jose Martinez-Lorenzo,True,0
+1468685,1652320,Randall Hughes,True,0
+1468686,1652537,Seth Cooper,True,0
+1468687,1654192,Yongmin Liu,True,0
+1469096,1651732,Yunrong Chai,True,0
+1469188,1750716,Huy Nguyen,True,0
+1469189,1750640,Jonathan Ullman,True,0
+1469224,1750539,Stratis Ioannidis,True,0
+1469229,1750996,Dori Woods,True,0
+1469370,1750978,Byron Wallace,True,0
+1469460,1751720,Richard West,True,0
+1469593,1750649,Robert Platt,True,0
+1470031,1750253,David Choffnes,True,0
+1470150,1750065,Javier Apfeld,True,0
+1470174,1750795,Daniel Wichs,True,0
+1471062,1846962,Eno Ebong,True,0
+1471063,1845833,Pau Closas,True,0
+1471207,1941743,Yi Zheng,True,0
+1471271,1848087,Paul Hand,True,0
+1471289,2011411,Josep Jornet,True,0
+1471426,1848089,James Halverson,True,0
+1494395,1945207,Leila Deravi,True,0
+1621465,2314050,Qimin Yan,True,0
+1463494,1451213,Marvin Onabajo,True,0
+1765779,2519886,Aravind Nagulu,True,0
+1470567,1350312,Paul Whitford,True,0
+1464585,1254245,Philip Larese-Casanova,True,0
+1465735,1054233,Alan Mislove,True,0
+1466960,0844977,Luca Caracoglia,True,0
+1465168,1149570,Deniz Erdogmus,True,0
+1465170,1149232,Peter Desnoyers,True,0
+1466959,0845003,Emanuele Viola,True,0
+1467616,0748048,Rebecca Carrier,True,0
+1467615,0746810,Nian Sun,True,0
+1467612,0746310,Edwin Marengo,True,0
+1464035,1351424,Swastik Kar,True,0
+1467613,0757140,Kai-tak Wan,True,0
+1469920,0545932,Timothy Bickmore,True,0
+1469819,0547503,Mehrdad Sasani,True,0
+1470905,0448330,Guevara Noubir,True,0
+1470536,1350114,Matteo Rinaldi,True,0
+1466297,0954579,Yingzi Lin,True,0
+1466961,0845033,Penny Beuning,True,0
+1463496,1501356,Ming Su,True,0
+1463498,1501900,Olga Vitek,True,0
+1710918,2517201,Prashant Pandey,True,0
+1669262,2508320,Ziming Zhao,True,0
+1495456,2313814,Sze Zheng Yong,True,0
+1495450,2415445,Jose Perea,True,0
+1464312,1719446,Jennifer Bowen,True,0
+1494155,2415440,Hessam Mahdavifar,True,0
+1494013,2526432,Xuan Zhang,True,0
+1464124,1737130,Guohao Dai,True,0
+1471424,2319894,Christopher Martens,True,0
+1471357,2100015,Jonathan Bell,True,0
+1462700,1762268,Wolfgang Gatterbauer,True,0
+1470646,0551468,Latika Menon,True,0
+1462971,1930082,Babak Heydari,True,0
+1471125,2049088,Rouzbeh Amini,True,0
+1463270,2012720,Yaning Li,True,0
+1464036,1458019,Tommaso Melodia,True,0
+1462841,1649455,Francisco Hung,True,0
+1465610,1838386,Craig Maloney,True,0
+1464584,1339564,Adrian Feiguin,True,0
+1319350,0418390,Javed Aslam,True,0
+1463492,1522841,Carlos Hidrovo Chavez,True,0
+1467611,0838774,Andrew Gouldstone,True,0

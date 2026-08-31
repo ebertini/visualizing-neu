@@ -15,6 +15,16 @@ Outputs
            Available, Co-PI Available) joined on agency name,
          - the most-recently-updated abstract + title + funding metadata
            from grants-with-abstract, merged on grant id.
+       `abstract_source` tracks provenance: `internal` (the base match
+       above), `orphan_recovered` (added later by reconcile_orphans.py), or
+       — gap-fill only, never overwriting existing text — `nih_reporter` /
+       `nih_reporter_parent` / `nsf_api` from data/nih_nsf_backfill/ (see
+       src/backfill_nih_reporter.py, src/backfill_nsf_awards.py, and
+       _apply_abstract_backfill below). `nih_reporter_parent` text is real
+       and stored here for display, but excluded from the topic-model fit
+       (src.clean_text.LOW_TRUST_ABSTRACT_SOURCES) — it's a subaward's
+       parent-center abstract borrowed for a subproject that has none of
+       its own.
 
 3. faculty_grants.parquet
        Faculty -> grants lookup. Union of (faculty, grant) pairs from BOTH
@@ -130,10 +140,23 @@ class DataPipeline:
         "unmatched":     "UnmatchedFaculty.csv",
     }
 
-    def __init__(self, input_dir: Path, output_dir: Path):
+    # Optional pipeline-OUTPUT backfill files (NOT raw DataSet/ inputs) from
+    # src/backfill_nih_reporter.py / src/backfill_nsf_awards.py, pooled at
+    # data/nih_nsf_backfill/. Cross-source precedence (if grant_ids ever
+    # overlap — NIH and NSF are confirmed disjoint by funding agency today)
+    # is BACKFILL_SOURCE_TRUST below, NOT this dict's key order. Missing
+    # entirely (a machine that never ran the API scripts) is fine — see
+    # _load_agency_backfill.
+    BACKFILL_FILES = {
+        "nih": "backfill_nih_abstracts.parquet",
+        "nsf": "backfill_nsf_abstracts.parquet",
+    }
+
+    def __init__(self, input_dir: Path, output_dir: Path, backfill_dir: Path | None = None):
         self.input_dir = Path(input_dir)
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.backfill_dir = Path(backfill_dir) if backfill_dir else Path("data/nih_nsf_backfill")
         self.raw: dict[str, pd.DataFrame] = {}
         self.processed: dict[str, pd.DataFrame] = {}
         self.validation_log: list[str] = []
@@ -409,6 +432,106 @@ class DataPipeline:
             f"Total abstract records: {len(df)}"
         )
         return matched, orphaned
+
+    # ── Build: external abstract backfill (NIH RePORTER / NSF Award Search) ──
+
+    # Trust rank for cross-source dedup (lower wins) — NOT the file-list order
+    # (that was an accident of dict iteration, not a deliberate ranking).
+    # nih_reporter_parent ranks last among "has text" sources since it's a
+    # borrowed, lower-trust substitution (excluded from the topic-model fit —
+    # see src.clean_text.LOW_TRUST_ABSTRACT_SOURCES).
+    BACKFILL_SOURCE_TRUST = {"nih_reporter": 0, "nsf_api": 0, "nih_reporter_parent": 1}
+
+    def _load_agency_backfill(self) -> pd.DataFrame:
+        """Load + union data/nih_nsf_backfill/*.parquet into one long-form
+        table: (grant_id, abstract, abstract_source). Missing directory/files
+        are NOT an error — this pipeline must stay runnable on a machine that
+        never ran src/backfill_nih_reporter.py / src/backfill_nsf_awards.py.
+        """
+        frames = []
+        for key, fname in self.BACKFILL_FILES.items():
+            path = self.backfill_dir / fname
+            if not path.exists():
+                self._log_check(f"external backfill: {fname} not found, skipping ({key})")
+                continue
+            bf = pd.read_parquet(path)  # read all columns — need id_confidence for the NSF gate below
+            bf["grant_id"] = bf["grant_id"].astype(str).str.strip()
+            bf["abstract"] = bf["abstract"].fillna("").astype(str).str.strip()
+            bf["abstract_source"] = bf["abstract_source"].fillna("").astype(str)
+            bf = bf[(bf["abstract"] != "") & (bf["grant_id"] != "") & (bf["grant_id"] != "nan")]
+
+            # src/backfill_nsf_awards.py deliberately flags 5-digit-id padding
+            # as "padded_low" — "a guess, not a fact... flag for manual
+            # review rather than trust" (its own docstring). Don't silently
+            # adopt those without a human looking at investigator_faculty_
+            # proposals_nsf.parquet / the backfill report first.
+            n_low_conf = 0
+            if "id_confidence" in bf.columns:
+                low_conf = bf["id_confidence"] == "padded_low"
+                n_low_conf = int(low_conf.sum())
+                bf = bf[~low_conf]
+
+            bf = bf[["grant_id", "abstract", "abstract_source"]]
+            self._log_check(
+                f"external backfill: loaded {len(bf)} usable rows from {fname}"
+                + (f" ({n_low_conf} padded_low rows excluded — flagged for manual review, "
+                   f"not auto-adopted)" if n_low_conf else "")
+            )
+            frames.append(bf)
+
+        if not frames:
+            return pd.DataFrame(columns=["grant_id", "abstract", "abstract_source"])
+
+        combined = pd.concat(frames, ignore_index=True)
+        combined["_trust"] = combined["abstract_source"].map(self.BACKFILL_SOURCE_TRUST).fillna(0)
+        combined = combined.sort_values("_trust", kind="stable").drop(columns=["_trust"])
+        deduped = combined.drop_duplicates(subset=["grant_id"], keep="first")
+        n_dupes = len(combined) - len(deduped)
+        self._log_check(
+            f"external backfill: {len(deduped)} unique grant_ids "
+            f"({n_dupes} cross-source duplicates dropped, highest-trust source wins "
+            f"per BACKFILL_SOURCE_TRUST)"
+        )
+        return deduped
+
+    def _apply_abstract_backfill(
+        self, grants: pd.DataFrame, backfill: pd.DataFrame
+    ) -> pd.DataFrame:
+        """Gap-fill ONLY: never overwrites a grant that already has abstract
+        text. Also seeds abstract_source='internal' for the base grants-with-
+        abstract.xlsx match, idempotently — this must run BEFORE
+        src/reconcile_orphans.py, which relies on abstract_source already
+        being a real (non-null) string column.
+        """
+        grants = grants.copy()
+        grants["abstract"] = grants["abstract"].fillna("").astype(str)
+        if "abstract_source" not in grants.columns:
+            grants["abstract_source"] = ""
+        grants["abstract_source"] = grants["abstract_source"].fillna("").astype(str)
+        grants.loc[
+            (grants["abstract"] != "") & (grants["abstract_source"] == ""), "abstract_source"
+        ] = "internal"
+
+        if backfill.empty:
+            return grants
+
+        gap = grants["abstract"].str.strip() == ""
+        hit = gap & grants["grant_id"].isin(set(backfill["grant_id"]))
+        abs_map = dict(zip(backfill["grant_id"], backfill["abstract"]))
+        src_map = dict(zip(backfill["grant_id"], backfill["abstract_source"]))
+        grants.loc[hit, "abstract"] = grants.loc[hit, "grant_id"].map(abs_map)
+        grants.loc[hit, "abstract_source"] = grants.loc[hit, "grant_id"].map(src_map)
+
+        by_source = grants.loc[hit, "abstract_source"].value_counts().to_dict()
+        n_low_trust = int((grants.loc[hit, "abstract_source"] == "nih_reporter_parent").sum())
+        self._log_check(
+            f"external backfill applied: {int(hit.sum())} previously text-less grants filled "
+            f"({dict(sorted(by_source.items()))}) | "
+            f"of which nih_reporter_parent={n_low_trust} (excluded from topic-model fit, "
+            f"see src.clean_text.LOW_TRUST_ABSTRACT_SOURCES) | "
+            f"skipped (already had text): {int((~gap & grants['grant_id'].isin(set(backfill['grant_id']))).sum())}"
+        )
+        return grants
 
     # ── Build: faculty_grants (union of ri_matches + grants-with-coPI) ───────
 
@@ -831,6 +954,7 @@ class DataPipeline:
                   "type_of_funding", "funding_source"]:
             if c in grants.columns:
                 grants[c] = grants[c].fillna("")
+        grants = self._apply_abstract_backfill(grants, self._load_agency_backfill())
         n_with_abs = int((grants["abstract"].fillna("") != "").sum()) if "abstract" in grants.columns else 0
         self._log_check(f"grants: {n_with_abs}/{len(grants)} rows have a non-empty abstract")
         self.processed["grants"]                     = grants
@@ -860,9 +984,13 @@ def main() -> None:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--input-dir", type=Path, default=Path("DataSet"))
     p.add_argument("--output-dir", type=Path, default=Path("data/processed"))
+    p.add_argument("--backfill-dir", type=Path, default=Path("data/nih_nsf_backfill"),
+                   help="NIH RePORTER / NSF Award Search backfill outputs "
+                        "(src/backfill_nih_reporter.py, src/backfill_nsf_awards.py). "
+                        "Missing entirely is fine — backfill is gap-fill-only and optional.")
     args = p.parse_args()
     try:
-        DataPipeline(args.input_dir, args.output_dir).run()
+        DataPipeline(args.input_dir, args.output_dir, args.backfill_dir).run()
     except Exception as e:
         log.error(f"Pipeline failed: {e}", exc_info=True)
         sys.exit(1)

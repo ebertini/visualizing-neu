@@ -48,7 +48,10 @@ DEFAULT_ROOT = REPO_ROOT / "docs" / "TopicVizPrototypes"
 PAGES = [
     ("what_we_can_see.html", "what_we_can_see/data.js"),
     ("topic_flow.html", "topic_flow/data.js"),
-    ("about.html", "about/data.js"),
+    # about.html existed here before 2026-08-30 — its content (coverage
+    # headline, every caveat, frozen-inputs summary) is now part of
+    # what_we_can_see.html's own "About this data & what's missing" tab
+    # (see what_we_can_see/missing.js); about.html/about/ no longer exist.
 ]
 
 FOOTER = """\
@@ -173,9 +176,9 @@ EXPORT_BRACE_RE = re.compile(r'export\s*\{([^}]*)\}(?!\s*from)')
 # reordering. Lookaheads assert both attributes are present on the SAME
 # tag regardless of order, with `src`'s value as the one capture group.
 SCRIPT_MODULE_SRC_RE = re.compile(r'<script(?=[^>]*\btype="module")(?=[^>]*\bsrc="([^"]+)")[^>]*>')
-# topic_flow.html and about.html use an INLINE `<script type="module">` (no
-# src) — their import line pulls in data.js, but the rest of the page logic
-# (the id-touching code) stays inline in the HTML. Capture that text too so
+# topic_flow.html uses an INLINE `<script type="module">` (no src) — its
+# import line pulls in data.js, but the rest of the page logic (the
+# id-touching code) stays inline in the HTML. Capture that text too so
 # the id cross-reference actually checks something for those two pages.
 SCRIPT_MODULE_INLINE_RE = re.compile(r'<script\s+type="module"(?!\s+src)[^>]*>(.*?)</script>', re.S)
 GETID_RE = re.compile(r'getElementById\(["\']([^"\']+)["\']\)')
@@ -271,8 +274,8 @@ def check_js_graph(root: Path) -> bool:
             entry = (root / entry_rel).resolve()
             all_ok &= _walk_graph(entry, all_modules, node_check_ok)
 
-        # topic_flow.html and about.html keep their page logic INLINE inside
-        # `<script type="module">` (no src) and only import data.js
+        # topic_flow.html keeps its page logic INLINE inside
+        # `<script type="module">` (no src) and only imports data.js
         # externally — walking only external `<script src>` entries (as
         # above) would give those two pages zero JS checking at all. Check
         # the inline body's own syntax and walk whatever it imports.
@@ -382,9 +385,9 @@ def check_id_crossref(root: Path) -> bool:
             text = mod.read_text(encoding="utf-8")
             referenced_ids |= set(GETID_RE.findall(text))
             referenced_ids |= set(QUERY_ID_RE.findall(text))
-        # Inline module script bodies (topic_flow.html, about.html keep their
-        # page logic inline, only importing data.js externally) — scan those
-        # directly out of the HTML too.
+        # Inline module script bodies (topic_flow.html keeps its page logic
+        # inline, only importing data.js externally) — scan those directly
+        # out of the HTML too.
         for inline_body in SCRIPT_MODULE_INLINE_RE.findall(html_text):
             referenced_ids |= set(GETID_RE.findall(inline_body))
             referenced_ids |= set(QUERY_ID_RE.findall(inline_body))
@@ -427,6 +430,154 @@ class _BalanceChecker(HTMLParser):
             self.errors.append(f"mismatched </{tag}> at line {self.getpos()[0]}")
         elif self.stack:
             self.stack.pop()
+
+
+# ---------------------------------------------------------------- parent/palette/caveat consistency
+
+def _extract_string_list(text: str, marker: str) -> list[str]:
+    """Pull the quoted-string VALUES out of a `NAME = [...]`-style array
+    literal (Python or JS, both use the same `"..."` list-of-strings shape).
+    Value-only (not raw text) is deliberate: the two copies this feeds into
+    (src/build_viz_aggregates.py, shared/enrico.js) format the same list with
+    different indentation/line-wrapping, which is fine — only a VALUE
+    mismatch (a missing entry, a reordering, a typo) is a real drift."""
+    i = text.find(marker)
+    if i == -1:
+        return []
+    start = text.index("[", i)
+    end = text.index("]", start)
+    return re.findall(r'"([^"]*)"', text[start:end])
+
+
+def _extract_caveat_ids(build_viz_aggregates_text: str) -> set[str]:
+    """Every `"id": "..."` inside the CAVEATS = [...] list specifically (not
+    the many other `"id"` keys build_viz_aggregates.py's other dicts use) —
+    scoped to the slice between `CAVEATS = [` and the matching top-level `]`
+    ending the CAVEATS list (found via bracket depth, since the list itself
+    contains nested `{...}` dicts and `re.search` alone can't tell where the
+    outer list ends)."""
+    i = build_viz_aggregates_text.find("CAVEATS = [")
+    if i == -1:
+        return set()
+    start = build_viz_aggregates_text.index("[", i)
+    depth = 0
+    end = start
+    for j in range(start, len(build_viz_aggregates_text)):
+        c = build_viz_aggregates_text[j]
+        if c == "[":
+            depth += 1
+        elif c == "]":
+            depth -= 1
+            if depth == 0:
+                end = j
+                break
+    body = build_viz_aggregates_text[start:end]
+    return set(re.findall(r'"id":\s*"([^"]+)"', body))
+
+
+def _extract_caveat_whitelist(text: str) -> list[str]:
+    """Pull the whitelist array out of one `E.renderCaveats(el, VIZ_META.caveats, [...])`
+    call — the 3rd argument, wherever the call appears in the file."""
+    m = re.search(r"renderCaveats\([^,]+,\s*VIZ_META\.caveats\s*,\s*\[([^\]]*)\]\s*\)", text)
+    if not m:
+        return []
+    return re.findall(r'"([^"]+)"', m.group(1))
+
+
+def check_parent_taxonomy(root: Path) -> bool:
+    print("\nparent taxonomy / palette / caveat consistency")
+    all_ok = True
+
+    aggregates_py = REPO_ROOT / "src" / "build_viz_aggregates.py"
+    enrico_js = root / "shared" / "enrico.js"
+    if not aggregates_py.exists() or not enrico_js.exists():
+        warn("skipping parent/palette/caveat checks — build_viz_aggregates.py or shared/enrico.js not found")
+        return True
+
+    py_text = aggregates_py.read_text(encoding="utf-8")
+    js_text = enrico_js.read_text(encoding="utf-8")
+
+    # 1. PARENT_NAMES / PARENT_COLORS must be value-identical between the two
+    # hand-synced copies — this is the exact check that would have caught the
+    # 8->7 parent-count swap silently drifting between the two files.
+    py_names = _extract_string_list(py_text, "PARENT_NAMES = [")
+    js_names = _extract_string_list(js_text, "const PARENT_NAMES = [")
+    if py_names and py_names == js_names:
+        ok(f"PARENT_NAMES value-identical ({len(py_names)} entries) between "
+           "build_viz_aggregates.py and shared/enrico.js")
+    else:
+        fail(f"PARENT_NAMES differ — build_viz_aggregates.py has {py_names}, "
+             f"shared/enrico.js has {js_names}")
+        all_ok = False
+
+    py_colors = _extract_string_list(py_text, "PARENT_COLORS = [")
+    js_colors = _extract_string_list(js_text, "const PARENT_COLORS = [")
+    if py_colors and py_colors == js_colors:
+        ok(f"PARENT_COLORS value-identical ({len(py_colors)} entries)")
+    else:
+        fail(f"PARENT_COLORS differ — build_viz_aggregates.py has {py_colors}, "
+             f"shared/enrico.js has {js_colors}")
+        all_ok = False
+
+    # 2. Palette-capacity: the curated leaf count must not exceed
+    # shared/enrico.js's TOPIC_COLORS length (topicColor() wraps via modulo
+    # rather than crashing, so this degrades to silently-repeated colors, not
+    # an error — worth a loud FAIL here regardless, since it's exactly the
+    # kind of drift nothing else would catch).
+    js_topic_colors = _extract_string_list(js_text, "const TOPIC_COLORS = [")
+    n_topic_colors = len(js_topic_colors)
+    n_leaves = None
+    viz_meta_path = root / "data" / "viz_meta.json"
+    curated_path = REPO_ROOT / "outputs" / "topic_keywords.json"
+    if viz_meta_path.exists():
+        try:
+            n_leaves = json.loads(viz_meta_path.read_text(encoding="utf-8"))["frozen_inputs"]["n_topics"]
+        except (json.JSONDecodeError, KeyError):
+            pass
+    if n_leaves is None and curated_path.exists():
+        try:
+            n_leaves = len(json.loads(curated_path.read_text(encoding="utf-8")).get("leaves", {}))
+        except json.JSONDecodeError:
+            pass
+    if n_leaves is None:
+        warn("palette-capacity check skipped — neither data/viz_meta.json nor "
+             "outputs/topic_keywords.json is available to read the leaf count from")
+    elif n_leaves > n_topic_colors:
+        fail(f"{n_leaves} curated leaves exceeds shared/enrico.js's TOPIC_COLORS "
+             f"capacity ({n_topic_colors}) — leaf colors will start silently repeating")
+        all_ok = False
+    else:
+        ok(f"leaf count ({n_leaves}) within TOPIC_COLORS capacity ({n_topic_colors})")
+
+    # 3. Every caveat id a page's renderCaveats() whitelist references must
+    # actually exist in CAVEATS — the exact mechanical check that would have
+    # caught a rename (e.g. t14_artifact -> placeholder_titles) landing in
+    # one file but not the other, instead of relying on "same commit" discipline.
+    caveat_ids = _extract_caveat_ids(py_text)
+    if not caveat_ids:
+        warn("could not find/parse CAVEATS in build_viz_aggregates.py — skipping whitelist cross-check")
+        return all_ok
+
+    whitelist_sources = [
+        ("topic_flow.html", root / "topic_flow.html"),
+        ("what_we_can_see/missing.js", root / "what_we_can_see" / "missing.js"),
+    ]
+    for label, path in whitelist_sources:
+        if not path.exists():
+            continue
+        whitelist = _extract_caveat_whitelist(path.read_text(encoding="utf-8"))
+        if not whitelist:
+            warn(f"{label}: no renderCaveats(...) whitelist found (page may render all caveats directly)")
+            continue
+        unknown = [cid for cid in whitelist if cid not in caveat_ids]
+        if unknown:
+            fail(f"{label}: renderCaveats() whitelist references unknown caveat id(s) {unknown} "
+                 "— not present in build_viz_aggregates.py's CAVEATS")
+            all_ok = False
+        else:
+            ok(f"{label}: all {len(whitelist)} whitelisted caveat ids exist in CAVEATS")
+
+    return all_ok
 
 
 def check_html(root: Path) -> bool:
@@ -477,6 +628,7 @@ def main() -> None:
 
     root = args.root.resolve()
     all_ok = check_datasets(root)
+    all_ok &= check_parent_taxonomy(root)
 
     if not args.data_only:
         all_ok &= check_html(root)

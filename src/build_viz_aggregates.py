@@ -16,7 +16,13 @@ output already lives in the two committed files this script reads FROM:
 
 Reads (frozen, read-only, owned by docs/EnricoVis/ — never write here):
   docs/EnricoVis/data/grants_umap.json   2,676 grant points: id/agency/amount/
-                                          year/titleOnly/dom(topic)/isNoise
+                                          year/titleOnly/modelTitleOnly/
+                                          dom(topic)/isNoise. titleOnly = data
+                                          availability; modelTitleOnly = did
+                                          the fit see text (differs only for
+                                          LOW_TRUST_ABSTRACT_SOURCES grants —
+                                          absent entirely on an older,
+                                          pre-backfill grants_umap.json).
   docs/EnricoVis/data/topics.json        26 entries: 25 topics + noise, each
                                           with a "parent" ("P0".."P7" or null)
 
@@ -83,6 +89,11 @@ import json
 import re
 from pathlib import Path
 
+try:
+    from src.clean_text import LOW_TRUST_ABSTRACT_SOURCES
+except ImportError:  # run from within src/
+    from clean_text import LOW_TRUST_ABSTRACT_SOURCES
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PROC = REPO_ROOT / "data" / "processed"
 ENRICOVIS_DATA = REPO_ROOT / "docs" / "EnricoVis" / "data"     # read-only upstream (PI's work)
@@ -93,37 +104,55 @@ OUT_DIR = REPO_ROOT / "docs" / "TopicVizPrototypes" / "data"   # writable (this 
 # check too as a belt-and-suspenders safety net.
 FROZEN_STEMS = {"grants_umap", "topics", "grants_hier"}
 
-# 8-parent-theme names/colors — copied verbatim from docs/EnricoVis/topic_hierarchy.html
-# (PARENT_COLORS, the PI's file) and docs/TopicVizPrototypes/shared/enrico.js
-# (PARENT_NAMES, this project's own copy), which must in turn stay in sync
-# with this list. Do not hand-edit one without the other two.
+# 8-parent-theme names/colors — the curated keyword-classifier taxonomy
+# (outputs/topic_keywords.json, promoted 2026-08-29, revised same day to split
+# the original P3 into a redefined P3 + new P7 — see their notes in that file
+# for the full rationale: workforce/career-pipeline content (Leaf 13) was
+# diluting the social-science parent's identity). Names/order copied verbatim
+# from that file's parents{} (P0..P7, dense zero-based) and must stay
+# byte-identical to docs/TopicVizPrototypes/shared/enrico.js's own PARENT_NAMES
+# copy. Do not hand-edit one without the other. This REPLACES the prior
+# 8-parent BERTopic-era taxonomy ("Life Sciences & Biomedicine", "Physical
+# Sciences & Engineering", ... "Education & Learning") — those names never
+# matched the curated keyword lists (see the redo plan) and are retired, not
+# kept as unused history.
 PARENT_NAMES = [
-    "Life Sciences & Biomedicine", "Physical Sciences & Engineering", "Environment, Ocean & Climate",
-    "Computing & Cybersecurity", "Networks, Signals & Control", "AI, Robotics & Cognition",
-    "Society, Health & Mobility", "Education & Learning",
+    "Biomedical Sciences", "Public & Behavioral Health", "Environmental Science & Ecology",
+    "Social Science, Public Policy & Education Research",
+    "Materials Science & Structural/Civil Engineering", "Mathematics & Fundamental Physics",
+    "Computing, Networking & Robotic Systems", "Workforce Development & Institutional Partnerships",
 ]
 # 8 real names above + 4 SPARE colors below (indices 8-11) — pre-allocated
-# headroom so a refit that adds a 9th+ parent theme (always a human curation
-# step — BERTopic itself never produces parent groups, see
-# docs/TOPIC_MODEL_REFIT_CHECKLIST.md) gets a real, distinct color the moment
-# it's named in PARENT_NAMES, instead of silently reusing color 0
-# (`i % len(PARENT_COLORS)` wraps once `i` reaches 8). The 4 spares are hues
-# already used in shared/enrico.js's TOPIC_COLORS, kept red-free/grey-free to
-# match this palette's existing convention (grey is reserved for NOISE_GREY).
-# Every color-consuming line below already keys off len(PARENT_COLORS)/
-# len(PARENT_NAMES), not a literal 8 or 12, so this extension changes nothing
-# about today's 8-parent rendering — see the modulo-safety comments at the
-# actual usage sites further down this file.
+# headroom so a re-curation that adds a 9th+ parent theme (always a human
+# curation step — the classifier's own discovery fit never produces parent
+# groups directly, see docs/TOPIC_MODEL_REFIT_CHECKLIST.md) gets a real,
+# distinct color the moment it's named in PARENT_NAMES, instead of silently
+# reusing color 0 (`i % len(PARENT_COLORS)` wraps once `i` reaches 8). Every
+# color-consuming line below already keys off len(PARENT_COLORS)/
+# len(PARENT_NAMES), not a literal count, so this changes nothing about
+# today's 8-parent rendering.
 PARENT_COLORS = [
     "#4E79A7", "#F28E2B", "#59A14F", "#B07AA1", "#76B7B2", "#EDC948", "#9C755F", "#D37295",
     "#6B4C9A", "#1B9E77", "#B6992D", "#7570B3",
 ]
 
-# Topic 11 is a documented artifact bucket (docs/TOPIC_WORK_EXECUTION_REPORT.md):
-# 28 of 62 docs are placeholder "Grant" title-only ONR/NIH-sub records. It has
-# no parent theme and is folded into "Unassigned" everywhere in the hierarchy
-# app — we do the same here for the parent-level series.
-ARTIFACT_TOPIC_ID = 11
+# The BERTopic-era artifact-topic concept is RETIRED — the curated keyword
+# taxonomy has no single "flagged low-coherence cluster" the way HDBSCAN's
+# topic 14 was; every leaf here is a deliberate human curation decision. The
+# 28 ONR placeholder-title "Grant" records that used to define topic 14 are
+# now individually tagged `unassignedReason == "placeholder_title_only"` on
+# each point (see src.classify_by_keywords) rather than living in one
+# hardcoded topic id. Kept as a named sentinel (rather than deleted) so every
+# use site below stays visibly None-safe instead of silently vanishing —
+# `== ARTIFACT_TOPIC_ID` / `in (-1, ARTIFACT_TOPIC_ID)` comparisons against
+# `None` are safe by construction (a point's `dom`/`bertopicDom` is always an
+# int or None, never equal to the sentinel None via `==`).
+ARTIFACT_TOPIC_ID = None
+
+# Must match len(TOPIC_COLORS) in docs/TopicVizPrototypes/shared/enrico.js —
+# only used for validate()'s palette-headroom warning below, never to index
+# anything here.
+TOPIC_COLOR_CAPACITY = 32
 
 DENSE_FROM, DENSE_TO = 2005, 2025
 
@@ -138,28 +167,83 @@ CAVEATS = [
     },
     {
         "id": "nih_cliff",
-        "severity": "high",
+        "severity": "low",
         "text": (
-            "NIH abstract coverage collapses from 64% (2019) to 0% from 2021 onward. "
-            "This is a data-collection artifact, not a funding decline — NIH grant "
-            "counts hold steady while the evidence behind each topic label thins out."
+            "UPDATE (2026-08-20): this used to read 'NIH abstract coverage collapses "
+            "from 64% (2019) to 0% from 2021 onward' — a data-collection artifact, not "
+            "a funding decline. A live NIH RePORTER backfill (src/backfill_nih_reporter.py) "
+            "has since closed it: 2020-2025 NIH/NIH-SubAward coverage now runs 94-100%. "
+            "Kept here, downgraded, as a record that this was a real prior limitation."
         ),
     },
     {
         "id": "unassigned",
-        "severity": "med",
+        "severity": "low",
         "text": (
-            "808 grants (27.8% of dollars) carry no confident topic — 746 HDBSCAN "
-            "noise + 62 in a flagged artifact bucket (topic 11). Shown as a grey "
-            "‘Unassigned’ band, never dropped."
+            "UPDATE (2026-08-30): 36 grants (1.35% of grants, 1.0% of dollars) carry no "
+            "confident topic under the curated keyword classifier — down from 697 grants "
+            "/ 26.7% of dollars under the prior BERTopic/HDBSCAN fit, and further down "
+            "from an initial 66 after a targeted curation pass closed 30 of them. Only 8 "
+            "have real text but zero curated-keyword evidence now (2 of those are text "
+            "the classifier is deliberately masked from seeing — a borrowed, low-trust "
+            "abstract source — so no amount of curation can help them); 28 are the ONR "
+            "placeholder-title records described in 'placeholder_titles' below. Shown "
+            "as a grey 'Unassigned' band, never dropped."
         ),
     },
     {
-        "id": "t11_artifact",
-        "severity": "med",
+        "id": "placeholder_titles",
+        "severity": "low",
         "text": (
-            "Topic 11 (“Mixed / low-coherence”) is a flagged artifact: 28 of its "
-            "62 grants carry the placeholder title “Grant”. It has no parent theme."
+            "28 grants carry the placeholder title “Grant” (all Office of Naval "
+            "Research — ONR has no public abstract API, so no backfill could ever "
+            "recover real text for them). Unclassifiable by any text-based method, "
+            "keyword or embedding; they have no parent theme. Formerly BERTopic's "
+            "flagged 'topic 14' artifact bucket — now tracked per-grant "
+            "(unassignedReason == 'placeholder_title_only') rather than as one hardcoded "
+            "topic id."
+        ),
+    },
+    {
+        "id": "keyword_classifier",
+        "severity": "low",
+        "text": (
+            "As of 2026-08-29, topic labels come from a deterministic, human-curated "
+            "keyword classifier (BM25F scoring over 31 leaves / 8 parent themes), not "
+            "the prior BERTopic/HDBSCAN fit — chosen for inspectability (every "
+            "assignment records which curated terms actually fired) and full offline "
+            "reproducibility. BERTopic's own assignment is kept as a comparison field "
+            "(bertopicDom/bertopicNoise), not deleted. See "
+            "docs/TOPIC_MODEL_REFIT_CHECKLIST.md."
+        ),
+    },
+    {
+        "id": "low_confidence",
+        "severity": "low",
+        "text": (
+            "511 grants (19.1%) land in the classifier's 'low' confidence tier — a "
+            "curated term matched, but weakly (a thin margin over the runner-up topic, "
+            "or few matched terms). A 180-row human-labeled gold set now exists "
+            "(68.3% overall accuracy, 95% CI 61.2-74.7%) and confirms the tiers "
+            "calibrate correctly (high 81.2% accurate vs. low 60.7%) — the underlying "
+            "BM25F constants (K1/B/W_TITLE/ALPHA) and tier thresholds were checked "
+            "against a 108-point sweep of that gold set and left unchanged (no "
+            "candidate beat the baseline by more than its own margin of error) — "
+            "treat 'low' as 'worth a second look', not as a precise probability."
+        ),
+    },
+    {
+        "id": "secondary_theme",
+        "severity": "low",
+        "text": (
+            "272 grants (10.2%) sit genuinely between two parent themes — their "
+            "second-most-relevant topic (already computed by the classifier, now "
+            "surfaced per grant) belongs to a DIFFERENT parent than their primary "
+            "one, within a close scoring margin. This reflects real interdisciplinary "
+            "work (e.g. human-computer interaction grants that could reasonably be "
+            "Computing, Public & Behavioral Health, or Social Science depending on "
+            "framing) that a single-parent taxonomy can't fully represent — shown as "
+            "a secondary-theme hint, not forced into one label."
         ),
     },
     {
@@ -233,6 +317,46 @@ COLLEGE_NORMALIZE = {
     "Khoury": "Khoury College of Computer Sciences",
 }
 
+# Pooled into a generic "Other" bin on BOTH the grants and PI college
+# facets — a deliberate, later decision than COLLEGE_NORMALIZE above (which
+# keeps genuine oddities as their own honest bin). "Northeastern University"
+# and "Math?" are tiny/edge-case values on both facets (2-4 records each).
+# "Network science institute" (PI facet only — never appears on the grants
+# facet) is a real but small unit, pooled for the same reason. "College of
+# Professional Studies" was pooled in an earlier pass but reverted (real
+# college, 110 of 2,247 roster faculty on the PI facet — too large to treat
+# as an edge case) — kept as its own bin on both facets. Applied by name,
+# not by size threshold, so this doesn't silently start pooling some OTHER
+# small college later just because its count drops.
+COLLEGE_POOL_TO_OTHER = {"Northeastern University", "Math?", "Network science institute"}
+COLLEGE_OTHER_LABEL = "Other"
+
+
+def _normalize_college(raw) -> str | None:
+    """Apply the SAME normalize-then-pool transform `build_facets()`'s
+    `college_idx()` closure applies inline, as a reusable function for
+    anything that needs a clean college label OUTSIDE that closure (e.g.
+    `load_colleges_per_grant()` below, and `build_college_collab()`).
+
+    Found missing from `load_colleges_per_grant()` during the About-section
+    review (2026-08-30): that function read `faculty_id_lookup.college`
+    completely raw, so duplicate strings for the same real college
+    ("Engineering" vs "College of Engineering", "Khoury" vs "Khoury College
+    of Computer Sciences", "College of science" vs "College of Science")
+    each counted as a DIFFERENT college — inflating its cross-college count
+    by 28 grants (22%) that were actually single-college. Returns None for
+    missing/blank (the caller decides what that means — "no college known,"
+    not a real college and not "Other")."""
+    if raw is None:
+        return None
+    s = str(raw).strip()
+    if not s:
+        return None
+    s = COLLEGE_NORMALIZE.get(s, s)
+    if s in COLLEGE_POOL_TO_OTHER:
+        return COLLEGE_OTHER_LABEL
+    return s
+
 DOLLAR_BANDS = [
     (0, 100_000, "< $100K"),
     (100_000, 500_000, "$100K–$500K"),
@@ -240,6 +364,11 @@ DOLLAR_BANDS = [
     (1_000_000, 5_000_000, "$1M–$5M"),
     (5_000_000, float("inf"), "≥ $5M"),
 ]
+
+# Ordinal, low-to-high — the classifier's own conf_tier vocabulary
+# (src.classify_by_keywords), a facet the old BERTopic one-hot assignment
+# couldn't support at all (it had no per-grant confidence signal).
+CONF_LEVELS = ["none", "low", "medium", "high"]
 
 # The one cliff this round documents — verified: NIH+NIH-SUB coverage falls
 # from 64% (2019) to 3% (2020) to 0% (2021-2025). A module-level constant
@@ -251,10 +380,18 @@ CLIFFS = [{
     "agency": "NIH",
     "last_good_year": 2019,
     "first_zero_year": 2021,
+    # UPDATE (found stale 2026-08-30, during the About-section review — this
+    # text still described the PRE-backfill state while the "nih_cliff"
+    # CAVEATS entry above already correctly says the backfill closed it,
+    # contradicting each other in the same file): the cliff shown here is
+    # historical — what coverage looked like before src/backfill_nih_reporter.py
+    # ran — not a live, still-open gap. Live 2020-2025 NIH/NIH-SubAward
+    # coverage is 94-100%, same as every other agency.
     "text": (
-        "NIH abstract coverage falls from 64% (2019) to 3% (2020) to 0% "
-        "(2021-2025). Data-collection artifact; only NIH RePORTER backfill "
-        "can repair it."
+        "NIH abstract coverage historically fell from 64% (2019) to 3% (2020) "
+        "to 0% (2021-2025) — a data-collection artifact, not a funding "
+        "decline. Since closed by a live NIH RePORTER backfill: 2020-2025 "
+        "NIH/NIH-SubAward coverage now runs 94-100%."
     ),
 }]
 
@@ -289,10 +426,13 @@ def load_frozen() -> tuple[list[dict], list[dict]]:
 
 
 def load_abstract_source(points: list[dict]) -> tuple[dict[str, str], str]:
-    """Best-effort grant_id -> abstract_source ('internal'/'orphan_recovered'/'none').
-    Falls back to deriving it from `titleOnly` (exactly equivalent when the
-    real value is absent, since titleOnly IS `abstract == ""` at the source —
-    see src/build_viz_data.py) if grants.parquet hasn't been built locally.
+    """Best-effort grant_id -> abstract_source ('internal'/'nih_reporter'/
+    'nih_reporter_parent'/'nsf_api'/'orphan_recovered'/'none'). Falls back to
+    deriving a two-value approximation from `titleOnly` (data availability —
+    exactly correct for the has-text/no-text question) if grants.parquet
+    hasn't been built locally: 'none' or a generic 'internal' — the fallback
+    can tell IF a grant has text but not WHICH of the newer sources provided
+    it, since `titleOnly` alone doesn't carry that distinction.
     """
     parquet_path = PROC / "grants.parquet"
     if parquet_path.exists():
@@ -334,8 +474,8 @@ def load_abstract_text(points: list[dict]) -> tuple[dict[str, str], str]:
 
 
 def load_pi_attrs(points: list[dict]) -> tuple[dict[str, dict], str]:
-    """grant_id -> {college, academic_unit, hire_date_known, neu_status, on_roster}
-    for the grant's PI row (is_pi==True) in faculty_grants.parquet, joined to
+    """grant_id -> {college, academic_unit, hire_date_known, neu_status, on_roster,
+    pi_name} for the grant's PI row (is_pi==True) in faculty_grants.parquet, joined to
     faculty_id_lookup.parquet (college/academic_unit) and faculty.parquet
     (hire_date). A grant absent from this dict has NO PI row at all — the
     caller is responsible for mapping that to NO_PI_LABEL, not this function
@@ -353,7 +493,7 @@ def load_pi_attrs(points: list[dict]) -> tuple[dict[str, dict], str]:
 
     import pandas as pd  # local import: keep this script runnable with json alone
 
-    fg = pd.read_parquet(fg_path, columns=["faculty_id", "grant_id", "is_pi", "neu_status"])
+    fg = pd.read_parquet(fg_path, columns=["faculty_id", "faculty_name", "grant_id", "is_pi", "neu_status"])
     fl = pd.read_parquet(fl_path, columns=["faculty_id", "college", "academic_unit"])
     fac = pd.read_parquet(fac_path, columns=["faculty_id", "hire_date"])
 
@@ -380,8 +520,149 @@ def load_pi_attrs(points: list[dict]) -> tuple[dict[str, dict], str]:
             "hire_date_known": bool(hire_known_by_faculty.get(row.faculty_id, False)),
             "neu_status": row.neu_status or "unknown",
             "on_roster": on_roster,
+            "pi_name": str(row.faculty_name).strip() if pd.notna(row.faculty_name) else "",
         }
     return out, "parquet"
+
+
+def load_colleges_per_grant() -> dict[str, int]:
+    """grant_id -> count of DISTINCT NORMALIZED roster colleges among EVERY
+    person linked to that grant (PI and co-PIs alike, unlike load_pi_attrs
+    above which is PI-only) — answers "how many different colleges does
+    this grant involve" (a PI-feedback item: cross-college collaboration is
+    otherwise invisible per-grant). A person absent from the roster (no
+    college on record) doesn't count toward the total, so this is a floor,
+    not a ceiling, same spirit as every other "known so far" count in this
+    file. Degrades to an empty dict (every grant reads as 0) if the
+    parquets aren't built locally.
+
+    Uses `_normalize_college()` (same transform `college_idx()` applies) —
+    NOT the raw `faculty_id_lookup.college` string. Without it, duplicate
+    strings for the same real college inflated the cross-college count by
+    28 grants (22%); see `_normalize_college`'s own docstring.
+    """
+    fg_path = PROC / "faculty_grants.parquet"
+    fl_path = PROC / "faculty_id_lookup.parquet"
+    if not (fg_path.exists() and fl_path.exists()):
+        return {}
+
+    import pandas as pd  # local import: keep this script runnable with json alone
+
+    fg = pd.read_parquet(fg_path, columns=["faculty_id", "grant_id"])
+    fl = pd.read_parquet(fl_path, columns=["faculty_id", "college"])
+    college_by_faculty = {fid: _normalize_college(c) for fid, c in zip(fl["faculty_id"], fl["college"])}
+
+    fg = fg.copy()
+    fg["college"] = fg["faculty_id"].map(college_by_faculty)
+    fg = fg[fg["college"].notna()]
+    return fg.groupby("grant_id")["college"].nunique().to_dict()
+
+
+def load_team_size_per_grant() -> dict[str, int]:
+    """grant_id -> count of DISTINCT people linked to that grant, any role.
+
+    Deliberately NOT a count of `is_copi`-flagged rows — verified against the
+    real corpus that `is_copi` is a per-row ROLE LABEL, not a team-size
+    signal: 291 of the 602 grants with an is_copi=True row have exactly ONE
+    distinct person linked to them in total (that person's role is recorded
+    as "co-PI" with no separate PI row present at all, likely because the
+    real PI isn't in this dataset) — a naive is_copi count would show these
+    291 solo records as 1-collaborator grants, which is wrong. Counting
+    distinct people (any role) instead gives 0 "extra collaborators" for a
+    genuinely solo record, matching reality. Every one of the 2,676 grants
+    has at least 1 linked person (verified), so this is never 0 — "1" means
+    solo, "2+" means an actual additional collaborator is on record.
+    Degrades to an empty dict (every grant reads as 0) if the parquet isn't
+    built locally, same as load_colleges_per_grant above.
+    """
+    fg_path = PROC / "faculty_grants.parquet"
+    if not fg_path.exists():
+        return {}
+
+    import pandas as pd  # local import: keep this script runnable with json alone
+
+    fg = pd.read_parquet(fg_path, columns=["faculty_id", "grant_id"])
+    return fg.groupby("grant_id")["faculty_id"].nunique().to_dict()
+
+
+def build_college_collab(points: list[dict]) -> dict:
+    """Cross-college PI/co-PI collaboration — the college-pair matrix
+    version of `load_colleges_per_grant()`'s per-grant count above. Nothing
+    like this existed anywhere in the pipeline before this (the only
+    precedent, notebooks/05_collaboration_network.ipynb, uses a different
+    join with no normalization and counts faculty-pair EDGES rather than
+    grants, so its numbers aren't comparable to this function's). Verified
+    independently against real data before being wired in: 100 grants cross
+    a college line under `_normalize_college()` (not 128 — see that
+    function's docstring for the duplicate-string bug this avoids).
+
+    Returns `{"n_cross_college": int, "dollars": float, "pairs": [...],
+    "by_college": [...], "by_year": [...], "provenance": str}`. Degrades to
+    an all-empty/zero shape (not a missing key) if the parquets aren't
+    built locally, matching every other "known so far" aggregate in this
+    file.
+    """
+    fg_path = PROC / "faculty_grants.parquet"
+    fl_path = PROC / "faculty_id_lookup.parquet"
+    empty = {"n_cross_college": 0, "dollars": 0.0, "pairs": [], "by_college": [],
+             "by_year": [], "provenance": "derived"}
+    if not (fg_path.exists() and fl_path.exists()):
+        return empty
+
+    import pandas as pd  # local import: keep this script runnable with json alone
+    from itertools import combinations
+    from collections import Counter
+
+    fg = pd.read_parquet(fg_path, columns=["faculty_id", "grant_id"])
+    fl = pd.read_parquet(fl_path, columns=["faculty_id", "college"])
+    college_by_faculty = {fid: _normalize_college(c) for fid, c in zip(fl["faculty_id"], fl["college"])}
+    fg = fg.copy()
+    fg["college"] = fg["faculty_id"].map(college_by_faculty)
+    fg = fg[fg["college"].notna()]
+
+    point_by_id = {str(p["id"]).strip(): p for p in points}
+    year_by_grant = {gid: p.get("year") for gid, p in point_by_id.items()}
+
+    pair_counts: Counter = Counter()
+    pair_dollars: dict[tuple, float] = {}
+    college_participation: Counter = Counter()
+    year_counts: Counter = Counter()
+    n_cross_college = 0
+    total_dollars = 0.0
+
+    for gid, sub in fg.groupby("grant_id"):
+        cols = sorted(set(sub["college"]))
+        if len(cols) < 2:
+            continue
+        n_cross_college += 1
+        amount = point_by_id.get(gid, {}).get("amount", 0.0) or 0.0
+        total_dollars += amount
+        for c in cols:
+            college_participation[c] += 1
+        for a, b in combinations(cols, 2):
+            pair_counts[(a, b)] += 1
+            pair_dollars[(a, b)] = pair_dollars.get((a, b), 0.0) + amount
+        yr = year_by_grant.get(gid)
+        if yr is not None:
+            year_counts[yr] += 1
+
+    pairs = [
+        {"a": a, "b": b, "n": n, "dollars": round(pair_dollars.get((a, b), 0.0), 2)}
+        for (a, b), n in sorted(pair_counts.items(), key=lambda kv: -kv[1])
+    ]
+    by_college = [
+        {"college": c, "n": n} for c, n in sorted(college_participation.items(), key=lambda kv: -kv[1])
+    ]
+    by_year = [{"year": y, "n": n} for y, n in sorted(year_counts.items())]
+
+    return {
+        "n_cross_college": n_cross_college,
+        "dollars": round(total_dollars, 2),
+        "pairs": pairs,
+        "by_college": by_college,
+        "by_year": by_year,
+        "provenance": "parquet",
+    }
 
 
 def build_facets(points: list[dict], topics: list[dict]) -> dict:
@@ -397,13 +678,21 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
     abs_src, abs_source = load_abstract_source(points)
     abs_text, abs_text_source = load_abstract_text(points)
     pi_attrs, pi_source = load_pi_attrs(points)
+    n_colleges_by_grant = load_colleges_per_grant()
+    n_team_by_grant = load_team_size_per_grant()
     parent_of_topic = {t["id"]: _parent_index(t.get("parent")) for t in topics}
 
     ag_levels = list(ORDER)
     ag_index = {k: i for i, k in enumerate(ag_levels)}
     st_levels = ["earned_at_neu", "prior_institution", "unknown", NO_PI_LABEL]
     st_index = {k: i for i, k in enumerate(st_levels)}
-    asrc_levels = ["internal", "orphan_recovered", "none"]
+    # Every real src.build_dataset.py abstract_source value, so a backfilled
+    # grant (nih_reporter/nsf_api/nih_reporter_parent) doesn't collapse into
+    # "none" (the opposite of the truth — it has real, sourced text). Not
+    # currently rendered by any facet UI (see what_we_can_see/facets.js:70-72)
+    # but emitted in the data, so this enum should still be complete.
+    asrc_levels = ["internal", "nih_reporter", "nih_reporter_parent", "nsf_api",
+                   "orphan_recovered", "none"]
     asrc_index = {k: i for i, k in enumerate(asrc_levels)}
     amt_levels = [label for (_lo, _hi, label) in DOLLAR_BANDS]
 
@@ -414,14 +703,31 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
     col_index: dict[str, int] = {NO_PI_LABEL: 0, PI_OFF_ROSTER_LABEL: 1}
 
     def college_idx(label: str) -> int:
+        if label in COLLEGE_POOL_TO_OTHER:
+            label = COLLEGE_OTHER_LABEL
         if label not in col_index:
             col_index[label] = len(col_levels)
             col_levels.append(label)
         return col_index[label]
 
+    # Secondary-theme signal (build_viz_data.py's secondaryLeaf/secondaryParent/
+    # secondaryMargin/hasSecondaryTheme, computed there from the classifier's
+    # own already-computed runner-up leaf) — plain parallel arrays like
+    # titles/abstracts below, NOT a `cols` entry: this is display-only
+    # (a detail-card hint), not an arrange/split/color facet.
+    leaf_name_by_id = {t["id"]: t["name"] for t in topics}
+
     ids: list[str] = []
     titles: list[str] = []
     abstracts: list[str] = []
+    matched_terms: list[list[str]] = []
+    pi_names: list[str] = []
+    n_colleges: list[int] = []
+    n_team: list[int] = []
+    secondary_leaf_label: list[str | None] = []
+    secondary_parent_label: list[str | None] = []
+    secondary_margin: list[float | None] = []
+    has_secondary_theme: list[bool] = []
     # "amt" is the 5-level band index used for arranging/splitting (a small,
     # legible enum); "amt_raw" is the actual dollar float, added so the facet
     # grid can offer a real "sort by size ($)" — bands alone can't distinguish
@@ -429,13 +735,50 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
     # column rather than replacing "amt" so existing band-based arrangements
     # are untouched.
     cols: dict[str, list[float]] = {k: [] for k in
-                                     ("ag", "yr", "col", "st", "ab", "asrc", "tp", "tid", "pi", "amt", "amt_raw")}
+                                     ("ag", "yr", "col", "st", "ab", "asrc", "tp", "tid", "pi", "amt", "amt_raw",
+                                      "conf", "ncol", "src", "team")}
+    conf_index = {name: i for i, name in enumerate(CONF_LEVELS)}
+    # How the grant's CURRENT topic (tid/tp above) was actually decided —
+    # src.build_viz_data.py's assignmentSource, surfaced as its own facet so
+    # "was this LLM-adjudicated or a low-confidence keyword guess kept
+    # visible-but-flagged" is inspectable/filterable, not just buried in the
+    # per-grant detail card. Distinct from "conf" (which keeps describing the
+    # keyword classifier's OWN BM25F confidence, unchanged, even for a doc
+    # this facet says was later LLM-resolved).
+    src_levels = ["keyword_classifier", "keyword_classifier_low_confidence", "llm_adjudication", "unassigned"]
+    src_index = {name: i for i, name in enumerate(src_levels)}
+    # How many distinct roster colleges a grant involves (PI + co-PIs) — a new
+    # facet (PI feedback: "for each grant how many different colleges does it
+    # involve?"), banded small since the real distribution is almost entirely
+    # 0-3 (a grant with 4+ distinct colleges is a genuine rarity worth its own
+    # top band rather than a long flat tail of near-empty bins).
+    ncol_levels = ["0 (none known)", "1", "2", "3+"]
+
+    def ncol_band(n: int) -> int:
+        return min(n, 3)
+
+    # Team size — count of DISTINCT people linked to a grant, any role (see
+    # load_team_size_per_grant's docstring for why this is NOT a count of
+    # is_copi rows). Every grant has >=1 (verified against the real corpus:
+    # zero grants show 0), so bands start at "1" with no miss bin needed —
+    # unlike ncol above, there's no "unknown" case here to reserve a slot for.
+    team_levels = ["1", "2", "3", "4+"]
+
+    def team_band(n: int) -> int:
+        return min(max(n, 1), 4) - 1
 
     for p in points:
         gid = str(p["id"]).strip()
         ids.append(gid)
         titles.append(p["title"] or "")
         abstracts.append(abs_text.get(gid, ""))
+        matched_terms.append(list(p.get("matchedTerms") or []))
+        this_n_colleges = int(n_colleges_by_grant.get(gid, 0))
+        n_colleges.append(this_n_colleges)
+        cols["ncol"].append(ncol_band(this_n_colleges))
+        this_n_team = int(n_team_by_grant.get(gid, 0))
+        n_team.append(this_n_team)
+        cols["team"].append(team_band(this_n_team))
         # .get(..., "Other") rather than a bare [] — every point SHOULD already
         # carry one of the 9 ORDER buckets (build_viz_data.py's agency_bucket()
         # already defaults to "Other"), but a defensive fallback here means an
@@ -450,23 +793,51 @@ def build_facets(points: list[dict], topics: list[dict]) -> dict:
         cols["asrc"].append(asrc_index.get(abs_src.get(gid, "none"), asrc_index["none"]))
         cols["amt"].append(_dollar_band(p["amount"]))
         cols["amt_raw"].append(p["amount"])
+        cols["conf"].append(conf_index.get(p.get("confTier", "none"), 0))
+        cols["src"].append(src_index.get(p.get("assignmentSource"), src_index["unassigned"]))
+
+        sec_leaf = p.get("secondaryLeaf")
+        if sec_leaf is not None:
+            secondary_leaf_label.append(leaf_name_by_id.get(sec_leaf))
+            sec_parent_idx = parent_of_topic.get(sec_leaf, -1)
+            secondary_parent_label.append(
+                PARENT_NAMES[sec_parent_idx] if 0 <= sec_parent_idx < len(PARENT_NAMES) else None
+            )
+            secondary_margin.append(p.get("secondaryMargin"))
+        else:
+            secondary_leaf_label.append(None)
+            secondary_parent_label.append(None)
+            secondary_margin.append(None)
+        has_secondary_theme.append(bool(p.get("hasSecondaryTheme", False)))
 
         attrs = pi_attrs.get(gid)
         if attrs is None:
             cols["col"].append(college_idx(NO_PI_LABEL))
             cols["st"].append(st_index[NO_PI_LABEL])
             cols["pi"].append(0)
+            pi_names.append("")
         else:
             cols["col"].append(college_idx(attrs["college"]))
             cols["st"].append(st_index.get(attrs["neu_status"], st_index["unknown"]))
             cols["pi"].append(1 if attrs["on_roster"] else 0)
+            pi_names.append(attrs.get("pi_name", ""))
 
     return {
         "n": len(points),
         "ids": ids,
         "titles": titles,
         "abstracts": abstracts,
-        "levels": {"ag": ag_levels, "col": col_levels, "st": st_levels, "asrc": asrc_levels, "amt": amt_levels},
+        "matchedTerms": matched_terms,
+        "piNames": pi_names,
+        "nColleges": n_colleges,
+        "nTeam": n_team,
+        "secondaryLeafLabel": secondary_leaf_label,
+        "secondaryParentLabel": secondary_parent_label,
+        "secondaryMargin": secondary_margin,
+        "hasSecondaryTheme": has_secondary_theme,
+        "levels": {"ag": ag_levels, "col": col_levels, "st": st_levels, "asrc": asrc_levels,
+                   "amt": amt_levels, "conf": CONF_LEVELS, "ncol": ncol_levels, "src": src_levels,
+                   "team": team_levels},
         "cols": cols,
         "provenance": {"abstract_source": abs_source, "pi_attrs": pi_source, "abstract_text": abs_text_source},
     }
@@ -495,6 +866,10 @@ def build_facets_pi(fac, points: list[dict], topics: list[dict]) -> dict:
     Funding is credited PI-only (dollars from grants where is_pi is True),
     per CLAUDE.md's funding-credit-model caveat — the "amt"/"amt_raw" facets
     here are explicitly "dollars as PI", not full- or fractional-credit.
+    "amt_neu"/"amt_neu_raw" apply the SAME PI-only credit model further
+    filtered to `neu_status == "earned_at_neu"` (PI feedback: "dollars earned
+    from grants a PI earned AT Northeastern") — a separate facet, not a
+    redefinition of amt/amt_raw, per the titleOnly/modelTitleOnly lesson.
     """
     if fac is None:
         return {"n": 0, "ids": [], "names": [], "levels": {}, "cols": {}, "grant_titles": [], "provenance": "derived"}
@@ -504,7 +879,7 @@ def build_facets_pi(fac, points: list[dict], topics: list[dict]) -> dict:
     fg_path = PROC / "faculty_grants.parquet"
     if not fg_path.exists():
         return {"n": 0, "ids": [], "names": [], "levels": {}, "cols": {}, "grant_titles": [], "provenance": "derived"}
-    fg = pd.read_parquet(fg_path, columns=["faculty_id", "grant_id", "is_pi"])
+    fg = pd.read_parquet(fg_path, columns=["faculty_id", "grant_id", "is_pi", "neu_status"])
     fg["faculty_id"] = fg["faculty_id"].astype(str)
     fg["grant_id"] = fg["grant_id"].astype(str).str.strip()
 
@@ -515,7 +890,7 @@ def build_facets_pi(fac, points: list[dict], topics: list[dict]) -> dict:
     names: list[str] = []
     cols: dict[str, list] = {k: [] for k in
                               ("col", "dept", "rank", "track", "tenure", "hire_yr",
-                               "status", "hasgrants", "ngrants", "amt", "amt_raw", "tp")}
+                               "status", "hasgrants", "ngrants", "amt", "amt_raw", "amt_neu", "amt_neu_raw", "tp")}
     grant_titles: list[list[str]] = []
 
     col_levels: list[str] = []
@@ -523,6 +898,8 @@ def build_facets_pi(fac, points: list[dict], topics: list[dict]) -> dict:
 
     def college_idx(raw: str) -> int:
         label = COLLEGE_NORMALIZE.get(raw, raw) if raw else PI_NOT_RECORDED
+        if label in COLLEGE_POOL_TO_OTHER:
+            label = COLLEGE_OTHER_LABEL
         if label not in col_index:
             col_index[label] = len(col_levels)
             col_levels.append(label)
@@ -608,14 +985,32 @@ def build_facets_pi(fac, points: list[dict], topics: list[dict]) -> dict:
             cols["ngrants"].append(_ngrants_band(0))
             cols["amt"].append(0)
             cols["amt_raw"].append(0.0)
+            cols["amt_neu"].append(0)
+            cols["amt_neu_raw"].append(0.0)
             cols["tp"].append(NO_PI_GRANTS_TP)
             grant_titles.append([])
             continue
 
         n_grants = their_grants["grant_id"].nunique()
-        pi_grant_ids = their_grants.loc[their_grants["is_pi"], "grant_id"].tolist()
+        pi_rows = their_grants.loc[their_grants["is_pi"]]
+        pi_grant_ids = pi_rows["grant_id"].tolist()
         pi_points = [point_by_id[g] for g in pi_grant_ids if g in point_by_id]
         pi_dollars = sum(p["amount"] for p in pi_points)
+
+        # "Dollars earned from grants a PI earned AT Northeastern" — the
+        # `neu_status` attribution caveat (CLAUDE.md: prior-institution grants
+        # get attributed to a PI's NEU record even though the work predates
+        # their hire) applied on top of the PI-only credit model above, per
+        # PI feedback ("add dollars earned from grants PIs earned at NEU").
+        # A SEPARATE facet, not a redefinition of amt/amt_raw — same lesson
+        # as titleOnly/modelTitleOnly (CLAUDE.md): a change that looks locally
+        # correct can silently break every caller that assumed the old value
+        # meant "all PI dollars, no attribution filter."
+        neu_grant_ids = pi_rows.loc[pi_rows["neu_status"] == "earned_at_neu", "grant_id"].tolist()
+        neu_points = [point_by_id[g] for g in neu_grant_ids if g in point_by_id]
+        neu_dollars = sum(p["amount"] for p in neu_points)
+        cols["amt_neu_raw"].append(neu_dollars)
+        cols["amt_neu"].append(1 + _dollar_band(neu_dollars) if neu_points else 0)
 
         cols["hasgrants"].append(1)
         cols["ngrants"].append(_ngrants_band(n_grants))
@@ -648,7 +1043,9 @@ def build_facets_pi(fac, points: list[dict], topics: list[dict]) -> dict:
         "levels": {
             "col": col_levels, "dept": dept_levels, "rank": rank_levels, "track": track_levels,
             "tenure": tenure_levels, "status": status_levels, "hasgrants": hasgrants_levels,
-            "ngrants": ngrants_levels, "amt": amt_levels, "tp": tp_levels,
+            "ngrants": ngrants_levels, "amt": amt_levels,
+            "amt_neu": ["No grants earned at NEU as PI"] + [label for (_lo, _hi, label) in DOLLAR_BANDS],
+            "tp": tp_levels,
         },
         "cols": cols,
         "grant_titles": grant_titles,
@@ -714,7 +1111,7 @@ def build_missingness_grants(points: list[dict], pi_attrs: dict[str, dict], reco
         extra={"recoverable": abs_recoverable} if recoverable else None)
 
     row("topic", "Topic label", sum(1 for p in points if p["dom"] not in (-1, ARTIFACT_TOPIC_ID)),
-        "No confident cluster was found for this grant, or it fell into a flagged low-quality group.")
+        "No curated keyword term matched this grant's text (or it has no usable text at all).")
 
     def has(gid: str, pred) -> bool:
         attrs = pi_attrs.get(gid)
@@ -910,6 +1307,13 @@ def build_funnel() -> dict:
 
     orphaned_n = len(pd.read_parquet(orphaned_path, columns=["id"]))
     g = pd.read_parquet(grants_path, columns=["abstract_source"])
+    # Deliberate choice: this trunk step narrates ONE specific pipeline (the
+    # internal upload system's own raw records -> matched rows -> matched
+    # grants), so "has_text" here means "the internal match succeeded" —
+    # NOT the corpus-wide has-text count (that's has_text_final below,
+    # which the M2 branch and the external NIH/NSF backfill both feed).
+    # Do not extend this to nih_reporter/nsf_api — they come from an
+    # entirely different upload, outside what this trunk is describing.
     has_text_n = int((g["abstract_source"] == "internal").sum())
 
     # Labels here are the ones rendered directly in the funnel chart, so they're
@@ -943,12 +1347,68 @@ def build_funnel() -> dict:
         ],
     }
 
+    # Corpus-wide "ends up carrying [MODELING-usable] text" — the "Net
+    # effect" sentence rendered in what_we_can_see/missing.js ties this
+    # number directly to "the topic model's corpus", so it must match what
+    # the model actually sees: every non-empty abstract_source EXCEPT the
+    # low-trust ones (nih_reporter_parent has real text, but is excluded
+    # from the fit — see src.clean_text.LOW_TRUST_ABSTRACT_SOURCES).
+    has_text_final = int(
+        ((g["abstract_source"] != "") & (~g["abstract_source"].isin(LOW_TRUST_ABSTRACT_SOURCES))).sum()
+    )
     totals = {
         "grants_total": len(g),
-        "has_text_final": int(g["abstract_source"].isin(["internal", "orphan_recovered"]).sum()),
+        "has_text_final": has_text_final,
         "corpus_for_bertopic": len(g) + extra_n,
     }
     return {"trunk": trunk, "branch": branch, "totals": totals, "provenance": "parquet"}
+
+
+def build_calibration() -> dict:
+    """A small block of computed (not hand-typed) facts about this session's
+    own calibration work — the BM25F constant sweep and the LLM adjudication
+    pass — for the About section's "what we found" summary. Deliberately
+    NOT hardcoded prose: every stale-number bug found during the
+    About-section review (the `unassigned`/`low_confidence`/`secondary_theme`
+    CAVEATS entries above) was exactly this failure mode — a real number,
+    hand-typed once, that drifted the moment the underlying data changed
+    again. Reading straight from the sweep's own output JSON and the
+    adjudication parquet means this can't drift the same way.
+
+    Degrades field-by-field (not as one missing key) if either input is
+    absent locally — `outputs/bm25f_sweep.json` and
+    `data/processed/llm_adjudication.parquet` are both local-only artifacts
+    from a rate-limited/paid process, not something every build regenerates.
+    """
+    import pandas as pd  # local import: keep this script runnable with json alone
+
+    out: dict = {
+        "sweep_n_runs": None, "sweep_n_beat_baseline": None, "sweep_recommendation": None,
+        "llm_n_reviewed": None, "llm_n_abstained": None, "llm_n_changed_leaf": None,
+    }
+
+    sweep_path = REPO_ROOT / "outputs" / "bm25f_sweep.json"
+    if sweep_path.exists():
+        sweep = json.loads(sweep_path.read_text())
+        out["sweep_n_runs"] = sweep.get("n_runs")
+        out["sweep_n_beat_baseline"] = len(sweep.get("beats_baseline", []))
+        out["sweep_recommendation"] = sweep.get("recommendation")
+
+    llm_path = PROC / "llm_adjudication.parquet"
+    kw_path = PROC / "topic_keyword_assignments.parquet"
+    if llm_path.exists() and kw_path.exists():
+        llm = pd.read_parquet(llm_path)
+        llm["doc_id"] = llm["doc_id"].astype(str)
+        kw = pd.read_parquet(kw_path)
+        kw = kw[~kw["is_extra"]].copy()
+        kw["doc_id"] = kw["doc_id"].astype(str)
+        merged = llm.merge(kw[["doc_id", "kw_leaf_id"]], on="doc_id", how="left")
+        answered = merged[~merged["llm_abstain"]]
+        out["llm_n_reviewed"] = int(len(llm))
+        out["llm_n_abstained"] = int(llm["llm_abstain"].sum())
+        out["llm_n_changed_leaf"] = int((answered["llm_leaf_id"] != answered["kw_leaf_id"]).sum())
+
+    return out
 
 
 def build_viz_meta(points: list[dict], topics: list[dict]) -> dict:
@@ -984,8 +1444,15 @@ def build_viz_meta(points: list[dict], topics: list[dict]) -> dict:
             "parent": _parent_index(t.get("parent")),
             "terms": t.get("terms", []),
             "share": t.get("share", 0.0),
+            # Always False now that ARTIFACT_TOPIC_ID is retired (None) — no
+            # leaf in the curated taxonomy is a definitional artifact the way
+            # BERTopic's topic 14 was; kept as a field (not dropped) so
+            # existing frontend code that branches on `t.artifact` (e.g.
+            # topic_flow.html's dashed-border small-multiple) degrades to
+            # "never dashed" instead of needing its own edit.
             "artifact": tid == ARTIFACT_TOPIC_ID,
             "noise": tid == -1,
+            "conf_mean": t.get("conf_mean", 0.0),
         })
 
     years_present = sorted({p["year"] for p in points if p["year"] is not None})
@@ -1000,13 +1467,18 @@ def build_viz_meta(points: list[dict], topics: list[dict]) -> dict:
 
     return {
         "frozen_inputs": {
-            "projection": "SPECTER2 + UMAP + HDBSCAN",
+            # Coordinates are still SPECTER2 + UMAP; the LABELS are now the
+            # curated keyword classifier (BM25F), not HDBSCAN — stating only
+            # one half would misrepresent the method (see
+            # docs/TOPIC_MODEL_REFIT_CHECKLIST.md's re-curate track).
+            "projection": "Curated keyword scoring (BM25F) · layout: SPECTER2 + UMAP",
             "n_points": len(points),
-            # len(...), not a literal 25 — about.html renders this verbatim
-            # ("N topics + an explicit Unassigned noise cluster"); a hardcoded
-            # count would silently disagree with the actual topic model after
-            # a refit. Excludes the id=-1 noise entry, same convention as
-            # everywhere else in this file that counts "real" topics.
+            # len(...), not a literal 25 — what_we_can_see/missing.js's
+            # renderAboutCaveats() renders this verbatim ("N topics + an
+            # explicit Unassigned noise cluster"); a hardcoded count would
+            # silently disagree with the actual topic model after a refit.
+            # Excludes the id=-1 noise entry, same convention as everywhere
+            # else in this file that counts "real" topics.
             "n_topics": len([t for t in topics if t["id"] >= 0]),
         },
         "agencies": agencies,
@@ -1033,6 +1505,8 @@ def build_viz_meta(points: list[dict], topics: list[dict]) -> dict:
         },
         "caveats": CAVEATS,
         "cliffs": CLIFFS,
+        "college_collab": build_college_collab(points),
+        "calibration": build_calibration(),
     }
 
 
@@ -1135,16 +1609,59 @@ def build_coverage(points: list[dict]) -> dict:
     provenance["source"] = src_path
 
     unassigned_n = sum(1 for p in points if p["dom"] == -1)
-    t11_n = sum(1 for p in points if p["dom"] == ARTIFACT_TOPIC_ID)
 
-    # abstract-presence x assignment crosstab — the reassuring finding this
-    # view should lead with: losing the abstract barely moves the unassigned
-    # rate (titles carry most of the signal for BERTopic's HDBSCAN step).
+    # by_reason: the classifier's own honest breakdown of WHY a point is
+    # Unassigned (src.classify_by_keywords), replacing the old noise_n/t11_n
+    # split (which was HDBSCAN-noise-vs-one-hardcoded-artifact-topic — a
+    # distinction that no longer exists under the keyword classifier).
+    # unassignedReason is only set on points the classifier itself marked
+    # dom==-1, so this always partitions unassigned_n exactly (asserted in
+    # validate() below, not just assumed here).
+    by_reason: dict[str, int] = {}
+    for p in points:
+        if p["dom"] == -1:
+            reason = p.get("unassignedReason") or "no_usable_text"
+            by_reason[reason] = by_reason.get(reason, 0) + 1
+
+    # abstract-presence x assignment crosstab — is losing the abstract still
+    # a barely-moves-the-needle effect under the keyword classifier the way
+    # titles-carry-most-of-the-signal was for BERTopic's HDBSCAN step? This is
+    # a MODELING question (did the fit actually see abstract text), so it
+    # must use modelTitleOnly, not titleOnly (data availability) — they
+    # differ for grants tagged with a LOW_TRUST_ABSTRACT_SOURCES value.
+    # .get() fallback: a frozen grants_umap.json from before this field
+    # existed has no modelTitleOnly key at all, so fall back to titleOnly
+    # (the only information available at that point, and correct for every
+    # point anyway before any low-trust backfill existed).
+    def _model_title_only(p: dict) -> bool:
+        return p.get("modelTitleOnly", p["titleOnly"])
+
     crosstab = {
-        "abs_assigned": sum(1 for p in points if not p["titleOnly"] and p["dom"] != -1),
-        "abs_unassigned": sum(1 for p in points if not p["titleOnly"] and p["dom"] == -1),
-        "title_assigned": sum(1 for p in points if p["titleOnly"] and p["dom"] != -1),
-        "title_unassigned": sum(1 for p in points if p["titleOnly"] and p["dom"] == -1),
+        "abs_assigned": sum(1 for p in points if not _model_title_only(p) and p["dom"] != -1),
+        "abs_unassigned": sum(1 for p in points if not _model_title_only(p) and p["dom"] == -1),
+        "title_assigned": sum(1 for p in points if _model_title_only(p) and p["dom"] != -1),
+        "title_unassigned": sum(1 for p in points if _model_title_only(p) and p["dom"] == -1),
+    }
+
+    # confidence_by_text: the title-only-normalization check the redo plan
+    # calls its single most important automatic test, made into a real,
+    # checkable number instead of an assertion — split classifier confidence
+    # by whether the model actually saw abstract text (modelTitleOnly, NOT
+    # titleOnly — see the crosstab comment above for why). If title-only
+    # docs' none/low rate is much worse than abstract-bearing docs', or their
+    # mean_margin is HIGHER (the title weight over-boosting), that's a real
+    # calibration problem, not a rendering detail.
+    def _confidence_block(subset: list[dict]) -> dict:
+        n = len(subset)
+        tiers = {"high": 0, "medium": 0, "low": 0, "none": 0}
+        for p in subset:
+            tiers[p.get("confTier", "none")] = tiers.get(p.get("confTier", "none"), 0) + 1
+        mean_margin = round(sum(p.get("conf", 0.0) for p in subset) / n, 4) if n else 0.0
+        return {"n": n, **tiers, "mean_margin": mean_margin}
+
+    confidence_by_text = {
+        "abs": _confidence_block([p for p in points if not _model_title_only(p)]),
+        "title": _confidence_block([p for p in points if _model_title_only(p)]),
     }
 
     return {
@@ -1163,13 +1680,14 @@ def build_coverage(points: list[dict]) -> dict:
         },
         "provenance": provenance,
         "unassigned": {
-            "n": unassigned_n + t11_n,
-            "noise_n": unassigned_n,
-            "t11_n": t11_n,
+            "n": unassigned_n,
+            "by_reason": by_reason,
+            "artifact_n": 0,  # ARTIFACT_TOPIC_ID is retired — see its own comment above
             # count share, NOT dollar share — see viz_meta.json's totals.unassigned_share_d
             # for the dollar-share sibling.
-            "share_n": round((unassigned_n + t11_n) / len(points), 4),
+            "share_n": round(unassigned_n / len(points), 4),
         },
+        "confidence_by_text": confidence_by_text,
         "crosstab": crosstab,
         "cliffs": CLIFFS,
     }
@@ -1187,6 +1705,20 @@ def validate(points: list[dict], topics: list[dict], viz_meta: dict, topic_time:
     # that actually catch a broken build regardless of corpus size.
     lines.append(f"n_points = {n}")
     lines.append(f"total dollars = {total_dollars:,.0f}")
+
+    # Informational: surface every abstract_source value in play, so a new or
+    # renamed tag (e.g. from a future backfill) shows up here instead of
+    # silently landing in an unlabeled bucket somewhere downstream. Reuses
+    # coverage["provenance"] (build_coverage() already computes this exact,
+    # value-agnostic histogram) rather than a second load_abstract_source()
+    # call + a third grants.parquet read.
+    src_counts = {k: v for k, v in coverage.get("provenance", {}).items() if k != "source"}
+    src_method = coverage.get("provenance", {}).get("source", "unknown")
+    if src_counts:
+        lines.append(
+            f"abstract_source counts ({src_method}): "
+            + ", ".join(f"{k}={v}" for k, v in sorted(src_counts.items(), key=lambda kv: -kv[1]))
+        )
 
     # Parent-theme shape drift — PARENT_NAMES/PARENT_COLORS (this file) and
     # their manually-synced copies in shared/enrico.js (and, for visual
@@ -1206,21 +1738,45 @@ def validate(points: list[dict], topics: list[dict], viz_meta: dict, topic_time:
     else:
         lines.append(f"parent count = {len(seen_parents)} (matches PARENT_NAMES/PARENT_COLORS) ✓")
 
-    # ARTIFACT_TOPIC_ID can't be derived automatically — parent: null alone
-    # doesn't distinguish a real artifact bucket from the noise topic or any
-    # other unparented one — but it CAN be checked for staleness: after a
-    # refit it should still point at some real, unparented topic (or be unset
-    # if this fit doesn't have an equivalent artifact bucket).
-    artifact_topic = next((t for t in topics if t["id"] == ARTIFACT_TOPIC_ID), None)
-    if artifact_topic is None or artifact_topic.get("parent") is not None:
+    # Leaf-topic palette headroom — shared/enrico.js's TOPIC_COLORS has 32
+    # entries (verified by counting there); a curated leaf count past that
+    # would silently start reusing colors (topicColor() wraps via modulo,
+    # never crashes) rather than erroring. Informational, not asserted — a
+    # re-curation genuinely can grow past 32, and the fix is extending that
+    # array, not failing the build.
+    n_leaves_here = len([t for t in topics if t["id"] >= 0])
+    if n_leaves_here > TOPIC_COLOR_CAPACITY:
         lines.append(
-            f"⚠ ARTIFACT_TOPIC_ID={ARTIFACT_TOPIC_ID} no longer names a real, unparented topic — "
-            f"re-check which topic (if any) is this refit's artifact bucket and update the "
-            f"constant (or set it to a sentinel with no matching id if there isn't one this time)."
+            f"⚠ {n_leaves_here} curated leaves exceeds shared/enrico.js's TOPIC_COLORS "
+            f"capacity ({TOPIC_COLOR_CAPACITY}) — extend that array or leaf colors will "
+            "start silently repeating."
         )
     else:
-        lines.append(f"ARTIFACT_TOPIC_ID={ARTIFACT_TOPIC_ID} still names "
-                      f"'{artifact_topic['name']}', unparented ✓")
+        lines.append(f"leaf count = {n_leaves_here} (within TOPIC_COLORS capacity "
+                      f"of {TOPIC_COLOR_CAPACITY}) ✓")
+
+    # ARTIFACT_TOPIC_ID is deliberately retired (None) under the curated
+    # keyword taxonomy — every leaf is a human curation decision, not an
+    # HDBSCAN byproduct, so there's no single "flagged artifact bucket" to
+    # re-derive after a re-curation the way there was after a BERTopic refit.
+    # Only warn if it's ever set back to a real id AND that id doesn't
+    # actually name an unparented topic (the old staleness check, now scoped
+    # to only fire when the concept is back in use at all).
+    if ARTIFACT_TOPIC_ID is None:
+        lines.append("ARTIFACT_TOPIC_ID retired (None) — curated keyword taxonomy has no "
+                      "single artifact bucket; placeholder-title grants are tracked "
+                      "per-point via unassignedReason instead ✓")
+    else:
+        artifact_topic = next((t for t in topics if t["id"] == ARTIFACT_TOPIC_ID), None)
+        if artifact_topic is None or artifact_topic.get("parent") is not None:
+            lines.append(
+                f"⚠ ARTIFACT_TOPIC_ID={ARTIFACT_TOPIC_ID} no longer names a real, unparented topic — "
+                f"re-check which topic (if any) is this refit's artifact bucket and update the "
+                f"constant (or set it back to None if there isn't one this time)."
+            )
+        else:
+            lines.append(f"ARTIFACT_TOPIC_ID={ARTIFACT_TOPIC_ID} still names "
+                          f"'{artifact_topic['name']}', unparented ✓")
 
     # topic_time reconciliation: dense-window totals + prelude must equal the corpus.
     dense_n = sum(topic_time["totals_by_year"]["n"])
@@ -1260,6 +1816,45 @@ def validate(points: list[dict], topics: list[dict], viz_meta: dict, topic_time:
                  f"${viz_meta['totals']['unassigned_dollars']:,.0f} "
                  f"({viz_meta['totals']['unassigned_share_d']:.1%})")
 
+    # by_reason must exactly partition unassigned.n — each Unassigned point
+    # contributes to exactly one reason bucket (see build_coverage()).
+    by_reason_sum = sum(coverage["unassigned"]["by_reason"].values())
+    assert by_reason_sum == coverage["unassigned"]["n"], \
+        f"unassigned.by_reason sums to {by_reason_sum}, expected {coverage['unassigned']['n']}"
+    lines.append(f"unassigned.by_reason = {coverage['unassigned']['by_reason']} "
+                 f"(sums to {by_reason_sum}) ✓")
+
+    # parent_id == parent_of(leaf_id) for every leaf — holds BY CONSTRUCTION
+    # under the curated keyword taxonomy (kw_curation.py's own gate already
+    # enforces bidirectional leaf<->parent consistency before promotion), so
+    # this should never actually fire; kept as a cheap regression net against
+    # the topic_keywords.json -> topic_labels.json schema conversion
+    # (src.classify_by_keywords.curated_to_topic_labels) silently dropping or
+    # scrambling a parent link. Skipped gracefully if the curated source file
+    # isn't present or its leaf ids don't match this build's topics (e.g. a
+    # bootstrap taxonomy) rather than crashing on an unrelated mismatch.
+    curated_path = REPO_ROOT / "outputs" / "topic_keywords.json"
+    if curated_path.exists():
+        curated = json.loads(curated_path.read_text())
+        curated_leaves = curated.get("leaves", {})
+        topic_ids_here = {t["id"] for t in topics if t["id"] >= 0}
+        if {int(lid) for lid in curated_leaves} == topic_ids_here:
+            mismatches = [
+                t["id"] for t in topics if t["id"] >= 0
+                and t.get("parent") != curated_leaves[str(t["id"])].get("parent")
+            ]
+            assert not mismatches, (
+                f"leaf(s) {mismatches} disagree between topics.json's parent field and "
+                "outputs/topic_keywords.json's own leaf->parent mapping — the schema "
+                "conversion (curated_to_topic_labels) has drifted from its source."
+            )
+            lines.append(f"parent_id == parent_of(leaf_id) for all {len(topic_ids_here)} "
+                          "leaves (topics.json vs. outputs/topic_keywords.json) ✓")
+        else:
+            lines.append("skipped parent_id == parent_of(leaf_id) cross-check — "
+                          "topics.json's leaf ids don't match outputs/topic_keywords.json "
+                          "(bootstrap taxonomy in use?)")
+
     lines.append(f"abstract_source provenance path = {coverage['provenance']['source']}")
 
     ct = coverage["crosstab"]
@@ -1273,7 +1868,11 @@ def validate(points: list[dict], topics: list[dict], viz_meta: dict, topic_time:
         assert len(values) == n, f"facets column '{col_name}' length != {n}"
     assert len(facets["titles"]) == n, f"facets titles length != {n}"
     assert len(facets["abstracts"]) == n, f"facets abstracts length != {n}"
-    lines.append(f"facets: {len(facets['cols'])} columns, all length {n} ✓ (+ titles, abstracts)")
+    for arr_name in ("secondaryLeafLabel", "secondaryParentLabel", "secondaryMargin", "hasSecondaryTheme"):
+        assert len(facets[arr_name]) == n, f"facets {arr_name} length != {n}"
+    n_secondary = sum(facets["hasSecondaryTheme"])
+    lines.append(f"facets: {len(facets['cols'])} columns, all length {n} ✓ (+ titles, abstracts, "
+                 f"secondary-theme fields — {n_secondary} grants flagged)")
     lines.append(f"facets: pi_attrs provenance path = {facets['provenance']['pi_attrs']}")
 
     # Abstract text — when grants.parquet was available (provenance ==
@@ -1416,7 +2015,13 @@ def main() -> None:
     ]:
         p = OUT_DIR / f"{name}.json"
         _guard_output_path(p)
-        p.write_text(json.dumps(obj, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+        # allow_nan=False: fail loudly (ValueError) rather than silently
+        # write the spec-invalid `NaN` token — these are the files real
+        # browsers fetch(), and JSON.parse rejects a bare NaN outright (a
+        # sibling bug was found and fixed in src/build_viz_data.py's
+        # grants_umap.json this session — this is the same guard applied
+        # to the files that actually matter for the published site).
+        p.write_text(json.dumps(obj, ensure_ascii=False, separators=(",", ":"), allow_nan=False), encoding="utf-8")
         print(f"wrote {p.relative_to(REPO_ROOT)}  ({p.stat().st_size / 1024:.0f} KB)")
 
 

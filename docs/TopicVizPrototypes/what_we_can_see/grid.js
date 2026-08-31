@@ -18,7 +18,7 @@ import {
   computeBins, sortedOrder, matrixLayout, computeMarkPositions, reduceMotion,
   CELL_PAD, LABEL_LANE, STAGE_MARGIN, RING_PAD, LABEL_LINE_H,
 } from "./layout.js";
-import { populateSelect, populateOptions, defaultSortMode, SORT_OPTIONS } from "./facets.js";
+import { populateSelect, populateOptions, defaultSortMode, SORT_OPTIONS, fitWidthToText } from "./facets.js";
 import { NOISE } from "./constants.js";
 
 const E = window.ENRICO;
@@ -47,10 +47,19 @@ export function setupDial(dial, dock, onOpen) {
       dial.focus();
     }
   });
+  // PI feedback: "clicking anywhere outside the option dial should close
+  // it." A click ON the dial itself is already handled above (toggles); a
+  // click anywhere inside the open dock (e.g. a <select>) must NOT close
+  // it, so this only fires for a target outside both.
+  document.addEventListener("click", e => {
+    if (dock.classList.contains("collapsed")) return;
+    if (dial.contains(e.target) || dock.contains(e.target)) return;
+    setOpen(false);
+  });
 }
 
 export function createGrid(opts) {
-  const {data, facetDefs, arrangeFacets, defaultArrangeKey, noun, ids, buildTooltip, buildDetail} = opts;
+  const {data, facetDefs, arrangeFacets, defaultArrangeKey, noun, ids, buildTooltip, buildDetail, searchFields} = opts;
 
   // Columns carries the default facet; Rows starts on "— none —" — a single
   // undifferentiated band reads better as a first view than a 90-row lane of
@@ -62,6 +71,19 @@ export function createGrid(opts) {
   // purpose: a selection survives every reconfiguration, so its mark stays
   // highlighted and its details stay visible no matter how the view changes.
   let selected = null;
+
+  // Search (grants grid only — searchFields is undefined for the PI grid,
+  // see main.js). A HIGHLIGHT, not a filter: matching marks stay full
+  // opacity, non-matching marks dim, so the grid's own "every X is present"
+  // invariant holds even while searching — nothing is removed from the view.
+  let searchQuery = "";
+  const searchInputEl = ids.searchInput && document.getElementById(ids.searchInput);
+  const searchCountEl = ids.searchCount && document.getElementById(ids.searchCount);
+  function matchesSearch(i) {
+    if (!searchQuery) return true;
+    if (!searchFields) return true;
+    return searchFields(data, i).some(f => String(f || "").toLowerCase().includes(searchQuery));
+  }
 
   const tip = E.setupTooltip(document.getElementById(ids.tip), document.getElementById(ids.chartwrap));
 
@@ -158,6 +180,15 @@ export function createGrid(opts) {
   function render() {
     renderColorLegend();
 
+    if (searchCountEl) {
+      if (!searchQuery) {
+        searchCountEl.textContent = "";
+      } else {
+        const n = d3.range(data.n).filter(matchesSearch).length;
+        searchCountEl.textContent = `${n.toLocaleString()} of ${data.n.toLocaleString()} match`;
+      }
+    }
+
     const wrap = document.getElementById(ids.chartwrap);
     const W = wrap.clientWidth;
     // The controls dock floats OVER the chart now (see its CSS) instead of
@@ -220,8 +251,26 @@ export function createGrid(opts) {
           .join("");
       }
       const dollars = members.reduce((s, i) => s + data.cols.amt_raw[i], 0);
+      // PI feedback: "add dollar band to the column/row overview for
+      // quicker reference" / "what is the label that states the dollar
+      // total" — the total now has an explicit "Total:" label, and (unless
+      // Color by is already "amt", which would just repeat the rows above)
+      // a dollar-band BREAKDOWN of the group's own members, the same shape
+      // as the color breakdown, so a row/column's dollar composition is
+      // readable at a glance without switching Color by.
+      let amtRows = "";
+      if (colorKey !== "amt" && facetDefs.amt && data.levels.amt) {
+        const amtCol = facetDefs.amt.values();
+        const amtLevels = facetDefs.amt.levels();
+        const counts = new Map();
+        members.forEach(i => { const k = amtCol[i]; counts.set(k, (counts.get(k) || 0) + 1); });
+        amtRows = amtLevels
+          .filter(lv => counts.has(lv.key))
+          .map(lv => `<div class="meta">${E.esc(lv.label)}: ${counts.get(lv.key)} (${E.fmtPct(counts.get(lv.key) / members.length)})</div>`)
+          .join("");
+      }
       return `<div class="t">${E.esc(label)}</div>` +
-        `<div class="meta">${members.length.toLocaleString()} ${noun} · ${E.fmtAmt(dollars)}</div>${rows}`;
+        `<div class="meta">${members.length.toLocaleString()} ${noun} · Total: ${E.fmtAmt(dollars)}</div>${rows}${amtRows}`;
     }
 
     // A fixed container size + a viewBox that grows to fit content makes
@@ -300,7 +349,7 @@ export function createGrid(opts) {
     // markLayer, so paint order no longer depends on join/enter timing.
     const layer = cls => plot.selectAll("g." + cls).data([null]).join("g").attr("class", cls);
     const hdrLayer = layer("l-hdr");
-    const emptyLayer = layer("l-empty");
+    const gridLayer = layer("l-grid");
     const cellLayer = layer("l-cell");
     const markLayer = layer("l-mark");
     const ringLayer = layer("l-ring");
@@ -326,12 +375,17 @@ export function createGrid(opts) {
       })
       .on("mouseleave", () => tip.hide());
 
-    // Empty-cell placeholder — no level is ever hidden, so an all-zero row
-    // still draws a full row of these rather than vanishing.
-    const emptyCells = layout.cells.filter(c => c.members.length === 0);
-    emptyLayer.selectAll("rect.cellempty").data(emptyCells, c => c.ai + "|" + c.si).join("rect")
-      .attr("class", "cellempty")
-      .attr("x", c => c.x).attr("y", c => c.y + c.h / 2 - 1).attr("width", c => c.w).attr("height", 2);
+    // Faint cell-boundary gridline, for EVERY cell (empty or not) — PI
+    // feedback asked for two things together: "add a very faint grid line
+    // for every grant/PI tab" and "remove the default grey line that goes
+    // in empty cells" (the old fixed 2px horizontal bar this replaced). One
+    // change satisfies both: a stroked, unfilled rect around every cell's
+    // own boundary means an empty bin still reads as "this bin exists, it's
+    // just empty" (the old bar's whole purpose) without a separate
+    // special-cased marker — see .cellgrid in style.css for the faint color.
+    gridLayer.selectAll("rect.cellgrid").data(layout.cells, c => c.ai + "|" + c.si).join("rect")
+      .attr("class", "cellgrid")
+      .attr("x", c => c.x).attr("y", c => c.y).attr("width", c => c.w).attr("height", c => c.h);
 
     // Cell groups: a hit-rect (this cell's own color-level breakdown on
     // hover) — marks stay on top for their own hover target (see the
@@ -367,6 +421,11 @@ export function createGrid(opts) {
     const t = d3.transition().duration(reduceMotion() ? 0 : 420).ease(d3.easeCubicInOut);
     const idxArr = d3.range(data.n);
 
+    // Search dimming: 1 for a match (or no search active), a faint 0.12 for
+    // a non-match — dim, not removed, so the mark stays in its normal grid
+    // position and "every grant is present" still holds while searching.
+    const markOpacity = i => (searchQuery && !matchesSearch(i)) ? 0.12 : 1;
+
     const markSel = markLayer.selectAll("rect.markrect")
       .data(idxArr, i => data.ids[i])
       .join(
@@ -376,11 +435,12 @@ export function createGrid(opts) {
           .attr("x", i => positions[i].x).attr("y", i => positions[i].y)
           .attr("fill", i => colorDef ? (colorMap.get(colorVals[i]) || NOISE) : FLAT_COLOR)
           .attr("opacity", 0)
-          .call(e => e.transition(t).attr("opacity", 1)),
+          .call(e => e.transition(t).attr("opacity", markOpacity)),
         update => update.call(u => u.transition(t)
           .attr("width", layout.mark).attr("height", layout.mark)
           .attr("x", i => positions[i].x).attr("y", i => positions[i].y)
-          .attr("fill", i => colorDef ? (colorMap.get(colorVals[i]) || NOISE) : FLAT_COLOR)),
+          .attr("fill", i => colorDef ? (colorMap.get(colorVals[i]) || NOISE) : FLAT_COLOR)
+          .attr("opacity", markOpacity)),
         exit => exit.remove()
       )
       .on("mousemove", (ev, i) => tip.show(buildTooltip(i), ev.clientX, ev.clientY))
@@ -445,6 +505,19 @@ export function createGrid(opts) {
   document.getElementById(ids.sortSelect).addEventListener("change", e => { sortMode = e.target.value; render(); });
   document.getElementById(ids.colorSelect).addEventListener("change", e => { colorKey = e.target.value; render(); });
 
+  if (searchInputEl) {
+    // Sized to fit its OWN text (placeholder when empty, typed value once
+    // something's typed) — see fitWidthToText's own comment for why this is
+    // JS-measured rather than CSS-only. Runs once up front (for the
+    // placeholder) and again on every keystroke.
+    fitWidthToText(searchInputEl, searchInputEl.value || searchInputEl.placeholder);
+    searchInputEl.addEventListener("input", e => {
+      searchQuery = e.target.value.trim().toLowerCase();
+      fitWidthToText(searchInputEl, e.target.value || searchInputEl.placeholder);
+      render();
+    });
+  }
+
   setupDial(document.getElementById(ids.dial), document.getElementById(ids.dock));
   // Same toggle pattern as the controls dial, reused for the legend — the
   // legend panel starts WITHOUT a .collapsed class in the markup (defaults
@@ -457,6 +530,22 @@ export function createGrid(opts) {
     if (e.key === "Escape" && selected != null && document.activeElement.tagName !== "INPUT") clearSelection();
   });
 
+  // "Need a suggestion?" presets (PI feedback: entry-point questions that
+  // configure Rows/Columns/Color/Sort for you) — a preset only ever names
+  // facet KEYS already in facetDefs, so an invalid key here is a bug in the
+  // preset table, not user input; left unguarded deliberately; any of
+  // arrange/split/color/sort may be omitted to leave that axis unchanged.
+  function applyPreset({arrange, split, color, sort}) {
+    if (arrange !== undefined) arrangeKey = arrange;
+    if (split !== undefined) splitKey = split;
+    if (color !== undefined) colorKey = color;
+    syncAxisSelects();
+    document.getElementById(ids.colorSelect).value = colorKey;
+    sortMode = sort !== undefined ? sort : defaultSortMode(facetDefs, primarySortKey());
+    populateSortSelectLocal();
+    render();
+  }
+
   renderSelectedCard();
-  return {render};
+  return {render, applyPreset};
 }

@@ -228,6 +228,38 @@ outputs/*
 # prevented that). See docs/TOPIC_MODEL_REFIT_CHECKLIST.md.
 !outputs/topic_labels.json
 
+# Exception: the keyword-mediated topic redesign's Phase 4a curation trail
+# (the topic-model-redo plan; see CLAUDE.md's "Topic modeling — state of
+# play"). topic_keywords.json is the curated single source of truth for the
+# Plan B keyword classifier, same treatment as topic_labels.json above.
+# keyword_topics.draft.json (the pre-curation editing surface) and
+# KEYWORD_REVIEW.md (the human-readable review sheet, src/kw_review_sheet.py)
+# are kept alongside it as the human-facing curation record.
+# keyword_topics.suggested.json (src/kw_suggest_curation.py) is an assistant
+# first-pass review — proposed labels + accept/reject/review calls per
+# parent/leaf — kept separate from topic_keywords.json so it's clear which
+# file is the human-authored final curation vs. a suggestion to review. The
+# larger upstream discovery/comparison artifacts (kw_candidates.json,
+# kw_vocab_candidates.json, kw_term_groups_planA.json, kw_term_groups_planB.json,
+# kw_stability_planA.json, kw_leaf_assignments_planA.csv) are deliberately
+# NOT included here — regenerable via src/kw_discover.py, src/kw_vocab_discover.py,
+# src/kw_term_groups.py, src/kw_term_cluster.py, src/kw_stability.py, and not
+# worth the repo weight (this project has previously had one large committed
+# file account for 25% of .git's pack size — see CLAUDE.md's structure-refactor
+# note on docs/TopicVizPrototypes/what_we_can_see.html).
+!outputs/topic_keywords.json
+!outputs/keyword_topics.draft.json
+!outputs/keyword_topics.suggested.json
+!outputs/KEYWORD_REVIEW.md
+# Frozen pre-redo snapshot of outputs/topic_labels.json (the ORIGINAL 8-parent/
+# 32-topic BERTopic seed, from commit ab6782d) — outputs/topic_labels.json
+# itself was repurposed by the 2026-08-29 redo (src.classify_by_keywords
+# --write-topic-labels now writes the keyword taxonomy's conversion there
+# instead), so anything needing the true old BERTopic parent scheme (e.g.
+# src/validate_keyword_classifier.py's parent-level agreement crosswalk) needs
+# its own untouched copy rather than reading the live, now-repurposed file.
+!outputs/bertopic_topic_labels_frozen.json
+
 # CI-only publish copies of docs/TopicVizPrototypes/ siblings, created by
 # .github/workflows/deploy-notebooks.yml so the prototype pages can fetch()
 # their data on GitHub Pages. The real sources are tracked under
@@ -246,6 +278,28 @@ data/processed/
 *.parquet
 *.feather
 *.pkl
+
+# Exception: data/nih_nsf_backfill/ pools the NIH RePORTER + NSF Award
+# Search backfill outputs (src/backfill_nih_reporter.py,
+# src/backfill_nsf_awards.py) — TRACKED deliberately, unlike every other
+# *.parquet in the repo. These come from rate-limited external APIs (NIH:
+# <=1 req/s; NSF: sequential per-award lookups) and take real wall-clock
+# time to regenerate; the raw *_raw.parquet caches in particular are what
+# let a parsing bug (e.g. the coPDPI format fix) be reprocessed for free via
+# `--offline` instead of re-fetching. Per the *.parquet rule above, a bare
+# directory ignore can't be re-included — hence the *.parquet-scoped
+# negation, matching the outputs/topic_labels.json exception's pattern.
+!data/nih_nsf_backfill/
+!data/nih_nsf_backfill/*.parquet
+
+# src/adjudicate_low_confidence.py's raw LLM response cache (Phase 4c,
+# optional/off by default) — UNLIKE data/nih_nsf_backfill/ above, deliberately
+# NOT tracked: LLM output is cheap to regenerate on demand, and treating it as
+# frozen ground truth would work against the reproducibility the keyword-
+# classifier redo is built around. Only the derived
+# data/processed/llm_adjudication.parquet (already covered by the
+# data/processed/ rule above) + a summary are meant to be shared.
+data/llm_adjudication/
 
 # OS / editor
 .DS_Store

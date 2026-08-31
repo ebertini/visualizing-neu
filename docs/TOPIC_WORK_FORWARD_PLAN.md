@@ -390,7 +390,11 @@ Ordered by expected impact per hour (matching
 
 #### M5d — Faculty-embedding UMAP *(natural extension for the PI)*
 
-- New notebook `notebooks/08_faculty_embedding.ipynb`:
+**Numbering note (2026-08-20):** `08` was taken by `notebooks/08_abstract_recovery_and_refit.ipynb`
+(the NIH RePORTER / NSF Award Search backfill + refit report notebook, unrelated to M5d). If M5d
+is ever picked up, its notebook becomes `09`, not `08`.
+
+- New notebook `notebooks/09_faculty_embedding.ipynb`:
   - group SPECTER2 vectors by `faculty_id` (mean-pooled, weighted by
     dollars where available; extra pseudo-docs from M2 contribute
     unweighted since they have no dollar figure);

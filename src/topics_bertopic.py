@@ -49,12 +49,20 @@ from hdbscan import HDBSCAN
 from umap import UMAP
 
 try:
-    from src.clean_text import DOMAIN_STOPS, clean_abstract, clean_title
+    from src.clean_text import DOMAIN_STOPS
 except ImportError:  # run from within src/
-    from clean_text import DOMAIN_STOPS, clean_abstract, clean_title
+    from clean_text import DOMAIN_STOPS
 
 SEED = 42
-MIN_CLUSTER_SIZE = 25
+# Re-swept 2026-08-20 after the NIH RePORTER / NSF Award Search backfill grew
+# the real-abstract fraction of the corpus (data/nih_nsf_backfill/) — the old
+# default of 25 is no longer stable at this corpus composition: across 3
+# seeds it produced anywhere from 4 topics (one 2,503-doc mega-cluster, 91%
+# of the corpus, 0% noise) to 27 reasonable topics, i.e. a coin-flip on
+# whether the fit degenerates. 20 is the tightest value that stayed stable
+# across all 3 seeds (32±0.5 topics, ~24.5% noise) per `python -m
+# src.tune_bertopic` — see outputs/bertopic_sweep.json for the full sweep.
+MIN_CLUSTER_SIZE = 20
 UMAP_N_COMPONENTS = 5      # 5-D UMAP feeds HDBSCAN (2-D is only for the viz)
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -147,43 +155,18 @@ def fit(docs, embeddings, seed: int = SEED, min_cluster_size: int = MIN_CLUSTER_
 
 
 def _load_docs_aligned_to_cache() -> tuple[list[str], list[str], np.ndarray]:
-    """Load cached embeddings + build cleaned docs in the SAME order as the cache."""
-    vec_path, ids_path = PROC / "specter2_embeddings.npy", PROC / "specter2_ids.txt"
-    if not vec_path.exists() or not ids_path.exists():
-        raise FileNotFoundError(
-            f"Missing SPECTER2 cache ({vec_path.name} / {ids_path.name}). "
-            "Run `python -m src.build_specter2_embeddings` locally first."
-        )
-    embeddings = np.load(vec_path)
-    ids = ids_path.read_text().splitlines()
+    """Load cached embeddings + build cleaned docs in the SAME order as the cache.
 
-    gr = pd.read_parquet(PROC / "grants.parquet")
-    gr["grant_id"] = gr["grant_id"].astype(str)
-    title_col = "title_from_abstract" if "title_from_abstract" in gr.columns else "grantname"
-    gr["_title"] = gr[title_col].where(gr[title_col].astype(str).str.len() > 0, gr["grantname"])
-    gr["abstract"] = gr["abstract"].fillna("").astype(str)
-    by_id = {gid: (t, a) for gid, t, a in zip(gr["grant_id"], gr["_title"], gr["abstract"])}
-
-    # M2 orphan pseudo-docs ('orphan-<id>') live in extra_neu_abstracts, not grants.
-    extra_path = PROC / "extra_neu_abstracts.parquet"
-    if extra_path.exists():
-        ex = pd.read_parquet(extra_path)
-        for did, t, a in zip(ex["doc_id"], ex["title"], ex["abstract"]):
-            by_id[str(did)] = (str(t or ""), str(a or ""))
-
-    docs, missing = [], 0
-    for did in ids:
-        if did in by_id:
-            t, a = by_id[did]
-            docs.append(f"{clean_title(t)}. {clean_abstract(a)}".strip())
-        else:
-            docs.append("")  # keep alignment; should not happen if cache is fresh
-            missing += 1
-    if missing:
-        print(f"WARNING: {missing} cache ids not found in grants/extras (cache stale?)")
-    if len(docs) != len(embeddings):
-        raise ValueError(f"docs ({len(docs)}) and embeddings ({len(embeddings)}) misaligned")
-    return docs, ids, embeddings
+    Delegates to src.model_docs (light deps — pandas/numpy/pyarrow only) so
+    that module and this one can't drift on cleaning/masking, and so callers
+    who only need doc text (e.g. src/kw_vocab_discover.py, Plan B's Phase 1+2)
+    can import it without pulling in bertopic/umap/hdbscan/torch.
+    """
+    try:
+        from src.model_docs import load_docs_and_embeddings
+    except ImportError:
+        from model_docs import load_docs_and_embeddings
+    return load_docs_and_embeddings()
 
 
 def _save_umap_2d(embeddings: np.ndarray, seed: int = SEED) -> None:

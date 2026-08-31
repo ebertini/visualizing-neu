@@ -46,6 +46,11 @@ from pathlib import Path
 import pandas as pd
 from rapidfuzz import fuzz
 
+try:
+    from src.clean_text import usable_abstract
+except ImportError:  # run from within src/
+    from clean_text import usable_abstract
+
 # ── Thresholds (plan §5.1; tune after spot-checking grant_orphan_recovery) ──
 MIN_ABSTRACT_CHARS = 200
 TITLE_MIN = 85          # token_set_ratio
@@ -127,10 +132,21 @@ def reconcile(proc: Path) -> dict:
     # (matches an abstract-less grant) from a `duplicate` (matches a grant that
     # ALREADY has an abstract — a re-upload under a new SourceActivityId, which
     # must be dropped not re-added, or we double-count. See ID_RECONCILIATION §5.1).
-    pool_cols = grants[["grant_id", "grantname", "startdate", "totaldollars", "abstract"]].copy()
-    pool_cols["has_abstract"] = pool_cols["abstract"] != ""
+    #
+    # `has_abstract` uses MODELING-usable text (usable_abstract), not raw text
+    # presence: a grant tagged nih_reporter_parent (borrowed, lower-trust
+    # parent-center text — src.clean_text.LOW_TRUST_ABSTRACT_SOURCES) must
+    # still count as text-less here, so a genuinely usable orphan abstract can
+    # win the `update` slot instead of being discarded as a `duplicate` in
+    # favor of text the topic model won't even use.
+    pool_cols = grants[["grant_id", "grantname", "startdate", "totaldollars",
+                        "abstract", "abstract_source"]].copy()
+    pool_cols["has_abstract"] = [
+        usable_abstract(a, s) != ""
+        for a, s in zip(pool_cols["abstract"], pool_cols["abstract_source"])
+    ]
     fac_to_grants = (
-        fg.merge(pool_cols.drop(columns=["abstract"]), on="grant_id", how="inner")
+        fg.merge(pool_cols.drop(columns=["abstract", "abstract_source"]), on="grant_id", how="inner")
           .groupby("faculty_id")
     )
     pool_by_fac = {fid: g for fid, g in fac_to_grants}
@@ -222,6 +238,23 @@ def write_report(res: dict, proc: Path, out: Path) -> str:
     n_extra = c.get("extra", 0)
     n_dup = c.get("duplicate", 0)
     n_unattr = c.get("unattributed", 0)
+
+    # Some `duplicate`s are duplicates ONLY because build_dataset.py's NIH
+    # RePORTER / NSF Award Search backfill (src/backfill_nih_reporter.py,
+    # src/backfill_nsf_awards.py) already filled the grant with agency-
+    # sourced text before this script ran — expected, not a regression:
+    # agency text is preferred over an 85%-fuzzy-matched orphan. Computed
+    # dynamically (not a hardcoded count) so this stays correct on every run.
+    # NOT nih_reporter_parent — `has_abstract` upstream uses usable_abstract(),
+    # so a nih_reporter_parent grant (real text, but excluded from the
+    # topic-model fit) is still treated as text-less here, letting a real
+    # orphan abstract win the `update` slot and REPLACE the borrowed parent
+    # text instead of being dropped as a `duplicate` behind it.
+    BACKFILL_SOURCES = {"nih_reporter", "nsf_api"}
+    dup_ids = res["audit"].loc[res["audit"]["bucket"] == "duplicate", "matched_grant_id"]
+    src_by_grant = g.set_index("grant_id")["abstract_source"]
+    n_dup_from_backfill = int(dup_ids.map(src_by_grant).isin(BACKFILL_SOURCES).sum())
+
     lines = [
         "# Orphan Recovery Report (M2)",
         "",
@@ -230,7 +263,10 @@ def write_report(res: dict, proc: Path, out: Path) -> str:
         "## Outcome buckets",
         f"- **update** (backfilled onto an abstract-less NEU grant): **{n_update}**",
         f"- **extra** (resolved faculty, no grant match -> pseudo-doc): **{n_extra}**",
-        f"- **duplicate** (re-upload of a grant that already has an abstract -> dropped): **{n_dup}**",
+        f"- **duplicate** (re-upload of a grant that already has an abstract -> dropped): **{n_dup}**"
+        + (f" — of which {n_dup_from_backfill} because the NIH RePORTER / NSF Award Search "
+           f"backfill already filled that grant first (expected, not a regression: agency "
+           f"text > an 85%-fuzzy-matched orphan)" if n_dup_from_backfill else ""),
         f"- **unattributed** (personid not strict-resolved, dropped): **{n_unattr}**",
         "",
         "## grants.parquet abstract coverage",
