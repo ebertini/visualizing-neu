@@ -58,18 +58,18 @@ main{display:block}
    still what actually hides them (see the global [hidden] rule above). */
 .tabbar{
   display:flex;align-items:center;flex-wrap:wrap;gap:4px 16px;
-  padding:0 24px 8px;border-bottom:1px solid var(--hair);
+  padding:0 24px;border-bottom:1px solid var(--hair);
   /* Floor, not a hard height: this row keeps flex-wrap:wrap above for
      narrow viewports, and a hard height wouldn't clip a wrapped 2nd line
      (overflow is visible by default) — it would let that line overlap the
-     chart below instead, which is worse than the row simply growing. 60px
-     = the .dial buttons' own 52px height + this rule's own 8px bottom
-     padding, since everything on this page is border-box (enrico.css's
-     `*{box-sizing:border-box}`) — a bare 52px here would reserve only 44px
-     of content and be completely inert. The color legend's vertical mode
-     (below) can never grow this past 60px either, since it's
+     chart below instead, which is worse than the row simply growing. 52px
+     = exactly the .dial/.legendtoggle buttons' own height (PI feedback:
+     the row should be no taller than its own controls) — no extra vertical
+     padding on top of that; previously had an 8px bottom padding making the
+     row 60px, 8px more than the buttons themselves. The color legend's
+     vertical mode (below) can never grow this past 52px either, since it's
      position:absolute — out of flow, same principle as .dock. */
-  min-height:60px;
+  min-height:52px;
   /* No position/sticky/z-index/background of its own — this row and
      <header> above it share ONE sticky container (.stickytop) instead, so
      they can never develop a seam between them (see .stickytop's own
@@ -290,9 +290,21 @@ main{display:block}
    to the width axis). */
 #facetscroll, #piscroll{position:absolute;top:0;bottom:0;right:0;overflow-x:auto;overflow-y:hidden}
 #facetchart, #pichart{display:block}
+/* appearance:none strips the native OS dropdown arrow/chrome (PI feedback:
+   every <select> on this page — Rows/Columns/Color by/Sort in the dock,
+   and "Need a suggestion?" — read as "generic," inconsistent with the rest
+   of the page's own deliberately custom look) and the background-image
+   below replaces it with a small hand-drawn chevron matching the dial/
+   legend-toggle icons' own stroke style (stroke-linecap/linejoin:round,
+   currentColor elsewhere — hardcoded to --ink's #16181d here since a CSS
+   custom property can't be interpolated into a data-URI). padding-right
+   leaves room for it so the arrow never overlaps long option text. */
 .facetselect{
   width:100%;font-family:var(--mono);font-size:11.5px;color:var(--ink);
-  border:1px solid var(--hair);border-radius:0;padding:6px 8px;background:#fff;cursor:pointer;
+  border:1px solid var(--hair);border-radius:0;padding:6px 26px 6px 8px;background:#fff;cursor:pointer;
+  appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2316181d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 8px center;background-size:11px;
 }
 .facetselect:focus-visible{outline:2px solid var(--c-nsf);outline-offset:1px}
 /* Search box + "Need a suggestion?" — the second slot of the shared
@@ -446,7 +458,7 @@ main{display:block}
      VERTICAL (.vertical) — a one-chip-per-line panel floating below the
        row, out of flow, showing the FULL list with no internal scrollbar,
        however tall that is.
-   In BOTH modes .tabbar's own height (min-height:60px, above) is
+   In BOTH modes .tabbar's own height (min-height:52px, above) is
    untouched: inline is forced to one line (flex-wrap:nowrap + overflow
    hidden below), vertical is position:absolute — the same principle that
    already keeps .dock from growing anything. Overrides .misslegend's own

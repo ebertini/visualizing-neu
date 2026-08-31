@@ -47,15 +47,14 @@ export function setupDial(dial, dock, onOpen) {
       dial.focus();
     }
   });
-  // PI feedback: "clicking anywhere outside the option dial should close
-  // it." A click ON the dial itself is already handled above (toggles); a
-  // click anywhere inside the open dock (e.g. a <select>) must NOT close
-  // it, so this only fires for a target outside both.
-  document.addEventListener("click", e => {
-    if (dock.classList.contains("collapsed")) return;
-    if (dial.contains(e.target) || dock.contains(e.target)) return;
-    setOpen(false);
-  });
+  // Deliberately NO click-outside-closes-it handler here (removed — PI
+  // feedback: the controls dock and the color legend should only close via
+  // their own toggle button or Esc, not by clicking anywhere else on the
+  // page). This is a DIFFERENT overlay than the "Selected grant"/"Selected
+  // PI" detail panel, which DOES still close on an outside click (see
+  // createGrid's own document click listener, below) — that one was a
+  // separate, later, explicit request; this one borrowed the same pattern
+  // early on and was later asked to stop.
 }
 
 export function createGrid(opts) {
@@ -386,7 +385,11 @@ export function createGrid(opts) {
         // unconditional, unlike the label lines' own dy above, which only
         // applies from the second line onward. matrixLayout's bandH already
         // reserves +1 line of height for this.
-        return `${lines}<tspan class="n" x="0" dy="${LABEL_LINE_H}"> · ${d.total.toLocaleString()}</tspan>`;
+        // No leading space before "·" (unlike when this trailed the last
+        // label line inline, where the space separated it from that line's
+        // own text) — PI feedback: on its own line, that leading space just
+        // indented the "·" away from the true left margin (x=0).
+        return `${lines}<tspan class="n" x="0" dy="${LABEL_LINE_H}">· ${d.total.toLocaleString()}</tspan>`;
       })
       .on("mousemove", (ev, d) => {
         const label = aLevels[d.ai].full || aLevels[d.ai].label;
@@ -480,8 +483,24 @@ export function createGrid(opts) {
         const [lx, ly] = d3.pointer(ev, ev.currentTarget);
         const lc = Math.min(c.cellCols - 1, Math.max(0, Math.floor((lx - CELL_PAD) / (layout.mark + layout.gap))));
         const lr = Math.max(0, Math.floor((ly - CELL_PAD) / (layout.mark + layout.gap)));
-        const idx = Math.min(c.members.length - 1, lr * c.cellCols + lc);
-        select(c.members[idx]);
+        const idx = lr * c.cellCols + lc;
+        // PI feedback: a cell's own packed grid can have empty trailing
+        // slots (fewer members than cellCols*cellRows) — clicking one of
+        // those used to clamp `idx` down to the LAST real member and select
+        // it, which reads as "clicking nothing selects something." Only
+        // select when the click actually resolves to a real member; clicking
+        // genuinely empty space closes whatever's open instead (the tooltip,
+        // if a stray hover left it showing, and any existing selection) —
+        // the same "click away to dismiss" behavior as clicking outside the
+        // grid entirely, just reachable from inside a cell's own empty area
+        // too. clearSelection()/tip.hide() are both no-ops if already
+        // closed, so this is safe to call unconditionally.
+        if (idx < c.members.length) {
+          select(c.members[idx]);
+        } else {
+          tip.hide();
+          clearSelection();
+        }
       });
 
     const t = d3.transition().duration(reduceMotion() ? 0 : 420).ease(d3.easeCubicInOut);

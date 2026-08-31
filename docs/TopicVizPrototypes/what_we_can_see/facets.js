@@ -110,8 +110,12 @@ export const GRANT_FACET_DEFS = {
   ncol: {
     label: "Colleges involved", ordinal: true, legend: "chips",
     values: () => FACETS.cols.ncol,
+    // Raw level names are bare counts ("1", "2", "3+") plus one sentinel
+    // ("0 (none known)", already self-explanatory, left untouched) — PI
+    // feedback: a bare number reads as ambiguous out of context, spell out
+    // the unit ("2 colleges") for every real count.
     levels: () => FACETS.levels.ncol.map((name, i, arr) =>
-      ({key: i, label: name, color: i === 0 ? NOISE : E.seqColor((i - 1) / Math.max(arr.length - 2, 1))})),
+      ({key: i, label: i === 0 ? name : `${name} college${name === "1" ? "" : "s"}`, color: i === 0 ? NOISE : E.seqColor((i - 1) / Math.max(arr.length - 2, 1))})),
   },
   // Team size — count of DISTINCT people linked to a grant, any role.
   // Deliberately NOT a count of co-PI-flagged rows: verified against the
@@ -128,8 +132,12 @@ export const GRANT_FACET_DEFS = {
   team: {
     label: "Team size", ordinal: true, legend: "chips",
     values: () => FACETS.cols.team,
+    // Raw level names are bare counts ("1", "2", "3", "4+") — PI feedback:
+    // a bare number reads as ambiguous out of context, spell out "Team of
+    // N" for every real count, with "Solo" (not "Team of 1") for the n=1
+    // case.
     levels: () => FACETS.levels.team.map((name, i, arr) =>
-      ({key: i, label: name === "1" ? "1 (solo)" : name, color: E.seqColor(i / Math.max(arr.length - 1, 1))})),
+      ({key: i, label: name === "1" ? "Solo" : `Team of ${name}`, color: E.seqColor(i / Math.max(arr.length - 1, 1))})),
   },
   // Both "Confidence" (the keyword classifier's own BM25F tier) and "How
   // this topic was decided" (keyword vs. LLM-adjudicated vs. low-confidence
