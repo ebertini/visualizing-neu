@@ -276,7 +276,7 @@ export function populateSelect(sel, facetDefs, keys, withNone, current) {
   sel.innerHTML = "";
   if (withNone) {
     const o = document.createElement("option");
-    o.value = ""; o.textContent = "— none —";
+    o.value = ""; o.textContent = "(none)";
     sel.appendChild(o);
   }
   keys.forEach(k => {

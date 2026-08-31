@@ -30,7 +30,14 @@ const E = window.ENRICO;
 // closed) because that kit's dock/opener float in the chart's own corner
 // rather than living in the header next to a title. Escape only closes
 // while a text input elsewhere isn't focused, matching setupDock's guard.
-export function setupDial(dial, dock, onOpen) {
+//
+// closeOnOutsideClick is opt-in, per call site, NOT a shared default — PI
+// feedback went back and forth on this: the controls dock (Rows/Columns/
+// Color/Sort) should close on any click elsewhere on the page, but the
+// color legend should only close via its own toggle button or Esc, not by
+// clicking away. Same setupDial() call, two different closing behaviors —
+// see the two call sites below for which passes `true`.
+export function setupDial(dial, dock, onOpen, closeOnOutsideClick) {
   function setOpen(open) {
     dock.classList.toggle("collapsed", !open);
     dial.setAttribute("aria-expanded", String(open));
@@ -47,14 +54,16 @@ export function setupDial(dial, dock, onOpen) {
       dial.focus();
     }
   });
-  // Deliberately NO click-outside-closes-it handler here (removed — PI
-  // feedback: the controls dock and the color legend should only close via
-  // their own toggle button or Esc, not by clicking anywhere else on the
-  // page). This is a DIFFERENT overlay than the "Selected grant"/"Selected
-  // PI" detail panel, which DOES still close on an outside click (see
-  // createGrid's own document click listener, below) — that one was a
-  // separate, later, explicit request; this one borrowed the same pattern
-  // early on and was later asked to stop.
+  if (closeOnOutsideClick) {
+    // A click ON the dial itself is already handled above (toggles); a
+    // click anywhere inside the open dock (e.g. a <select>) must NOT close
+    // it, so this only fires for a target outside both.
+    document.addEventListener("click", e => {
+      if (dock.classList.contains("collapsed")) return;
+      if (dial.contains(e.target) || dock.contains(e.target)) return;
+      setOpen(false);
+    });
+  }
 }
 
 export function createGrid(opts) {
@@ -330,7 +339,7 @@ export function createGrid(opts) {
           .join("");
       }
       return `<div class="t">${E.esc(label)}</div>` +
-        `<div class="meta">${members.length.toLocaleString()} ${noun} · Total: ${E.fmtAmt(dollars)}</div>${rows}${amtRows}`;
+        `<div class="meta">${members.length.toLocaleString()} ${noun} | Total: ${E.fmtAmt(dollars)}</div>${rows}${amtRows}`;
     }
 
     // A fixed container size + a viewBox that grows to fit content makes
@@ -385,11 +394,12 @@ export function createGrid(opts) {
         // unconditional, unlike the label lines' own dy above, which only
         // applies from the second line onward. matrixLayout's bandH already
         // reserves +1 line of height for this.
-        // No leading space before "·" (unlike when this trailed the last
-        // label line inline, where the space separated it from that line's
-        // own text) — PI feedback: on its own line, that leading space just
-        // indented the "·" away from the true left margin (x=0).
-        return `${lines}<tspan class="n" x="0" dy="${LABEL_LINE_H}">· ${d.total.toLocaleString()}</tspan>`;
+        // Parenthesized ("(906)"), not "· 906" (PI feedback) — also why
+        // there's no leading space here: unlike when this trailed the last
+        // label line inline (where a space separated it from that line's
+        // own text), the opening "(" sits flush at the true left margin
+        // (x=0) on its own line.
+        return `${lines}<tspan class="n" x="0" dy="${LABEL_LINE_H}">(${d.total.toLocaleString()})</tspan>`;
       })
       .on("mousemove", (ev, d) => {
         const label = aLevels[d.ai].full || aLevels[d.ai].label;
@@ -616,12 +626,15 @@ export function createGrid(opts) {
     });
   }
 
-  setupDial(document.getElementById(ids.dial), document.getElementById(ids.dock));
+  // true = closes on any click elsewhere on the page (PI feedback).
+  setupDial(document.getElementById(ids.dial), document.getElementById(ids.dock), null, true);
   // Same toggle pattern as the controls dial, reused for the legend — the
   // legend panel starts WITHOUT a .collapsed class in the markup (defaults
   // open, where the controls dock defaults closed), and re-decides inline
   // vs. vertical each time it's reopened (see updateLegendLayout; nothing is
-  // measurable while it's display:none).
+  // measurable while it's display:none). No closeOnOutsideClick here,
+  // unlike the controls dial above — PI feedback: the legend should only
+  // close via its own toggle or Esc, not by clicking away.
   setupDial(document.getElementById(ids.legendToggle), document.getElementById(ids.colorLegend), updateLegendLayout);
   document.getElementById(ids.selectedClose).addEventListener("click", clearSelection);
   document.addEventListener("keydown", e => {

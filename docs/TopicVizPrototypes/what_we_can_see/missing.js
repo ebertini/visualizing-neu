@@ -91,7 +91,7 @@ function mosaicFindingText(){
   const gapPp = Math.abs(titleRate - absRate) * 100;
   const verdict = gapPp <= 10
     ? "close enough that text availability isn't driving confidence"
-    : "a real gap — text availability still moves classifier confidence more than it should";
+    : "a real gap: text availability still moves classifier confidence more than it should";
   return `Low/no-confidence rate: ${E.fmtPct(absRate)} with an abstract vs ${E.fmtPct(titleRate)} title-only (${verdict}).`;
 }
 
@@ -206,7 +206,7 @@ function renderMissingTable(grain){
         `<td class="num">${f.known.toLocaleString()}</td>` +
         `<td class="num">${f.missing.toLocaleString()}</td>` +
         `<td class="num">${E.fmtPct(f.pct)}</td>` +
-        `<td class="num">${f.recovered ? f.recovered.toLocaleString() : "—"}</td>` +
+        `<td class="num">${f.recovered ? f.recovered.toLocaleString() : "0"}</td>` +
         `<td>${E.esc(f.where || "")}</td>` +
         `</tr>`).join("") +
       `</tbody></table>`;
@@ -226,7 +226,7 @@ function renderMissingTable(grain){
 // empty), and funnel.json's trunk only carries counts, not the "why", so
 // the reasons live here rather than being invented generically from n's.
 const FUNNEL_LOSS_NOTES = [
-  "didn't match an NEU grant directly — the orphan pool below",
+  "didn't match an NEU grant directly (the orphan pool below)",
   "duplicate re-uploads of the same grant (kept most recent)",
   "matched, but the abstract field was empty",
 ];
@@ -328,7 +328,7 @@ export function initMissingTab(){
 
   document.getElementById("funnelSub").textContent = (FUNNEL.trunk && FUNNEL.trunk.length)
     ? `${FUNNEL.trunk[0].n.toLocaleString()} raw records in, ${FUNNEL.trunk[FUNNEL.trunk.length - 1].n.toLocaleString()} grants with usable text out.`
-    : "Local build outputs not found — run src/build_dataset.py to see this section.";
+    : "Local build outputs not found. Run src/build_dataset.py to see this section.";
 
   renderCoverageByAgency();
   renderCoverageByYear();

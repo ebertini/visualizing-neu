@@ -162,7 +162,7 @@ CAVEATS = [
         "id": "neu_status",
         "severity": "high",
         "text": (
-            "The $2.18B headline is not money Northeastern raised — grants are "
+            "The $2.18B headline is not money Northeastern raised: grants are "
             "attributed to a faculty member even if the award predates their NEU hire."
         ),
     },
@@ -171,7 +171,7 @@ CAVEATS = [
         "severity": "low",
         "text": (
             "UPDATE (2026-08-20): this used to read 'NIH abstract coverage collapses "
-            "from 64% (2019) to 0% from 2021 onward' — a data-collection artifact, not "
+            "from 64% (2019) to 0% from 2021 onward,' a data-collection artifact, not "
             "a funding decline. A live NIH RePORTER backfill (src/backfill_nih_reporter.py) "
             "has since closed it: 2020-2025 NIH/NIH-SubAward coverage now runs 94-100%. "
             "Kept here, downgraded, as a record that this was a real prior limitation."
@@ -182,12 +182,12 @@ CAVEATS = [
         "severity": "low",
         "text": (
             "UPDATE (2026-08-30): 36 grants (1.35% of grants, 1.0% of dollars) carry no "
-            "confident topic under the curated keyword classifier — down from 697 grants "
+            "confident topic under the curated keyword classifier, down from 697 grants "
             "/ 26.7% of dollars under the prior BERTopic/HDBSCAN fit, and further down "
             "from an initial 66 after a targeted curation pass closed 30 of them. Only 8 "
             "have real text but zero curated-keyword evidence now (2 of those are text "
-            "the classifier is deliberately masked from seeing — a borrowed, low-trust "
-            "abstract source — so no amount of curation can help them); 28 are the ONR "
+            "the classifier is deliberately masked from seeing, a borrowed, low-trust "
+            "abstract source, so no amount of curation can help them); 28 are the ONR "
             "placeholder-title records described in 'placeholder_titles' below. Shown "
             "as a grey 'Unassigned' band, never dropped."
         ),
@@ -197,10 +197,10 @@ CAVEATS = [
         "severity": "low",
         "text": (
             "28 grants carry the placeholder title “Grant” (all Office of Naval "
-            "Research — ONR has no public abstract API, so no backfill could ever "
+            "Research; ONR has no public abstract API, so no backfill could ever "
             "recover real text for them). Unclassifiable by any text-based method, "
             "keyword or embedding; they have no parent theme. Formerly BERTopic's "
-            "flagged 'topic 14' artifact bucket — now tracked per-grant "
+            "flagged 'topic 14' artifact bucket, now tracked per-grant "
             "(unassignedReason == 'placeholder_title_only') rather than as one hardcoded "
             "topic id."
         ),
@@ -211,7 +211,7 @@ CAVEATS = [
         "text": (
             "As of 2026-08-29, topic labels come from a deterministic, human-curated "
             "keyword classifier (BM25F scoring over 31 leaves / 8 parent themes), not "
-            "the prior BERTopic/HDBSCAN fit — chosen for inspectability (every "
+            "the prior BERTopic/HDBSCAN fit. Chosen for inspectability (every "
             "assignment records which curated terms actually fired) and full offline "
             "reproducibility. BERTopic's own assignment is kept as a comparison field "
             "(bertopicDom/bertopicNoise), not deleted. See "
@@ -222,14 +222,14 @@ CAVEATS = [
         "id": "low_confidence",
         "severity": "low",
         "text": (
-            "511 grants (19.1%) land in the classifier's 'low' confidence tier — a "
+            "511 grants (19.1%) land in the classifier's 'low' confidence tier: a "
             "curated term matched, but weakly (a thin margin over the runner-up topic, "
             "or few matched terms). A 180-row human-labeled gold set now exists "
             "(68.3% overall accuracy, 95% CI 61.2-74.7%) and confirms the tiers "
-            "calibrate correctly (high 81.2% accurate vs. low 60.7%) — the underlying "
+            "calibrate correctly (high 81.2% accurate vs. low 60.7%). The underlying "
             "BM25F constants (K1/B/W_TITLE/ALPHA) and tier thresholds were checked "
             "against a 108-point sweep of that gold set and left unchanged (no "
-            "candidate beat the baseline by more than its own margin of error) — "
+            "candidate beat the baseline by more than its own margin of error); "
             "treat 'low' as 'worth a second look', not as a precise probability."
         ),
     },
@@ -237,22 +237,22 @@ CAVEATS = [
         "id": "secondary_theme",
         "severity": "low",
         "text": (
-            "272 grants (10.2%) sit genuinely between two parent themes — their "
+            "272 grants (10.2%) sit genuinely between two parent themes: their "
             "second-most-relevant topic (already computed by the classifier, now "
             "surfaced per grant) belongs to a DIFFERENT parent than their primary "
             "one, within a close scoring margin. This reflects real interdisciplinary "
             "work (e.g. human-computer interaction grants that could reasonably be "
             "Computing, Public & Behavioral Health, or Social Science depending on "
-            "framing) that a single-parent taxonomy can't fully represent — shown as "
-            "a secondary-theme hint, not forced into one label."
+            "framing) that a single-parent taxonomy can't fully represent, so it's "
+            "shown as a secondary-theme hint, not forced into one label."
         ),
     },
     {
         "id": "sparse_prelude",
         "severity": "low",
         "text": (
-            "1995–2004 (118 grants total) is too sparse to stack reliably and is "
-            "shown separately from the 2005–2025 series."
+            "1995-2004 (118 grants total) is too sparse to stack reliably and is "
+            "shown separately from the 2005-2025 series."
         ),
     },
     {
@@ -270,7 +270,7 @@ CAVEATS = [
         "severity": "high",
         "text": (
             "The faculty roster is a 2025 snapshot. Departed, retired, or renamed "
-            "faculty have no college — their grants are shown honestly as "
+            "faculty have no college; their grants are shown honestly as "
             "'PI not on 2025 roster', not silently dropped."
         ),
     },
@@ -288,7 +288,7 @@ CAVEATS = [
         "severity": "high",
         "text": (
             "Every record is stamped 'Northeastern' regardless of who else worked on "
-            "it — external co-investigators at other institutions are invisible here. "
+            "it, so external co-investigators at other institutions are invisible here. "
             "The collaboration network this data can support is NEU-internal only."
         ),
     },
@@ -296,15 +296,15 @@ CAVEATS = [
         "id": "pi_copi_role",
         "severity": "low",
         "text": (
-            "is_pi and is_copi are mutually exclusive on every grant record — 'co-PI' "
+            "is_pi and is_copi are mutually exclusive on every grant record: 'co-PI' "
             "means only 'not the PI of record on this specific grant', not a team "
             "dynamic on its own. 46 roster faculty are 'co-PI only' across every grant "
             "they're linked to; 8 of those 46 are the sole person on every one of "
             "their own grants, so their true PI is likely just missing from this "
-            "dataset — read the 'Co-PI only' bucket cautiously at that scale. The "
+            "dataset. Read the 'Co-PI only' bucket cautiously at that scale. The "
             "grant list shown for any person includes grants in any role, while the "
-            "dollar/theme facets elsewhere on this page count PI-credited grants only "
-            "— a co-PI-only person can show real grant titles alongside '$0 as PI', "
+            "dollar/theme facets elsewhere on this page count PI-credited grants only, "
+            "so a co-PI-only person can show real grant titles alongside '$0 as PI', "
             "which is expected, not a bug."
         ),
     },
@@ -314,22 +314,22 @@ CAVEATS = [
         "text": (
             "13 of the 312 grants that had no PI at all now have one, filled in from "
             "the NIH RePORTER / NSF Award Search backfill (already-fetched investigator "
-            "records, matched to this roster) — flagged on those grants as 'PI recovered "
+            "records, matched to this roster), flagged on those grants as 'PI recovered "
             "from NIH RePORTER / NSF Award Search records'. 10 of the 13 promote someone "
             "already linked to that grant from co-PI to PI; the other 3 add a person not "
             "previously linked at all, with their NEU-attribution status set to 'unknown' "
             "rather than guessed. Every match here scored a perfect name match after "
             "fixing a real bug in the matcher (a stray comma inflated the apparent name "
-            "difference) — a further, lower-confidence match tier was tried and rejected "
+            "difference); a further, lower-confidence match tier was tried and rejected "
             "after live spot-checks found real different-person name collisions in it. "
             "299 grants still have no PI. Separately, 834 grants disclose other award-record "
-            "investigators (1,068 distinct names) who never matched any NEU faculty record "
-            "— shown on those grants' own detail card, never added to the Every PI list: "
-            "most of this population is genuinely external collaborators at other "
+            "investigators (1,068 distinct names) who never matched any NEU faculty record. "
+            "These are shown on those grants' own detail card, never added to the Every PI "
+            "list: most of this population is genuinely external collaborators at other "
             "institutions, not missing Northeastern people (NIH's institution flag is "
             "record-level, not person-level, and mostly reflects legitimate pre-hire "
-            "attribution; NSF's cached data carries no institution signal at all) — "
-            "asserting a Northeastern affiliation for a majority-external population "
+            "attribution; NSF's cached data carries no institution signal at all). "
+            "Asserting a Northeastern affiliation for a majority-external population "
             "would be a step backward in data honesty, not forward."
         ),
     },
@@ -431,7 +431,7 @@ CLIFFS = [{
     # coverage is 94-100%, same as every other agency.
     "text": (
         "NIH abstract coverage historically fell from 64% (2019) to 3% (2020) "
-        "to 0% (2021-2025) — a data-collection artifact, not a funding "
+        "to 0% (2021-2025), a data-collection artifact, not a funding "
         "decline. Since closed by a live NIH RePORTER backfill: 2020-2025 "
         "NIH/NIH-SubAward coverage now runs 94-100%."
     ),
@@ -1537,7 +1537,7 @@ def build_missingness_pis(fac, lookup) -> dict:
         })
 
     row("name", "Name on record", col_known(fac["faculty_name"].fillna("")), 0,
-        "Only populated for faculty who appear on at least one grant — the roster export itself doesn't carry names.")
+        "Only populated for faculty who appear on at least one grant; the roster export itself doesn't carry names.")
     row("college", "College", col_known(fac["superior_academic_unit"].astype("string").fillna("")), 0,
         "Missing from the roster export for this person.")
     row("department", "Department", col_known(fac["academic_unit"].astype("string").fillna("")), 0,
@@ -1547,7 +1547,7 @@ def build_missingness_pis(fac, lookup) -> dict:
     row("track", "Appointment track", col_known(fac["academic_track_type"].astype("string").fillna("")), 0,
         "Missing from the roster export for this person.")
     row("tenure", "Tenure status", col_known(fac["tenure_status"].astype("string").fillna("")), 0,
-        "The single largest gap on the roster — tenure status isn't recorded for most non-tenure-track titles.")
+        "The single largest gap on the roster: tenure status isn't recorded for most non-tenure-track titles.")
     row("terminal_degree", "Terminal degree", col_known(fac["terminal_degrees"].astype("string").fillna("")), 0,
         "Missing from the roster export for this person.")
     row("hire_date", "Hire date", int(fac["hire_date"].notna().sum()), 0,
@@ -1558,11 +1558,11 @@ def build_missingness_pis(fac, lookup) -> dict:
     else:
         aauid_known = 0
     row("aauid", "Analytics vendor ID", aauid_known, 0,
-        "Only populated for faculty who appear on at least one grant — it's sourced from the grant tables, not the roster.")
+        "Only populated for faculty who appear on at least one grant; it's sourced from the grant tables, not the roster.")
 
     active = fac["termination_date"].isna()
     row("employment_status", "Departure status", int((~active).sum()), int(active.sum()),
-        "Not applicable — this person is still active, so there's nothing to record.")
+        "Not applicable: this person is still active, so there's nothing to record.")
 
     fields.sort(key=lambda f: f["missing"], reverse=True)
     return {"n": n, "fields": fields, "provenance": "parquet"}
@@ -1592,7 +1592,7 @@ def build_missingness_abstract_records() -> dict:
     fields = [{
         "id": "matched_grant", "label": "Matches a Northeastern grant",
         "known": matched_n, "missing": orphaned_n, "na": 0,
-        "where": "No Northeastern grant shares this record's source ID — it's likely a collaborator's or non-NU award.",
+        "where": "No Northeastern grant shares this record's source ID, likely a collaborator's or non-NU award.",
     }]
 
     # A "has abstract text" field lived here once — dropped as confusing,
@@ -1611,7 +1611,7 @@ def build_missingness_abstract_records() -> dict:
         fields.append({
             "id": "pi_resolved", "label": "ID matched to a faculty member",
             "known": pi_resolved, "missing": orphaned_n - pi_resolved, "na": matched_n,
-            "where": "Scored only among unmatched records — this record's writer ID doesn't map to anyone on the faculty roster via the ID bridge.",
+            "where": "Scored only among unmatched records; this record's writer ID doesn't map to anyone on the faculty roster via the ID bridge.",
         })
     else:
         # Can't score this without the bridge — the whole grain is "not
@@ -1619,7 +1619,7 @@ def build_missingness_abstract_records() -> dict:
         fields.append({
             "id": "pi_resolved", "label": "ID matched to a faculty member",
             "known": 0, "missing": 0, "na": n,
-            "where": "Scored only among unmatched records — this record's writer ID doesn't map to anyone on the faculty roster via the ID bridge.",
+            "where": "Scored only among unmatched records; this record's writer ID doesn't map to anyone on the faculty roster via the ID bridge.",
         })
 
     fields.sort(key=lambda f: f["missing"], reverse=True)

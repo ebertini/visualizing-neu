@@ -27,7 +27,7 @@ export function grantTooltip(i) {
   // collegesNote above. Counts distinct PEOPLE, not is_copi-flagged rows —
   // see facets.js's "team" facet def for why that distinction matters.
   const nTeam = FACETS.nTeam ? FACETS.nTeam[i] : 1;
-  const teamNote = nTeam > 1 ? ` · team of ${nTeam}` : "";
+  const teamNote = nTeam > 1 ? ` | team of ${nTeam}` : "";
   // What the grant actually IS leads the tooltip (PI feedback: "grant what
   // is it should show when you hover") — the id/amount/agency/etc. that
   // used to lead it are still there, just demoted to supporting .meta lines.
@@ -47,7 +47,7 @@ export function grantTooltip(i) {
   const srcIdx = FACETS.cols.src ? FACETS.cols.src[i] : 0;
   const srcName = FACETS.levels.src ? FACETS.levels.src[srcIdx] : "keyword_classifier";
   const srcNote = srcName === "unassigned"
-    ? `<div class="meta">⚠ Unassigned — no confident topic</div>`
+    ? `<div class="meta">⚠ Unassigned: no confident topic</div>`
     : "";
   // PI-link provenance — only disclosed when the PI came from an external
   // backfill, not the original dataset (same "only flag genuine gaps, not
@@ -61,10 +61,10 @@ export function grantTooltip(i) {
     ? `<div class="meta">PI recovered from NIH RePORTER / NSF Award Search records, not the original dataset</div>`
     : "";
   return `<div class="t">${E.esc(title || "(no title on record)")}</div>` +
-    `<div class="meta">${E.esc(piName || "PI not on record")} · ${E.fmtAmt(FACETS.cols.amt_raw[i])}</div>` +
-    `<div class="meta">${E.esc(agency.key)} · ${yr === -1 ? "year unknown" : yr}</div>` +
+    `<div class="meta">${E.esc(piName || "PI not on record")} | ${E.fmtAmt(FACETS.cols.amt_raw[i])}</div>` +
+    `<div class="meta">${E.esc(agency.key)} | ${yr === -1 ? "year unknown" : yr}</div>` +
     `<div class="meta">${E.esc(college)}${collegesNote}${teamNote}</div>` +
-    `<div class="meta">${hasAbs ? "Has abstract" : "Title only"} · ${E.esc(parent ? parent.name : "Unassigned")}</div>` +
+    `<div class="meta">${hasAbs ? "Has abstract" : "Title only"} | ${E.esc(parent ? parent.name : "Unassigned")}</div>` +
     srcNote +
     piSrcNote +
     secondary;
@@ -106,7 +106,7 @@ function highlightMatches(text, terms) {
   return escaped.replace(combined, m => `<mark>${m}</mark>`);
 }
 
-// Co-PI names, below the tooltip's own "· team of X" line (grantTooltip's
+// Co-PI names, below the tooltip's own "| team of X" line (grantTooltip's
 // output is prepended to this in the Selected-grant overlay — see grid.js's
 // renderSelectedCard: `buildTooltip(selected) + buildDetail(selected)`).
 // Gated on nTeam > 1, same "don't clutter the common case" rule as teamNote
@@ -156,7 +156,7 @@ export function grantDetail(i) {
     : FACETS.provenance.abstract_text === "derived"
       ? "abstract text wasn't available when this page was built"
       : "no abstract text on record for this grant";
-  return `${note}<div class="abstract abstract-empty">No abstract available — ${reason}.</div>`;
+  return `${note}<div class="abstract abstract-empty">No abstract available: ${reason}.</div>`;
 }
 
 export function piTooltip(i) {
@@ -167,7 +167,7 @@ export function piTooltip(i) {
   const hasGrants = FACETS_PI.cols.hasgrants[i] === 1;
   return `<div class="t">${E.esc(name || "(no name on record)")}</div>` +
     `<div class="meta">${E.esc(college)}</div>` +
-    `<div class="meta">${E.esc(dept)} · ${E.esc(rank)}</div>` +
+    `<div class="meta">${E.esc(dept)} | ${E.esc(rank)}</div>` +
     `<div class="meta">${hasGrants ? E.fmtAmt(FACETS_PI.cols.amt_raw[i]) + " as PI" : "No grants in this corpus"}</div>`;
 }
 

@@ -38,14 +38,14 @@ function renderHeadline() {
   const haveAbs = totalGrants - covPct.none;
   document.getElementById("aboutHeadline").innerHTML =
     `<b>${totalGrants.toLocaleString()}</b> grants in this corpus. ` +
-    `<b>${E.fmtPct(haveAbs / totalGrants, 1)}</b> have an abstract — ` +
+    `<b>${E.fmtPct(haveAbs / totalGrants, 1)}</b> have an abstract. ` +
     `<b>${covPct.none.toLocaleString()}</b> have only a title. ` +
-    `<b>${COVERAGE.unassigned.n.toLocaleString()}</b> (${E.fmtPct(COVERAGE.unassigned.share_n)}) carry no confident topic — ` +
+    `<b>${COVERAGE.unassigned.n.toLocaleString()}</b> (${E.fmtPct(COVERAGE.unassigned.share_n)}) carry no confident topic, ` +
     `kept as <i>Unassigned</i>, never forced into a cluster.`;
 
   document.getElementById("aboutHowto").textContent =
-    `Every grant and Every PI each show every record in their corpus, in every arrangement — ` +
-    `nobody and nothing is ever dropped, only repositioned as you change Rows, Columns, Sort, ` +
+    `Every grant and Every PI each show every record in their corpus, in every arrangement. ` +
+    `Nobody and nothing is ever dropped, only repositioned as you change Rows, Columns, Sort, ` +
     `or Color by.`;
 }
 
@@ -91,7 +91,7 @@ function renderMoney() {
   };
 
   document.getElementById("moneyIntro").innerHTML =
-    `The headline figure is not money Northeastern raised — see the "not money NEU raised" ` +
+    `The headline figure is not money Northeastern raised. See the "not money NEU raised" ` +
     `caveat below for how pre-hire attribution works. Grant size is also heavily concentrated: `;
 
   document.getElementById("moneyStats").innerHTML = [
@@ -193,7 +193,7 @@ function renderCollaboration() {
   const multiPerson = FACETS.n - teamCounts[1];
 
   document.getElementById("collabIntro").innerHTML =
-    `Team size counts distinct PEOPLE linked to a grant, any role — not a count of ` +
+    `Team size counts distinct PEOPLE linked to a grant, any role, not a count of ` +
     `"co-PI"-flagged rows, which turned out to be an unreliable signal (many single-person ` +
     `grants have their sole person recorded as "co-PI" with no separate PI row at all). ` +
     `Colleges involved counts distinct roster colleges among that same group.` +
@@ -220,7 +220,7 @@ function collabGrowthPhrase(byYear) {
   const earlyAvg = avg(byYear.filter(d => d.year < 2015));
   const lateAvg = avg(byYear.filter(d => d.year >= 2015));
   if (!earlyAvg || !lateAvg) return "";
-  return ` Cross-college grants have also grown steadily — from an average of ${earlyAvg.toFixed(1)}/year ` +
+  return ` Cross-college grants have also grown steadily, from an average of ${earlyAvg.toFixed(1)}/year ` +
     `before 2015 to ${lateAvg.toFixed(1)}/year since.`;
 }
 
@@ -345,10 +345,10 @@ function renderCollabMatrix(cc) {
   if (captionEl) {
     captionEl.textContent =
       `${cc.n_cross_college.toLocaleString()} grants cross a college line, across ${cc.pairs.length} of ` +
-      `${possiblePairs} possible college pairs — each shown twice, mirrored across the grey diagonal, so ` +
+      `${possiblePairs} possible college pairs, each shown twice, mirrored across the grey diagonal, so ` +
       `every row lines up with its own column. The diagonal itself (within-college collaboration) isn't ` +
       `computed by this pipeline. A blank cell means that pair has never co-occurred in this corpus, not ` +
-      `that it was measured at zero — and the smallest colleges here have too few grants to read much ` +
+      `that it was measured at zero. The smallest colleges here have too few grants to read much ` +
       `into on their own.`;
   }
 }
@@ -391,7 +391,7 @@ function renderBackfillHighlight() {
 
   document.getElementById("backfillIntro").innerHTML =
     `Two separate NIH RePORTER / NSF Award Search backfills recovered real data this ` +
-    `pipeline didn't otherwise have — abstract text, and (later) grant PI identity:`;
+    `pipeline didn't otherwise have: abstract text, and (later) grant PI identity.`;
 
   document.getElementById("backfillStats").innerHTML = [
     stattile(backfilledAbstracts.toLocaleString(), "grants gained real abstract text from the backfill"),
@@ -408,7 +408,7 @@ function renderBackfillHighlight() {
   const acanN = VIZ_META.calibration ? VIZ_META.calibration.acan_recoverable_n : null;
   document.getElementById("backfillNote").textContent = (acanN != null)
     ? `A separate, much smaller check: a refreshed abstract export the data team provided later ` +
-      `(2026-08-13) was compared against what's already here — it would only add ${acanN} more ` +
+      `(2026-08-13) was compared against what's already here. It would only add ${acanN} more ` +
       `grants' worth of text, too small to justify re-running the topic model over, so it was ` +
       `never adopted.`
     : "";
@@ -434,7 +434,7 @@ function renderFindings() {
   if (cal.sweep_n_runs != null) {
     items.push(
       `A ${cal.sweep_n_runs}-configuration sweep of the classifier's own tuning constants found ` +
-      `${cal.sweep_n_beat_baseline === 0 ? "none" : cal.sweep_n_beat_baseline} that beat the baseline — ` +
+      `${cal.sweep_n_beat_baseline === 0 ? "none" : cal.sweep_n_beat_baseline} that beat the baseline: ` +
       `the fix for the classifier's title-only confidence gap turned out to be curation coverage, ` +
       `not constant-tuning.`
     );
